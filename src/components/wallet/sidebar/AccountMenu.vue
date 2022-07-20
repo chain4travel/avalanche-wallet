@@ -1,5 +1,15 @@
 <template>
     <div v-if="!isLedger && wallet">
+        <template v-if="kycStatus">
+            <!--TODO: Kyc verified checkmark-->
+        </template>
+        <template v-else>
+            <!--TODO: Kyc modal here-->
+            <button class="save_account" @click="save">
+                <fa icon="exclamation-triangle" class="volatile_alert"></fa>
+                {{ $t('kyc_process.verify_kyc') }}
+            </button>
+        </template>
         <template v-if="account">
             <button class="account_but" @click="openSettings">
                 <Identicon :value="account.baseAddresses.join('')" diameter="18"></Identicon>
@@ -11,7 +21,7 @@
             <SaveAccountModal ref="save_modal"></SaveAccountModal>
             <button class="save_account" @click="save">
                 <fa icon="exclamation-triangle" class="volatile_alert"></fa>
-                Save Account
+                {{ $t('keys.save_account.title') }}
             </button>
         </template>
     </div>
@@ -39,6 +49,10 @@ export default class AccountMenu extends Vue {
 
     get account(): iUserAccountEncrypted | null {
         return this.$store.getters['Accounts/account']
+    }
+
+    get kycStatus(): boolean {
+        return this.$store.getters['Accounts/kycStatus']
     }
 
     get wallet(): WalletType | null {
