@@ -23,14 +23,6 @@
                     <span><fa icon="random" class="icon"></fa></span>
                     {{ $t('wallet.sidebar.export') }}
                 </router-link>
-                <router-link
-                    to="/wallet/kyc_process"
-                    data-cy="wallet_export"
-                    class="wallet_export wallet_link"
-                >
-                    <span><fa icon="random" class="icon"></fa></span>
-                    {{ $t('kyc_process.title') }}
-                </router-link>
                 <router-link to="/wallet/earn" data-cy="wallet_earn" class="wallet_link">
                     <img v-if="$root.theme === 'day'" src="@/assets/sidebar/earn_nav.png" />
                     <img v-else src="@/assets/sidebar/earn_nav_night.png" />

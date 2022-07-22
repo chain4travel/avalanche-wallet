@@ -21,7 +21,6 @@ import Legal from '@/views/Legal.vue'
 import store from '../store/index'
 import Studio from '@/views/wallet/Studio.vue'
 import Export from '@/views/wallet/CrossChain.vue'
-import KycProcess from '@/views/wallet/KycProcess.vue'
 
 Vue.use(VueRouter)
 
@@ -119,10 +118,6 @@ const routes = [
             {
                 path: 'advanced',
                 component: Advanced,
-            },
-            {
-                path: 'kyc_process',
-                component: KycProcess,
             },
             {
                 path: 'activity',

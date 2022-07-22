@@ -1,11 +1,14 @@
 <template>
     <div v-if="!isLedger && wallet">
         <template v-if="kycStatus">
-            <!--TODO: Kyc verified checkmark-->
+            <button class="success_button">
+                <fa icon="check-circle"></fa>
+                {{ $t('kyc_process.kyc_verified') }}
+            </button>
         </template>
         <template v-else>
-            <!--TODO: Kyc modal here-->
-            <button class="save_account" @click="save">
+            <KycModal ref="kyc_modal"></KycModal>
+            <button class="warning_button" @click="openKyc">
                 <fa icon="exclamation-triangle" class="volatile_alert"></fa>
                 {{ $t('kyc_process.verify_kyc') }}
             </button>
@@ -19,7 +22,7 @@
         </template>
         <template v-else>
             <SaveAccountModal ref="save_modal"></SaveAccountModal>
-            <button class="save_account" @click="save">
+            <button class="warning_button" @click="save">
                 <fa icon="exclamation-triangle" class="volatile_alert"></fa>
                 {{ $t('keys.save_account.title') }}
             </button>
@@ -33,9 +36,11 @@ import Identicon from '@/components/misc/Identicon.vue'
 import SaveAccountModal from '@/components/modals/SaveAccount/SaveAccountModal.vue'
 import AccountSettingsModal from '@/components/modals/AccountSettings/AccountSettingsModal.vue'
 import { WalletType } from '@/js/wallets/types'
+import KycModal from '@/components/modals/KycModal.vue'
 
 @Component({
     components: {
+        KycModal,
         AccountSettingsModal,
         SaveAccountModal,
         Identicon,
@@ -45,6 +50,7 @@ export default class AccountMenu extends Vue {
     $refs!: {
         save_modal: SaveAccountModal
         settings_modal: AccountSettingsModal
+        kyc_modal: KycModal
     }
 
     get account(): iUserAccountEncrypted | null {
@@ -72,6 +78,10 @@ export default class AccountMenu extends Vue {
     save() {
         this.$refs.save_modal.open()
     }
+
+    openKyc() {
+        this.$refs.kyc_modal.open()
+    }
 }
 </script>
 <style scoped lang="scss">
@@ -93,10 +103,15 @@ export default class AccountMenu extends Vue {
     }
 }
 
-.save_account {
+.warning_button {
     color: var(--warning);
     &:hover {
         opacity: 0.5;
     }
+}
+
+.success_button {
+    color: var(--success);
+    pointer-events: none;
 }
 </style>

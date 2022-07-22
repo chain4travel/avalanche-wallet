@@ -50,9 +50,6 @@
                     <router-link to="/wallet/cross_chain">
                         {{ $t('wallet.sidebar.export') }}
                     </router-link>
-                    <router-link to="/wallet/kyc_process">
-                        {{ 'KYC process' }}
-                    </router-link>
                     <router-link to="/wallet/earn">{{ $t('wallet.sidebar.earn') }}</router-link>
                     <router-link to="/wallet/studio">{{ $t('wallet.sidebar.studio') }}</router-link>
                     <router-link to="/wallet/activity">

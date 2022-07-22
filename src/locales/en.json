@@ -197,6 +197,7 @@
         "title": "KYC Process",
         "desc": "Kyc something something",
         "verify_kyc": "Verify KYC",
+        "kyc_verified": "KYC Verified",
         "your_email_address": "Your Email Address",
         "email_address": "Email Address",
         "your_phone_number": "Your Phone Number",
