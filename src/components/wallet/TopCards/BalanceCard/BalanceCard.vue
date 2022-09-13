@@ -24,7 +24,8 @@
                 </template>
                 <button @click="showUTXOsModal" class="breakdown_toggle">Show UTXOs</button>
             </div>
-            <div class="balance_row">
+            <!-- Until Camino is listed on an exchange, Displaying this has no value but instead confuses the user. -->
+            <!-- <div class="balance_row">
                 <p class="balance" data-cy="wallet_balance" v-if="!balanceTextRight">
                     {{ balanceTextLeft }} {{ nativeAssetSymbol }}
                 </p>
@@ -45,7 +46,7 @@
                         USD
                     </p>
                 </div>
-            </div>
+            </div> -->
             <!--            <button class="expand_but">Show Breakdown<fa icon="list-ol"></fa></button>-->
             <div class="alt_info">
                 <div class="alt_non_breakdown" v-if="!isBreakdown">
@@ -57,10 +58,10 @@
                         <label>{{ $t('top.locked') }}</label>
                         <p>{{ balanceTextLocked }} {{ nativeAssetSymbol }}</p>
                     </div>
-                    <div>
+                    <!-- <div>
                         <label>{{ $t('top.balance.stake') }}</label>
                         <p>{{ stakingText }} {{ nativeAssetSymbol }}</p>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="alt_breakdown" v-else>
                     <div>
@@ -72,17 +73,17 @@
                         <p>{{ evmUnlocked | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
                     </div>
                     <div>
-                        <label>{{ $t('top.balance.locked') }} (X)</label>
+                        <label>{{ $t('top.balance.deposited') }} (P)</label>
                         <p>{{ avmLocked | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
-                        <label>{{ $t('top.balance.locked') }} (P)</label>
+                        <label>{{ $t('top.balance.bonded') }} (P)</label>
                         <p>{{ platformLocked | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
-                        <label>{{ $t('top.balance.locked_stake') }} (P)</label>
+                        <label>{{ $t('top.balance.bonded_deposited') }} (P)</label>
                         <p>{{ platformLockedStakeable | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
                     </div>
-                    <div>
+                    <!-- <div>
                         <label>{{ $t('top.balance.stake') }}</label>
                         <p>{{ stakingText }} {{ nativeAssetSymbol }}</p>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
