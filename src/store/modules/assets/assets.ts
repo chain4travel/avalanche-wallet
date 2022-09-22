@@ -5,6 +5,7 @@ import {
     AssetsState,
     TokenList,
     TokenListToken,
+    WalletBalance,
 } from '@/store/modules/assets/types'
 import {
     IWalletAssetsDict,
@@ -53,6 +54,13 @@ const assets_module: Module<AssetsState, RootState> = {
         // isUpdateBalance: false,
         assets: [],
         assetsDict: {}, // holds meta data of assets
+        balances: {
+            unlocked: new BN(0),
+            deposited: new BN(0),
+            bonded: new BN(0),
+            depositedAndBonded: new BN(0),
+            utxoIDs: [],
+        },
         nftFams: [],
         nftFamsDict: {},
         balanceDict: {},
@@ -453,6 +461,16 @@ const assets_module: Module<AssetsState, RootState> = {
             await commit('addNftFamily', newFam)
             return desc
         },
+
+        async getPChainBalances({ state, commit, rootState }) {
+            let wallet: WalletType | null = rootState.activeWallet
+            if (!wallet) return
+            let pchain = ava.PChain()
+
+            let pBalance = await pchain.getBalance(wallet!.getAllAddressesP()[0])
+            state.balances = pBalance as WalletBalance
+            return
+        },
     },
     getters: {
         networkErc20Tokens(state: AssetsState, getters, rootState: RootState): Erc20Token[] {
@@ -520,12 +538,13 @@ const assets_module: Module<AssetsState, RootState> = {
                 }
 
                 // Add extras for Native token
-                // @ts-ignore
                 if (asset.id === state.AVA_ASSET_ID) {
-                    asset.addExtra(getters.walletStakingBalance)
-                    asset.addExtra(getters.walletPlatformBalance)
+                    // asset.addExtra(getters.walletStakingBalance)
+                    // asset.addExtra(getters.walletPlatformBalance)
                     asset.addExtra(getters.walletPlatformBalanceLocked)
                     asset.addExtra(getters.walletPlatformBalanceLockedStakeable)
+                    asset.addExtra(getters.walletPlatformBalanceDeposited)
+                    asset.addExtra(getters.walletPlatformBalanceUnlocked)
                 }
 
                 res[assetId] = asset
@@ -597,63 +616,79 @@ const assets_module: Module<AssetsState, RootState> = {
             return amt
         },
 
-        walletPlatformBalanceLocked(state, getters, rootState): BN {
-            let wallet = rootState.activeWallet
-            if (!wallet) return new BN(0)
+        // walletPlatformBalanceLocked(state, getters, rootState): BN {
+        //     let wallet = rootState.activeWallet
+        //     if (!wallet) return new BN(0)
 
-            let utxoSet: PlatformUTXOSet
+        //     let utxoSet: PlatformUTXOSet
 
-            utxoSet = wallet.getPlatformUTXOSet()
+        //     utxoSet = wallet.getPlatformUTXOSet()
 
-            let now = UnixNow()
+        //     let now = UnixNow()
 
-            // The only type of asset is native token on the P chain
-            let amt = new BN(0)
+        //     // The only type of asset is native token on the P chain
+        //     let amt = new BN(0)
 
-            let utxos = utxoSet.getAllUTXOs()
-            for (var n = 0; n < utxos.length; n++) {
-                let utxo = utxos[n]
-                let utxoOut = utxo.getOutput() as AmountOutput
-                let locktime = utxoOut.getLocktime()
+        //     let utxos = utxoSet.getAllUTXOs()
+        //     for (var n = 0; n < utxos.length; n++) {
+        //         let utxo = utxos[n]
+        //         let utxoOut = utxo.getOutput() as AmountOutput
+        //         let locktime = utxoOut.getLocktime()
 
-                // Filter unlocked tokens
-                if (locktime.gt(now)) {
-                    amt.iadd(utxoOut.getAmount())
-                }
-            }
+        //         // Filter unlocked tokens
+        //         if (locktime.gt(now)) {
+        //             amt.iadd(utxoOut.getAmount())
+        //         }
+        //     }
 
-            return amt
-        },
+        //     return amt
+        // },
+
+        // walletPlatformBalanceLockedStakeable(state, getters, rootState): BN {
+        //     let wallet = rootState.activeWallet
+        //     if (!wallet) return new BN(0)
+
+        //     let utxoSet: PlatformUTXOSet
+
+        //     utxoSet = wallet.getPlatformUTXOSet()
+
+        //     // The only type of asset is native token on the P chain
+        //     let amt = new BN(0)
+        //     let unixNow = UnixNow()
+
+        //     let utxos = utxoSet.getAllUTXOs()
+        //     for (var n = 0; n < utxos.length; n++) {
+        //         let utxo = utxos[n]
+        //         let utxoOut = utxo.getOutput() as StakeableLockOut
+        //         let outType = utxoOut.getOutputID()
+
+        //         // Type ID 22 is stakeable but locked tokens
+        //         if (outType === 22) {
+        //             let locktime = utxoOut.getStakeableLocktime()
+        //             // Make sure the locktime is in the future
+        //             if (locktime.gt(unixNow)) {
+        //                 amt.iadd(utxoOut.getAmount())
+        //             }
+        //         }
+        //     }
+
+        //     return amt
+        // },
 
         walletPlatformBalanceLockedStakeable(state, getters, rootState): BN {
-            let wallet = rootState.activeWallet
-            if (!wallet) return new BN(0)
+            return new BN(state.balances.depositedAndBonded || 0)
+        },
 
-            let utxoSet: PlatformUTXOSet
+        walletPlatformBalanceLocked(state, getters, rootState): BN {
+            return new BN(state.balances.bonded || 0)
+        },
 
-            utxoSet = wallet.getPlatformUTXOSet()
+        walletPlatformBalanceDeposited(state, getters, rootState): BN {
+            return new BN(state.balances.deposited || 0)
+        },
 
-            // The only type of asset is native token on the P chain
-            let amt = new BN(0)
-            let unixNow = UnixNow()
-
-            let utxos = utxoSet.getAllUTXOs()
-            for (var n = 0; n < utxos.length; n++) {
-                let utxo = utxos[n]
-                let utxoOut = utxo.getOutput() as StakeableLockOut
-                let outType = utxoOut.getOutputID()
-
-                // Type ID 22 is stakeable but locked tokens
-                if (outType === 22) {
-                    let locktime = utxoOut.getStakeableLocktime()
-                    // Make sure the locktime is in the future
-                    if (locktime.gt(unixNow)) {
-                        amt.iadd(utxoOut.getAmount())
-                    }
-                }
-            }
-
-            return amt
+        walletPlatformBalanceUnlocked(state, getters, rootState): BN {
+            return new BN(state.balances.unlocked || 0)
         },
 
         nftMintDict(state): IWalletNftMintDict {

@@ -24,8 +24,7 @@
                 </template>
                 <button @click="showUTXOsModal" class="breakdown_toggle">Show UTXOs</button>
             </div>
-            <!-- Until Camino is listed on an exchange, Displaying this has no value but instead confuses the user. -->
-            <!-- <div class="balance_row">
+            <div class="balance_row">
                 <p class="balance" data-cy="wallet_balance" v-if="!balanceTextRight">
                     {{ balanceTextLeft }} {{ nativeAssetSymbol }}
                 </p>
@@ -34,7 +33,8 @@
                     <span class="smaller">.{{ balanceTextRight }}</span>
                     {{ nativeAssetSymbol }}
                 </p>
-                <div style="display: flex; flex-direction: row">
+                <!-- Until Camino is listed on an exchange, Displaying this has no value but instead confuses the user. -->
+                <!-- <div style="display: flex; flex-direction: row">
                     <p class="balance_usd">
                         <b>$ {{ totalBalanceUSDText }}</b>
                         USD
@@ -45,8 +45,8 @@
                         <b>${{ avaxPriceText }}</b>
                         USD
                     </p>
-                </div>
-            </div> -->
+                </div> -->
+            </div>
             <!--            <button class="expand_but">Show Breakdown<fa icon="list-ol"></fa></button>-->
             <div class="alt_info">
                 <div class="alt_non_breakdown" v-if="!isBreakdown">
@@ -92,7 +92,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 import AvaAsset from '@/js/AvaAsset'
 import Spinner from '@/components/misc/Spinner.vue'
 import NftCol from './NftCol.vue'
@@ -122,14 +122,27 @@ import UtxosBreakdownModal from '@/components/modals/UtxosBreakdown/UtxosBreakdo
 })
 export default class BalanceCard extends Vue {
     isBreakdown = false
+    intervalId: NodeJS.Timeout | number | null = null
 
     $refs!: {
         utxos_modal: UtxosBreakdownModal
     }
 
+    mounted() {
+        this.$store.dispatch('Assets/getPChainBalances')
+        this.intervalId = setInterval(() => {
+            this.$store.dispatch('Assets/getPChainBalances')
+        }, 60000)
+    }
+
+    beforeDestroy() {
+        clearInterval(this.intervalId as NodeJS.Timeout)
+    }
+
     updateBalance(): void {
         this.$store.dispatch('Assets/updateUTXOs')
         this.$store.dispatch('History/updateTransactionHistory')
+        this.$store.dispatch('Assets/getPChainBalances')
     }
 
     showUTXOsModal() {
@@ -246,8 +259,16 @@ export default class BalanceCard extends Vue {
         }
     }
 
+    // get platformUnlocked(): BN {
+    //     return this.$store.getters['Assets/walletPlatformBalance']
+    // }
+
     get platformUnlocked(): BN {
-        return this.$store.getters['Assets/walletPlatformBalance']
+        return this.$store.getters['Assets/walletPlatformBalanceUnlocked']
+    }
+
+    get platformDeposited(): BN {
+        return this.$store.getters['Assets/walletPlatformBalanceDeposited']
     }
 
     get platformLocked(): BN {
@@ -336,9 +357,9 @@ export default class BalanceCard extends Vue {
 
 .fungible_card {
     height: 100%;
-    display: grid !important;
-    grid-template-rows: max-content 1fr max-content;
-    flex-direction: column;
+    // display: grid !important;
+    // grid-template-rows: max-content 1fr max-content;
+    // flex-direction: column;
 }
 
 .where_info {
