@@ -1,5 +1,6 @@
 name: build-app
-on: [push]
+on: [push, workflow_dispatch]
+
 jobs:
   yarn-build:
     runs-on: ubuntu-latest
@@ -76,4 +77,4 @@ jobs:
             ${{ steps.setTagVariables.outputs.branch }}
             c4tplatform/camino-wallet:${{ needs.bump-version.outputs.version }}
             ${{ steps.setTagVariables.outputs.stable }}
-          push: ${{ github.ref == 'refs/heads/chain4travel' || github.ref == 'refs/heads/dev' }}
+          push: ${{ github.ref == 'refs/heads/chain4travel' || github.ref == 'refs/heads/dev' || github.event_name == 'workflow_dispatch' }}
