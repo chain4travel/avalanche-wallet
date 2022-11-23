@@ -33,7 +33,6 @@
                     <span class="smaller">.{{ balanceTextRight }}</span>
                     {{ nativeAssetSymbol }}
                 </p>
-                <!-- Until Camino is listed on an exchange, Displaying this has no value but instead confuses the user. -->
                 <!-- <div style="display: flex; flex-direction: row">
                     <p class="balance_usd">
                         <b>$ {{ totalBalanceUSDText }}</b>
@@ -99,8 +98,8 @@ import NftCol from './NftCol.vue'
 import Tooltip from '@/components/misc/Tooltip.vue'
 
 import Big from 'big.js'
-import { BN } from '@c4tplatform/camino/dist'
-import { ONEAVAX } from '@c4tplatform/camino/dist/utils'
+import { BN } from '@c4tplatform/caminojs/dist'
+import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import { bnToBig } from '@/helpers/helper'
 import { priceDict } from '@/store/types'
 import { WalletType } from '@/js/wallets/types'
