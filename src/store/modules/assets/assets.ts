@@ -468,7 +468,7 @@ const assets_module: Module<AssetsState, RootState> = {
             let pchain = ava.PChain()
 
             let pBalance = await pchain.getBalance(wallet!.getAllAddressesP()[0])
-            state.balances = pBalance as WalletBalance
+            state.balances = (pBalance as unknown) as WalletBalance
             return
         },
     },

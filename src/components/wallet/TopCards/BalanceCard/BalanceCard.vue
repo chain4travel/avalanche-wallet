@@ -33,20 +33,7 @@
                     <span class="smaller">.{{ balanceTextRight }}</span>
                     {{ nativeAssetSymbol }}
                 </p>
-                <!-- <div style="display: flex; flex-direction: row">
-                    <p class="balance_usd">
-                        <b>$ {{ totalBalanceUSDText }}</b>
-                        USD
-                    </p>
-                    <p class="balance_usd" style="background-color: transparent">
-                        <b>1 {{ nativeAssetSymbol }}</b>
-                        =
-                        <b>${{ avaxPriceText }}</b>
-                        USD
-                    </p>
-                </div> -->
             </div>
-            <!--            <button class="expand_but">Show Breakdown<fa icon="list-ol"></fa></button>-->
             <div class="alt_info">
                 <div class="alt_non_breakdown" v-if="!isBreakdown">
                     <div>
@@ -57,10 +44,6 @@
                         <label>{{ $t('top.locked') }}</label>
                         <p>{{ balanceTextLocked }} {{ nativeAssetSymbol }}</p>
                     </div>
-                    <!-- <div>
-                        <label>{{ $t('top.balance.stake') }}</label>
-                        <p>{{ stakingText }} {{ nativeAssetSymbol }}</p>
-                    </div> -->
                 </div>
                 <div class="alt_breakdown" v-else>
                     <div>
@@ -79,10 +62,6 @@
                         <label>{{ $t('top.balance.bonded_deposited') }} (P)</label>
                         <p>{{ platformLockedStakeable | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
                     </div>
-                    <!-- <div>
-                        <label>{{ $t('top.balance.stake') }}</label>
-                        <p>{{ stakingText }} {{ nativeAssetSymbol }}</p>
-                    </div> -->
                 </div>
             </div>
         </div>
