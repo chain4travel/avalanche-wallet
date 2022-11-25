@@ -16,27 +16,27 @@
             <label>{{ $t('earn.validate.confirmation.end') }}</label>
             <p>{{ end.toLocaleString() }}</p>
         </div>
-        <div>
+        <!-- <div>
             <label>{{ $t('earn.validate.confirmation.fee') }}</label>
             <p>{{ delegationFee }} %</p>
-        </div>
-        <div>
+        </div> -->
+        <!-- <div>
             <label>{{ $t('earn.validate.confirmation.reward') }} ({{ walletType }})</label>
             <p style="word-break: break-all">{{ rewardAddress }}</p>
-        </div>
+        </div> -->
     </div>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import { BN } from '@c4tplatform/camino'
+import { BN } from '@c4tplatform/caminojs'
 import Big from 'big.js'
 
 @Component
 export default class ConfirmPage extends Vue {
     @Prop() nodeID!: string
     @Prop() end!: Date
-    @Prop() delegationFee!: number
+    // @Prop() delegationFee!: number
     @Prop() amount!: BN
     @Prop() rewardAddress!: string
     @Prop() rewardDestination!: string
