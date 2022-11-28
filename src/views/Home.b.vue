@@ -132,7 +132,7 @@ export default class Home extends Vue {}
 
                     h2 {
                         padding-top: main.$s-size;
-                        font-family: 'DM Sans', sans-serif;
+                        font-family: 'Inter', sans-serif;
                         font-size: main.$s-size;
                         text-transform: uppercase;
                         color: var(--primary-color-light);
