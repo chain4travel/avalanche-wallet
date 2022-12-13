@@ -177,10 +177,28 @@ const network_module: Module<NetworkState, RootState> = {
 
             let columbus = new AvaNetwork(
                 'Columbus',
+                'https://columbus.camino.network',
+                1001,
+                'https://magellan.columbus.camino.network',
+                'https://explorer.columbus.camino.network',
+                true
+            )
+
+            let columbus_old = new AvaNetwork(
+                'Columbus',
                 'https://columbus.camino.foundation',
                 1001,
                 'https://magellan.columbus.camino.foundation',
                 'https://explorer.camino.foundation',
+                true
+            )
+
+            let kopernikus = new AvaNetwork(
+                'Kopernikus',
+                'https://kopernikus.camino.network',
+                1001,
+                'https://magellan.kopernikus.camino.network',
+                'https://explorer.kopernikus.camino.network',
                 true
             )
 
@@ -203,6 +221,8 @@ const network_module: Module<NetworkState, RootState> = {
             commit('addNetwork', camino)
             commit('addNetwork', columbus)
             commit('addNetwork', avaxMain)
+            commit('addNetwork', kopernikus)
+            commit('addNetwork', columbus_old)
 
             try {
                 let isSet = await dispatch('loadSelectedNetwork')
