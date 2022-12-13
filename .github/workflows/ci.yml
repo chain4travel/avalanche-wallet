@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
   push:    
     branches:
-      - main
+      - chain4travel
       - dev
   pull_request:
     branches:
-        - main
+        - chain4travel
         - dev
 
 env:
@@ -30,26 +30,26 @@ jobs:
 
       - name: Set bucket names
         id: setBucketNames
-        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
+        if: ${{ github.ref == 'refs/heads/chain4travel' || github.ref == 'refs/heads/dev' }}
         run: |
-          if [[ "${{ github.ref_name }}" == "main" ]]; then
+          if [[ "${{ github.ref_name }}" == "chain4travel" ]]; then
               echo "bucket=wallet.camino.network" >> $GITHUB_OUTPUT
           elif [[ "${{ github.ref_name }}" == "dev" ]]; then
               echo "bucket=wallet.kopernikus.camino.network" >> $GITHUB_OUTPUT
           fi
       - name: 'gcloud authentication'
         id: 'auth'
-        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
+        if: ${{ github.ref == 'refs/heads/chain4travel' || github.ref == 'refs/heads/dev' }}
         uses: 'google-github-actions/auth@v1'
         with:
             credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
 
       - name: 'Set up Cloud SDK'
-        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
+        if: ${{ github.ref == 'refs/heads/chain4travel' || github.ref == 'refs/heads/dev' }}
         uses: 'google-github-actions/setup-gcloud@v1'
 
       - name: update bucket files
-        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
+        if: ${{ github.ref == 'refs/heads/chain4travel' || github.ref == 'refs/heads/dev' }}
         run: gsutil rsync -R -d dist gs://${{ steps.setBucketNames.outputs.bucket }}
 
      
