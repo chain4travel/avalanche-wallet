@@ -185,7 +185,7 @@ const network_module: Module<NetworkState, RootState> = {
             )
 
             let columbus_old = new AvaNetwork(
-                'Columbus',
+                'Columbus-Old',
                 'https://columbus.camino.foundation',
                 1001,
                 'https://magellan.columbus.camino.foundation',
@@ -196,7 +196,7 @@ const network_module: Module<NetworkState, RootState> = {
             let kopernikus = new AvaNetwork(
                 'Kopernikus',
                 'https://kopernikus.camino.network',
-                1001,
+                1002,
                 'https://magellan.kopernikus.camino.network',
                 'https://explorer.kopernikus.camino.network',
                 true
