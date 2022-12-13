@@ -50,6 +50,6 @@ jobs:
 
       - name: update bucket files
         if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
-        run: gsutil rsync -R -d build gs://${{ steps.setBucketNames.outputs.bucket }}
+        run: gsutil rsync -R -d dist gs://${{ steps.setBucketNames.outputs.bucket }}
 
      
