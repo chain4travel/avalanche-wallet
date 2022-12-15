@@ -59,7 +59,6 @@ export default class Validator extends Vue {
     }
 
     get platformLockedStakeable(): BN {
-        // return this.$store.getters.walletPlatformBalanceLockedStakeable
         return this.$store.getters['Assets/walletPlatformBalanceLockedStakeable']
     }
 
@@ -71,20 +70,9 @@ export default class Validator extends Vue {
         return this.platformUnlocked.add(this.platformLockedStakeable).isZero()
     }
 
-    get canDelegate(): boolean {
-        let bn = this.$store.state.Platform.minStakeDelegation
-        if (this.totBal.lt(bn)) {
-            return false
-        }
-        return true
-    }
-
     get canValidate(): boolean {
         let bn = this.$store.state.Platform.minStake
-        if (this.totBal.lt(bn)) {
-            return false
-        }
-        return true
+        return !this.totBal.lt(bn)
     }
 
     get minStakeAmt(): Big {

@@ -219,19 +219,18 @@ export default class BalanceCard extends Vue {
         return ''
     }
 
-    // Locked balance is the sum of locked AVAX tokens on X and P chain
+    // Locked balance is the sum of locked CAM tokens P chain (bonded + deposited + bondedAndDeposited)
     get balanceTextLocked(): string {
         if (this.isUpdateBalance) return '--'
 
         if (this.ava_asset !== null) {
-            let denom = this.ava_asset.denomination
-            let tot = this.platformLocked.add(this.platformLockedStakeable)
-            // let otherLockedAmt = this.platformLocked.add(this.platformLockedStakeable)
-            let pLocked = Big(tot.toString()).div(Math.pow(10, denom))
-            let amt = this.ava_asset.getAmount(true)
-            amt = amt.add(pLocked)
+            let denomination = this.ava_asset.denomination
+            let total = this.platformDeposited
+                .add(this.platformBonded)
+                .add(this.platformBondedDeposited)
+            let totalDenominated = Big(total.toString()).div(Math.pow(10, denomination))
 
-            return amt.toLocaleString(denom)
+            return totalDenominated.toLocaleString(denomination)
         } else {
             return '--'
         }
@@ -242,7 +241,11 @@ export default class BalanceCard extends Vue {
     // }
 
     get platformUnlocked(): BN {
-        return this.$store.getters['Assets/walletPlatformBalanceUnlocked']
+        const total = this.$store.getters['Assets/walletPlatformBalanceTotal']
+        const locked = this.platformDeposited
+            .add(this.platformBonded)
+            .add(this.platformBondedDeposited)
+        return total.sub(locked)
     }
 
     get platformDeposited(): BN {
@@ -257,28 +260,23 @@ export default class BalanceCard extends Vue {
         return this.$store.getters['Assets/walletPlatformBalanceBondedDeposited']
     }
 
-    get platformLocked(): BN {
-        return this.$store.getters['Assets/walletPlatformBalanceLocked']
-    }
-
-    get platformLockedStakeable(): BN {
-        return this.$store.getters['Assets/walletPlatformBalanceLockedStakeable']
-    }
-
     get unlockedText() {
         if (this.isUpdateBalance) return '--'
 
         if (this.ava_asset) {
             let xUnlocked = this.ava_asset.amount
             let pUnlocked = this.platformUnlocked
+                .sub(this.platformDeposited)
+                .sub(this.platformBonded)
+                .sub(this.platformBondedDeposited)
 
-            let denom = this.ava_asset.denomination
+            let denomination = this.ava_asset.denomination
 
-            let tot = xUnlocked.add(pUnlocked).add(this.evmUnlocked)
+            let total = xUnlocked.add(pUnlocked).add(this.evmUnlocked)
 
-            let amtBig = bnToBig(tot, denom)
+            let amountBig = bnToBig(total, denomination)
 
-            return amtBig.toLocaleString(denom)
+            return amountBig.toLocaleString(denomination)
         } else {
             return '--'
         }
