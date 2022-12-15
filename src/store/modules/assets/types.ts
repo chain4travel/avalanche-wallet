@@ -94,10 +94,11 @@ export interface AddTokenListInput {
 }
 
 export interface WalletBalance {
-    unlocked: BN
-    deposited: BN
-    bonded: BN
-    depositedAndBonded: BN
+    balances: IBalanceDict
+    unlockedOutputs: IBalanceDict
+    bondedOutputs: IBalanceDict
+    depositedOutputs: IBalanceDict
+    bondedDepositedOutputs: IBalanceDict
     utxoIDs: utxoIDs[]
 }
 

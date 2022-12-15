@@ -56,11 +56,11 @@
                     </div>
                     <div>
                         <label>{{ $t('top.balance.deposited') }} (P)</label>
-                        <p>{{ avmLocked | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                        <p>{{ platformDeposited | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
                         <label>{{ $t('top.balance.bonded') }} (P)</label>
-                        <p>{{ platformLocked | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                        <p>{{ platformBonded | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
                         <label>{{ $t('top.balance.bonded_deposited') }} (P)</label>
-                        <p>{{ platformLockedStakeable | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                        <p>{{ platformBondedDeposited | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
                     </div>
                 </div>
             </div>
@@ -247,6 +247,14 @@ export default class BalanceCard extends Vue {
 
     get platformDeposited(): BN {
         return this.$store.getters['Assets/walletPlatformBalanceDeposited']
+    }
+
+    get platformBonded(): BN {
+        return this.$store.getters['Assets/walletPlatformBalanceBonded']
+    }
+
+    get platformBondedDeposited(): BN {
+        return this.$store.getters['Assets/walletPlatformBalanceBondedDeposited']
     }
 
     get platformLocked(): BN {
