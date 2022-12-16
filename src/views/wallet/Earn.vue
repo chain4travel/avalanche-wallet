@@ -56,23 +56,6 @@ export default class Earn extends Vue {
         clearInterval(this.intervalID)
     }
 
-    get platformUnlocked(): BN {
-        return this.$store.getters['Assets/walletPlatformBalance']
-    }
-
-    get platformLockedStakeable(): BN {
-        // return this.$store.getters.walletPlatformBalanceLockedStakeable
-        return this.$store.getters['Assets/walletPlatformBalanceLockedStakeable']
-    }
-
-    get totBal(): BN {
-        return this.platformUnlocked.add(this.platformLockedStakeable)
-    }
-
-    get pNoBalance() {
-        return this.platformUnlocked.add(this.platformLockedStakeable).isZero()
-    }
-
     get minStakeAmt(): Big {
         let bn = this.$store.state.Platform.minStake
         return bnToBig(bn, 9)

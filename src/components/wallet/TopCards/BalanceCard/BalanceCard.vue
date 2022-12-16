@@ -33,20 +33,7 @@
                     <span class="smaller">.{{ balanceTextRight }}</span>
                     {{ nativeAssetSymbol }}
                 </p>
-                <!-- <div style="display: flex; flex-direction: row">
-                    <p class="balance_usd">
-                        <b>$ {{ totalBalanceUSDText }}</b>
-                        USD
-                    </p>
-                    <p class="balance_usd" style="background-color: transparent">
-                        <b>1 {{ nativeAssetSymbol }}</b>
-                        =
-                        <b>${{ avaxPriceText }}</b>
-                        USD
-                    </p>
-                </div> -->
             </div>
-            <!--            <button class="expand_but">Show Breakdown<fa icon="list-ol"></fa></button>-->
             <div class="alt_info">
                 <div class="alt_non_breakdown" v-if="!isBreakdown">
                     <div>
@@ -56,10 +43,6 @@
                     <div>
                         <label>{{ $t('top.locked') }}</label>
                         <p>{{ balanceTextLocked }} {{ nativeAssetSymbol }}</p>
-                    </div>
-                    <div>
-                        <label>{{ $t('top.balance.stake') }}</label>
-                        <p>{{ stakingText }} {{ nativeAssetSymbol }}</p>
                     </div>
                 </div>
                 <div class="alt_breakdown" v-else>
@@ -72,16 +55,12 @@
                         <p>{{ evmUnlocked | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
                     </div>
                     <div>
-                        <label>{{ $t('top.balance.locked') }} (X)</label>
-                        <p>{{ avmLocked | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
-                        <label>{{ $t('top.balance.locked') }} (P)</label>
-                        <p>{{ platformLocked | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
-                        <label>{{ $t('top.balance.locked_stake') }} (P)</label>
-                        <p>{{ platformLockedStakeable | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
-                    </div>
-                    <div>
-                        <label>{{ $t('top.balance.stake') }}</label>
-                        <p>{{ stakingText }} {{ nativeAssetSymbol }}</p>
+                        <label>{{ $t('top.balance.deposited') }} (P)</label>
+                        <p>{{ platformDeposited | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                        <label>{{ $t('top.balance.bonded') }} (P)</label>
+                        <p>{{ platformBonded | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                        <label>{{ $t('top.balance.bonded_deposited') }} (P)</label>
+                        <p>{{ platformBondedDeposited | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
                     </div>
                 </div>
             </div>
@@ -91,7 +70,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 import AvaAsset from '@/js/AvaAsset'
 import Spinner from '@/components/misc/Spinner.vue'
 import NftCol from './NftCol.vue'
@@ -121,14 +100,27 @@ import UtxosBreakdownModal from '@/components/modals/UtxosBreakdown/UtxosBreakdo
 })
 export default class BalanceCard extends Vue {
     isBreakdown = false
+    intervalId: NodeJS.Timeout | number | null = null
 
     $refs!: {
         utxos_modal: UtxosBreakdownModal
     }
 
+    mounted() {
+        this.$store.dispatch('Assets/getPChainBalances')
+        this.intervalId = setInterval(() => {
+            this.$store.dispatch('Assets/getPChainBalances')
+        }, 60000)
+    }
+
+    beforeDestroy() {
+        clearInterval(this.intervalId as NodeJS.Timeout)
+    }
+
     updateBalance(): void {
         this.$store.dispatch('Assets/updateUTXOs')
         this.$store.dispatch('History/updateTransactionHistory')
+        this.$store.dispatch('Assets/getPChainBalances')
     }
 
     showUTXOsModal() {
@@ -227,34 +219,45 @@ export default class BalanceCard extends Vue {
         return ''
     }
 
-    // Locked balance is the sum of locked AVAX tokens on X and P chain
+    // Locked balance is the sum of locked CAM tokens P chain (bonded + deposited + bondedAndDeposited)
     get balanceTextLocked(): string {
         if (this.isUpdateBalance) return '--'
 
         if (this.ava_asset !== null) {
-            let denom = this.ava_asset.denomination
-            let tot = this.platformLocked.add(this.platformLockedStakeable)
-            // let otherLockedAmt = this.platformLocked.add(this.platformLockedStakeable)
-            let pLocked = Big(tot.toString()).div(Math.pow(10, denom))
-            let amt = this.ava_asset.getAmount(true)
-            amt = amt.add(pLocked)
+            let denomination = this.ava_asset.denomination
+            let total = this.platformDeposited
+                .add(this.platformBonded)
+                .add(this.platformBondedDeposited)
+            let totalDenominated = Big(total.toString()).div(Math.pow(10, denomination))
 
-            return amt.toLocaleString(denom)
+            return totalDenominated.toLocaleString(denomination)
         } else {
             return '--'
         }
     }
 
+    // get platformUnlocked(): BN {
+    //     return this.$store.getters['Assets/walletPlatformBalance']
+    // }
+
     get platformUnlocked(): BN {
-        return this.$store.getters['Assets/walletPlatformBalance']
+        const total = this.$store.getters['Assets/walletPlatformBalanceTotal']
+        const locked = this.platformDeposited
+            .add(this.platformBonded)
+            .add(this.platformBondedDeposited)
+        return total.sub(locked)
     }
 
-    get platformLocked(): BN {
-        return this.$store.getters['Assets/walletPlatformBalanceLocked']
+    get platformDeposited(): BN {
+        return this.$store.getters['Assets/walletPlatformBalanceDeposited']
     }
 
-    get platformLockedStakeable(): BN {
-        return this.$store.getters['Assets/walletPlatformBalanceLockedStakeable']
+    get platformBonded(): BN {
+        return this.$store.getters['Assets/walletPlatformBalanceBonded']
+    }
+
+    get platformBondedDeposited(): BN {
+        return this.$store.getters['Assets/walletPlatformBalanceBondedDeposited']
     }
 
     get unlockedText() {
@@ -263,14 +266,17 @@ export default class BalanceCard extends Vue {
         if (this.ava_asset) {
             let xUnlocked = this.ava_asset.amount
             let pUnlocked = this.platformUnlocked
+                .sub(this.platformDeposited)
+                .sub(this.platformBonded)
+                .sub(this.platformBondedDeposited)
 
-            let denom = this.ava_asset.denomination
+            let denomination = this.ava_asset.denomination
 
-            let tot = xUnlocked.add(pUnlocked).add(this.evmUnlocked)
+            let total = xUnlocked.add(pUnlocked).add(this.evmUnlocked)
 
-            let amtBig = bnToBig(tot, denom)
+            let amountBig = bnToBig(total, denomination)
 
-            return amtBig.toLocaleString(denom)
+            return amountBig.toLocaleString(denomination)
         } else {
             return '--'
         }
@@ -335,9 +341,9 @@ export default class BalanceCard extends Vue {
 
 .fungible_card {
     height: 100%;
-    display: grid !important;
-    grid-template-rows: max-content 1fr max-content;
-    flex-direction: column;
+    // display: grid !important;
+    // grid-template-rows: max-content 1fr max-content;
+    // flex-direction: column;
 }
 
 .where_info {

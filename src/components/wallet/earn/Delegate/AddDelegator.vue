@@ -616,10 +616,6 @@ export default class AddDelegator extends Vue {
     // get platformUnlocked(): BN {
     //     return this.$store.getters.walletPlatformBalance
     // }
-
-    get platformLockedStakeable(): BN {
-        return this.$store.getters['Assets/walletPlatformBalanceLockedStakeable']
-    }
 }
 </script>
 <style scoped lang="scss">
