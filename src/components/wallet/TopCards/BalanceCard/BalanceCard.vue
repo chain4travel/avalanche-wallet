@@ -236,16 +236,8 @@ export default class BalanceCard extends Vue {
         }
     }
 
-    // get platformUnlocked(): BN {
-    //     return this.$store.getters['Assets/walletPlatformBalance']
-    // }
-
     get platformUnlocked(): BN {
-        const total = this.$store.getters['Assets/walletPlatformBalanceTotal']
-        const locked = this.platformDeposited
-            .add(this.platformBonded)
-            .add(this.platformBondedDeposited)
-        return total.sub(locked)
+        return this.$store.getters['Assets/walletPlatformBalanceUnlocked']
     }
 
     get platformDeposited(): BN {

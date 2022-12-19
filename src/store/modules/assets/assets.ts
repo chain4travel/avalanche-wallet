@@ -614,6 +614,10 @@ const assets_module: Module<AssetsState, RootState> = {
             return amt
         },
 
+        walletPlatformBalanceUnlocked(state, getters, rootState): BN {
+            return new BN(state.balances.unlockedOutputs[state.AVA_ASSET_ID || ''] || 0)
+        },
+
         walletPlatformBalanceTotalLocked(state, getters, rootState): BN {
             return new BN(state.balances.depositedOutputs[state.AVA_ASSET_ID || ''] || 0)
                 .add(new BN(state.balances.bondedOutputs[state.AVA_ASSET_ID || ''] || 0))
