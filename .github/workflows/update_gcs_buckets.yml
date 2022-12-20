@@ -1,4 +1,4 @@
-name: camino wallet ci
+name: update-gcs-bucket
 
 on:
   workflow_dispatch:
