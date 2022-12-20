@@ -369,7 +369,7 @@ h4 {
     font-size: 2.4em;
     white-space: normal;
     /*font-weight: bold;*/
-    font-family: Rubik !important;
+    font-family: Inter !important;
 
     span.smaller {
         font-size: 0.8em;
