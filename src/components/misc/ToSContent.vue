@@ -19,7 +19,7 @@
             ”, or “
             <b>our</b>
             ”), concerning your access to and use of the
-            <span class="s1">https://wallet.camino.foundation/</span>
+            <span class="s1">https://wallet.camino.network/</span>
             website and related features and services, including but not limited to the Camino
             wallet functionality, as well as any other media form, media channel, mobile website or
             mobile application related, linked, or otherwise connected thereto, (collectively, the
