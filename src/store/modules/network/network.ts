@@ -177,10 +177,10 @@ const network_module: Module<NetworkState, RootState> = {
 
             let columbus = new AvaNetwork(
                 'Columbus',
-                'https://columbus.camino.foundation',
+                'https://columbus.camino.network',
                 1001,
-                'https://magellan.columbus.camino.foundation',
-                'https://explorer.camino.foundation',
+                'https://magellan.columbus.camino.network',
+                'https://explorer.columbus.camino.network',
                 true
             )
 

@@ -58,25 +58,21 @@ export default class Validator extends Vue {
         return this.$store.getters['Assets/walletPlatformBalance']
     }
 
-    get platformLockedStakeable(): BN {
-        // return this.$store.getters.walletPlatformBalanceLockedStakeable
-        return this.$store.getters['Assets/walletPlatformBalanceLockedStakeable']
+    get platformTotalLocked(): BN {
+        return this.$store.getters['Assets/walletPlatformBalanceTotalLocked']
     }
 
     get totBal(): BN {
-        return this.platformUnlocked.add(this.platformLockedStakeable)
+        return this.platformUnlocked.add(this.platformTotalLocked)
     }
 
     get pNoBalance() {
-        return this.platformUnlocked.add(this.platformLockedStakeable).isZero()
+        return this.platformUnlocked.add(this.platformTotalLocked).isZero()
     }
 
     get canDelegate(): boolean {
         let bn = this.$store.state.Platform.minStakeDelegation
-        if (this.totBal.lt(bn)) {
-            return false
-        }
-        return true
+        return !this.totBal.lt(bn)
     }
 
     get canValidate(): boolean {
