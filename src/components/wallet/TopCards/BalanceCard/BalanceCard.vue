@@ -130,12 +130,6 @@ export default class BalanceCard extends Vue {
 
     @Watch('$store.state.Network.selectedNetwork.networkId')
     SupportdepositAndBound(): void {
-        console.log(
-            'lockModeBondDeposit',
-            ava.getNetwork().P.lockModeBondDeposit,
-            'verifyNodeSignature',
-            ava.getNetwork().P.verifyNodeSignature
-        )
         this.depositAndBound =
             ava.getNetwork().P.lockModeBondDeposit && ava.getNetwork().P.verifyNodeSignature
     }
