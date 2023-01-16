@@ -9,6 +9,7 @@
         "build": "vue-cli-service build",
         "cypress": "cypress run",
         "format": "prettier src/**/*.{js,ts,vue} .github/workflows/*.yml --write",
+        "format-check": "prettier src/**/*.{js,ts,vue} .github/workflows/*.yml --check",
         "lint": "vue-cli-service lint",
         "release": "release-it",
         "serve": "vue-cli-service serve",

@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches:
-        - chain4travel
-        - dev
+      - chain4travel
+      - dev
 
 env:
   node_version: 15
@@ -18,8 +18,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.node_version }}
-          
-      - name: install yarn dependencies        
+
+      - name: install yarn dependencies
         run: yarn install
       - name: build
         run: yarn build
@@ -37,7 +37,7 @@ jobs:
 
         uses: 'google-github-actions/auth@v1'
         with:
-            credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v1'
@@ -45,9 +45,7 @@ jobs:
       - name: update bucket files
         run: gsutil rsync -R -d dist gs://${{ steps.setBucketNames.outputs.bucket }}
 
-## TODO: this needs more discussion, to decide if we really need 3 different deployments from 2 branch for the wallet and explorer
+      ## TODO: this needs more discussion, to decide if we really need 3 different deployments from 2 branch for the wallet and explorer
       - name: update bucket files for columbus
         if: ${{ github.ref == 'refs/heads/chain4travel' }}
         run: gsutil rsync -R -d dist gs://wallet.columbus.camino.network
-
-     
