@@ -891,7 +891,7 @@
 "@c4tplatform/camino-wallet-sdk@file:camino-wallet-sdk":
   version "0.0.2"
   dependencies:
-    "@c4tplatform/caminojs" "file:C:/Users/mpfau/AppData/Local/Yarn/Cache/v6/npm-@c4tplatform-camino-wallet-sdk-0.0.2-cc32d5c8-4692-487d-8676-9ab8597f9b19-1669277075513/node_modules/@c4tplatform/camino-wallet-sdk/caminojs"
+    "@c4tplatform/caminojs" "file:C:/Users/mpfau/AppData/Local/Yarn/Cache/v6/npm-@c4tplatform-camino-wallet-sdk-0.0.2-f95cda17-5ae8-40cb-af18-e46c341e74bf-1673852857218/node_modules/@c4tplatform/camino-wallet-sdk/caminojs"
     "@ethereumjs/tx" "3.4.0"
     "@ledgerhq/hw-app-eth" "6.12.2"
     "@ledgerhq/hw-transport" "^6.19.0"
@@ -14548,11 +14548,6 @@ rlp@^2.2.3, rlp@^2.2.4:
   integrity sha512-HAfAmL6SDYNWPUOJNrM500x4Thn4PZsEy5pijPh40U9WfNk0z15hUYzO9xVIMAdIHdFtD8CBDHd75Td1g36Mjg==
   dependencies:
     bn.js "^4.11.1"
-
-roboto-fontface@0.10.0:
-  version "0.10.0"
-  resolved "https://registry.npmjs.org/roboto-fontface/-/roboto-fontface-0.10.0.tgz"
-  integrity sha512-OlwfYEgA2RdboZohpldlvJ1xngOins5d7ejqnIBWr9KaMxsnBqotpptRXTyfNRLnFpqzX6sTDt+X+a+6udnU8g==
 
 rsvp@^4.8.4:
   version "4.8.5"

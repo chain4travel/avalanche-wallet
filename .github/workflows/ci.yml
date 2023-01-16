@@ -1,7 +1,7 @@
 name: CI
 
 on:
-  push:
+  push:branches-ignore: [chain4travel, dev]
 
 env:
   CI: true
@@ -20,3 +20,4 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: yarn install
       - run: yarn lint
+      - run: yarn format-check
