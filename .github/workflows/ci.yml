@@ -1,7 +1,8 @@
 name: CI
 
 on:
-  push:branches-ignore: [chain4travel, dev]
+  push:
+    branches-ignore: [chain4travel, dev]
 
 env:
   CI: true
