@@ -58,7 +58,8 @@ export default class Validator extends Vue {
         ava.getNetwork().P.lockModeBondDeposit && ava.getNetwork().P.verifyNodeSignature
 
     @Watch('$store.state.Network.selectedNetwork.networkId')
-    SupportDepositAndBond(): void {
+    onNetworkChange() {
+        this.$forceUpdate()
         this.depositAndBond =
             ava.getNetwork().P.lockModeBondDeposit && ava.getNetwork().P.verifyNodeSignature
     }
