@@ -606,10 +606,10 @@
         <p style="text-indent: 0pt; text-align: left"><br /></p>
         <p style="padding-left: 5pt; text-indent: 0pt; text-align: justify">
             We care about data privacy and security. Please review our Privacy Policy:
-            <a href="https://camino.foundation/privacy-policy" class="s7" target="_blank">
-                https://camino.foundation/privacy-policy
+            <a href="https://camino.network/privacy-policy" class="s7" target="_blank">
+                https://camino.network/privacy-policy
             </a>
-            <a href="https://camino.foundation/privacy-policy" class="a" target="_blank">.</a>
+            <a href="https://camino.network/privacy-policy" class="a" target="_blank">.</a>
             By using the Site, you agree to be bound by our Privacy Policy, which is incorporated
             into these Terms of Use. Please be advised the Site is hosted in EU-West. If you access
             the Site from any other region of the world with laws or other requirements governing
