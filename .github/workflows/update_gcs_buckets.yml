@@ -1,10 +1,9 @@
 name: update-gcs-bucket
 
 on:
-  workflow_dispatch:
   push:
     branches:
-      - chain4travel
+      - c4t
       - dev
 
 env:
@@ -27,10 +26,10 @@ jobs:
       - name: Set bucket names
         id: setBucketNames
         run: |
-          if [[ "${{ github.ref_name }}" == "chain4travel" ]]; then
-              echo "bucket=wallet.camino.network" >> $GITHUB_OUTPUT
+          if [[ "${{ github.ref_name }}" == "c4t" ]]; then
+              echo "bucket=stage.wallet.camino.network" >> $GITHUB_OUTPUT
           elif [[ "${{ github.ref_name }}" == "dev" ]]; then
-              echo "bucket=wallet.kopernikus.camino.network" >> $GITHUB_OUTPUT
+              echo "bucket=dev.wallet.camino.network" >> $GITHUB_OUTPUT
           fi
       - name: 'gcloud authentication'
         id: 'auth'
@@ -43,9 +42,4 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v1'
 
       - name: update bucket files
-        run: gsutil rsync -R -d dist gs://${{ steps.setBucketNames.outputs.bucket }}
-
-      ## TODO: this needs more discussion, to decide if we really need 3 different deployments from 2 branch for the wallet and explorer
-      - name: update bucket files for columbus
-        if: ${{ github.ref == 'refs/heads/chain4travel' }}
-        run: gsutil rsync -R -d dist gs://wallet.columbus.camino.network
+        run: gsutil -m rsync -R -d dist gs://${{ steps.setBucketNames.outputs.bucket }}
