@@ -167,10 +167,23 @@ const accounts_module: Module<AccountsState, RootState> = {
             commit('loadAccounts')
         },
 
-        async updateKycStatus({ state, rootState }) {
-            const wallet = rootState.activeWallet
-            if (!wallet) return
-            state.kycStatus = await checkVerificationStatus('0x' + wallet.ethAddress)
+        async updateKycStatus({ state, rootState, dispatch }) {
+            if (!rootState.activeWallet || rootState.activeWallet.type === 'ledger') return null
+            const wallet = rootState.activeWallet as SingletonWallet | MnemonicWallet
+            try {
+                state.kycStatus = await checkVerificationStatus(
+                    wallet.ethKey,
+                    //@ts-ignore
+                    rootState.Network.selectedNetwork.name.toLowerCase()
+                )
+            } catch (e) {
+                dispatch('Notifications/add', {
+                    title: 'KYC Status',
+                    message: 'Error Updating KYC Status.',
+                    type: 'error',
+                })
+                state.kycStatus = false
+            }
         },
     },
     getters: {

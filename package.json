@@ -20,7 +20,6 @@
         "preinstall": "git submodule update --recursive --init"
     },
     "dependencies": {
-        "@arcblock/forge-util": "^1.6.3",
         "@c4tplatform/camino-wallet-sdk": "file:camino-wallet-sdk",
         "@c4tplatform/vue_components": "0.1.0",
         "@ethereumjs/common": "2.0.0",
