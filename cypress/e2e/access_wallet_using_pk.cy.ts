@@ -7,7 +7,7 @@ describe('access wallet', () => {
     })
     it('Wallet access private key ', () => {
         //changeNetwork(cy);
-        addLocalNetwork(cy);
+        addLocalNetwork(cy)
         accessWallet(cy, 'privateKey')
     })
 })

@@ -55,9 +55,8 @@ export default class MnemonicDisplay extends Vue {
         return wordlists.EN.includes(word) || !word
     }
 
-    getDataCY(pos: number)
-    {
-        return `mnemonic-field-${pos}`;
+    getDataCY(pos: number) {
+        return `mnemonic-field-${pos}`
     }
 }
 </script>

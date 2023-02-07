@@ -1,6 +1,6 @@
 import { expect } from 'chai'
-import '@cypress/xpath';
-import { changeNetwork, accessWallet,addLocalNetwork } from '../utils/utils';
+import '@cypress/xpath'
+import { changeNetwork, accessWallet, addLocalNetwork } from '../utils/utils'
 
 describe('Wallet Access Mnemonic', () => {
     before(() => {
@@ -8,8 +8,8 @@ describe('Wallet Access Mnemonic', () => {
     })
 
     it('open suite/open wallet using mnemonic', () => {
-        addLocalNetwork(cy);
+        addLocalNetwork(cy)
         //changeNetwork(cy);
-        accessWallet(cy, "mnemonic");
-    });
+        accessWallet(cy, 'mnemonic')
+    })
 })

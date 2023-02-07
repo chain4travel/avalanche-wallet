@@ -14,7 +14,13 @@
                 </div>
             </div>
             <p class="err">{{ err }}</p>
-            <button data-cy="btn-confirm-verify-new-mnemonic-phrase" class="but_primary ava_button button_primary" @click="verify">Verify</button>
+            <button
+                data-cy="btn-confirm-verify-new-mnemonic-phrase"
+                class="but_primary ava_button button_primary"
+                @click="verify"
+            >
+                Verify
+            </button>
         </div>
     </modal>
 </template>
@@ -118,8 +124,7 @@ export default class VerifyMnemonic extends Vue {
         this.$emit('complete')
     }
 
-    getDataCY(pos: number)
-    {
+    getDataCY(pos: number) {
         return `mnemonic-in-${pos}`
     }
 }
