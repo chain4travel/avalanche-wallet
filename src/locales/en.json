@@ -177,7 +177,7 @@
                 "desc": "Transaction Sent",
                 "label1": "Transaction Hash"
             },
-            "reset": "New Transaction”"
+            "reset": "New Transaction"
         }
     },
     "cross_chain": {
