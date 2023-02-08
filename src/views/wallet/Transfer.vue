@@ -121,7 +121,7 @@
                                 block
                                 :disabled="!canSendAgain"
                             >
-                                Start Again
+                                {{ $t('transfer.c_chain.reset') }}
                             </v-btn>
                         </template>
                     </div>
