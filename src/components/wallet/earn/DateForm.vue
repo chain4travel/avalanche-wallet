@@ -163,6 +163,9 @@ export default class DateForm extends Vue {
         background-color: var(--bg-light);
         color: var(--text-color);
         font-family: 'Inter', sans-serif;
+        .vdatetime-popup__header {
+            background-color: #0085ff;
+        }
         .vdatetime-popup__header div {
             font-family: 'ClashDisplay', sans-serif;
         }
@@ -175,8 +178,16 @@ export default class DateForm extends Vue {
             opacity: 0.8;
         }
         .vdatetime-calendar__month__day:hover > span > span {
-            background-color: rgba(63, 81, 181, 0.3);
+            background-color: #0085ff;
             color: #fff;
+            opacity: 0.3;
+        }
+        .vdatetime-calendar__month__day--selected > span > span {
+            background-color: #0085ff;
+            color: #fff;
+        }
+        .vdatetime-popup__actions__button {
+            color: #0085ff;
         }
     }
 }
