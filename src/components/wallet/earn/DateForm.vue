@@ -157,6 +157,28 @@ export default class DateForm extends Vue {
         text-align: right;
         width: 100%;
     }
+    .vdatetime-popup {
+        border-radius: var(--border-radius-sm);
+        overflow: hidden;
+        background-color: var(--bg-light);
+        color: var(--text-color);
+        font-family: 'Inter', sans-serif;
+        .vdatetime-popup__header div {
+            font-family: 'ClashDisplay', sans-serif;
+        }
+        .vdatetime-calendar__navigation--next svg path,
+        .vdatetime-calendar__navigation--previous svg path {
+            stroke: var(--text-color);
+        }
+        .vdatetime-calendar__navigation--next svg path:hover,
+        .vdatetime-calendar__navigation--previous svg path:hover {
+            opacity: 0.8;
+        }
+        .vdatetime-calendar__month__day:hover > span > span {
+            background-color: rgba(63, 81, 181, 0.3);
+            color: #fff;
+        }
+    }
 }
 </style>
 <style scoped lang="scss">
