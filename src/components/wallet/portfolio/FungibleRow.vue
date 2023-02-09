@@ -18,11 +18,6 @@
             <span>
                 {{ amtBig.toLocaleString() }}
             </span>
-            <br />
-            <span class="fiat" v-if="isAvaxToken">
-                {{ totalUSD.toLocaleString(2) }}
-                &nbsp;USD
-            </span>
         </p>
         <p class="balance_col" v-else>0</p>
     </div>
@@ -141,10 +136,6 @@ export default class FungibleRow extends Vue {
     .balance_col {
         font-size: 18px;
         text-align: right;
-        .fiat {
-            font-size: 12px;
-            color: var(--primary-color-light);
-        }
     }
 
     .name_col {

@@ -60,9 +60,6 @@
                     {{ $t('transfer.fee_tx') }}
                     <span>{{ maxFeeText }} {{ nativeAssetSymbol }}</span>
                 </p>
-                <p>
-                    <span>${{ maxFeeUSD.toLocaleString(2) }} USD</span>
-                </p>
             </div>
             <template v-if="!isSuccess">
                 <p class="err">{{ err }}</p>

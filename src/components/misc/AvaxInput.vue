@@ -20,10 +20,6 @@
                     <b>{{ $t('misc.balance') }}:</b>
                     {{ balanceBig }}
                 </p>
-                <p>
-                    <b>$</b>
-                    {{ amountUSD.toLocaleString(2) }}
-                </p>
             </div>
             <div></div>
         </div>

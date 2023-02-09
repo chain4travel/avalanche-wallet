@@ -57,10 +57,6 @@
                             {{ $t('transfer.fee_tx') }}
                             <span>{{ txFee.toLocaleString(9) }} {{ nativeAssetSymbol }}</span>
                         </p>
-                        <p>
-                            {{ $t('transfer.total_native') }}
-                            <span>{{ totalUSD.toLocaleString(2) }} USD</span>
-                        </p>
                     </div>
                     <div class="checkout">
                         <ul class="err_list" v-if="formErrors.length > 0">
