@@ -428,14 +428,6 @@ export default class Transfer extends Vue {
         return bnToBig(fee, 9)
     }
 
-    get totalUSD(): Big {
-        let totalAsset = this.avaxTxSize.add(ava.XChain().getTxFee())
-        let bigAmt = bnToBig(totalAsset, 9)
-        let usdPrice = this.priceDict.usd
-        let usdBig = bigAmt.times(usdPrice)
-        return usdBig
-    }
-
     get addresses() {
         return this.$store.state.addresses
     }

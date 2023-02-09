@@ -61,14 +61,6 @@ export default class FungibleRow extends Vue {
         return false
     }
 
-    get totalUSD(): Big {
-        if (!this.isAvaxToken) return Big(0)
-        let usdPrice = this.priceDict.usd
-        let bigAmt = bnToBig(this.amount, this.asset.denomination)
-        let usdBig = bigAmt.times(usdPrice)
-        return usdBig
-    }
-
     get priceDict(): priceDict {
         return this.$store.state.prices
     }

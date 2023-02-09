@@ -115,13 +115,6 @@ export default class CurrencyInputDropdown extends Vue {
         console.log('focus')
     }
 
-    get amountUSD(): Big {
-        let usdPrice = this.priceDict.usd
-        let bigAmt = bnToBig(this.amount, this.denomination)
-        let usdBig = bigAmt.times(usdPrice)
-        return usdBig
-    }
-
     get isEmpty(): boolean {
         if (this.walletAssetsArray.length === 0) {
             return true

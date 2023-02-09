@@ -93,13 +93,6 @@ export default class AvaxInput extends Vue {
         }
     }
 
-    get amountUSD(): Big {
-        let usdPrice = this.priceDict.usd
-        let amount = bnToBig(this.amount, 9)
-        let usdBig = amount.times(usdPrice)
-        return usdBig
-    }
-
     get priceDict(): priceDict {
         return this.$store.state.prices
     }
