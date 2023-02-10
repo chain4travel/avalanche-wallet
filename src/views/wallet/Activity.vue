@@ -371,7 +371,7 @@ export default class Activity extends Vue {
 
 .explorer_warning {
     position: absolute;
-    background-color: var(--bg);
+    // background-color: var(--bg);
     width: 100%;
     height: 100%;
     top: 0;
