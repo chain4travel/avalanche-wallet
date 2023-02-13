@@ -53,7 +53,7 @@ jobs:
           cp -ar ./camino-block-explorer/dist ./camino-suite/dist/explorer
           cp -ar dist ./camino-suite/dist/wallet
           cd ./camino-suite
-          yarn start --mode e2e
+          yarn start
 
       - name: jest-run
         run: yarn test
