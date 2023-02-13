@@ -60,8 +60,7 @@ jobs:
         env:
           USE_HTTP: true
         with:
-          start: yarn start
-          working-directory: ./camino-suite
+          start: yarn start ./camino-suite/dist
           wait-on: 'http://localhost:3000/'
           # wait for 3 minutes for the server to respond
           wait-on-timeout: 180
