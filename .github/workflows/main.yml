@@ -58,7 +58,7 @@ jobs:
 
       - name: jest-run
         run: yarn test
-      
+
       - name: test-port
         run: netstat -anpe | grep "3000" | grep "LISTEN"
       - name: cypress-run
