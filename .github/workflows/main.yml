@@ -7,7 +7,7 @@ on:
     branches: [c4t, dev, suite]
 
 env:
-  suite_branch: "suite"
+  suite_branch: 'suite'
 
 jobs:
   build:
@@ -50,8 +50,6 @@ jobs:
           yarn build
           cp -ar dist ../camino-suite/dist/explorer
           cp -ar ../dist ../camino-suite/dist/wallet
-          
-
 
       - name: jest-run
         run: yarn test
