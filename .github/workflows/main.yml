@@ -52,8 +52,6 @@ jobs:
           yarn build:dev
           cp -ar ./camino-block-explorer/dist ./camino-suite/dist/explorer
           cp -ar dist ./camino-suite/dist/wallet
-          cd ./camino-suite
-          yarn start
 
       - name: jest-run
         run: yarn test
@@ -62,6 +60,8 @@ jobs:
         env:
           USE_HTTP: true
         with:
+          start: yarn start
+          working-directory: ./camino-suite
           wait-on: 'http://localhost:3000/'
           # wait for 3 minutes for the server to respond
           wait-on-timeout: 180
