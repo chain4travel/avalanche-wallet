@@ -44,12 +44,14 @@ jobs:
           git clone -b ${{ env.suite_branch }} https://github.com/chain4travel/camino-block-explorer.git
           cd camino-suite
           yarn install
-          yarn build
+          yarn build:dev
           cd ../camino-block-explorer
           yarn install
-          yarn build
-          cp -ar dist ../camino-suite/dist/explorer
-          cp -ar ../dist ../camino-suite/dist/wallet
+          yarn build:dev
+          cd ..
+          yarn build:dev
+          cp -ar ./camino-block-explorer/dist ./camino-suite/dist/explorer
+          cp -ar dist ./camino-suite/dist/wallet
 
       - name: jest-run
         run: yarn test
