@@ -153,6 +153,7 @@ const network_module: Module<NetworkState, RootState> = {
             dispatch('Platform/update', null, { root: true })
             dispatch('Platform/updateMinStakeAmount', null, { root: true })
             dispatch('updateTxFee')
+            dispatch('Accounts/updateMultisigAliases', null, { root: true })
             // Update tx history
             this.dispatch('History/getAliasChains')
             this.dispatch('History/updateTransactionHistory', null, { root: true })

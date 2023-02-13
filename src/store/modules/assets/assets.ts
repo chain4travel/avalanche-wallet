@@ -545,6 +545,7 @@ const assets_module: Module<AssetsState, RootState> = {
                     addDictAmount(amt, assetID, dest)
                 }
             }
+            console.log('Platform balances updated', newBalance)
             state.platformBalances = newBalance
         },
     },
