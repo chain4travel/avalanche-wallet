@@ -40,7 +40,7 @@ jobs:
 
       - name: start suite
         run: |
-          netstat -anpe | grep "3000" | grep "LISTEN"
+          sudo netstat -anpe | grep "3000" | grep "LISTEN"
           git clone -b ${{ env.suite_branch }} https://github.com/chain4travel/camino-suite.git
           git clone -b ${{ env.suite_branch }} https://github.com/chain4travel/camino-block-explorer.git
           cd camino-suite
@@ -60,7 +60,7 @@ jobs:
         run: yarn test
 
       - name: test-port
-        run: netstat -anpe | grep "3000" | grep "LISTEN"
+        run: sudo netstat -anpe | grep "3000" | grep "LISTEN"
       - name: cypress-run
         uses: cypress-io/github-action@v5
         env:
