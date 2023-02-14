@@ -2,7 +2,7 @@ name: main-commit-checks
 
 on:
   push:
-    branches: [c4t, dev, suite, fix-cypress]
+    branches: [c4t, dev, suite]
   pull_request:
     branches: [c4t, dev, suite]
 
