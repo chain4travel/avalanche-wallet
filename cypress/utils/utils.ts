@@ -4,7 +4,7 @@ export function changeNetwork(cy: Cypress.cy & CyEventEmitter, network = 'Columb
 }
 
 export function addKopernikusNetwork(cy: Cypress.cy & CyEventEmitter) {
-    const localNetworkName = 'Kopernikus'
+    const localNetworkName = 'Localhost'
 
     cy.get('[data-cy="network-selector"]').click()
     cy.get('[data-cy="add-custom-network"]').click();
