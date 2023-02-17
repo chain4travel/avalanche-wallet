@@ -57,6 +57,8 @@ class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet 
     ethAddressBech: string
     ethBalance: BN
 
+    selectedAlias?: string
+
     constructor(pk: string) {
         super()
 
@@ -145,6 +147,10 @@ class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet 
 
     getBaseAddress(): string {
         return this.getCurrentAddressAvm()
+    }
+
+    getStaticAddress(): string {
+        return this.platformKeyPair.getAddressString()
     }
 
     async getStake(): Promise<BN> {
@@ -284,6 +290,10 @@ class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet 
         let signed = this.keyPair.sign(digestBuff)
 
         return bintools.cb58Encode(signed)
+    }
+
+    setSelectedAlias(alias: string) {
+        this.selectedAlias = alias
     }
 
     async delegate(

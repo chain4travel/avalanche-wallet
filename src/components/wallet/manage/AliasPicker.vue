@@ -119,9 +119,9 @@ export default class AliasPicker extends Vue {
     chooseAlias(alias: string) {
         this.selectedAlias = alias
         if (alias !== this.personalAddress.split('-')[1]) {
-            this.$store.state.activeWallet.selectedAlias = 'P-' + alias
+            this.$store.state.activeWallet.setSelectedAlias('P-' + alias)
         } else {
-            this.$store.state.activeWallet.selectedAlias = undefined
+            this.$store.state.activeWallet.setSelectedAlias(undefined)
         }
         this.$store.dispatch('Assets/updateUTXOs')
         this.$store.dispatch('History/updateTransactionHistory')

@@ -196,8 +196,8 @@ abstract class HdWalletCore extends WalletCore {
     }
 
     getCurrentAddressPlatform(): string {
-        if (this.selectedAlias) {
-            return this.selectedAlias
+        if (this.platformHelper.selectedAlias) {
+            return this.platformHelper.selectedAlias
         } else {
             return this.platformHelper.getCurrentAddress()
         }
@@ -217,6 +217,10 @@ abstract class HdWalletCore extends WalletCore {
 
     getBaseAddress() {
         return this.externalHelper.getAddressForIndex(0)
+    }
+
+    getStaticAddress() {
+        return this.platformHelper.getStaticAddress()
     }
 
     onnetworkchange(): void {
@@ -280,6 +284,10 @@ abstract class HdWalletCore extends WalletCore {
 
     async signMessage(msg: string, address: string) {
         return await this.signMessageByExternalAddress(msg, address)
+    }
+
+    setSelectedAlias(alias: string) {
+        this.platformHelper.selectedAlias = alias
     }
 
     abstract signHashByExternalIndex(index: number, hash: Buffer): Promise<string>

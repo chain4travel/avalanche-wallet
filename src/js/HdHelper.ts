@@ -44,6 +44,7 @@ class HdHelper {
     isPublic: boolean
     isFetchUtxo: boolean // true if updating balance
     isInit: boolean // true if HD index is found
+    selectedAlias?: string
 
     constructor(
         changePath: string,
@@ -242,14 +243,19 @@ class HdHelper {
     }
 
     getAllDerivedAddresses(upTo = this.hdIndex, start = 0): string[] {
-        let res = this.ethKeyPair
-            ? [bintools.addressToString(ava.getHRP(), this.chainId, this.ethKeyPair.getAddress())]
-            : []
+        if (this.selectedAlias && this.chainId === 'P') return [this.selectedAlias]
+        const staticAddr = this.getStaticAddress()
+        let res = staticAddr ? [staticAddr] : []
         for (var i = start; i <= upTo; i++) {
             let addr = this.getAddressForIndex(i)
             res.push(addr)
         }
         return res
+    }
+
+    getStaticAddress(): string {
+        if (!this.ethKeyPair) return ''
+        return bintools.addressToString(ava.getHRP(), this.chainId, this.ethKeyPair.getAddress())
     }
 
     clearCache() {

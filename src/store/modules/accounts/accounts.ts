@@ -187,7 +187,7 @@ const accounts_module: Module<AccountsState, RootState> = {
         async updateMultisigAliases({ state, rootState }) {
             const wallet = rootState.activeWallet
             if (!wallet) return
-            const addressP = wallet.getCurrentAddressPlatform()
+            const addressP = wallet.getStaticAddress()
             state.multisigAliases = await getMultisigAliases(addressP)
         },
     },

@@ -36,8 +36,7 @@ abstract class WalletCore {
     isFetchUtxos: boolean
     isInit: boolean
 
-    selectedAlias?: string
-
+    abstract getStaticAddress(): string
     abstract getEvmAddressBech(): string
     abstract getEvmAddress(): string
     abstract getCurrentAddressAvm(): string
@@ -55,6 +54,8 @@ abstract class WalletCore {
 
     abstract signMessage(msg: string, address?: string): Promise<string>
     abstract getPlatformUTXOSet(): PlatformUTXOSet
+
+    abstract setSelectedAlias(alias: string): void
 
     getUTXOSet(): AVMUTXOSet {
         return this.utxoset
