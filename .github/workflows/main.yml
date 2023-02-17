@@ -1,4 +1,4 @@
-name: cypress-tests
+name: main-commit-checks
 
 on:
   push:
