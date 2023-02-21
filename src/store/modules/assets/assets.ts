@@ -156,7 +156,6 @@ const assets_module: Module<AssetsState, RootState> = {
         // Called everytime a new wallet is selected
         updateWallet({ dispatch }) {
             dispatch('ERCNft/updateUserNfts')
-            dispatch('ERCNft/scanNewNfts')
         },
         // Called on a logout event
         onLogout({ state, commit }) {
@@ -369,7 +368,6 @@ const assets_module: Module<AssetsState, RootState> = {
             await wallet.getUTXOs()
             dispatch('onUtxosUpdated')
             dispatch('updateERC20Balances')
-            dispatch('ERCNft/scanNewNfts')
             dispatch('ERCNft/updateWalletBalance')
             commit('updateActiveAddress', null, { root: true })
         },

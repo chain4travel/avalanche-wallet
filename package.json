@@ -165,6 +165,7 @@
     },
     "dependencies": {
         "@cypress/xpath": "^2.0.3",
+        "@openzeppelin/contracts": "^4.8.1",
         "vue": "^2.5.18",
         "vue-cli-plugin-vuetify": "^2.0.3",
         "vuetify": "2.3.9",

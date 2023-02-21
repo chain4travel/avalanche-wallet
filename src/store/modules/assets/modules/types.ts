@@ -7,7 +7,6 @@ export interface ERCNftModuleState {
     walletPrefix: string
     ercNftTokens: ERCNftToken[]
     ercNftTokensCustom: ERCNftToken[]
-    ercNftTokenIds: ERCNftToken[]
     walletBalance: ERCNftWalletBalance
 }
 
