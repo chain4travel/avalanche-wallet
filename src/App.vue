@@ -42,6 +42,25 @@ export default {
         Navbar,
         Notifications,
     },
+    watch: {
+        '$store.state.isAuth': [
+            {
+                handler: 'onAuthChanged',
+                immediate: false,
+                deep: false,
+            },
+        ],
+    },
+    methods: {
+        onAuthChanged(val, _) {
+            if (val) {
+                this.$router.replace('/wallet')
+            } else {
+                // Go to the base URL with GET request not router
+                this.$router.push(this.$store.getters['Accounts/hasAccounts'] ? '/access' : '/')
+            }
+        },
+    },
     async created() {
         // Init language preference
         let locale = localStorage.getItem('lang')
