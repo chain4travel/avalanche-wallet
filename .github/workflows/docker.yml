@@ -51,9 +51,9 @@ jobs:
       - name: Cloud authentication
         if: github.event_name == 'push'
         id: auth
-        uses: "google-github-actions/auth@v1"
+        uses: 'google-github-actions/auth@v1'
         with:
-          credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
 
       - name: push and deploy docker
         if: github.event_name == 'push'
