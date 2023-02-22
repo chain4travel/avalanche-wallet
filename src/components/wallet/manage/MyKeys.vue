@@ -23,7 +23,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component } from 'vue-property-decorator'
 
 import KeyRow from '@/components/wallet/manage/KeyRow.vue'
 import RememberKey from '@/components/misc/RememberKey.vue'
@@ -52,6 +52,11 @@ export default class MyKeys extends Vue {
         if (isConfirm) {
             await this.$store.dispatch('Accounts/deleteKey', wallet)
             await this.$store.dispatch('removeWallet', wallet)
+            let { dispatchNotification } = this.globalHelper()
+            dispatchNotification({
+                message: this.$t('keys.remove_success_msg'),
+                type: 'success',
+            })
         }
     }
 

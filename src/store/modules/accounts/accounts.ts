@@ -20,6 +20,7 @@ import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import { makeKeyfile } from '@/js/Keystore'
 import { checkVerificationStatus } from '@/kyc_api'
+import { getMultisigAliases } from '@/explorer_api'
 
 const accounts_module: Module<AccountsState, RootState> = {
     namespaced: true,
@@ -27,6 +28,7 @@ const accounts_module: Module<AccountsState, RootState> = {
         accounts: [],
         accountIndex: null,
         kycStatus: false,
+        multisigAliases: [],
     },
     mutations: {
         loadAccounts(state) {
@@ -99,12 +101,12 @@ const accounts_module: Module<AccountsState, RootState> = {
         // If there is an active account, will remove it from local storage
         async deleteAccount({ state, dispatch, getters, commit }, password) {
             let acct = getters.account
-
             let passCorrect = await verifyAccountPassword(acct, password)
             if (!passCorrect) throw new Error('Invalid password.')
-            let index = state.accountIndex
-
-            if (!acct || !index) return
+            let index = state.accounts.indexOf(acct)
+            if (!acct || index === -1) {
+                return
+            }
 
             removeAccountByIndex(index)
             state.accountIndex = null
@@ -114,10 +116,10 @@ const accounts_module: Module<AccountsState, RootState> = {
         },
 
         async changePassword({ state, getters, dispatch }, input: ChangePasswordInput) {
-            let index = state.accountIndex
             let account: iUserAccountEncrypted = getters.account
+            let index = state.accounts.indexOf(account)
 
-            if (!account || !index) return
+            if (!account || index === -1) return
 
             let oldPassCorrect = await verifyAccountPassword(account, input.passOld)
             if (!oldPassCorrect) throw new Error('Previous password invalid.')
@@ -166,10 +168,27 @@ const accounts_module: Module<AccountsState, RootState> = {
             commit('loadAccounts')
         },
 
-        async updateKycStatus({ state, rootState }) {
+        async updateKycStatus({ state, rootState, dispatch }) {
+            if (!rootState.activeWallet || rootState.activeWallet.type === 'ledger') return null
+            const wallet = rootState.activeWallet as SingletonWallet | MnemonicWallet
+            try {
+                state.kycStatus = await checkVerificationStatus(
+                    wallet.ethKey,
+                    //@ts-ignore
+                    rootState.Network.selectedNetwork.name.toLowerCase()
+                )
+            } catch (e) {
+                let error = e as Error
+                console.log(error.message)
+                state.kycStatus = false
+            }
+        },
+
+        async updateMultisigAliases({ state, rootState }) {
             const wallet = rootState.activeWallet
             if (!wallet) return
-            state.kycStatus = await checkVerificationStatus('0x' + wallet.ethAddress)
+            const addressP = wallet.getCurrentAddressPlatform()
+            state.multisigAliases = await getMultisigAliases(addressP)
         },
     },
     getters: {
@@ -199,8 +218,16 @@ const accounts_module: Module<AccountsState, RootState> = {
             return state.accounts[state.accountIndex]
         },
 
+        accountIndex(state: AccountsState): number | null {
+            return state.accountIndex
+        },
+
         kycStatus(state: AccountsState): boolean {
             return state.kycStatus
+        },
+
+        multisigAliases(state: AccountsState): string[] {
+            return state.multisigAliases
         },
     },
 }

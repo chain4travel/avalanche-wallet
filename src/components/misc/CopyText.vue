@@ -12,13 +12,20 @@
 export default {
     props: {
         value: String,
+        notificationMessage: String,
     },
     methods: {
         copy() {
             let copytext = this.$refs.copytext
             copytext.select()
             copytext.setSelectionRange(0, 99999)
-
+            let { dispatchNotification } = this.globalHelper()
+            dispatchNotification({
+                message: this.notificationMessage
+                    ? this.notificationMessage
+                    : this.$t('notifications.copy_to_clipboard'),
+                type: 'success',
+            })
             document.execCommand('copy')
         },
     },
