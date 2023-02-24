@@ -5,8 +5,7 @@ import { NetworkState } from '@/store/modules/network/types'
 import { ava, infoApi } from '@/AVA'
 import { AvaNetwork } from '@/js/AvaNetwork'
 import { explorer_api } from '@/explorer_api'
-import { BN } from '@c4tplatform/caminojs'
-import router from '@/router'
+import { BN } from '@c4tplatform/caminojs/dist'
 import { web3 } from '@/evm'
 import { setSocketNetwork } from '../../../providers'
 import { setAvalanche } from '@c4tplatform/camino-wallet-sdk/dist'
@@ -142,8 +141,6 @@ const network_module: Module<NetworkState, RootState> = {
 
             // If authenticated
             if (rootState.isAuth) {
-                // Go back to wallet page
-                router.replace('/wallet')
                 for (var i = 0; i < rootState.wallets.length; i++) {
                     let w = rootState.wallets[i]
                     w.onnetworkchange()

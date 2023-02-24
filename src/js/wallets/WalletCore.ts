@@ -1,7 +1,7 @@
 /*
 The base wallet class used for common functionality
 */
-import { BN } from '@c4tplatform/caminojs'
+import { BN } from '@c4tplatform/caminojs/dist'
 import { UTXOSet as AVMUTXOSet } from '@c4tplatform/caminojs/dist/apis/avm'
 import { UTXOSet as PlatformUTXOSet } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import {
@@ -79,12 +79,11 @@ abstract class WalletCore {
 
         let toAddress = '0x' + hexAddr
         let ownerAddresses = [bechAddr]
-        let fromAddresses = ownerAddresses
         const sourceChainId = chainIdFromAlias(sourceChain)
 
         return await ava
             .CChain()
-            .buildImportTx(utxoSet, toAddress, ownerAddresses, sourceChainId, fromAddresses, fee)
+            .buildImportTx(utxoSet, toAddress, ownerAddresses, sourceChainId, fee)
     }
 
     /**

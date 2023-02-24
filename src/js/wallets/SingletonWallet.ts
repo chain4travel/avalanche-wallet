@@ -3,7 +3,7 @@ import { ITransaction } from '@/components/wallet/transfer/types'
 import { digestMessage } from '@/helpers/helper'
 import { WalletNameType } from '@/js/wallets/types'
 
-import { Buffer as BufferAvalanche, BN } from '@c4tplatform/caminojs'
+import { Buffer as BufferAvalanche, BN } from '@c4tplatform/caminojs/dist'
 import {
     KeyPair as AVMKeyPair,
     KeyChain as AVMKeyChain,
@@ -20,7 +20,7 @@ import { PayloadBase } from '@c4tplatform/caminojs/dist/utils'
 import { buildUnsignedTransaction } from '../TxHelper'
 import { AvaWalletCore, UnsafeWallet } from './types'
 import { UTXO as PlatformUTXO } from '@c4tplatform/caminojs/dist/apis/platformvm/utxos'
-import { privateToAddress } from 'ethereumjs-util'
+import { privateToAddress } from '@ethereumjs/util'
 import { Tx as AVMTx, UnsignedTx as AVMUnsignedTx } from '@c4tplatform/caminojs/dist/apis/avm/tx'
 import {
     Tx as PlatformTx,
