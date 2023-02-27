@@ -98,7 +98,7 @@ export default class UserRewardRow extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
 
 .node_id {
     word-break: break-all;
@@ -156,7 +156,7 @@ label {
     color: var(--primary-color-light) !important;
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .stake_info {
         grid-column: 1/3;
         border-left: none;

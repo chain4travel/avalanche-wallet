@@ -518,7 +518,7 @@ export default class Transfer extends Vue {
 }
 </style>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
 $padLeft: 24px;
 $padTop: 8px;
@@ -689,14 +689,14 @@ label {
 //    }
 //}
 
-@include main.medium-device {
+@include mixins.medium-device {
     .new_order_Form {
         grid-template-columns: 1fr 1fr 220px;
         column-gap: 25px;
     }
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .transfer_card {
         display: block;
         grid-template-columns: none;

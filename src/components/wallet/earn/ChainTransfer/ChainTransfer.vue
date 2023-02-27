@@ -566,7 +566,7 @@ export default class ChainTransfer extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../../styles/main';
+@use '../../../../styles/abstracts/mixins';
 
 .cols {
     display: grid;
@@ -744,7 +744,7 @@ h2 {
     }
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .cols {
         //display: grid;
         //grid-template-columns: 1fr 2fr;
@@ -760,7 +760,7 @@ h2 {
     }
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .cols {
         display: block;
         padding-bottom: 3vh;

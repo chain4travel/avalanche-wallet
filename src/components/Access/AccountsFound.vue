@@ -38,7 +38,8 @@ export default class AccountsFound extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
+@use '../../styles/abstracts/variables';
 @use './menu';
 
 .account {
@@ -59,7 +60,7 @@ export default class AccountsFound extends Vue {
 
 .access_card {
     background-color: var(--bg-light) !important;
-    padding: main.$container-padding;
+    padding: variables.$container-padding;
 }
 h3 {
     margin-top: 1rem;
@@ -81,7 +82,7 @@ h3 {
 //    font-weight: 700 !important;
 //    text-transform: uppercase;
 //    padding: 8px 18px;
-//    font-size: main.$s-size;
+//    font-size: variables.$s-size;
 //    display: flex;
 //    align-items: center;
 //    justify-content: center;
@@ -91,9 +92,9 @@ h3 {
 //    }
 //}
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .card {
-        padding: main.$container-padding-mobile;
+        padding: variables.$container-padding-mobile;
     }
 
     .options {

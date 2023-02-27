@@ -68,7 +68,7 @@ export default class PrivateKey extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
 .avm_token_select {
     width: 520px;
@@ -110,7 +110,7 @@ export default class PrivateKey extends Vue {
     align-self: center;
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .avm_token_select {
         width: 100%;
     }

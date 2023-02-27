@@ -279,7 +279,7 @@ export default class KeyRow extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
 
 .addressItem {
     font-size: 12px;
@@ -440,7 +440,7 @@ export default class KeyRow extends Vue {
     margin-left: 6px;
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .header_cols {
         display: block;
     }

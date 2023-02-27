@@ -350,8 +350,8 @@ export default class BalanceCard extends Vue {
     }
 }
 </script>
+
 <style scoped lang="scss">
-@use '../../../../styles/main';
 .balance_card {
     display: grid;
     column-gap: 20px;

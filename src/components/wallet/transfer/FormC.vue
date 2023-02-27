@@ -498,7 +498,7 @@ export default class FormC extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
 
 h4 {
     display: block;
@@ -583,14 +583,14 @@ label {
     padding-bottom: 30px;
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .cols {
         grid-template-columns: 1fr 1fr 220px;
         column-gap: 25px;
     }
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .cols {
         display: block;
     }

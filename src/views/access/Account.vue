@@ -105,7 +105,7 @@ export default class Account extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/variables';
 .pass {
     text-align: center;
     background-color: var(--bg-light) !important;
@@ -118,7 +118,7 @@ export default class Account extends Vue {
 .access_card {
     /*max-width: 80vw;*/
     //background-color: var(--bg-light);
-    //padding: main.$container-padding;
+    //padding: variables.$container-padding;
     width: 100%;
     /*max-width: 240px;*/
     /*max-width: 1000px;*/
@@ -134,7 +134,7 @@ export default class Account extends Vue {
     margin: 0px auto;
 }
 h1 {
-    font-size: main.$m-size;
+    font-size: variables.$m-size;
     font-weight: 400;
 }
 
@@ -149,7 +149,7 @@ form {
     /*min-width: 200px*/
 }
 a {
-    color: main.$primary-color-light !important;
+    color: variables.$primary-color-light !important;
     text-decoration: underline !important;
     margin: 10px 0 20px;
 }
@@ -164,9 +164,9 @@ a {
     color: var(--error);
     margin: 14px 0px !important;
 }
-@media only screen and (max-width: main.$mobile_width) {
+@media only screen and (max-width: variables.$mobile_width) {
     h1 {
-        font-size: main.$m-size-mobile;
+        font-size: variables.$m-size-mobile;
     }
     .but_primary {
         width: 100%;

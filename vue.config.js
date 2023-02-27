@@ -13,9 +13,16 @@ module.exports = {
         https: !process.env.USE_HTTP,
         port: 5000,
     },
+    css: { extract: false },
     // publicPath: '',
     configureWebpack: (config) => {
-        if (process.env.NODE_ENV === 'production') {
+        if (process.env.VUE_CLI_BUILD_TARGET === 'wc') {
+            // sassRule = config.module.rules.find((r) => r.test.toString() === '/\\.sass$/')
+            // Shallow copy last rule for node_modules
+            //sassRule.oneOf.splice(3, 0, Object.assign({ test: /node_modules/ }, sassRule.oneOf[3]))
+            // Disable shadow mode for node_module sass
+            //sassRule.oneOf[3].use[0].options.shadowMode = false
+        } else if (process.env.NODE_ENV === 'production') {
             config.optimization = {
                 minimize: true,
                 minimizer: [new TerserPlugin()],
@@ -26,6 +33,7 @@ module.exports = {
                 },
             }
         }
+
         config.resolve = {
             extensions: ['.tsx', '.ts', '.js', '.vue'],
             fallback: {

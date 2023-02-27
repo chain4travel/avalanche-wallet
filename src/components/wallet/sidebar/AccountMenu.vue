@@ -86,7 +86,8 @@ export default class AccountMenu extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
+
 .sidebar_account_menu {
     display: flex;
     flex-direction: row;
@@ -122,7 +123,7 @@ export default class AccountMenu extends Vue {
     }
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .account_but {
         width: 100% !important;
         p {
@@ -175,14 +176,14 @@ hr {
     }
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .warning_button {
         svg {
             margin-right: 14px;
         }
     }
 }
-@include main.mobile-device {
+@include mixins.mobile-device {
     hr {
         border-color: var(--sidebar-links);
         opacity: 0.2;

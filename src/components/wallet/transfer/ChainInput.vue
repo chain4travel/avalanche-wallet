@@ -32,7 +32,8 @@ export default class ChainInput extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
+
 label {
     color: var(--primary-color-light);
 }
@@ -64,7 +65,7 @@ label {
     }
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .chain_select {
         width: 100%;
         display: grid;

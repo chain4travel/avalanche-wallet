@@ -49,7 +49,7 @@ export default class CollectibleFamilyGroup extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
 
 .family_group {
     position: relative;
@@ -85,6 +85,6 @@ export default class CollectibleFamilyGroup extends Vue {
     height: 100%;
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
 }
 </style>

@@ -489,7 +489,7 @@ export default class AddValidator extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../../styles/main';
+@use '../../../../styles/abstracts/mixins';
 
 form {
     display: grid;
@@ -645,7 +645,7 @@ label {
     margin-bottom: 6px;
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     form {
         grid-template-columns: 1fr;
     }

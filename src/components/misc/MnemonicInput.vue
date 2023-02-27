@@ -60,7 +60,8 @@ export default class MnemonicDisplay extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use "../../styles/main";
+@use "../../styles/abstracts/variables";
+@use "../../styles/abstracts/mixins";
 
 .mnemonic_input {
     display: grid;
@@ -115,7 +116,7 @@ span {
 
 label {
     text-align: left;
-    color: main.$primary-color-light;
+    color: variables.$primary-color-light;
     font-size: 12px;
     margin-bottom: 20px;
 }
@@ -133,7 +134,7 @@ label {
     margin: 16px 0;
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .word {
         * {
             padding: 4px 2px;
@@ -145,7 +146,7 @@ label {
     }
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .mnemonic_input {
         grid-template-columns: repeat(2, 1fr);
     }

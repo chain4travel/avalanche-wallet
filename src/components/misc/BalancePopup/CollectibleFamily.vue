@@ -77,7 +77,7 @@ export default class CollectibleFamily extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
 
 .collectible_family {
     display: grid;
@@ -120,7 +120,7 @@ $card_w: 80px;
     }
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     $card_w: 60px;
 
     .collectible_family {

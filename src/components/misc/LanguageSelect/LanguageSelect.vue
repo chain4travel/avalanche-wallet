@@ -49,12 +49,12 @@ export default class LanguageSelect extends Vue {
     locale = 'en'
 
     mounted() {
-        this.locale = this.$root.$i18n.locale
+        this.locale = this.$i18n.locale
     }
 
     @Watch('locale')
     onSelectedChange(val: string) {
-        this.$root.$i18n.locale = val
+        this.$i18n.locale = val
         localStorage.setItem('lang', val)
     }
 
@@ -71,7 +71,7 @@ export default class LanguageSelect extends Vue {
     get items(): LanguageItem[] {
         let res = []
 
-        let messages = this.$root.$i18n.messages
+        let messages = this.$i18n.messages
         for (var langCode in messages) {
             // @ts-ignore
             let data = langMap[langCode]
@@ -88,7 +88,8 @@ export default class LanguageSelect extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
+
 .sel_locale {
     display: flex;
     flex-direction: row;
@@ -139,7 +140,7 @@ select {
     transform: scale(0.35);
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .small-flag {
         transform: scale(0.25);
     }
@@ -153,8 +154,6 @@ select {
         display: none;
     }
 }
-</style>
-<style lang="scss">
 .sel_locale {
     .vs__dropdown-toggle {
         border-color: var(--primary-color-light) !important;

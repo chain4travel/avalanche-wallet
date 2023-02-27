@@ -623,7 +623,7 @@ export default class AddDelegator extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../../styles/main';
+@use '../../../../styles/abstracts/mixins';
 
 .add_delegator {
     height: 100%;
@@ -829,7 +829,7 @@ label {
     }
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .summary {
         > div {
             margin-bottom: 10px;
@@ -844,7 +844,7 @@ label {
     }
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .cols {
         grid-template-columns: 1fr;
     }

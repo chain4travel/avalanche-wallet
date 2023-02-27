@@ -46,7 +46,8 @@ export default class Menu extends Vue {}
 </script>
 
 <style scoped lang="scss">
-@use "../../styles/main";
+@use "../../styles/abstracts/variables";
+@use '../../styles/abstracts/mixins';
 @use '/src/components/Access/menu';
 
 .access_card {
@@ -57,20 +58,20 @@ export default class Menu extends Vue {}
 }
 
 img {
-    width: main.$img-size;
-    height: main.$img-size;
-    margin-bottom: main.$vertical-padding;
+    width: variables.$img-size;
+    height: variables.$img-size;
+    margin-bottom: variables.$vertical-padding;
 }
 
 h1 {
-    font-size: main.$l-size;
+    font-size: variables.$l-size;
     font-weight: 400;
 }
 
 hr {
     max-width: 67% !important;
-    margin: main.$vertical-padding auto 0;
-    color: main.$primary-color-light;
+    margin: variables.$vertical-padding auto 0;
+    color: variables.$primary-color-light;
     opacity: 0.2;
 }
 
@@ -105,19 +106,19 @@ hr {
     margin-top: 1em;
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     img {
-        width: main.$img-size-mobile;
-        height: main.$img-size-mobile;
-        margin-bottom: main.$vertical-padding-mobile;
+        width: variables.$img-size-mobile;
+        height: variables.$img-size-mobile;
+        margin-bottom: variables.$vertical-padding-mobile;
     }
 
     h1 {
-        font-size: main.$l-size-mobile;
+        font-size: variables.$l-size-mobile;
     }
 
     .card {
-        padding: main.$container-padding-mobile;
+        padding: variables.$container-padding-mobile;
     }
 
     .options {

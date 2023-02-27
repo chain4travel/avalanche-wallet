@@ -114,7 +114,8 @@ export default class TxHistoryValue extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/variables';
+@use '../../styles/abstracts/mixins';
 
 .utxo {
     display: grid;
@@ -134,7 +135,7 @@ export default class TxHistoryValue extends Vue {
 
 .action {
     font-size: 12px;
-    color: main.$primary-color-light;
+    color: variables.$primary-color-light;
 }
 .amount {
     text-align: right;
@@ -142,7 +143,7 @@ export default class TxHistoryValue extends Vue {
     font-size: 15px;
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .amount {
         font-size: 14px;
     }

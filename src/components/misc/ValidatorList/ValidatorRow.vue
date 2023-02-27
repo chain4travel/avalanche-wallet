@@ -114,7 +114,7 @@ export default class ValidatorsList extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
 
 .amount {
     text-align: right;
@@ -137,7 +137,7 @@ td {
     font-size: 13px;
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     td {
         font-size: 10px !important;
     }
