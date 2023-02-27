@@ -78,7 +78,8 @@ export default class Home extends Vue {}
 </script>
 
 <style scoped lang="scss">
-@use "../styles/main";
+@use "../styles/abstracts/variables";
+@use '../styles/abstracts/mixins';
 
 .home {
     padding-top: 100px;
@@ -110,7 +111,7 @@ export default class Home extends Vue {}
             margin-top: 60px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            column-gap: main.$container-padding;
+            column-gap: variables.$container-padding;
 
             .login_option {
                 display: flex;
@@ -119,7 +120,7 @@ export default class Home extends Vue {}
                 align-items: flex-start;
                 justify-content: space-between;
                 background-color: var(--bg-light);
-                padding: 60px 90px main.$container-padding main.$container-padding;
+                padding: 60px 90px variables.$container-padding variables.$container-padding;
 
                 header {
                     margin-bottom: 60px;
@@ -131,16 +132,16 @@ export default class Home extends Vue {}
                     }
 
                     h2 {
-                        padding-top: main.$s-size;
+                        padding-top: variables.$s-size;
                         font-family: 'Inter', sans-serif;
-                        font-size: main.$s-size;
+                        font-size: variables.$s-size;
                         text-transform: uppercase;
                         color: var(--primary-color-light);
                     }
 
                     p {
                         margin-top: 10px !important;
-                        font-size: main.$l-size;
+                        font-size: variables.$l-size;
                     }
                 }
 
@@ -163,7 +164,7 @@ export default class Home extends Vue {}
    Nav
    ========================================== */
 
-@include main.night-mode {
+@include mixins.night-mode {
 }
 .logo {
     margin-bottom: 30px;
@@ -174,7 +175,7 @@ img {
     object-fit: contain;
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .login_option {
         padding: 30px 40px !important;
         p {
@@ -183,7 +184,7 @@ img {
     }
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .auth {
         border-radius: 0;
         box-shadow: none;
@@ -204,7 +205,7 @@ img {
     .home {
         .home_wrapper {
             h1 {
-                font-size: main.$xl-size-mobile;
+                font-size: variables.$xl-size-mobile;
             }
 
             .login_wrapper {
@@ -213,7 +214,7 @@ img {
                 flex-direction: column;
 
                 .login_option {
-                    margin-bottom: main.$vertical-padding;
+                    margin-bottom: variables.$vertical-padding;
                     padding: 30px 15px;
                     align-items: center;
 
@@ -230,13 +231,13 @@ img {
                         }
 
                         h2 {
-                            padding-top: main.$s-size-mobile;
-                            font-size: main.$s-size-mobile;
+                            padding-top: variables.$s-size-mobile;
+                            font-size: variables.$s-size-mobile;
                         }
 
                         p {
                             margin-top: 10px !important;
-                            font-size: main.$l-size-mobile;
+                            font-size: variables.$l-size-mobile;
                             text-align: center;
                         }
                     }

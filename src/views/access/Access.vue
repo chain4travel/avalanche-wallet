@@ -41,9 +41,8 @@ import { Vue, Component } from 'vue-property-decorator'
 })
 export default class Access extends Vue {}
 </script>
-<style scoped lang="scss">
-@use '../../styles/main';
 
+<style scoped lang="scss">
 .access_view {
     display: flex;
     justify-content: center;

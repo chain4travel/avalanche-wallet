@@ -278,7 +278,7 @@ export default class EditPage extends Vue {
 // }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/variables';
 
 .custom_network {
     padding: 0px 15px;
@@ -286,7 +286,7 @@ export default class EditPage extends Vue {
 }
 
 .header {
-    border-bottom: 1px solid main.$background-color;
+    border-bottom: 1px solid variables.$background-color;
     padding: 10px 15px;
     display: flex;
     h4 {
@@ -325,7 +325,7 @@ select {
 button {
     margin-top: 10px;
     width: 100%;
-    background-color: main.$primary-color;
+    background-color: variables.$primary-color;
     color: #fff;
     font-size: 12px;
     padding: 3px 14px;

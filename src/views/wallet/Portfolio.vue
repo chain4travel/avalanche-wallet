@@ -65,7 +65,7 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
 .home_view {
     display: grid;
@@ -137,7 +137,7 @@ export default {
     }
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .header {
         display: block;
 
@@ -158,7 +158,7 @@ export default {
     }
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .header {
         button {
             font-size: 13px;

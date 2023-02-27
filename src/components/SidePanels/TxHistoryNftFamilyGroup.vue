@@ -68,7 +68,7 @@ export default class TxHistoryNftFamilyGroup extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
 $countW: 18px;
 .count {
@@ -104,6 +104,6 @@ $countW: 18px;
 .payload_view {
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
 }
 </style>

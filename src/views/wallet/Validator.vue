@@ -140,7 +140,7 @@ export default class Validator extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
 /* body {
     height: auto;
@@ -243,13 +243,13 @@ span {
     margin-top: 14px;
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .options {
         grid-template-columns: 1fr 1fr;
     }
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .options {
         grid-template-columns: none;
         grid-row-gap: 15px;

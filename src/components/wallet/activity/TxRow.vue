@@ -119,7 +119,8 @@ export default class TxRow extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use "../../../styles/main";
+@use "../../../styles/abstracts/mixins";
+
 .tx_row {
     //display: grid;
     //grid-template-columns: 1fr 1fr;
@@ -215,7 +216,7 @@ label {
     color: var(--primary-color-light);
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .tx_cols {
         grid-template-columns: max-content 1fr;
     }

@@ -78,8 +78,6 @@ export default class AddKeyString extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
-
 label {
     color: #909090;
     font-size: 12px;

@@ -47,7 +47,7 @@ export default class Modal extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
 .modal_topbar {
     background-color: var(--bg);
@@ -119,7 +119,7 @@ export default class Modal extends Vue {
     max-height: 90%;
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .modal_body {
         position: absolute;
         width: max-content;

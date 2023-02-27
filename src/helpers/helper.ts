@@ -71,4 +71,4 @@ function getPayloadFromUTXO(utxo: UTXO): PayloadBase {
     return payloadbase
 }
 
-export { keyToKeypair, calculateStakingReward, bnToBig, digestMessage, getPayloadFromUTXO }
+export { keyToKeypair, calculateStakingReward, Big, bnToBig, digestMessage, getPayloadFromUTXO }

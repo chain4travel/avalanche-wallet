@@ -128,11 +128,11 @@ export default {
 </script>
 
 <style lang="scss">
-@use "../../styles/main";
+@use "../../styles/abstracts/variables";
 
 .remember {
     .v-label {
-        font-size: main.$s-size !important;
+        font-size: variables.$s-size !important;
         color: var(--primary-color);
     }
 
@@ -150,7 +150,6 @@ export default {
 }
 </style>
 <style lang="scss" scoped>
-@use "../../styles/main";
 .passwords {
     display: flex;
     flex-direction: column;

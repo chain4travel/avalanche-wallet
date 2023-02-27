@@ -133,7 +133,7 @@ export default class Collectibles extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-@use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
 
 $flip_dur: 0.6s;
 
@@ -168,7 +168,7 @@ $flip_dur: 0.6s;
     height: 220px;
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .list {
         max-height: none;
     }

@@ -128,7 +128,7 @@ export default class FungibleRow extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
 
 .asset {
     padding: 14px 0px;
@@ -207,7 +207,7 @@ $icon_w: 40px;
     }
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .asset {
         padding: 6px 0;
     }
@@ -235,7 +235,7 @@ $icon_w: 40px;
         border-radius: $icon_w;
     }
 }
-@include main.mobile-device {
+@include mixins.mobile-device {
     .name_col {
         display: none;
     }

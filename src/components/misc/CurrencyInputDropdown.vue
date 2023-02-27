@@ -204,7 +204,7 @@ export default class CurrencyInputDropdown extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
 .bigIn {
     width: 100%;
@@ -316,13 +316,13 @@ input {
     }
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .balance {
         grid-template-columns: 1fr;
     }
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .balance,
     .curr_in_drop {
         grid-template-columns: 1fr 80px;

@@ -394,7 +394,8 @@ export default class MintNft extends Vue {
 }
 </style>
 <style lang="scss" scoped>
-@use '../../../../styles/main';
+@use '../../../../styles/abstracts/mixins';
+
 .mint_form {
     padding: 10px 0;
 }
@@ -534,7 +535,7 @@ $col_pad: 24px;
     justify-content: center;
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .cols {
         grid-template-columns: 1fr 1fr;
         row-gap: 24px;

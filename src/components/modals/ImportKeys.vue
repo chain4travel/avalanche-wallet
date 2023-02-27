@@ -80,7 +80,7 @@ export default class ImportKeys extends Vue {
 </script>
 
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
 .add_key_body {
     padding: 30px;
@@ -115,7 +115,7 @@ export default class ImportKeys extends Vue {
     margin: 14px 0 !important;
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .add_key_body {
         max-width: 100%;
     }
@@ -123,15 +123,15 @@ export default class ImportKeys extends Vue {
 </style>
 
 <style lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/variables';
 
 .v-tab.v-tab {
     font-weight: 700;
 }
 
 .v-tabs-slider-wrapper {
-    color: main.$secondary-color;
-    caret-color: main.$secondary-color;
+    color: variables.$secondary-color;
+    caret-color: variables.$secondary-color;
     height: 3px !important;
 }
 </style>

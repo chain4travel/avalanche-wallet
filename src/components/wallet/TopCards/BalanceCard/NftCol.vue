@@ -92,9 +92,6 @@ export default class NftCol extends Vue {
     }
 
     get ercNftBalanceArray() {
-        // TODO: Remove after ledger support
-        if (this.$store.state.activeWallet.type === 'ledger') return []
-
         let res: iERCNftSelectInput[] = []
         for (var tokenAddr in this.ercNftBalance) {
             let ercNftToken = this.$store.getters['Assets/ERCNft/find'](tokenAddr)
@@ -132,9 +129,8 @@ export default class NftCol extends Vue {
     }
 }
 </script>
-<style scoped lang="scss">
-@use '../../../../styles/main';
 
+<style scoped lang="scss">
 .nft_col {
     margin-top: 10px;
     p {

@@ -176,7 +176,7 @@ export default class TxList extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
 
 $right_pad: 60px;
 
@@ -291,7 +291,7 @@ $right_pad: 60px;
     pointer-events: none;
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .list_item {
         column-gap: 12px;
         grid-template-columns: 1fr max-content;

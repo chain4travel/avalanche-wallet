@@ -358,7 +358,7 @@ export default class Activity extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
 .activity_page {
     position: relative;
@@ -536,7 +536,7 @@ export default class Activity extends Vue {
         margin-right: 1em;
     }
 }
-@include main.medium-device {
+@include mixins.medium-device {
     .pagination {
         p {
             font-size: 18px;
@@ -544,7 +544,7 @@ export default class Activity extends Vue {
     }
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .settings {
         display: grid;
         grid-template-columns: none;

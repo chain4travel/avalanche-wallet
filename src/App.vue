@@ -107,7 +107,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@use './styles/main';
+@use './styles/abstracts/variables';
 
 .main_cols {
     &[wallet_view] {
@@ -122,13 +122,13 @@ export default {
     #router_view {
         position: relative;
         min-height: calc(100vh - 80px);
-        /* padding: main.$container_padding_m; */
+        /* padding: variables.$container_padding_m; */
     }
 }
 
 #router_view {
     position: relative;
-    /* padding: main.$container_padding_m; */
+    /* padding: variables.$container_padding_m; */
 }
 </style>
 
