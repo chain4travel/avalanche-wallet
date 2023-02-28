@@ -2,6 +2,7 @@ const TerserPlugin = require('terser-webpack-plugin')
 const ProvidePlugin = require('webpack/lib/ProvidePlugin')
 const path = require('path')
 process.env.VUE_APP_VERSION = process.env.npm_package_version
+RegExp.prototype.toJSON = RegExp.prototype.toString
 
 module.exports = {
     transpileDependencies: ['vuetify'],
@@ -17,11 +18,9 @@ module.exports = {
     // publicPath: '',
     configureWebpack: (config) => {
         if (process.env.VUE_CLI_BUILD_TARGET === 'wc') {
-            // sassRule = config.module.rules.find((r) => r.test.toString() === '/\\.sass$/')
-            // Shallow copy last rule for node_modules
-            //sassRule.oneOf.splice(3, 0, Object.assign({ test: /node_modules/ }, sassRule.oneOf[3]))
-            // Disable shadow mode for node_module sass
-            //sassRule.oneOf[3].use[0].options.shadowMode = false
+            if (process.env.NODE_ENV === 'development') {
+                config.devtool = 'source-map'
+            }
         } else if (process.env.NODE_ENV === 'production') {
             config.optimization = {
                 minimize: true,

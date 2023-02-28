@@ -1,9 +1,6 @@
 import Vue from 'vue'
 import Vuetify, { VApp, VBtn, VIcon, VList, VMain, VNavigationDrawer, VSpacer } from 'vuetify/lib'
 
-import '@fortawesome/fontawesome-free/css/all.css' // Ensure you are using css-loader
-import '@mdi/font/css/materialdesignicons.css'
-
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
     faDollarSign,
