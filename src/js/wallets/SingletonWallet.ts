@@ -145,6 +145,10 @@ class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet 
         }
     }
 
+    getAddressPlatform(): string {
+        return this.platformKeyPair.getAddressString()
+    }
+
     getBaseAddress(): string {
         return this.getCurrentAddressAvm()
     }
@@ -268,6 +272,9 @@ class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet 
             additionalSigners.forEach((k) => keychain.importKey(k))
         }
 
+        console.log('unsignedTx', unsignedTx)
+        console.log('keychain info', keychain)
+
         const tx = unsignedTx.sign(keychain)
         return tx
     }
@@ -357,6 +364,10 @@ class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet 
     getAllAddressesX() {
         return [this.getCurrentAddressAvm()]
     }
+
+    // getAllAddressesP() {
+    //     return [this.getAddressPlatform()]
+    // }
 
     getAllAddressesP() {
         return [this.getCurrentAddressPlatform()]

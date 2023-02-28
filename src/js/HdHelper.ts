@@ -243,7 +243,6 @@ class HdHelper {
     }
 
     getAllDerivedAddresses(upTo = this.hdIndex, start = 0): string[] {
-        if (this.selectedAlias && this.chainId === 'P') return [this.selectedAlias]
         const staticAddr = this.getStaticAddress()
         let res = staticAddr ? [staticAddr] : []
         for (var i = start; i <= upTo; i++) {
@@ -251,6 +250,11 @@ class HdHelper {
             res.push(addr)
         }
         return res
+    }
+
+    getAllActiveAddresses(): string[] {
+        if (this.selectedAlias) return [this.selectedAlias]
+        return this.getAllDerivedAddresses()
     }
 
     getStaticAddress(): string {

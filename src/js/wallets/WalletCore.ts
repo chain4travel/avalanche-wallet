@@ -42,6 +42,7 @@ abstract class WalletCore {
     abstract getCurrentAddressAvm(): string
     abstract getChangeAddressAvm(): string
     abstract getCurrentAddressPlatform(): string
+    abstract getAddressPlatform(): string
     abstract getAllAddressesP(): string[]
     abstract getAllAddressesX(): string[]
 
@@ -123,7 +124,7 @@ abstract class WalletCore {
 
         // Get destination address
         let destinationAddr =
-            destinationChain === 'P' ? this.getCurrentAddressPlatform() : this.getEvmAddressBech()
+            destinationChain === 'P' ? this.getAddressPlatform() : this.getEvmAddressBech()
 
         // Add import fee to transaction
         if (importFee) {
@@ -183,6 +184,7 @@ abstract class WalletCore {
             destinationChain
         )
 
+        console.log('exportTx', exportTx)
         let tx = await this.signP(exportTx)
         return await ava.PChain().issueTx(tx)
     }
@@ -264,12 +266,16 @@ abstract class WalletCore {
 
         const sourceChainId = chainIdFromAlias(sourceChain)
         // Owner addresses, the addresses we exported to
+        let pOwnerAddress = this.getAddressPlatform()
         let pToAddr = this.getCurrentAddressPlatform()
 
         let hrp = ava.getHRP()
         let utxoAddrs = utxoSet
             .getAddresses()
             .map((addr) => bintools.addressToString(hrp, 'P', addr))
+
+        console.log('UTXO ADDRS', utxoAddrs)
+        console.log('ptoAddr', pToAddr)
 
         let fromAddrs = utxoAddrs
         let ownerAddrs = utxoAddrs
@@ -281,12 +287,13 @@ abstract class WalletCore {
                 ownerAddrs,
                 sourceChainId,
                 [pToAddr],
-                [pToAddr],
-                [pToAddr],
+                [pOwnerAddress],
+                [pOwnerAddress],
                 undefined,
                 undefined
             )
         const tx = await this.signP(unsignedTx)
+        console.log('tx', tx)
         // Pass in string because AJS fails to verify Tx type
         return ava.PChain().issueTx(tx)
     }

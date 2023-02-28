@@ -126,7 +126,7 @@ abstract class HdWalletCore extends WalletCore {
     }
 
     getDerivedAddressesP(): string[] {
-        return this.platformHelper.getAllDerivedAddresses()
+        return this.platformHelper.getAllActiveAddresses()
     }
 
     getAllAddressesX() {
@@ -201,6 +201,10 @@ abstract class HdWalletCore extends WalletCore {
         } else {
             return this.platformHelper.getCurrentAddress()
         }
+    }
+
+    getAddressPlatform(): string {
+        return this.platformHelper.getCurrentAddress()
     }
 
     getPlatformUTXOSet() {
