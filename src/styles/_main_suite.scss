@@ -20,3 +20,10 @@
 
 // pages
 @import './pages/wallet';
+
+// vuetify
+@import './vuetify/reset';
+
+// css styles only / fonts are load separately
+@import '~@fortawesome/fontawesome-free/css/fontawesome.css';
+@import '~@mdi/font/css/materialdesignicons.css';

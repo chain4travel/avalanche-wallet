@@ -11,6 +11,8 @@ import vuetify from '@/plugins/vuetify_suite'
 import i18n from '@/plugins/i18n'
 import router from '@/router'
 import store from '@/store'
+//@ts-ignore
+import font from '@/styles/fonts/suite.css'
 
 export default {
     name: 'Suite-Wallet',
@@ -21,11 +23,24 @@ export default {
     components: {
         Wallet,
     },
+    async created() {
+        font.__inject__(document.head)
+    },
 }
 </script>
+
+<!-- We have disabled vuetify style sheets because they go 
+to document.head instead into the shaowDOM element -->
+<style lang="sass">
+@import '~vuetify/src/styles/main.sass'
+@import '~vuetify/src/components/VBtn/VBtn.sass'
+@import '~vuetify/src/components/VIcon/VIcon.sass'
+@import '~vuetify/src/components/VList/VList.sass'
+@import '~vuetify/src/components/VMain/VMain.sass'
+@import '~vuetify/src/components/VNavigationDrawer/VNavigationDrawer.sass'
+</style>
 <style lang="scss">
 @import '../styles/main_suite';
-@import '~vuetify/src/styles/generic/reset';
 
 #suite_wallet {
     min-height: 100%;
