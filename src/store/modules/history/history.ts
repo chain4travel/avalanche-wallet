@@ -3,7 +3,7 @@ import { RootState } from '@/store/types'
 import { getAddressHistory, getAliasChains } from '@/explorer_api'
 import moment from 'moment'
 
-import { Chain, HistoryState, ITransactionData } from '@/store/modules/history/types'
+import { Chain, HistoryState } from '@/store/modules/history/types'
 import { ava } from '@/AVA'
 import { filterDuplicateTransactions } from '@/helpers/history_helper'
 
@@ -20,6 +20,7 @@ const history_module: Module<HistoryState, RootState> = {
         clear(state) {
             state.transactions = []
             state.allTransactions = []
+            state.chains = []
         },
     },
     actions: {
@@ -117,7 +118,6 @@ const history_module: Module<HistoryState, RootState> = {
             //@ts-ignore
             let network = rootState.Network.selectedNetwork
             if (!network.explorerUrl || rootState.address === null) {
-                state.chains = []
                 return
             }
             let res = await getAliasChains()

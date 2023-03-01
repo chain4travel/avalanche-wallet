@@ -145,9 +145,12 @@ const assets_module: Module<AssetsState, RootState> = {
         },
     },
     actions: {
-        async onNetworkChange({ state }, network: AvaNetwork) {
+        async onNetworkChange({ state, rootState, dispatch }, network: AvaNetwork) {
             let id = await web3.eth.getChainId()
             state.evmChainId = id
+
+            let wallet: WalletType | null = rootState.activeWallet
+            if (wallet) dispatch('updateWallet')
         },
         // Called everytime a new wallet is selected
         updateWallet({ dispatch }) {
