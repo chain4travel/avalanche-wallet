@@ -13,21 +13,6 @@
             ></span>
             <p v-if="activeNetwork">{{ activeNetwork.name }}</p>
             <p v-else>Disconnected</p>
-            <!--            <template v-if="status === 'disconnected' || status === 'connecting'">-->
-            <!--                <img v-if="$root.theme === 'day'" src="@/assets/network_off.png" />-->
-            <!--                <img v-else src="@/assets/network_off_night.svg" />-->
-            <!--            </template>-->
-            <!--            <template v-else>-->
-            <!--                <img v-if="$root.theme === 'day'" src="@/assets/network_on.png" />-->
-            <!--                <img v-else src="@/assets/network_off_night.svg" />-->
-            <!--            </template>-->
-            <!--            <button v-if="status === 'connected'">-->
-            <!--                {{ activeNetwork.name }}-->
-            <!--            </button>-->
-            <!--            <button v-else-if="status === 'connecting'">-->
-            <!--                {{ $t('network.status1') }}-->
-            <!--            </button>-->
-            <!--            <button v-else>{{ $t('network.status2') }}</button>-->
         </div>
         <transition name="fade">
             <div class="network_dispose_bg" v-if="isActive" key="bg" @click="closeMenu"></div>
@@ -77,7 +62,6 @@
 import 'reflect-metadata'
 import { Vue, Component } from 'vue-property-decorator'
 
-import NetworkRow from './NetworkRow.vue'
 import CustomPage from './CustomPage.vue'
 import ListPage from './ListPage.vue'
 import EditPage from '@/components/NetworkSettings/EditPage.vue'
@@ -87,7 +71,6 @@ import { NetworkStatus } from '@/store/modules/network/types'
 @Component({
     components: {
         ListPage,
-        NetworkRow,
         CustomPage,
         EditPage,
     },

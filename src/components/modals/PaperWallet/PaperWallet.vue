@@ -219,10 +219,6 @@ export default class PaperWallet extends Vue {
         this.height = contW / this.aspectRatio
     }
 
-    mounted() {
-        this.buildQr()
-    }
-
     designPxToReal(px: number) {
         return (this.width / designWidth) * px
     }

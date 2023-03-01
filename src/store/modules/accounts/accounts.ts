@@ -89,7 +89,7 @@ const accounts_module: Module<AccountsState, RootState> = {
                 commit('loadAccounts')
                 state.accountIndex = state.accounts.length - 1
             } catch (e) {
-                dispatch('Notifications/add', {
+                this.dispatch('Notifications/add', {
                     title: 'Account Save',
                     message: 'Error Saving Account.',
                     type: 'error',
@@ -177,7 +177,7 @@ const accounts_module: Module<AccountsState, RootState> = {
                     rootState.Network.selectedNetwork.name.toLowerCase()
                 )
             } catch (e) {
-                dispatch('Notifications/add', {
+                this.dispatch('Notifications/add', {
                     title: 'KYC Status',
                     message: 'Error Updating KYC Status.',
                     type: 'error',

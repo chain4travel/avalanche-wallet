@@ -99,7 +99,6 @@ import { bnToBig } from '@/helpers/helper'
 import { priceDict } from '@/store/types'
 import { WalletType } from '@/js/wallets/types'
 import UtxosBreakdownModal from '@/components/modals/UtxosBreakdown/UtxosBreakdownModal.vue'
-import { ava } from '@/AVA'
 
 @Component({
     components: {
@@ -229,7 +228,6 @@ export default class BalanceCard extends Vue {
 
     // Locked balance is the sum of locked CAM tokens P chain (bonded + deposited + bondedAndDeposited)
     // Locked balance is the sum of locked AVAX tokens on X and P chain
-    @Watch('$store.state.Network.selectedNetwork.id')
     get balanceTextLocked(): string {
         if (this.isUpdateBalance) return '--'
 
