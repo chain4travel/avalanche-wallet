@@ -42,9 +42,6 @@ import { AvaNetwork } from '@/js/AvaNetwork'
     },
 })
 export default class TransactionHistoryPanel extends Vue {
-    mounted() {
-        this.getChains()
-    }
     get isExplorer(): boolean {
         let network: AvaNetwork | null = this.$store.state.Network.selectedNetwork
         if (!network) return false
@@ -59,9 +56,6 @@ export default class TransactionHistoryPanel extends Vue {
             return true
         }
         return false
-    }
-    getChains() {
-        this.$store.dispatch('History/getAliasChains')
     }
     get isUpdating(): boolean {
         return this.$store.state.History.isUpdating
