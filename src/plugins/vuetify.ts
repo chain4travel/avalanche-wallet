@@ -1,5 +1,14 @@
 import Vue from 'vue'
-import Vuetify, { VApp, VBtn, VIcon, VList, VMain, VNavigationDrawer, VSpacer } from 'vuetify/lib'
+import Vuetify, {
+    VApp,
+    VBtn,
+    VIcon,
+    VList,
+    VMain,
+    VNavigationDrawer,
+    VTextField,
+    VSpacer,
+} from 'vuetify/lib'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
@@ -139,6 +148,7 @@ Vue.use(Vuetify, {
         VList,
         VMain,
         VNavigationDrawer,
+        VTextField,
         VSpacer,
     },
 })
