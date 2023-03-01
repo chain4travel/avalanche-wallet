@@ -40,7 +40,7 @@ to document.head instead into the shaowDOM element -->
 @import '~vuetify/src/components/VNavigationDrawer/VNavigationDrawer.sass'
 </style>
 <style lang="scss">
-@import '../styles/main_suite';
+@use '../styles/main_suite';
 
 #suite_wallet {
     min-height: 100%;
@@ -75,5 +75,29 @@ to document.head instead into the shaowDOM element -->
     --sidebar-background: #fff;
     --icon-color: #0f172a;
     --icon-color-light: #334155;
+    // from root
+    --border-radius-lg: 12px;
+    --border-radius-sm: 7px;
+    --primary-btn-border-color: #149ded;
+    --secondary-color: #149ded;
+    --primary-border: solid 1px var(--primary-border-color);
+    --secondary-border: solid 1px var(--secondary-border-color);
+    --box-shadow: rgb(0 0 0 / 10%) 0px 0px 5px;
+    --tooltip-bg: rgba(51, 65, 85, 0.92);
+}
+
+#nav {
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    background-color: transparent;
+    padding: main_suite.$container_padding_m;
+}
+
+p {
+    margin: 0px !important;
 }
 </style>
