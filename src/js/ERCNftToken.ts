@@ -167,7 +167,6 @@ class ERCNftToken {
                         const balance = await this.contract.methods.balanceOf(address).call()
                         for(let i = 0; i < balance; i++) {
                             const tokenId = await this.contract.methods.tokenOfOwnerByIndex(address, i).call()
-                            console.log('tokenId: ', tokenId)
                             res.push({ tokenId, quantity: 1 })
                         }
                     } catch (err) {
