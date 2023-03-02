@@ -298,18 +298,18 @@ export default class Transfer extends Vue {
         this.isSuccess = true
         let { dispatchNotification } = this.globalHelper()
         dispatchNotification({
-            message: this.$t('transfer.success_msg'),
+            message: this.$t('notifications.transfer_success_msg'),
             type: 'success',
         })
         // Update the user's balance
         this.$store.dispatch('Assets/updateUTXOs').then(() => {
             this.updateSendAgainLock()
         })
-        this.$store.dispatch('History/updateTransactionHistory')
     }
 
     updateSendAgainLock() {
         if (!this.wallet.isFetchUtxos) {
+            this.$store.dispatch('History/updateTransactionHistory')
             this.canSendAgain = true
         } else {
             setTimeout(() => {
@@ -323,7 +323,7 @@ export default class Transfer extends Vue {
         this.isAjax = false
         let { dispatchNotification } = this.globalHelper()
         dispatchNotification({
-            message: this.$t('transfer.error_msg'),
+            message: this.$t('notifications.transfer_error_msg'),
             type: 'error',
         })
     }
