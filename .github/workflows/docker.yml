@@ -1,7 +1,7 @@
 name: docker
 
 on:
-  pull_request: [c4t,dev]
+  pull_request: [c4t, dev]
   push:
     tags:
       - v*
