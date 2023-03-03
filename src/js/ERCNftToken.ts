@@ -208,7 +208,7 @@ class ERCNftToken {
                 ? await this.contract.methods.uri(id).call()
                 : await this.contract.methods.tokenURI(id).call()
 
-        if (data.startsWith('ipfs://')) data = 'https://ipfs.io/ipfs' + data.substring(7)
+        if (data.startsWith('ipfs://')) data = 'https://ipfs.io/ipfs/' + data.substring(7)
         this.tokenCache[id] = data
         return data
     }
