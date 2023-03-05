@@ -9,7 +9,7 @@
                     dense
                     solo
                     flat
-                    type="password"
+                    :type="inputType"
                     v-model="privatekey"
                     hide-details
                 ></v-text-field>
@@ -35,7 +35,13 @@ import { Vue, Component } from 'vue-property-decorator'
 export default class PrivateKey extends Vue {
     privatekey: string = ''
     isLoading: boolean = false
+    inputType = 'input'
     error: string = ''
+    async mounted() {
+        if (!(window.getComputedStyle(this.$el) as any).webkitTextSecurity) {
+            this.inputType = 'password'
+        }
+    }
     async access() {
         if (!this.canSubmit || this.isLoading) return
         this.error = ''
@@ -70,6 +76,8 @@ export default class PrivateKey extends Vue {
 @use '../../styles/abstracts/variables';
 .pass {
     background-color: var(--bg) !important;
+    -webkit-text-security: disc;
+    -moz-text-security: disc;
 }
 .ava_button {
     width: 100%;
