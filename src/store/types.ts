@@ -118,6 +118,11 @@ export interface AccessWalletMultipleInput {
     key: string
 }
 
+export interface AccessWalletMultipleInputParams {
+    keys: AccessWalletMultipleInput[]
+    activeIndex: number
+}
+
 export interface SaveAccountInput {
     password: string
     accountName: string

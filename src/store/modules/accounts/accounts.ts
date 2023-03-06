@@ -19,6 +19,7 @@ import {
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import { makeKeyfile } from '@/js/Keystore'
+import { KeyFileV6 } from '@/js/IKeystore'
 import { checkVerificationStatus } from '@/kyc_api'
 import { getMultisigAliases } from '@/explorer_api'
 
@@ -70,6 +71,7 @@ const accounts_module: Module<AccountsState, RootState> = {
 
                 if (!wallet) throw new Error('No active wallet.')
                 let activeIndex = wallets.findIndex((w) => w.id == wallet!.id)
+                if (wallets.length >= activeIndex) activeIndex = 0
 
                 let file = await makeKeyfile(wallets, pass, activeIndex)
                 let baseAddresses = getters.baseAddresses
@@ -156,7 +158,8 @@ const accounts_module: Module<AccountsState, RootState> = {
         // Remove the selected key from account and update local storage
         async deleteKey({ state, getters, rootState, commit }, wallet: WalletType) {
             if (!getters.account) return
-            let delIndex = rootState.wallets.indexOf(wallet)
+            let wallets = rootState.wallets
+            let delIndex = wallets.indexOf(wallet)
             let acctIndex = state.accountIndex
             let acct: iUserAccountEncrypted = getters.account
 
@@ -165,8 +168,34 @@ const accounts_module: Module<AccountsState, RootState> = {
             acct.baseAddresses.splice(delIndex, 1)
             acct.wallet.keys.splice(delIndex, 1)
 
+            let activeWallet = rootState.activeWallet
+            if (activeWallet) {
+                let activeIndex = wallets.indexOf(activeWallet)
+                if (activeIndex > delIndex) {
+                    const v6Wallet = acct.wallet as KeyFileV6
+                    v6Wallet.activeIndex = activeIndex - 1
+                }
+            }
             overwriteAccountAtIndex(acct, acctIndex)
             commit('loadAccounts')
+        },
+
+        async updateActiveIndex({ state, rootState, getters }) {
+            let activeWallet = rootState.activeWallet
+            if (!activeWallet) return
+
+            let wallets = rootState.wallets
+            let activeIndex = wallets.indexOf(activeWallet)
+
+            const accountIndex = state.accountIndex
+            if (accountIndex === null) return
+
+            const account = state.accounts[accountIndex]
+            const v6Wallet = account.wallet as KeyFileV6
+            if ((v6Wallet.activeIndex ?? 0) === activeIndex) return
+
+            v6Wallet.activeIndex = activeIndex
+            overwriteAccountAtIndex(account, state.accountIndex ?? -1)
         },
 
         async updateKycStatus({ state, rootState, dispatch }) {
@@ -196,18 +225,18 @@ const accounts_module: Module<AccountsState, RootState> = {
         },
     },
     getters: {
-        hasAccounts(state: AccountsState, getters) {
+        hasAccounts(state, getters) {
             return state.accounts.length > 0
         },
 
-        baseAddresses(state: AccountsState, getters, rootState: RootState) {
+        baseAddresses(state, getters, rootState: RootState) {
             let wallets = rootState.wallets
             return wallets.map((w: WalletType) => {
                 return w.getEvmAddress()
             })
         },
 
-        baseAddressesNonVolatile(state: AccountsState, getters, rootState: RootState) {
+        baseAddressesNonVolatile(state, getters, rootState: RootState) {
             let wallets = rootState.wallets.filter((w) => {
                 return !rootState.volatileWallets.includes(w)
             })
@@ -217,7 +246,7 @@ const accounts_module: Module<AccountsState, RootState> = {
             })
         },
 
-        account(state: AccountsState, getters): iUserAccountEncrypted | null {
+        account(state): iUserAccountEncrypted | null {
             if (state.accountIndex === null) return null
             return state.accounts[state.accountIndex]
         },

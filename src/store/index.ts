@@ -15,7 +15,7 @@ import {
     IssueBatchTxInput,
     ImportKeyfileInput,
     ExportWalletsInput,
-    AccessWalletMultipleInput,
+    AccessWalletMultipleInputParams,
 } from '@/store/types'
 
 import { WalletType } from '@/js/wallets/types'
@@ -81,6 +81,9 @@ export default new Vuex.Store({
                 updateFilterAddresses()
             }
         },
+        setActiveWallet(state, wallet) {
+            state.activeWallet = wallet
+        },
     },
     actions: {
         // Used in home page to access a user's wallet
@@ -88,8 +91,8 @@ export default new Vuex.Store({
         // TODO rename to accessWalletMenmonic
         async accessWallet({ state, dispatch, commit }, mnemonic: string): Promise<MnemonicWallet> {
             let wallet: MnemonicWallet = await dispatch('addWalletMnemonic', mnemonic)
-            await dispatch('activateWallet', wallet)
 
+            commit('setActiveWallet', wallet)
             dispatch('onAccess')
             return wallet
         },
@@ -97,10 +100,7 @@ export default new Vuex.Store({
         // Only for singletons and mnemonics
         async accessWalletMultiple(
             { state, dispatch, commit },
-            {
-                keys: keyList,
-                activeIndex,
-            }: { keys: AccessWalletMultipleInput[]; activeIndex: number }
+            { keys: keyList, activeIndex }: AccessWalletMultipleInputParams
         ) {
             for (var i = 0; i < keyList.length; i++) {
                 try {
@@ -114,36 +114,29 @@ export default new Vuex.Store({
                     continue
                 }
             }
-
-            await dispatch('activateWallet', state.wallets[activeIndex])
-
-            dispatch('onAccess')
+            commit('setActiveWallet', state.wallets[activeIndex])
+            dispatch('onAccess', state.wallets[activeIndex])
         },
 
-        async accessWalletLedger({ state, dispatch }, wallet: LedgerWallet) {
+        async accessWalletLedger({ state, commit, dispatch }, wallet: LedgerWallet) {
             state.wallets = [wallet]
 
-            await dispatch('activateWallet', wallet)
-
+            commit('setActiveWallet', wallet)
             dispatch('onAccess')
         },
 
-        async accessWalletSingleton({ state, dispatch }, key: string) {
+        async accessWalletSingleton({ commit, dispatch }, key: string) {
             let wallet = await dispatch('addWalletSingleton', key)
-            await dispatch('activateWallet', wallet)
 
+            commit('setActiveWallet', wallet)
             dispatch('onAccess')
         },
 
-        async onAccess(store) {
-            store.state.isAuth = true
+        async onAccess({ state, dispatch }) {
+            state.isAuth = true
 
-            store.dispatch('Assets/updateAvaAsset')
-            store.dispatch('Platform/update')
-            store.dispatch('Assets/updateUTXOs')
-            store.dispatch('Accounts/updateKycStatus')
-            store.dispatch('Accounts/updateMultisigAliases')
-            store.dispatch('Launch/initialize')
+            await dispatch('Launch/initialize')
+            dispatch('activateWallet', state.activeWallet)
         },
 
         // TODO: Parts can be shared with the logout function below
@@ -265,11 +258,18 @@ export default new Vuex.Store({
         },
 
         async activateWallet({ state, dispatch, commit }, wallet: MnemonicWallet | LedgerWallet) {
-            state.activeWallet = wallet
+            if (wallet) {
+                commit('setActiveWallet', wallet)
+                commit('updateActiveAddress')
+            }
 
             await dispatch('Assets/updateWallet')
             dispatch('Assets/updateAvaAsset')
-            commit('updateActiveAddress')
+            dispatch('Assets/updateUTXOs')
+            dispatch('Platform/update')
+            dispatch('Accounts/updateActiveIndex')
+            dispatch('Accounts/updateKycStatus')
+            dispatch('Accounts/updateMultisigAliases')
             dispatch('History/updateTransactionHistory')
             updateFilterAddresses()
         },

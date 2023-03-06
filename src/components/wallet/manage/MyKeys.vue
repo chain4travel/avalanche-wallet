@@ -81,9 +81,6 @@ export default class MyKeys extends Vue {
 </script>
 
 <style scoped lang="scss">
-.default_key {
-}
-
 hr {
     border-top: 1px solid var(--bg-light);
     border-left: 1px solid var(--bg-light);
@@ -109,10 +106,6 @@ hr {
 .my_keys {
     padding-top: 15px;
 }
-.addressItem {
-    &[selected] {
-    }
-}
 
 .volatile_cont {
     max-width: 380px;
@@ -121,10 +114,6 @@ hr {
     padding-top: 20px;
     /*display: grid;*/
     /*grid-template-columns: 1fr 1fr;*/
-}
-
-.remember_comp {
-    /*padding: 20px 0;*/
 }
 
 .alert_box {
