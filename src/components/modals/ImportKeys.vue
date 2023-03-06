@@ -11,9 +11,9 @@
                 :centered="true"
                 :mobile-breakpoint="900"
             >
-                <v-tab key="mnemonic">{{ $t('keys.import_key_option1') }}</v-tab>
-                <v-tab key="keystore">{{ $t('keys.import_key_option2') }}</v-tab>
-                <v-tab key="priv_key">{{ $t('keys.import_key_option3') }}</v-tab>
+                <v-tab key="mnemonic"><v-icon>mdi-list-box-outline</v-icon></v-tab>
+                <v-tab key="keystore"><v-icon>mdi-file-key-outline</v-icon></v-tab>
+                <v-tab key="priv_key"><v-icon>mdi-shield-key-outline</v-icon></v-tab>
                 <v-tab-item>
                     <AddMnemonic @success="handleImportSuccess" ref="mnemonic"></AddMnemonic>
                 </v-tab-item>

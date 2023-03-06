@@ -72,11 +72,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import Modal from '@/components/modals/Modal.vue'
-import {
-    checkIfSavedLocally,
-    getAccountByIndex,
-    overwriteAccountAtIndex,
-} from '@/helpers/account_helper'
+import { overwriteAccountAtIndex } from '@/helpers/account_helper'
 import { iUserAccountEncrypted } from '@/store/types'
 
 @Component({

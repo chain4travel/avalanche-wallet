@@ -37,7 +37,11 @@ to document.head instead into the shaowDOM element -->
 @import '~vuetify/src/components/VIcon/VIcon.sass'
 @import '~vuetify/src/components/VList/VList.sass'
 @import '~vuetify/src/components/VMain/VMain.sass'
+@import '~vuetify/src/components/VRadioGroup/VRadio.sass'
+@import '~vuetify/src/components/VRadioGroup/VRadioGroup.sass'
 @import '~vuetify/src/components/VNavigationDrawer/VNavigationDrawer.sass'
+@import '~vuetify/src/components/VTabs/VTabs.sass'
+@import '~vuetify/src/components/VTooltip/VTooltip.sass'
 </style>
 <style lang="scss">
 @use '../styles/main_suite';
