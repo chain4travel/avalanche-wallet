@@ -74,11 +74,6 @@ export default class PrivateKey extends Vue {
 </script>
 <style scoped lang="scss">
 @use '../../styles/abstracts/variables';
-.pass {
-    background-color: var(--bg) !important;
-    -webkit-text-security: disc;
-    -moz-text-security: disc;
-}
 .ava_button {
     width: 100%;
     margin-bottom: 22px;
