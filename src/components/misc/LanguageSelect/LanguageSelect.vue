@@ -112,6 +112,7 @@ export default class LanguageSelect extends Vue {
     margin: 0;
     padding-left: 8px;
     color: var(--primary-color);
+    background-color: var(--bg);
 }
 
 .sel_outlined {
@@ -119,21 +120,20 @@ export default class LanguageSelect extends Vue {
     color: #1d82bb !important;
 }
 
-.selected {
-    //font-size: 13px;
-}
-
-select {
+.sel_locale select {
     outline: none;
     flex-grow: 1;
-    margin-left: 10px;
+    padding: 12px;
     color: var(--primary-color);
     cursor: pointer;
-    //font-size: 13px;
 
     &:hover {
         color: var(--primary-color);
     }
+}
+
+.sel_locale select > option {
+    background-color: var(--bg);
 }
 
 .small-flag {

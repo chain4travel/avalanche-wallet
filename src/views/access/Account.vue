@@ -4,6 +4,7 @@
             <Identicon :value="account.baseAddresses.join('')"></Identicon>
             <h1>{{ account.name }}</h1>
             <form @submit.prevent="access">
+                <input class="pass_name" :value="account.name" />
                 <input
                     class="single_line_input hover_border pass"
                     type="password"
@@ -110,6 +111,7 @@ export default class Account extends Vue {
     text-align: center;
     background-color: var(--bg-light) !important;
 }
+
 .ava_button {
     width: 100%;
     margin-bottom: 22px;

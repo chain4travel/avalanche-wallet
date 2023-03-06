@@ -89,24 +89,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="header">
-                <div></div>
-                <div>
-                    <p v-if="Object.keys(balances).length === 0" class="balance_empty">
-                        {{ $t('keys.empty') }}
-                    </p>
-                    <div class="addressBalance bal_cols" v-else>
-                        <p>This key has:</p>
-                        <div class="bal_rows">
-                            <p v-for="bal in balances" :key="bal.id">
-                                {{ bal.toString() }}
-                                <b>{{ bal.symbol }}</b>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </template>
@@ -114,10 +96,7 @@
 import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
-import { bintools } from '@/AVA'
 import AvaAsset from '@/js/AvaAsset'
-import { AssetsDict } from '@/store/modules/assets/types'
-import { AmountOutput } from '@c4tplatform/caminojs/dist/apis/avm'
 import MnemonicPhraseModal from '@/components/modals/MnemonicPhraseModal.vue'
 import HdDerivationListModal from '@/components/modals/HdDerivationList/HdDerivationListModal.vue'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
@@ -160,62 +139,6 @@ export default class KeyRow extends Vue {
 
     get walletTitle() {
         return this.wallet.getBaseAddress()
-    }
-
-    get assetsDict(): AssetsDict {
-        return this.$store.state.Assets.assetsDict
-    }
-
-    get balances(): IKeyBalanceDict {
-        if (!this.wallet.getUTXOSet()) return {}
-
-        let res: IKeyBalanceDict = {}
-
-        let addrUtxos = this.wallet.getUTXOSet().getAllUTXOs()
-        for (var n = 0; n < addrUtxos.length; n++) {
-            let utxo = addrUtxos[n]
-
-            // ignore NFTS and mint outputs
-            //TODO: support nfts
-            let outId = utxo.getOutput().getOutputID()
-            if (outId === 11 || outId === 6 || outId === 10) continue
-
-            let utxoOut = utxo.getOutput() as AmountOutput
-
-            let amount = utxoOut.getAmount()
-            let assetIdBuff = utxo.getAssetID()
-            let assetId = bintools.cb58Encode(assetIdBuff)
-
-            let assetObj: AvaAsset | undefined = this.assetsDict[assetId]
-
-            if (!assetObj) {
-                let name = '?'
-                let symbol = '?'
-                let denomination = 0
-
-                let newAsset = new AvaAsset(assetId, name, symbol, denomination)
-                newAsset.addBalance(amount)
-
-                res[assetId] = newAsset
-                continue
-            }
-
-            let asset = res[assetId]
-            if (!asset) {
-                let name = assetObj.name
-                let symbol = assetObj.symbol
-                let denomination = assetObj.denomination
-
-                let newAsset = new AvaAsset(assetId, name, symbol, denomination)
-                newAsset.addBalance(amount)
-
-                res[assetId] = newAsset
-            } else {
-                asset.addBalance(amount)
-            }
-        }
-
-        return res
     }
 
     get walletType(): WalletNameType {
@@ -405,33 +328,6 @@ export default class KeyRow extends Vue {
     &:hover {
         opacity: 1;
     }
-}
-
-.addressBalance {
-    display: flex;
-    white-space: nowrap;
-    color: var(--primary-color);
-    .bal_rows p {
-        font-weight: bold;
-        padding: 0px 8px;
-        margin-bottom: 4px;
-    }
-    p {
-        border-radius: 3px;
-    }
-}
-
-.bal_cols {
-    display: flex;
-}
-
-.bal_rows {
-    display: flex;
-    flex-direction: column;
-}
-
-.balance_empty {
-    color: var(--primary-color);
 }
 
 .volatile_alert {
