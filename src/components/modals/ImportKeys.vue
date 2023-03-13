@@ -116,6 +116,10 @@ export default class ImportKeys extends Vue {
     margin: 14px 0 !important;
 }
 
+.v-icon {
+    color: var(--primary-color) !important;
+}
+
 @include main.mobile-device {
     .add_key_body {
         max-width: 100%;
@@ -135,4 +139,7 @@ export default class ImportKeys extends Vue {
     caret-color: main.$secondary-color;
     height: 3px !important;
 }
+// .v-tabs-slider {
+//     background-color: main.$secondary-color;
+// }
 </style>
