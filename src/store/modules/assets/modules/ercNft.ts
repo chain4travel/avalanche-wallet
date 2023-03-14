@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import { Module } from 'vuex'
 import ERCNftToken from '@/js/ERCNftToken'
 import {
@@ -9,6 +8,7 @@ import {
 import { RootState } from '@/store/types'
 import ERCNft_TOKEN_LIST from '@/ERC721Tokenlist.json'
 import { WalletType } from '@/js/wallets/types'
+import Vue from 'vue'
 import { web3 } from '@/evm'
 
 const ercNft_module: Module<ERCNftModuleState, RootState> = {
@@ -20,6 +20,7 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
         walletPrefix: '',
         ercNftTokens: [],
         ercNftTokensCustom: [],
+        ercNftTokenIds: [],
         walletBalance: {},
     },
     mutations: {
@@ -37,9 +38,30 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
             }
         },
         saveCustomContracts(state) {
-            // ercTokenIds will load later in 'updateWalletBalance'
-            const tokenRawData = state.ercNftTokensCustom.map((token) => token.data)
+            let tokenRawData = state.ercNftTokensCustom
+                .filter((token) => token.data.ercTokenIds.length > 0)
+                .map((token) => token.data)
             localStorage.setItem('ercNft_tokens', JSON.stringify(tokenRawData))
+        },
+        loadTokenIds(state) {
+            if (state.walletPrefix === '') return
+
+            let tokensRaw = localStorage.getItem(state.walletPrefix + '_tokens') ?? '[]'
+            state.ercNftTokenIds = []
+            let tokens: ERCNftTokenInput[] = JSON.parse(tokensRaw)
+            for (var i = 0; i < tokens.length; i++) {
+                const token = new ERCNftToken(tokens[i])
+                state.ercNftTokenIds.push(token)
+                token.updateSupports()
+            }
+        },
+        saveTokenIds(state) {
+            if (state.walletPrefix === '') return
+
+            let tokenRawData = state.ercNftTokenIds
+                .filter((token) => token.data.ercTokenIds.length > 0)
+                .map((token) => token.data)
+            localStorage.setItem(state.walletPrefix + '_tokens', JSON.stringify(tokenRawData))
         },
         loadLastScannedBlock(state) {
             if (state.walletPrefix === '') return
@@ -63,8 +85,14 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
     },
     actions: {
         async removeCustom({ state, commit }, data: ERCNftToken) {
-            const index = state.ercNftTokensCustom.indexOf(data)
+            let index = state.ercNftTokensCustom.indexOf(data)
             state.ercNftTokensCustom.splice(index, 1)
+
+            index = state.ercNftTokenIds.indexOf(data)
+            if (index >= 0) {
+                state.ercNftTokenIds.splice(index, 1)
+                commit('saveTokenIds')
+            }
 
             Vue.delete(state.walletBalance, data.data.address)
             commit('saveCustomContracts')
@@ -85,9 +113,8 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
             await token.updateSupports()
 
             if (token.canSupport) {
-                state.ercNftTokensCustom = state.ercNftTokensCustom.concat([token])
-                dispatch('updateWalletBalance')
-                commit('saveCustomContracts')
+                state.ercNftTokensCustom.push(token)
+                await dispatch('scanNewNfts')
                 return token
             }
             throw new Error('Unsupported contract.')
@@ -111,31 +138,86 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
             state.evmAddress = '0x' + wallet.getEvmAddress()
             state.walletPrefix = wallet.chainId + '_' + wallet.getEvmAddress()
             commit('clear')
+            commit('loadTokenIds')
             commit('loadLastScannedBlock')
         },
-        updateWalletBalance({ state, rootState, getters }) {
+        updateWalletBalance({ state, rootState }, token: ERCNftToken[]) {
             let w: WalletType | null = rootState.activeWallet
             if (!w) return
 
             let walletAddr = '0x' + w.getEvmAddress()
 
             // Loop through contracts and update wallet balance object
-            let contracts: ERCNftToken[] = getters.networkContracts
+            let contracts: ERCNftToken[] = token ?? state.ercNftTokenIds
             for (var i = 0; i < contracts.length; i++) {
                 let ercNft = contracts[i]
                 ercNft
                     .getAllTokensIds(walletAddr)
                     .then((tokenIds: ERCNftBalance[]) => {
-                        state.walletBalance = {
-                            ...state.walletBalance,
-                            [ercNft.data.address]: tokenIds
-                        }
-                        ercNft.data.ercTokenIds = tokenIds.map(token => token.tokenId)
-                        // Vue.set(state.walletBalance, ercNft.data.address, tokenIds)
+                        Vue.set(state.walletBalance, ercNft.data.address, tokenIds)
                     })
                     .catch((err) => {
                         console.error(err)
                     })
+            }
+        },
+        async scanNewNfts({ state, getters, commit, dispatch }) {
+            const contracts: ERCNftToken[] = getters['networkContracts']
+            let changed = false
+
+            const unknownContracts = contracts.filter(
+                (c) => !state.scannedTokens.has(c.data.address)
+            )
+            const knownContracts = contracts.filter((c) => state.scannedTokens.has(c.data.address))
+
+            // Step 1 Look for new contracts (rescan from 0)
+            if (unknownContracts.length > 0) {
+                if (await ERCNftToken.updateNftActivity(state.evmAddress, unknownContracts, 0))
+                    changed = true
+                unknownContracts.forEach((c) => state.scannedTokens.add(c.data.address))
+            }
+
+            // Step 2 Update existing contracts
+            if (knownContracts.length > 0) {
+                if (
+                    await ERCNftToken.updateNftActivity(
+                        state.evmAddress,
+                        knownContracts,
+                        state.lastScannedBlock
+                    )
+                )
+                    changed = true
+            }
+            state.lastScannedBlock = await web3.eth.getBlockNumber()
+            commit('saveLastScannedBlock')
+
+            if (changed) {
+                const search = new Set<ERCNftToken>(state.ercNftTokenIds)
+                const updates: ERCNftToken[] = []
+                contracts.forEach((c) => {
+                    if (
+                        c.data.ercTokenIds.length > 0 &&
+                        !state.ercNftTokenIds
+                            .map((tokenId) => tokenId.data.address)
+                            .includes(c.data.address)
+                    ) {
+                        state.ercNftTokenIds.push(c)
+                        updates.push(c)
+                    } else if (
+                        state.ercNftTokenIds
+                            .map((tokenId) => tokenId.data.address)
+                            .includes(c.data.address)
+                    ) {
+                        const index = state.ercNftTokenIds.findIndex(
+                            (tokenId) => tokenId.data.address === c.data.address
+                        )
+                        state.ercNftTokenIds[index] = c
+                        updates.push(c)
+                    }
+                })
+                commit('saveTokenIds')
+                commit('saveCustomContracts')
+                dispatch('updateWalletBalance', updates)
             }
         },
     },

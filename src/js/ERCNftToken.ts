@@ -1,5 +1,5 @@
-import IERC721 from '@openzeppelin/contracts/build/contracts/ERC721Enumerable.json'
 import { AbiItem, Contract, web3 } from '@/evm'
+import IERC721Abi from '@/abi/IERC721MetaData.json'
 import IERC1155Abi from '@/abi/IERC1155MetaData.json'
 import { ERCNftBalance, ERCNftTokenInput } from '@/store/modules/assets/modules/types'
 import axios from 'axios'
@@ -12,10 +12,8 @@ interface URIDataCache {
     [index: number]: string
 }
 
-const IERC721Abi = IERC721.abi
 const ERC721ID = '0x80ac58cd'
 const ERC721MetadataID = '0x5b5e139f'
-const ERC721EnumerableID = '0x780e9d63'
 const ERC1155ID = '0xd9b67a26'
 
 const ERC721_TRANSFER = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
@@ -34,7 +32,6 @@ class ERCNftToken {
     tokenCache: TokenDataCache = {}
     uriDataCache: URIDataCache = {}
     canSupport = false
-    transferEventSubscription = undefined
 
     constructor(data: ERCNftTokenInput) {
         this.data = data
@@ -46,12 +43,10 @@ class ERCNftToken {
                 // assume ERC721 first
                 this.contract = new web3.eth.Contract(IERC721Abi as AbiItem[], this.data.address)
                 if (await this.contract.methods.supportsInterface(ERC721ID).call()) {
-                    const metadata = await this.contract.methods
+                    this.canSupport = await this.contract.methods
                         .supportsInterface(ERC721MetadataID)
                         .call()
-                    const enumerable = await this.contract?.methods.supportsInterface(ERC721EnumerableID).call()
 
-                    this.canSupport = metadata && enumerable
                     if (this.canSupport) {
                         this.data.type = 'ERC721'
                     }
@@ -76,7 +71,6 @@ class ERCNftToken {
         }
     }
 
-    /** @deprecated */
     static updateNftActivity = async (
         address: string,
         tokens: ERCNftToken[],
@@ -143,12 +137,11 @@ class ERCNftToken {
     }
 
     async getAllTokensIds(address: string): Promise<ERCNftBalance[]> {
-        if (!this.canSupport) return []
+        if (!this.canSupport || this.data.ercTokenIds.length == 0) return []
         let res: ERCNftBalance[] = []
 
-        if (this.contract) {
+        if (this.contract)
             try {
-                // TODO: refactor
                 if (this.data.type === 'ERC1155') {
                     const balances = await this.contract.methods
                         .balanceOfBatch(
@@ -162,21 +155,37 @@ class ERCNftToken {
                             quantity: parseInt(s),
                         })
                     })
-                } else { // ERC721
-                    try {
-                        const balance = await this.contract.methods.balanceOf(address).call()
-                        for(let i = 0; i < balance; i++) {
-                            const tokenId = await this.contract.methods.tokenOfOwnerByIndex(address, i).call()
-                            res.push({ tokenId, quantity: 1 })
+                } else {
+                    for (const token of this.data.ercTokenIds) {
+                        try {
+                            res.push({
+                                tokenId: token,
+                                quantity:
+                                    (
+                                        await this.contract?.methods.ownerOf(token).call()
+                                    ).toLowerCase() === address
+                                        ? 1
+                                        : 0,
+                            })
+                        } catch (err) {
+                            if (
+                                err.message.includes(
+                                    'Returned error: execution reverted: ERC721: invalid token ID'
+                                )
+                            ) {
+                                res.push({
+                                    tokenId: token,
+                                    quantity: 0,
+                                })
+                            } else {
+                                console.error(err)
+                            }
                         }
-                    } catch (err) {
-                        console.error(`failed to fetch ERC721 balance of ${address}: `, err)
                     }
                 }
             } catch (e) {
                 console.error(e)
             }
-        }
         return res
     }
 

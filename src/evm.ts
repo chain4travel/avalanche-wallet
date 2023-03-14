@@ -1,5 +1,5 @@
 import Web3 from 'web3'
-import { Contract } from 'web3-eth-contract'
+import { Contract } from 'web3-eth/node_modules/web3-eth-contract'
 import { AbiItem } from 'web3-utils'
 
 import ERC721Abi from '@/abi/IERC721MetaData.json'
