@@ -29,7 +29,7 @@ export default class MnemonicDisplay extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use "../../styles/abstracts/mixins";
+@use '../../styles/abstracts/mixins';
 
 .mnemonic_display {
     display: grid;

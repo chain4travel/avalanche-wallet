@@ -46,7 +46,7 @@ export default class Menu extends Vue {}
 </script>
 
 <style scoped lang="scss">
-@use "../../styles/abstracts/variables";
+@use '../../styles/abstracts/variables';
 @use '../../styles/abstracts/mixins';
 @use '/src/components/Access/menu';
 

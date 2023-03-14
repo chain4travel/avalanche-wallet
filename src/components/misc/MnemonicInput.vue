@@ -69,8 +69,8 @@ export default class MnemonicDisplay extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use "../../styles/abstracts/variables";
-@use "../../styles/abstracts/mixins";
+@use '../../styles/abstracts/variables';
+@use '../../styles/abstracts/mixins';
 
 .mnemonic_input {
     display: grid;

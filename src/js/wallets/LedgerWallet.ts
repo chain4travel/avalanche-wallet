@@ -82,6 +82,7 @@ class LedgerWallet extends HdWalletCore implements AvaWalletCore {
 
     constructor(app: AppAvax, hdkey: HDKey, config: ILedgerAppConfig, hdEth: HDKey, ethApp: Eth) {
         super(hdkey, hdEth)
+        this.name = 'Ledger Wallet'
         this.app = app
         this.ethApp = ethApp
         this.type = 'ledger'

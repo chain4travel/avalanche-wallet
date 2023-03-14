@@ -1,7 +1,7 @@
 <template>
     <div class="access_card">
         <div class="content">
-            <Identicon :value="account.baseAddresses.join('')"></Identicon>
+            <Identicon :value="account.name"></Identicon>
             <h1>{{ account.name }}</h1>
             <form @submit.prevent="access">
                 <input class="pass_name" :value="account.name" />

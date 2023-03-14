@@ -16,7 +16,8 @@
         <hr />
         <template v-if="account">
             <button class="account_but" @click="openSettings">
-                <Identicon :value="account.baseAddresses.join('')" diameter="18"></Identicon>
+                <fa v-if="accountChanged" icon="exclamation-triangle" class="volatile_alert"></fa>
+                <Identicon :value="account.name" diameter="18"></Identicon>
                 <p>{{ account.name }}</p>
             </button>
             <AccountSettingsModal ref="settings_modal"></AccountSettingsModal>
@@ -70,6 +71,10 @@ export default class AccountMenu extends Vue {
         let w = this.wallet
         if (!w) return false
         return w.type === 'ledger'
+    }
+
+    get accountChanged() {
+        return this.$store.getters.accountChanged
     }
 
     openSettings() {
@@ -174,6 +179,12 @@ hr {
         color: var(--success);
         margin-right: 4px;
     }
+}
+
+.volatile_alert {
+    color: var(--warning);
+    font-size: 15px;
+    margin-right: 6px;
 }
 
 @include mixins.medium-device {

@@ -128,7 +128,7 @@ export default {
 </script>
 
 <style lang="scss">
-@use "../../styles/abstracts/variables";
+@use '../../styles/abstracts/variables';
 
 .remember {
     .v-label {

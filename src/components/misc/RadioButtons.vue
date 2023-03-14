@@ -27,7 +27,7 @@ export default class RadioButtons extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use "../../styles/abstracts/mixins";
+@use '../../styles/abstracts/mixins';
 .radio_buts {
     display: flex;
     flex-wrap: wrap;

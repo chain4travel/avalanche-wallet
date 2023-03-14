@@ -119,7 +119,7 @@ export default class TxRow extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use "../../../styles/abstracts/mixins";
+@use '../../../styles/abstracts/mixins';
 
 .tx_row {
     //display: grid;
@@ -231,5 +231,5 @@ label {
         grid-column: 2/3;
         grid-row: 2;
     }
-} ;
+}
 </style>

@@ -15,6 +15,7 @@ import {
     IssueBatchTxInput,
     ImportKeyfileInput,
     ExportWalletsInput,
+    AccessWalletMultipleInput,
     AccessWalletMultipleInputParams,
 } from '@/store/types'
 
@@ -23,18 +24,22 @@ import { AllKeyFileDecryptedTypes } from '@/js/IKeystore'
 
 Vue.use(Vuex)
 
-import { bintools } from '@/AVA'
+import { ava, bintools } from '@/AVA'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
-
+import { LedgerWallet } from '@/js/wallets/LedgerWallet'
+import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { ChainAlias } from '@/js/wallets/types'
 import {
     extractKeysFromDecryptedFile,
     KEYSTORE_VERSION,
     makeKeyfile,
     readKeyFile,
 } from '@/js/Keystore'
-import { LedgerWallet } from '@/js/wallets/LedgerWallet'
-import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+
 import { Buffer as BufferAvalanche } from '@c4tplatform/caminojs/dist'
+import { MultisigAliasReply } from '@c4tplatform/caminojs/dist/apis/platformvm'
+
 import { privateToAddress } from '@ethereumjs/util'
 import { updateFilterAddresses } from '../providers'
 import { getAvaxPriceUSD } from '@/helpers/price_helper'
@@ -53,6 +58,7 @@ export default new Vuex.Store({
     state: {
         isAuth: false,
         activeWallet: null,
+        storedActiveWallet: null,
         address: null, // current active derived address
         wallets: [],
         volatileWallets: [], // will be forgotten when tab is closed
@@ -67,6 +73,16 @@ export default new Vuex.Store({
             if (!wallet) return []
             let addresses = wallet.getDerivedAddresses()
             return addresses
+        },
+        staticAddresses: (state: RootState) => (chain: ChainAlias): string[] => {
+            return state.wallets.map((w) => w.getStaticAddress('P')).filter((e) => e != '')
+        },
+        accountChanged(state: RootState): boolean {
+            return (
+                state.volatileWallets.length > 0 ||
+                state.warnUpdateKeyfile ||
+                state.activeWallet !== state.storedActiveWallet
+            )
         },
     },
     mutations: {
@@ -83,6 +99,7 @@ export default new Vuex.Store({
         },
         setActiveWallet(state, wallet) {
             state.activeWallet = wallet
+            if (!state.storedActiveWallet) state.storedActiveWallet = wallet
         },
     },
     actions: {
@@ -90,7 +107,7 @@ export default new Vuex.Store({
         // Used to access wallet with a single key
         // TODO rename to accessWalletMenmonic
         async accessWallet({ state, dispatch, commit }, mnemonic: string): Promise<MnemonicWallet> {
-            let wallet: MnemonicWallet = await dispatch('addWalletMnemonic', mnemonic)
+            let wallet: MnemonicWallet = await dispatch('addWalletMnemonic', { key: mnemonic })
 
             commit('setActiveWallet', wallet)
             dispatch('onAccess')
@@ -106,9 +123,11 @@ export default new Vuex.Store({
                 try {
                     let keyInfo = keyList[i]
                     if (keyInfo.type === 'mnemonic') {
-                        await dispatch('addWalletMnemonic', keyInfo.key)
+                        await dispatch('addWalletMnemonic', { file: keyInfo })
+                    } else if (keyInfo.type === 'singleton') {
+                        await dispatch('addWalletSingleton', { file: keyInfo })
                     } else {
-                        await dispatch('addWalletSingleton', keyInfo.key)
+                        await dispatch('addWalletsMultisig', { file: keyInfo })
                     }
                 } catch (e) {
                     continue
@@ -116,6 +135,7 @@ export default new Vuex.Store({
             }
             commit('setActiveWallet', state.wallets[activeIndex])
             dispatch('onAccess', state.wallets[activeIndex])
+            dispatch('updateMultisigWallets')
         },
 
         async accessWalletLedger({ state, commit, dispatch }, wallet: LedgerWallet) {
@@ -126,7 +146,7 @@ export default new Vuex.Store({
         },
 
         async accessWalletSingleton({ commit, dispatch }, key: string) {
-            let wallet = await dispatch('addWalletSingleton', key)
+            let wallet = await dispatch('addWalletSingleton', { key })
 
             commit('setActiveWallet', wallet)
             dispatch('onAccess')
@@ -156,6 +176,7 @@ export default new Vuex.Store({
             store.state.wallets = []
             store.state.volatileWallets = []
             store.state.activeWallet = null
+            store.state.storedActiveWallet = null
             store.state.address = null
             store.state.isAuth = false
 
@@ -183,12 +204,12 @@ export default new Vuex.Store({
         },
 
         // Add a HD wallet from mnemonic string
-        async addWalletMnemonic(
-            { state, dispatch },
-            mnemonic: string
-        ): Promise<MnemonicWallet | null> {
+        async addWalletMnemonic({ state }, { key, file }): Promise<MnemonicWallet | null> {
             // Cannot add mnemonic wallets on ledger mode
             if (state.activeWallet?.type === 'ledger') return null
+
+            // get mnemonic either from key or from file
+            const mnemonic = (file as AccessWalletMultipleInput) ? file.key : (key as string)
 
             // Split mnemonic and seed hash
             const mParts = mnemonic.split('\n')
@@ -204,13 +225,20 @@ export default new Vuex.Store({
             }
 
             let wallet = new MnemonicWallet(mParts[0], mParts[1])
+            if (file?.name) wallet.name = file.name
             state.wallets.push(wallet)
             state.volatileWallets.push(wallet)
+            if (!file) this.dispatch('updateMultisigWallets')
             return wallet
         },
 
         // Add a singleton wallet from private key string
-        async addWalletSingleton({ state, dispatch }, pk: string): Promise<SingletonWallet | null> {
+        async addWalletSingleton(
+            { state, dispatch },
+            { key, file }
+        ): Promise<SingletonWallet | null> {
+            let pk = (file as AccessWalletMultipleInput) ? file.key : key
+
             try {
                 let keyBuf = Buffer.from(pk, 'hex')
                 // @ts-ignore
@@ -234,15 +262,74 @@ export default new Vuex.Store({
             }
 
             let wallet = new SingletonWallet(pk)
+            if (file?.name) wallet.name = file.name
             state.wallets.push(wallet)
             state.volatileWallets.push(wallet)
+            if (!file) this.dispatch('updateMultisigWallets')
             return wallet
         },
 
-        removeWallet({ state, dispatch, getters }, wallet: MnemonicWallet) {
+        // Add a multisig wallet from multisig alias
+        async addWalletsMultisig(
+            { state, getters },
+            { keys, file }
+        ): Promise<MultisigWallet[] | null> {
+            // Cannot add singleton wallets on ledger mode
+            if (state.activeWallet?.type === 'ledger') return null
+
+            if (file as AccessWalletMultipleInput) {
+                const wallet = new MultisigWallet()
+                if (file.name) wallet.name = file.name
+                wallet.setKey(file.key)
+                state.wallets.push(wallet)
+                state.volatileWallets.push(wallet)
+                return [wallet]
+            }
+
+            const wallets: MultisigWallet[] = []
+            const staticAddresses = getters.staticAddresses('P') as string[]
+            for (const alias of keys as string[]) {
+                var response: MultisigAliasReply
+                try {
+                    // get owner from alias
+                    response = await ava.PChain().getMultisigAlias(alias)
+                } catch (e) {
+                    continue
+                }
+
+                const aliasBuffer = bintools.stringToAddress(alias)
+                // Make sure wallet doesnt exist already
+                for (const wallet of state.wallets) {
+                    if (wallet.type === 'multisig') {
+                        if ((wallet as MultisigWallet).alias().compare(aliasBuffer) === 0) {
+                            throw new Error('Wallet already exists.')
+                        }
+                    }
+                }
+
+                // Check that we have at least one staticAddress in owner
+                if (!response.addresses.some((address) => staticAddresses.includes(address)))
+                    continue
+
+                const wallet = new MultisigWallet(aliasBuffer, response.Memo, response)
+                wallets.push(wallet)
+                state.wallets.push(wallet)
+                state.volatileWallets.push(wallet)
+            }
+            return wallets
+        },
+
+        removeWallet({ state, dispatch }, wallet: MnemonicWallet) {
             // TODO: This might cause an error use wallet id instead
             let index = state.wallets.indexOf(wallet)
             state.wallets.splice(index, 1)
+            dispatch('updateMultisigWallets')
+        },
+
+        updateMultisigWallets({ state }) {
+            state.wallets.forEach((w) => {
+                if (w instanceof MultisigWallet) w.updateWallets(state.wallets)
+            })
         },
 
         async issueBatchTx({ state }, data: IssueBatchTxInput) {
@@ -267,9 +354,7 @@ export default new Vuex.Store({
             dispatch('Assets/updateAvaAsset')
             dispatch('Assets/updateUTXOs')
             dispatch('Platform/update')
-            dispatch('Accounts/updateActiveIndex')
             dispatch('Accounts/updateKycStatus')
-            dispatch('Accounts/updateMultisigAliases')
             dispatch('History/updateTransactionHistory')
             updateFilterAddresses()
         },
@@ -338,9 +423,11 @@ export default new Vuex.Store({
 
                     // Private keys from the keystore file do not have the PrivateKey- prefix
                     if (key.type === 'mnemonic') {
-                        await store.dispatch('addWalletMnemonic', key.key)
+                        await store.dispatch('addWalletMnemonic', { file: key })
                     } else if (key.type === 'singleton') {
-                        await store.dispatch('addWalletSingleton', key.key)
+                        await store.dispatch('addWalletSingleton', { file: key })
+                    } else if (key.type === 'multisig') {
+                        await store.dispatch('addWalletsMultisig', { file: key })
                     }
                 }
             }
