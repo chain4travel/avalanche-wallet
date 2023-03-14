@@ -10,18 +10,18 @@
 
                     <input
                         v-model="accountName"
-                        :name="$t('keys.save_account.placeholder_1').toString"
+                        :name="$t('keys.save_account.placeholder_1').toString()"
                         placeholder="Account Name"
                         :disabled="existsInLocalStorage"
                     />
                     <input
                         type="password"
-                        :placeholder="$t('keys.save_account.placeholder_2').toString"
+                        :placeholder="$t('keys.save_account.placeholder_2').toString()"
                         v-model="password"
                     />
                     <input
                         type="password"
-                        :placeholder="$t('keys.save_account.placeholder_3').toString"
+                        :placeholder="$t('keys.save_account.placeholder_3').toString()"
                         v-model="password_confirm"
                     />
                     <p class="err">{{ err }}</p>

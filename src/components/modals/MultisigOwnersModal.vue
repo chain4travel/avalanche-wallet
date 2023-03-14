@@ -55,6 +55,10 @@ export default class MultisigOwnersModal extends Vue {
 <style scoped lang="scss">
 @use '../../styles/abstracts/mixins';
 
+.label {
+    color: #9999;
+}
+
 .modal-body {
     background-color: var(--bg);
     max-width: fit-content;
