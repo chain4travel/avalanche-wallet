@@ -29,6 +29,7 @@ import { Transaction } from '@ethereumjs/tx'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { LedgerWallet } from '@/js/wallets/LedgerWallet'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { ExportChainsC, ExportChainsP, ExportChainsX } from '@c4tplatform/camino-wallet-sdk/dist'
 import { UTXOSet as EVMUTXOSet } from '@c4tplatform/caminojs/dist/apis/evm/utxos'
 
@@ -40,8 +41,8 @@ export type ChainAlias = 'X' | 'P'
 export type AvmImportChainType = 'P' | 'C'
 export type AvmExportChainType = 'P' | 'C'
 
-export type WalletNameType = 'mnemonic' | 'ledger' | 'singleton'
-export type WalletType = MnemonicWallet | LedgerWallet | SingletonWallet
+export type WalletNameType = 'mnemonic' | 'ledger' | 'singleton' | 'multisig'
+export type WalletType = MnemonicWallet | LedgerWallet | SingletonWallet | MultisigWallet
 
 interface IAddressManager {
     getCurrentAddressAvm(): string

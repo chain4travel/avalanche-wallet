@@ -6,7 +6,7 @@ import {
 import { UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm/utxos'
 import { WalletType } from '@/js/wallets/types'
 
-import { BN, Buffer } from '@c4tplatform/caminojs'
+import { BN, Buffer } from '@c4tplatform/caminojs/dist'
 import {
     buildCreateNftFamilyTx,
     buildEvmTransferErc20Tx,
@@ -14,7 +14,7 @@ import {
     buildEvmTransferNativeTx,
     buildMintNftTx,
 } from '@/js/TxHelper'
-import { PayloadBase, UnixNow } from '@c4tplatform/caminojs/dist/utils'
+import { PayloadBase } from '@c4tplatform/caminojs/dist/utils'
 import { ITransaction } from '@/components/wallet/transfer/types'
 
 import { web3 } from '@/evm'
@@ -22,10 +22,6 @@ import Erc20Token from '@/js/Erc20Token'
 import { getStakeForAddresses } from '@/helpers/utxo_helper'
 import ERCNftToken from '@/js/ERCNftToken'
 import { UnsignedTx, UTXOSet } from '@c4tplatform/caminojs/dist/apis/platformvm'
-
-import { GetValidatorsResponse } from '@/store/modules/platform/types'
-
-import axios from 'axios'
 
 class WalletHelper {
     static async getStake(wallet: WalletType): Promise<BN> {
@@ -229,8 +225,7 @@ class WalletHelper {
 
         let pAddressStrings = wallet.getAllAddressesP()
         // For change address use first available on the platform chain
-        // ToDo: In case ethAddr is msig alias, return undefined
-        let changeAddress = wallet.getFirstAvailableAddressPlatform()
+        let changeAddress = wallet.getChangeAddressPlatform()
         const consortiumMemberAuthCredentials: [number, Buffer | string][] = [
             [0, pAddressStrings[0]],
         ]
@@ -241,7 +236,7 @@ class WalletHelper {
             [changeAddress], // change
             oldNodeID,
             newNodeID,
-            ava.PChain().parseAddress(address),
+            address,
             consortiumMemberAuthCredentials,
             undefined, // memo
             undefined, // asOf

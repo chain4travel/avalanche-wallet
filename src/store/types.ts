@@ -8,9 +8,11 @@ import { AllKeyFileTypes, AllKeyFileDecryptedTypes } from '@/js/IKeystore'
 import { UTXO } from '@c4tplatform/caminojs/dist/apis/avm'
 import { UTXO as TxUTXO } from './modules/history/types'
 import { WalletNameType, WalletType } from '@/js/wallets/types'
+import { KeystoreFileKeyType } from '@/js/IKeystore'
 
 export interface RootState {
     isAuth: boolean
+    storedActiveWallet: null | WalletType
     activeWallet: null | WalletType
     wallets: WalletType[]
     address: String | null
@@ -115,7 +117,8 @@ export interface SessionPersistKey {
 }
 
 export interface AccessWalletMultipleInput {
-    type: Extract<'mnemonic' | 'singleton', WalletNameType>
+    name: string
+    type: Extract<KeystoreFileKeyType, WalletNameType>
     key: string
 }
 
