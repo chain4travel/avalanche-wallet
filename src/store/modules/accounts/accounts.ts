@@ -19,8 +19,8 @@ import {
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import { makeKeyfile } from '@/js/Keystore'
-import { KeyFile } from '@/js/IKeystore'
 import { checkVerificationStatus } from '@/kyc_api'
+import { createHash } from 'crypto'
 
 const accounts_module: Module<AccountsState, RootState> = {
     namespaced: true,
@@ -32,6 +32,18 @@ const accounts_module: Module<AccountsState, RootState> = {
     mutations: {
         loadAccounts(state) {
             state.accounts = getLocalStorageAccounts()
+        },
+        deleteKey(state, wallet: WalletType) {
+            if (state.accountIndex === null || !wallet.accountHash) return
+            const acct = state.accounts[state.accountIndex]
+            const delIndex = acct.wallet.keys.findIndex((w) => {
+                const hash = createHash('sha256').update(w.key).digest()
+                return hash.compare(wallet.accountHash ?? Buffer.alloc(0))
+            })
+            if (delIndex >= 0) {
+                acct.baseAddresses.splice(delIndex, 1)
+                acct.wallet.keys.splice(delIndex, 1)
+            }
         },
     },
     actions: {
@@ -91,6 +103,7 @@ const accounts_module: Module<AccountsState, RootState> = {
                 rootState.volatileWallets = []
                 rootState.warnUpdateKeyfile = false
                 rootState.storedActiveWallet = rootState.activeWallet
+                rootState.walletsDeleted = false
                 commit('loadAccounts')
             } catch (e) {
                 this.dispatch('Notifications/add', {
@@ -151,35 +164,6 @@ const accounts_module: Module<AccountsState, RootState> = {
                 password: pass,
                 accountName: account.name,
             })
-        },
-
-        // Remove the selected key from account and update local storage
-        async deleteKey({ state, getters, rootState, commit }, wallet: WalletType) {
-            if (!getters.account) return
-            let wallets = rootState.wallets
-            let delIndex = wallets.indexOf(wallet)
-            let acctIndex = state.accountIndex
-            let acct: iUserAccountEncrypted = getters.account
-            let activeWallet = rootState.activeWallet
-            let activeIndex = activeWallet ? wallets.indexOf(activeWallet) : 0
-
-            if (!acctIndex) throw new Error('Account not found.')
-
-            acct.baseAddresses.splice(delIndex, 1)
-            acct.wallet.keys.splice(delIndex, 1)
-
-            if (activeIndex > delIndex) {
-                activeIndex--
-            }
-            const keywallet = acct.wallet as KeyFile
-            keywallet.activeIndex = activeIndex
-
-            overwriteAccountAtIndex(acct, acctIndex)
-
-            rootState.volatileWallets = []
-            rootState.warnUpdateKeyfile = false
-            rootState.storedActiveWallet = activeWallet
-            commit('loadAccounts')
         },
 
         async updateKycStatus({ state, rootState, dispatch }) {

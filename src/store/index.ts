@@ -43,6 +43,7 @@ import { MultisigAliasReply } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { privateToAddress } from '@ethereumjs/util'
 import { updateFilterAddresses } from '../providers'
 import { getAvaxPriceUSD } from '@/helpers/price_helper'
+import createHash from 'create-hash'
 
 export default new Vuex.Store({
     modules: {
@@ -63,6 +64,7 @@ export default new Vuex.Store({
         wallets: [],
         volatileWallets: [], // will be forgotten when tab is closed
         warnUpdateKeyfile: false, // If true will promt the user the export a new keyfile
+        walletsDeleted: false,
         prices: {
             usd: 0,
         },
@@ -81,6 +83,7 @@ export default new Vuex.Store({
             return (
                 state.volatileWallets.length > 0 ||
                 state.warnUpdateKeyfile ||
+                state.walletsDeleted ||
                 state.activeWallet !== state.storedActiveWallet
             )
         },
@@ -210,22 +213,21 @@ export default new Vuex.Store({
 
             // get mnemonic either from key or from file
             const mnemonic = (file as AccessWalletMultipleInput) ? file.key : (key as string)
+            const accountHash = createHash('sha256').update(mnemonic).digest()
 
             // Split mnemonic and seed hash
             const mParts = mnemonic.split('\n')
 
             // Make sure wallet doesnt exist already
-            for (var i = 0; i < state.wallets.length; i++) {
-                let w = state.wallets[i] as WalletType
-                if (w.type === 'mnemonic') {
-                    if ((w as MnemonicWallet).getMnemonic() === mParts[0]) {
-                        throw new Error('Wallet already exists.')
-                    }
+            for (const w of state.wallets) {
+                if (w.type === 'mnemonic' && w.accountHash === accountHash) {
+                    throw new Error('Wallet already exists.')
                 }
             }
 
             let wallet = new MnemonicWallet(mParts[0], mParts[1])
             if (file?.name) wallet.name = file.name
+            wallet.accountHash = accountHash
             state.wallets.push(wallet)
             state.volatileWallets.push(wallet)
             if (!file) this.dispatch('updateMultisigWallets')
@@ -238,6 +240,7 @@ export default new Vuex.Store({
             { key, file }
         ): Promise<SingletonWallet | null> {
             let pk = (file as AccessWalletMultipleInput) ? file.key : key
+            const accountHash = createHash('sha256').update(pk).digest()
 
             try {
                 let keyBuf = Buffer.from(pk, 'hex')
@@ -252,17 +255,15 @@ export default new Vuex.Store({
             if (state.activeWallet?.type === 'ledger') return null
 
             // Make sure wallet doesnt exist already
-            for (var i = 0; i < state.wallets.length; i++) {
-                let w = state.wallets[i] as WalletType
-                if (w.type === 'singleton') {
-                    if ((w as SingletonWallet).key === pk) {
-                        throw new Error('Wallet already exists.')
-                    }
+            for (const w of state.wallets) {
+                if (w.type === 'singleton' && w.accountHash === accountHash) {
+                    throw new Error('Wallet already exists.')
                 }
             }
 
             let wallet = new SingletonWallet(pk)
             if (file?.name) wallet.name = file.name
+            wallet.accountHash = accountHash
             state.wallets.push(wallet)
             state.volatileWallets.push(wallet)
             if (!file) this.dispatch('updateMultisigWallets')
@@ -280,6 +281,7 @@ export default new Vuex.Store({
             if (file as AccessWalletMultipleInput) {
                 const wallet = new MultisigWallet()
                 if (file.name) wallet.name = file.name
+                wallet.accountHash = createHash('sha256').update(file.key).digest()
                 wallet.setKey(file.key)
                 state.wallets.push(wallet)
                 state.volatileWallets.push(wallet)
@@ -312,6 +314,7 @@ export default new Vuex.Store({
                     continue
 
                 const wallet = new MultisigWallet(aliasBuffer, response.Memo, response)
+                wallet.accountHash = createHash('sha256').update(wallet.getKey()).digest()
                 wallets.push(wallet)
                 state.wallets.push(wallet)
                 state.volatileWallets.push(wallet)
@@ -319,10 +322,13 @@ export default new Vuex.Store({
             return wallets
         },
 
-        removeWallet({ state, dispatch }, wallet: MnemonicWallet) {
-            // TODO: This might cause an error use wallet id instead
+        removeWallet({ state, dispatch, commit }, wallet: WalletType) {
             let index = state.wallets.indexOf(wallet)
             state.wallets.splice(index, 1)
+            state.walletsDeleted = true
+            index = state.volatileWallets.indexOf(wallet)
+            if (index >= 0) state.volatileWallets.splice(index, 1)
+            commit('Accounts/deleteKey', wallet)
             dispatch('updateMultisigWallets')
         },
 

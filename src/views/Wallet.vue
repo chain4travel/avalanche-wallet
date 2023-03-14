@@ -1,6 +1,5 @@
 <template>
     <div class="wallet_view" ref="wallet_view">
-        <UpdateKeystoreModal v-if="isManageWarning"></UpdateKeystoreModal>
         <transition name="fade" mode="out-in">
             <sidebar class="panel sidenav"></sidebar>
         </transition>
@@ -96,10 +95,6 @@ export default class Wallet extends Vue {
 
     destroyed() {
         clearInterval(this.intervalId!)
-    }
-
-    get isManageWarning(): boolean {
-        return this.$store.state.warnUpdateKeyfile
     }
 
     get hasVolatileWallets() {

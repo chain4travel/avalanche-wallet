@@ -39,6 +39,7 @@ abstract class WalletCore {
     id: string
     name: string = ''
     type?: WalletNameType
+    accountHash?: Buffer
 
     utxoset: AVMUTXOSet
     platformUtxoset: PlatformUTXOSet
@@ -85,9 +86,7 @@ abstract class WalletCore {
     getStaticAddress(chainID: ChainAlias): string {
         const kp = this.getStaticKeyPair()
         if (kp) {
-            kp.setChainID(chainID)
-            kp.setHRP(ava.getHRP())
-            return kp.getAddressString()
+            return bintools.addressToString(ava.getHRP(), chainID, kp.getAddress())
         }
         return ''
     }
