@@ -318,6 +318,7 @@ export default new Vuex.Store({
                 wallets.push(wallet)
                 state.wallets.push(wallet)
                 state.volatileWallets.push(wallet)
+                this.dispatch('updateMultisigWallets')
             }
             return wallets
         },
