@@ -6,14 +6,27 @@
                 Warning: Never disclose this key. Anyone with your private keys can steal any assets
                 held in your wallet.
             </p>
+            <template v-if="publicKey">
+                <div class="key_raw">
+                    Public Key
+                    <br />
+                    {{ publicKey }}
+                </div>
+                <div class="key_raw">
+                    Compressed Public Key
+                    <br />
+                    {{ compressedPublicKey }}
+                </div>
+            </template>
         </div>
     </modal>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
-
 import Modal from '@/components/modals/Modal.vue'
+const ecdsa = require('elliptic').ec
+const ec = new ecdsa('secp256k1')
 
 @Component({
     components: {
@@ -22,10 +35,21 @@ import Modal from '@/components/modals/Modal.vue'
 })
 export default class PrivateKey extends Vue {
     @Prop({ default: '' }) privateKey!: string
+    @Prop({ default: '' }) publicKey!: string
 
     open(): void {
         let modal = this.$refs.modal as Modal
         modal.open()
+    }
+
+    get compressedPublicKey(): string {
+        return Buffer.from(
+            ec
+                .keyFromPublic(Buffer.from(this.publicKey, 'hex'))
+                .getPublic(true, 'hex')
+                .padStart(66, '0'),
+            'hex'
+        ).toString('hex')
     }
 }
 </script>
@@ -47,9 +71,8 @@ export default class PrivateKey extends Vue {
     text-align: center;
     word-break: break-all;
     background-color: var(--bg);
-    margin: 15px 0px !important;
+    margin: 12px 0px !important;
     border-radius: 2px;
-    padding: 6px 12px;
 }
 
 .warning_text {

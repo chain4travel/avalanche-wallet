@@ -14,6 +14,7 @@
                 <v-tab key="mnemonic"><v-icon>mdi-list-box-outline</v-icon></v-tab>
                 <v-tab key="keystore"><v-icon>mdi-file-key-outline</v-icon></v-tab>
                 <v-tab key="priv_key"><v-icon>mdi-shield-key-outline</v-icon></v-tab>
+                <v-tab key="multisig"><v-icon>mdi-account-group-outline</v-icon></v-tab>
                 <v-tab-item>
                     <AddMnemonic @success="handleImportSuccess" ref="mnemonic"></AddMnemonic>
                 </v-tab-item>
@@ -22,6 +23,12 @@
                 </v-tab-item>
                 <v-tab-item>
                     <add-key-string @success="handleImportSuccess" ref="keyString"></add-key-string>
+                </v-tab-item>
+                <v-tab-item>
+                    <AddMultisigAlias
+                        @success="handleImportSuccess($event)"
+                        ref="multisigAlias"
+                    ></AddMultisigAlias>
                 </v-tab-item>
             </v-tabs>
         </div>
@@ -35,6 +42,7 @@ import Modal from '@/components/modals/Modal.vue'
 import AddKeyFile from '@/components/wallet/manage/AddKeyFile.vue'
 import AddKeyString from '@/components/wallet/manage/AddKeyString.vue'
 import AddMnemonic from '@/components/wallet/manage/AddMnemonic.vue'
+import AddMultisigAlias from '@/components/wallet/manage/AddMultisigAlias.vue'
 
 @Component({
     components: {
@@ -42,6 +50,7 @@ import AddMnemonic from '@/components/wallet/manage/AddMnemonic.vue'
         AddKeyFile,
         AddKeyString,
         AddMnemonic,
+        AddMultisigAlias,
     },
 })
 export default class ImportKeys extends Vue {
@@ -53,6 +62,7 @@ export default class ImportKeys extends Vue {
         keyfile: AddKeyFile
         keyString: AddKeyString
         mnemonic: AddMnemonic
+        multisigAlias: AddMultisigAlias
     }
     created() {
         this.title = this.$t('keys.import_key_title') as string
@@ -69,12 +79,13 @@ export default class ImportKeys extends Vue {
         this.$refs.mnemonic?.clear()
     }
 
-    handleImportSuccess() {
+    handleImportSuccess(event?: any) {
         this.$refs.modal.close()
-        this.$store.dispatch('Notifications/add', {
+        const payload = event ?? {
             title: this.$t('keys.import_key_success_title'),
             message: this.$t('keys.import_key_success_msg'),
-        })
+        }
+        this.$store.dispatch('Notifications/add', payload)
     }
 }
 </script>

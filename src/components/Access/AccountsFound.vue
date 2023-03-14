@@ -6,7 +6,7 @@
             :key="i"
             @click="selectAccount(i)"
         >
-            <Identicon :value="acct.baseAddresses.join('')" diameter="40"></Identicon>
+            <Identicon :value="acct.name" diameter="40"></Identicon>
             <p>{{ acct.name }}</p>
         </div>
     </div>

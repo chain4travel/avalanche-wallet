@@ -77,6 +77,7 @@ import {
     faFileCsv,
     faExternalLinkAlt,
     faExternalLinkSquareAlt,
+    faPen,
 } from '@fortawesome/free-solid-svg-icons'
 
 import { faBtc, faGoogle } from '@fortawesome/free-brands-svg-icons'
@@ -142,7 +143,8 @@ library.add(
     faUnlink,
     faFileCsv,
     faExternalLinkAlt,
-    faExternalLinkSquareAlt
+    faExternalLinkSquareAlt,
+    faPen
 )
 
 Vue.component('fa', FontAwesomeIcon)

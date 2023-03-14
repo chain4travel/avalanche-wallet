@@ -91,7 +91,7 @@ export default class ManageKeys extends Vue {
     }
 
     get canEncryptWallet() {
-        return ['mnemonic', 'singleton'].includes(this.walletType)
+        return ['mnemonic', 'singleton', 'multisig'].includes(this.walletType)
     }
 
     get walletType(): WalletNameType {
@@ -99,7 +99,7 @@ export default class ManageKeys extends Vue {
     }
 
     get hasVolatile() {
-        return this.$store.state.volatileWallets.length > 0
+        return this.$store.getters.accountChanged
     }
 
     get allWallets(): MnemonicWallet[] {

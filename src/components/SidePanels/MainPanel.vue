@@ -7,7 +7,6 @@
             <button @click="logout" class="logout">
                 {{ $t('logout.button') }}
             </button>
-            <AliasPicker class="alias"></AliasPicker>
         </div>
         <transition name="fade" mode="out-in">
             <transaction-history-panel class="panel_content"></transaction-history-panel>
@@ -19,11 +18,9 @@ import NetworkMenu from '../NetworkSettings/NetworkMenu'
 import TransactionHistoryPanel from './TransactionHistoryPanel'
 import DayNightToggle from '../misc/DayNightToggle'
 import ConfirmLogout from '../modals/ConfirmLogout'
-import AliasPicker from '../wallet/manage/AliasPicker'
 
 export default {
     components: {
-        AliasPicker,
         NetworkMenu,
         TransactionHistoryPanel,
         DayNightToggle,
@@ -82,13 +79,6 @@ export default {
 
 .logout {
     margin-left: auto;
-}
-
-.alias {
-    padding: 0px;
-    text-align: center;
-    grid-column: 1/4;
-    grid-row: 2;
 }
 
 @include mixins.medium-device {

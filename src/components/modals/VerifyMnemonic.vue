@@ -119,7 +119,7 @@ export default class VerifyMnemonic extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use "../../styles/abstracts/variables";
+@use '../../styles/abstracts/variables';
 @use '../../styles/abstracts/mixins';
 
 .mnemonic_body {

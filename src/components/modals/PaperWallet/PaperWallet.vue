@@ -181,8 +181,8 @@ export default class PaperWallet extends Vue {
         )
     }
 
-    @Watch('address')
-    @Watch('mnemonic')
+    @Watch('address', { immediate: true })
+    //@Watch('mnemonic')
     buildQr() {
         let parent = this
         QRCode.toDataURL(

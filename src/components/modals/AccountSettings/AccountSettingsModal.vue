@@ -2,7 +2,7 @@
     <modal ref="modal" title="Account Settings" class="modal_main" @beforeClose="clear">
         <div class="modal_body">
             <div class="header">
-                <Identicon :value="account.baseAddresses.join('')"></Identicon>
+                <Identicon :value="account.name"></Identicon>
                 <p style="text-align: center">{{ account.name }}</p>
 
                 <p class="err small" style="text-align: center">
@@ -28,7 +28,11 @@
                 <button @click="deleteAccount" class="ava_button">Delete Account</button>
             </div>
             <template v-else>
-                <component v-if="subComponent" :is="subComponent"></component>
+                <component
+                    v-if="subComponent"
+                    :is="subComponent"
+                    v-bind="[{ accountName: account.name }]"
+                ></component>
                 <button @click="clear">{{ $t('access.cancel') }}</button>
             </template>
         </div>
@@ -85,7 +89,7 @@ export default class AccountSettingsModal extends Vue {
     }
 
     get hasVolatile() {
-        return this.$store.state.volatileWallets.length > 0
+        return this.$store.getters.accountChanged
     }
 }
 </script>

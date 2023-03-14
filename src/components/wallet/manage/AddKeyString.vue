@@ -53,7 +53,7 @@ export default class AddKeyString extends Vue {
 
         setTimeout(async () => {
             try {
-                await this.$store.dispatch('addWalletSingleton', this.privateKeyInput)
+                await this.$store.dispatch('addWalletSingleton', { key: this.privateKeyInput })
                 // @ts-ignore
                 this.$emit('success')
                 this.clear()

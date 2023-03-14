@@ -1,4 +1,4 @@
-process.env['NODE_OPTIONS'] ="--openssl_legacy-provider"
+process.env['NODE_OPTIONS'] = '--openssl_legacy-provider'
 
 module.exports = {
     modulePathIgnorePatterns: ['camino-wallet-sdk'],
