@@ -9,7 +9,7 @@
                         <v-icon>mdi-refresh</v-icon>
                     </button>
                 </div>
-                <h4>{{ $t('top.title2') }}</h4>
+                <h4>{{ $t('top.title2') }} ({{ wallet ? wallet.name : 'Unknown' }})</h4>
                 <template v-if="!isBreakdown">
                     <button class="breakdown_toggle" @click="toggleBreakdown">
                         <v-icon>mdi-eye-outline</v-icon>
@@ -86,7 +86,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Watch } from 'vue-property-decorator'
+import { Vue, Component } from 'vue-property-decorator'
 import AvaAsset from '@/js/AvaAsset'
 import Spinner from '@/components/misc/Spinner.vue'
 import NftCol from './NftCol.vue'

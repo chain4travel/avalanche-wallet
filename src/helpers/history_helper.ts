@@ -3,7 +3,8 @@
 //     received:
 // }
 
-import { ITransactionData, UTXO } from '@/store/modules/history/types'
+import { IsOutputDeposited, ITransactionData, UTXO } from '@/store/modules/history/types'
+import { ZeroBN } from '@/store/types'
 import { WalletType } from '@/js/wallets/types'
 import { BN } from '@c4tplatform/caminojs/dist'
 import { AVMConstants } from '@c4tplatform/caminojs/dist/apis/avm'
@@ -39,6 +40,7 @@ interface NFTSummaryResultDict {
 
 export interface BaseTxAssetSummary {
     amount: BN
+    deposited: BN
     payload: string | undefined
     groupNum: number
     addresses: string[]
@@ -48,6 +50,7 @@ export interface BaseTxAssetSummary {
 function addToDict(
     assetId: string,
     amount: BN,
+    deposited: BN,
     dict: TokenSummaryResult,
     utxo: UTXO,
     addresses: string[]
@@ -59,10 +62,11 @@ function addToDict(
         dict[assetId].addresses.push(...addrDiff)
     } else {
         dict[assetId] = {
-            amount: amount,
+            amount,
+            deposited,
             payload: utxo.payload,
             groupNum: utxo.groupID,
-            addresses: addresses,
+            addresses,
         }
     }
 }
@@ -226,7 +230,7 @@ function getLoss(tx: ITransactionData, wallet: WalletType): TokenSummaryResult {
                 }
             })
 
-            addToDict(assetId, amountBN, loss, utxo, receivers)
+            addToDict(assetId, amountBN, ZeroBN, loss, utxo, receivers)
         }
     }
 
@@ -245,11 +249,9 @@ function getProfit(tx: ITransactionData, wallet: WalletType): TokenSummaryResult
     if (outs) {
         for (let i = 0; i < outs.length; i++) {
             let utxo = outs[i]
-            let outputType = utxo.outputType
-            let isNft = outputType === AVMConstants.NFTXFEROUTPUTID
 
             // Skip NFTs
-            if (isNft) continue
+            if (utxo.outputType === AVMConstants.NFTXFEROUTPUTID) continue
 
             let addrs = utxo.addresses
 
@@ -260,6 +262,7 @@ function getProfit(tx: ITransactionData, wallet: WalletType): TokenSummaryResult
             let assetId = utxo.assetID
             let amount = utxo.amount
             let amountBN = new BN(amount)
+            const depositBN = IsOutputDeposited(utxo.outputType) ? amountBN : ZeroBN
 
             // Get who sent this to you
             let senders: string[] = []
@@ -275,7 +278,7 @@ function getProfit(tx: ITransactionData, wallet: WalletType): TokenSummaryResult
                 }
             })
 
-            addToDict(assetId, amountBN, profit, utxo, senders)
+            addToDict(assetId, amountBN, depositBN, profit, utxo, senders)
         }
     }
 
@@ -307,6 +310,7 @@ function getTransactionSummary(tx: ITransactionData, wallet: WalletType) {
 
         sum.tokens[assetId] = {
             amount: loss.amount.mul(new BN(-1)),
+            deposited: loss.deposited,
             payload: loss.payload,
             groupNum: loss.groupNum,
             addresses: loss.addresses,
@@ -315,12 +319,15 @@ function getTransactionSummary(tx: ITransactionData, wallet: WalletType) {
 
     for (let assetId in profits) {
         let profit = profits[assetId]
+        let sumAsset = sum.tokens[assetId]
 
-        if (sum.tokens[assetId]) {
-            sum.tokens[assetId].amount = sum.tokens[assetId].amount.add(profit.amount)
+        if (sumAsset) {
+            sumAsset.amount = sumAsset.amount.add(profit.amount)
+            sumAsset.deposited = sumAsset.deposited.add(profit.deposited)
         } else {
             sum.tokens[assetId] = {
                 amount: profit.amount,
+                deposited: profit.deposited,
                 payload: profit.payload,
                 groupNum: profit.groupNum,
                 addresses: profit.addresses,

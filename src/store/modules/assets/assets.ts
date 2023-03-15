@@ -14,6 +14,7 @@ import {
     IWalletNftMintDict,
     PlatformBalances,
     RootState,
+    ZeroBN,
 } from '@/store/types'
 import { ava, bintools } from '@/AVA'
 import Vue from 'vue'
@@ -41,7 +42,6 @@ import { web3 } from '@/evm'
 // import ERCNftToken from '@/js/ERCNftToken'
 
 const TOKEN_LISTS: string[] = []
-const ZeroBN = new BN(0)
 
 import ERCNftModule from './modules/ercNft'
 import ERC20_TOKEN_LIST from '@/ERC20Tokenlist.json'
