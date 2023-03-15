@@ -82,17 +82,46 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
                 JSON.stringify([...state.scannedTokens.values()])
             )
         },
+        updateScannedTokens(state, incommingTokens: ERCNftToken[]) {
+            // somehow the state became frozen to update, using reassignment to update it
+            state.scannedTokens = new Set([
+                ...state.scannedTokens.values(),
+                ...incommingTokens.map(c => c.data.address)
+            ])
+        },
+        removeAndSaveCustom(state, tokenToRemove: ERCNftToken) {
+            let index = state.ercNftTokensCustom.indexOf(tokenToRemove)
+            if (index >= 0) {
+                // somehow the state became frozen to update, using reassignment to update it
+                state.ercNftTokensCustom = [
+                    ...state.ercNftTokensCustom.slice(0, index),
+                    ...state.ercNftTokensCustom.slice(index + 1)
+                ]
+            }
+
+            index = state.ercNftTokenIds.indexOf(tokenToRemove)
+            if (index >= 0) {
+                state.ercNftTokenIds.splice(index, 1)
+            }
+
+            const currentTokens = [...state.scannedTokens.values()]
+            index = currentTokens.indexOf(tokenToRemove.data.address)
+            if (index >= 0) {
+                currentTokens.splice(index, 1)
+                // somehow the state became frozen to update, using reassignment to update it
+                state.scannedTokens = new Set(currentTokens)
+                localStorage.setItem(
+                    state.walletPrefix + '_scanned',
+                    JSON.stringify([...state.scannedTokens.values()])
+                )
+            }
+        }
     },
     actions: {
         async removeCustom({ state, commit }, data: ERCNftToken) {
-            let index = state.ercNftTokensCustom.indexOf(data)
-            state.ercNftTokensCustom.splice(index, 1)
-
-            index = state.ercNftTokenIds.indexOf(data)
-            if (index >= 0) {
-                state.ercNftTokenIds.splice(index, 1)
-                commit('saveTokenIds')
-            }
+            // commit mutations to update state
+            commit('removeAndSaveCustom', data)
+            commit('saveTokenIds')
 
             Vue.delete(state.walletBalance, data.data.address)
             commit('saveCustomContracts')
@@ -113,7 +142,7 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
             await token.updateSupports()
 
             if (token.canSupport) {
-                state.ercNftTokensCustom.push(token)
+                state.ercNftTokensCustom = state.ercNftTokensCustom.concat([token])
                 await dispatch('scanNewNfts')
                 return token
             }
@@ -141,7 +170,7 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
             commit('loadTokenIds')
             commit('loadLastScannedBlock')
         },
-        updateWalletBalance({ state, rootState }, token: ERCNftToken[]) {
+        async updateWalletBalance({ state, rootState, commit }, token: ERCNftToken[]) {
             let w: WalletType | null = rootState.activeWallet
             if (!w) return
 
@@ -154,7 +183,10 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
                 ercNft
                     .getAllTokensIds(walletAddr)
                     .then((tokenIds: ERCNftBalance[]) => {
-                        Vue.set(state.walletBalance, ercNft.data.address, tokenIds)
+                        state.walletBalance = {
+                            ...state.walletBalance,
+                            [ercNft.data.address]: tokenIds
+                        }
                     })
                     .catch((err) => {
                         console.error(err)
@@ -174,7 +206,7 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
             if (unknownContracts.length > 0) {
                 if (await ERCNftToken.updateNftActivity(state.evmAddress, unknownContracts, 0))
                     changed = true
-                unknownContracts.forEach((c) => state.scannedTokens.add(c.data.address))
+                commit('updateScannedTokens', unknownContracts)
             }
 
             // Step 2 Update existing contracts
@@ -201,7 +233,7 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
                             .map((tokenId) => tokenId.data.address)
                             .includes(c.data.address)
                     ) {
-                        state.ercNftTokenIds.push(c)
+                        state.ercNftTokenIds = state.ercNftTokenIds.concat([c])
                         updates.push(c)
                     } else if (
                         state.ercNftTokenIds
@@ -211,7 +243,11 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
                         const index = state.ercNftTokenIds.findIndex(
                             (tokenId) => tokenId.data.address === c.data.address
                         )
-                        state.ercNftTokenIds[index] = c
+                        state.ercNftTokenIds = [
+                            ...state.ercNftTokenIds.slice(0, index),
+                            c,
+                            ...state.ercNftTokenIds.slice(index + 1)
+                        ]
                         updates.push(c)
                     }
                 })
