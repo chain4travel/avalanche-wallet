@@ -12,13 +12,13 @@
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import ERCNftToken from '@/js/ERCNftToken'
 import { ERCNftBalance } from '@/store/modules/assets/modules/types'
+import { CF_IPFS_BASE } from '@/constants'
 
 // If an image url is hosted on one of these urls, reroute through cloudflare.
 const REDIRECT_DOMAINS = ['gateway.pinata.cloud/ipfs']
-const CF_IPFS_BASE = 'https://cloudflare-ipfs.com/ipfs/'
 const checkIPFSUri = (url: string) =>
     url?.startsWith('ipfs://')
-        ? `https://ipfs.io/ipfs/${url.substring(7)}`
+        ? `${CF_IPFS_BASE}${url.substring(7)}`
         : url
 @Component
 export default class ERCNftView extends Vue {
