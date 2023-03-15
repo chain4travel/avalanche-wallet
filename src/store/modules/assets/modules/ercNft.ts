@@ -170,7 +170,7 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
             commit('loadTokenIds')
             commit('loadLastScannedBlock')
         },
-        async updateWalletBalance({ state, rootState, commit }, token: ERCNftToken[]) {
+        updateWalletBalance({ state, rootState }, token: ERCNftToken[]) {
             let w: WalletType | null = rootState.activeWallet
             if (!w) return
 
