@@ -56,6 +56,7 @@ jobs:
           yarn install
           (yarn start&)
           cd ../camino-block-explorer
+          git checkout 5753d5bffdd62f53fe28bd9d8f3937a33a730a79
           yarn install
           (yarn start&)
 
