@@ -65,6 +65,7 @@ export default class AddKeyString extends Vue {
                 } else {
                     this.error = this.$t('keys.import_key_err') as string
                 }
+                console.error(e)
             }
         }, 200)
     }

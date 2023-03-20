@@ -39,6 +39,7 @@ abstract class WalletCore {
     id: string
     name: string = ''
     type?: WalletNameType
+    accountHash?: Buffer
 
     utxoset: AVMUTXOSet
     platformUtxoset: PlatformUTXOSet
@@ -85,9 +86,7 @@ abstract class WalletCore {
     getStaticAddress(chainID: ChainAlias): string {
         const kp = this.getStaticKeyPair()
         if (kp) {
-            kp.setChainID(chainID)
-            kp.setHRP(ava.getHRP())
-            return kp.getAddressString()
+            return bintools.addressToString(ava.getHRP(), chainID, kp.getAddress())
         }
         return ''
     }
@@ -103,12 +102,11 @@ abstract class WalletCore {
 
         let toAddress = '0x' + hexAddr
         let ownerAddresses = [bechAddr]
-        let fromAddresses = ownerAddresses
         const sourceChainId = chainIdFromAlias(sourceChain)
 
         return await ava
             .CChain()
-            .buildImportTx(utxoSet, toAddress, ownerAddresses, sourceChainId, fromAddresses, fee)
+            .buildImportTx(utxoSet, toAddress, ownerAddresses, sourceChainId, fee)
     }
 
     /**
@@ -166,7 +164,7 @@ abstract class WalletCore {
             changeAddress
         )
 
-        const eTx = exportTx.getTransaction() as unknown as PlatformExportTx
+        const eTx = (exportTx.getTransaction() as unknown) as PlatformExportTx
         let tx = await this.signX(exportTx)
 
         return ava.XChain().issueTx(tx)

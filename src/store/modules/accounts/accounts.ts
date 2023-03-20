@@ -189,9 +189,8 @@ const accounts_module: Module<AccountsState, RootState> = {
                     //@ts-ignore
                     rootState.Network.selectedNetwork.name.toLowerCase()
                 )
-            } catch (e) {
-                let error = e as Error
-                console.log(error.message)
+            } catch (error) {
+                console.log(error)
                 state.kycStatus = false
             }
         },
