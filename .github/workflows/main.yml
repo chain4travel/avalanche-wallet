@@ -50,6 +50,7 @@ jobs:
 
       - name: start suite
         run: |
+          yarn install
           ls -la /home/runner
           ls -la /home/runner/.cache
           ls -la /home/runner/.cache/Cypress
