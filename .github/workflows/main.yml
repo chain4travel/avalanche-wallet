@@ -50,6 +50,7 @@ jobs:
 
       - name: start suite
         run: |
+          ls ~/.cache/Cypress
           git clone -b ${{ steps.setBranch.outputs.branch }} https://github.com/chain4travel/camino-suite.git
           git clone -b ${{ steps.setBranch.outputs.branch }} https://github.com/chain4travel/camino-block-explorer.git
           cd camino-suite
@@ -59,6 +60,7 @@ jobs:
           git checkout 5753d5bffdd62f53fe28bd9d8f3937a33a730a79
           yarn install
           (yarn start&)
+          ls ~/.cache/Cypress
 
       - name: jest-run
         run: yarn test
