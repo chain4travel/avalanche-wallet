@@ -17,6 +17,8 @@ This is the frontend Vue.js application for the Camino (CAM) Wallet.
 
 ## Running The Project
 
+
+
 In order for the wallet to work, it needs the Camino network to operate on. By default the wallet will connect to the Camino testnet.
 
 1. If you want to connect to a local network, make sure you have installed and able to run a CaminoGo node properly.
