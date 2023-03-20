@@ -15,6 +15,7 @@ This is the frontend Vue.js application for the Camino (CAM) Wallet.
 2. Go to root of the project `cd camino-wallet`
 3. Install javascript dependencies with `yarn install`.
 
+
 ## Running The Project
 
 In order for the wallet to work, it needs the Camino network to operate on. By default the wallet will connect to the Camino testnet.
