@@ -52,7 +52,7 @@ jobs:
       - name: start suite
         run: |
           yarn install
-          cypress install
+          yarn install cypress
           ls -la /home/runner
           ls -la /home/runner/.cache
           ls -la /home/runner/.cache/Cypress
