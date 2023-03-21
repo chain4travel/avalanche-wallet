@@ -133,7 +133,6 @@ import Tooltip from '@/components/misc/Tooltip.vue'
 
 import ExportKeys from '@/components/modals/ExportKeys.vue'
 import PrivateKey from '@/components/modals/PrivateKey.vue'
-import PublicKey from '@/components/modals/PublicKey.vue'
 import { WalletNameType, WalletType } from '@/js/wallets/types'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import MnemonicPhrase from '@/js/wallets/MnemonicPhrase'

@@ -39,7 +39,7 @@
     </modal>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component } from 'vue-property-decorator'
 
 import Modal from '@/components/modals/Modal.vue'
 import Identicon from '@/components/misc/Identicon.vue'
@@ -55,7 +55,6 @@ import SaveKeys from '@/components/modals/AccountSettings/SaveKeys.vue'
     },
 })
 export default class AccountSettingsModal extends Vue {
-    @Prop() setAccount: any
     $refs!: {
         modal: Modal
     }

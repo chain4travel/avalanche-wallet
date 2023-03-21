@@ -10,18 +10,18 @@
 
                     <input
                         v-model="accountName"
-                        :name="$t('keys.save_account.placeholder_1').toString"
+                        :name="$t('keys.save_account.placeholder_1').toString()"
                         placeholder="Account Name"
                         :disabled="existsInLocalStorage"
                     />
                     <input
                         type="password"
-                        :placeholder="$t('keys.save_account.placeholder_2').toString"
+                        :placeholder="$t('keys.save_account.placeholder_2').toString()"
                         v-model="password"
                     />
                     <input
                         type="password"
-                        :placeholder="$t('keys.save_account.placeholder_3').toString"
+                        :placeholder="$t('keys.save_account.placeholder_3').toString()"
                         v-model="password_confirm"
                     />
                     <p class="err">{{ err }}</p>
@@ -48,7 +48,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component } from 'vue-property-decorator'
 
 import Modal from '../Modal.vue'
 import { SaveAccountInput } from '@/store/types'
@@ -62,7 +62,6 @@ import Identicon from '@/components/misc/Identicon.vue'
     },
 })
 export default class SaveAccountModal extends Vue {
-    @Prop() setAccount: any
     password: string = ''
     password_confirm: string = ''
     isLoading: boolean = false
@@ -100,14 +99,8 @@ export default class SaveAccountModal extends Vue {
             accountName: accountName,
             password: pass,
         }
-        let notificationMessage = this.$t('notifications.save_account')
         await this.$store.dispatch('Accounts/saveAccount', input)
-        this.setAccount(this.$store.getters['Accounts/account'])
-        let { dispatchNotification } = this.globalHelper()
-        dispatchNotification({
-            message: notificationMessage,
-            type: 'success',
-        })
+
         this.isLoading = false
         this.onsuccess()
     }
@@ -117,6 +110,12 @@ export default class SaveAccountModal extends Vue {
     }
 
     onsuccess() {
+        let { dispatchNotification } = this.globalHelper()
+        dispatchNotification({
+            title: 'Account Saved',
+            message: 'Your keys are now stored under a new local account.',
+            type: 'info',
+        })
         this.close()
     }
 
@@ -141,8 +140,6 @@ export default class SaveAccountModal extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
-
 .remember_modal {
     width: 320px;
     max-width: 100%;

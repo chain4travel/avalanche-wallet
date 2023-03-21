@@ -64,7 +64,7 @@ export default new Vuex.Store({
         wallets: [],
         volatileWallets: [], // will be forgotten when tab is closed
         warnUpdateKeyfile: false, // If true will promt the user the export a new keyfile
-        theme: 'night',
+        walletsDeleted: false,
         prices: {
             usd: 0,
         },
@@ -89,10 +89,6 @@ export default new Vuex.Store({
         },
     },
     mutations: {
-        updateTheme(state) {
-            if (state.theme === 'night') state.theme = 'day'
-            else state.theme = 'night'
-        },
         updateActiveAddress(state) {
             if (!state.activeWallet) {
                 state.address = null
@@ -169,7 +165,8 @@ export default new Vuex.Store({
         // TODO: Parts can be shared with the logout function below
         // Similar to logout but keeps the Remembered keys.
         async timeoutLogout(store) {
-            await store.dispatch('Notifications/add', {
+            let { dispatchNotification } = this.globalHelper()
+            dispatchNotification({
                 title: 'Session Timeout',
                 message: 'You are logged out due to inactivity.',
                 type: 'warning',
@@ -200,7 +197,8 @@ export default new Vuex.Store({
                 let wallet = wallets[0]
                 await dispatch('removeWallet', wallet)
 
-                dispatch('Notifications/add', {
+                let { dispatchNotification } = this.globalHelper()
+                dispatchNotification({
                     title: 'Key Removed',
                     message: 'Private key and assets removed from the wallet.',
                 })
@@ -232,8 +230,8 @@ export default new Vuex.Store({
             let wallet = new MnemonicWallet(mParts[0], mParts[1])
             if (file?.name) wallet.name = file.name
             wallet.accountHash = accountHash
-            state.wallets.push(wallet)
-            state.volatileWallets.push(wallet)
+            state.wallets = [...state.wallets, wallet]
+            state.volatileWallets = [...state.volatileWallets, wallet]
             if (!file) this.dispatch('updateMultisigWallets')
             return wallet
         },
@@ -268,8 +266,8 @@ export default new Vuex.Store({
             let wallet = new SingletonWallet(pk)
             if (file?.name) wallet.name = file.name
             wallet.accountHash = accountHash
-            state.wallets.push(wallet)
-            state.volatileWallets.push(wallet)
+            state.wallets = [...state.wallets, wallet]
+            state.volatileWallets = [...state.volatileWallets, wallet]
             if (!file) this.dispatch('updateMultisigWallets')
             return wallet
         },
@@ -287,8 +285,8 @@ export default new Vuex.Store({
                 if (file.name) wallet.name = file.name
                 wallet.accountHash = createHash('sha256').update(file.key).digest()
                 wallet.setKey(file.key)
-                state.wallets.push(wallet)
-                state.volatileWallets.push(wallet)
+                state.wallets = [...state.wallets, wallet]
+                state.volatileWallets = [...state.volatileWallets, wallet]
                 return [wallet]
             }
 
@@ -320,8 +318,8 @@ export default new Vuex.Store({
                 const wallet = new MultisigWallet(aliasBuffer, response.Memo, response)
                 wallet.accountHash = createHash('sha256').update(wallet.getKey()).digest()
                 wallets.push(wallet)
-                state.wallets.push(wallet)
-                state.volatileWallets.push(wallet)
+                state.wallets = [...state.wallets, wallet]
+                state.volatileWallets = [...state.volatileWallets, wallet]
                 this.dispatch('updateMultisigWallets')
             }
             return wallets
@@ -401,7 +399,8 @@ export default new Vuex.Store({
                 element.click()
                 document.body.removeChild(element)
             } catch (e) {
-                dispatch('Notifications/add', {
+                let { dispatchNotification } = this.globalHelper()
+                dispatchNotification({
                     title: 'Export Wallet',
                     message: 'Error exporting wallet.',
                     type: 'error',

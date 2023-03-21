@@ -19,8 +19,8 @@ import {
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import { makeKeyfile } from '@/js/Keystore'
-import { KeyFile } from '@/js/IKeystore'
 import { checkVerificationStatus } from '@/kyc_api'
+import { createHash } from 'crypto'
 
 const accounts_module: Module<AccountsState, RootState> = {
     namespaced: true,
@@ -32,6 +32,18 @@ const accounts_module: Module<AccountsState, RootState> = {
     mutations: {
         loadAccounts(state) {
             state.accounts = getLocalStorageAccounts()
+        },
+        deleteKey(state, wallet: WalletType) {
+            if (state.accountIndex === null || !wallet.accountHash) return
+            const acct = state.accounts[state.accountIndex]
+            const delIndex = acct.wallet.keys.findIndex((w) => {
+                const hash = createHash('sha256').update(w.key).digest()
+                return hash.compare(wallet.accountHash ?? Buffer.alloc(0))
+            })
+            if (delIndex >= 0) {
+                acct.baseAddresses.splice(delIndex, 1)
+                acct.wallet.keys.splice(delIndex, 1)
+            }
         },
     },
     actions: {
@@ -50,6 +62,7 @@ const accounts_module: Module<AccountsState, RootState> = {
                 password: pass,
                 data: account.wallet,
             }
+
             await dispatch('importKeyfile', data, { root: true })
             state.accountIndex = index
         },
@@ -60,6 +73,7 @@ const accounts_module: Module<AccountsState, RootState> = {
                 // If this is an active account, get its index
                 let activeAccount = getters.account
                 let accountIndex = state.accountIndex
+                console.log('Saving account', activeAccount, accountIndex)
                 let wallet = rootState.activeWallet as MnemonicWallet | SingletonWallet | null
                 let pass = data.password
                 if (!pass || wallet?.type === 'ledger') return
@@ -90,9 +104,11 @@ const accounts_module: Module<AccountsState, RootState> = {
                 rootState.volatileWallets = []
                 rootState.warnUpdateKeyfile = false
                 rootState.storedActiveWallet = rootState.activeWallet
+                rootState.walletsDeleted = false
                 commit('loadAccounts')
             } catch (e) {
-                dispatch('Notifications/add', {
+                let { dispatchNotification } = this.globalHelper()
+                dispatchNotification({
                     title: 'Account Save',
                     message: 'Error Saving Account.',
                     type: 'error',
@@ -103,12 +119,12 @@ const accounts_module: Module<AccountsState, RootState> = {
         // If there is an active account, will remove it from local storage
         async deleteAccount({ state, dispatch, getters, commit }, password) {
             let acct = getters.account
+
             let passCorrect = await verifyAccountPassword(acct, password)
             if (!passCorrect) throw new Error('Invalid password.')
-            let index = state.accounts.indexOf(acct)
-            if (!acct || index === -1) {
-                return
-            }
+            let index = state.accountIndex
+
+            if (!acct || !index) return
 
             removeAccountByIndex(index)
             state.accountIndex = null
@@ -118,10 +134,10 @@ const accounts_module: Module<AccountsState, RootState> = {
         },
 
         async changePassword({ state, getters, dispatch }, input: ChangePasswordInput) {
+            let index = state.accountIndex
             let account: iUserAccountEncrypted = getters.account
-            let index = state.accounts.indexOf(account)
 
-            if (!account || index === -1) return
+            if (!account || !index) return
 
             let oldPassCorrect = await verifyAccountPassword(account, input.passOld)
             if (!oldPassCorrect) throw new Error('Previous password invalid.')
@@ -152,34 +168,6 @@ const accounts_module: Module<AccountsState, RootState> = {
             })
         },
 
-        // Remove the selected key from account and update local storage
-        async deleteKey({ state, getters, rootState, commit }, wallet: WalletType) {
-            if (!getters.account) return
-            let delIndex = rootState.wallets.indexOf(wallet)
-            let acctIndex = state.accountIndex
-            let acct: iUserAccountEncrypted = getters.account
-            let activeWallet = rootState.activeWallet
-            let activeIndex = activeWallet ? wallets.indexOf(activeWallet) : 0
-
-            if (!acctIndex) throw new Error('Account not found.')
-
-            acct.baseAddresses.splice(delIndex, 1)
-            acct.wallet.keys.splice(delIndex, 1)
-
-            if (activeIndex > delIndex) {
-                activeIndex--
-            }
-            const keywallet = acct.wallet as KeyFile
-            keywallet.activeIndex = activeIndex
-
-            overwriteAccountAtIndex(acct, acctIndex)
-
-            rootState.volatileWallets = []
-            rootState.warnUpdateKeyfile = false
-            rootState.storedActiveWallet = activeWallet
-            commit('loadAccounts')
-        },
-
         async updateKycStatus({ state, rootState, dispatch }) {
             if (!rootState.activeWallet || rootState.activeWallet.type === 'ledger') return null
             const wallet = rootState.activeWallet as SingletonWallet | MnemonicWallet
@@ -204,14 +192,14 @@ const accounts_module: Module<AccountsState, RootState> = {
             return state.accounts.length > 0
         },
 
-        baseAddresses(state: AccountsState, getters, rootState: RootState) {
+        baseAddresses(state, getters, rootState: RootState) {
             let wallets = rootState.wallets
             return wallets.map((w: WalletType) => {
                 return w.getEvmAddress()
             })
         },
 
-        baseAddressesNonVolatile(state: AccountsState, getters, rootState: RootState) {
+        baseAddressesNonVolatile(state, getters, rootState: RootState) {
             let wallets = rootState.wallets.filter((w) => {
                 return !rootState.volatileWallets.includes(w)
             })
@@ -221,7 +209,7 @@ const accounts_module: Module<AccountsState, RootState> = {
             })
         },
 
-        account(state: AccountsState, getters): iUserAccountEncrypted | null {
+        account(state): iUserAccountEncrypted | null {
             if (state.accountIndex === null) return null
             return state.accounts[state.accountIndex]
         },

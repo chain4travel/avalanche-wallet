@@ -37,7 +37,7 @@ import Crypto from '@/js/Crypto'
 import { AccessWalletMultipleInput } from '@/store/types'
 import { keyToKeypair } from '@/helpers/helper'
 import * as bip39 from 'bip39'
-import { Buffer as AjsBuffer } from '@c4tplatform/caminojs'
+import { Buffer as AjsBuffer } from '@c4tplatform/caminojs/dist'
 
 const cryptoHelpers = new Crypto()
 

@@ -85,7 +85,8 @@ export default class ImportKeys extends Vue {
             title: this.$t('keys.import_key_success_title'),
             message: this.$t('keys.import_key_success_msg'),
         }
-        this.$store.dispatch('Notifications/add', payload)
+        let { dispatchNotification } = this.globalHelper()
+        dispatchNotification(payload)
     }
 }
 </script>
