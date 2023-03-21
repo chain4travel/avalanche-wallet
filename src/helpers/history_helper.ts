@@ -216,6 +216,7 @@ function getLoss(tx: ITransactionData, wallet: WalletType): TokenSummaryResult {
             let assetId = utxo.assetID
             let amount = utxo.amount
             let amountBN = new BN(amount)
+            const depositBN = IsOutputDeposited(utxo.outputType) ? amountBN : ZeroBN
 
             // Get who received this asset
             let receivers: string[] = []
@@ -230,7 +231,7 @@ function getLoss(tx: ITransactionData, wallet: WalletType): TokenSummaryResult {
                 }
             })
 
-            addToDict(assetId, amountBN, ZeroBN, loss, utxo, receivers)
+            addToDict(assetId, amountBN, depositBN, loss, utxo, receivers)
         }
     }
 

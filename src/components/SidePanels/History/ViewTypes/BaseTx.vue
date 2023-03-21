@@ -26,8 +26,8 @@
                     </div>
                 </div>
             </div>
-            <div v-if="type === 'deposit'">
-                <label>Deposited</label>
+            <div v-if="['deposit', 'undeposit'].includes(type)">
+                <label>{{ type == 'deposit' ? 'Deposited' : 'Undeposited' }}</label>
                 <BaseTxOutput
                     v-for="(asset, assetId) in tokensDeposited"
                     :key="assetId"
@@ -66,15 +66,10 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import {
-    ITransactionData,
-    OutputTypesLockedOutD,
-    OutputTypesLockedOutDB,
-    UTXO,
-} from '@/store/modules/history/types'
+import { ITransactionData, UTXO } from '@/store/modules/history/types'
 import { TransactionValueDict } from '@/components/SidePanels/types'
 import { PayloadBase, PayloadTypes } from '@c4tplatform/caminojs/dist/utils'
-import { BN, Buffer } from '@c4tplatform/caminojs/dist'
+import { Buffer } from '@c4tplatform/caminojs/dist'
 import { WalletType } from '@/js/wallets/types'
 
 import { ava } from '@/AVA'
@@ -136,9 +131,6 @@ export default class BaseTx extends Vue {
 
     // What did I lose?
     get inValues() {
-        let addrs: string[] = this.addresses
-        let addrsRaw = addrs.map((addr) => addr.split('-')[1])
-
         let ins = this.transaction.inputs
         let res: TransactionValueDict = {} // asset id -> value dict
 
@@ -185,12 +177,6 @@ export default class BaseTx extends Vue {
                 // check if it is from wallet
                 if (!utxo.payload && !isIncludes) return false
                 return true
-            case 'deposit':
-                return (
-                    !isInput &&
-                    (utxo.outputType === OutputTypesLockedOutD ||
-                        utxo.outputType === OutputTypesLockedOutDB)
-                )
             // default just return original logic
             // might need to be changed in the future as
             // more tx types are added
@@ -242,8 +228,6 @@ export default class BaseTx extends Vue {
     }
     // what did I gain?
     get outValues() {
-        let addrs: string[] = this.addresses
-        let addrsRaw = addrs.map((addr) => addr.split('-')[1])
         let outs = this.transaction.outputs
         let res: TransactionValueDict = {} // asset id -> value dict
 
@@ -253,7 +237,6 @@ export default class BaseTx extends Vue {
         }
 
         outs.forEach((utxoOut) => {
-            let utxoAddrs = utxoOut.addresses
             let assetId = utxoOut.assetID
             let amt = utxoOut.amount
 
@@ -289,9 +272,6 @@ export default class BaseTx extends Vue {
     }
 
     get nftGroups() {
-        let addrs: string[] = this.addresses
-        let addrsRaw = addrs.map((addr) => addr.split('-')[1])
-
         let ins = this.transaction.inputs
         let outs = this.transaction.outputs
         let res: { [key in string]: { [key in string]: PayloadBase[] } } = {}

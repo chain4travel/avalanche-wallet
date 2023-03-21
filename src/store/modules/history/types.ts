@@ -82,6 +82,7 @@ export type TransactionType =
     | 'advance_time'
     | 'reward_validator'
     | 'deposit'
+    | 'undeposit'
 
 // CSV Staking Row
 export type CsvRowStakingTxType = 'add_validator' | 'add_delegator' | 'fee_received'
