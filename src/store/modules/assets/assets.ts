@@ -14,10 +14,10 @@ import {
     IWalletNftMintDict,
     PlatformBalances,
     RootState,
-    ZeroBN,
 } from '@/store/types'
 import { ava, bintools } from '@/AVA'
 import Vue from 'vue'
+import { ZeroBN } from '@/constants'
 import AvaAsset from '@/js/AvaAsset'
 import { WalletType } from '@/js/wallets/types'
 import { AvaNftFamily } from '@/js/AvaNftFamily'
@@ -39,7 +39,6 @@ import axios from 'axios'
 import Erc20Token from '@/js/Erc20Token'
 import { AvaNetwork } from '@/js/AvaNetwork'
 import { web3 } from '@/evm'
-// import ERCNftToken from '@/js/ERCNftToken'
 
 const TOKEN_LISTS: string[] = []
 

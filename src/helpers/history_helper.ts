@@ -4,7 +4,7 @@
 // }
 
 import { IsOutputDeposited, ITransactionData, UTXO } from '@/store/modules/history/types'
-import { ZeroBN } from '@/store/types'
+import { ZeroBN } from '@/constants'
 import { WalletType } from '@/js/wallets/types'
 import { BN } from '@c4tplatform/caminojs/dist'
 import { AVMConstants } from '@c4tplatform/caminojs/dist/apis/avm'

@@ -2,6 +2,7 @@
 The base wallet class used for common functionality
 */
 import { ava, bintools } from '@/AVA'
+import { ChainIdType } from '@/constants'
 import { AvmImportChainType, ChainAlias } from '@/js/wallets/types'
 
 import { BN } from '@c4tplatform/caminojs/dist'
@@ -89,6 +90,10 @@ abstract class WalletCore {
             return bintools.addressToString(ava.getHRP(), chainID, kp.getAddress())
         }
         return ''
+    }
+
+    getSignerAddresses(chainID: ChainIdType): string[] {
+        return []
     }
 
     async evmGetAtomicUTXOs(sourceChain: ExportChainsC) {

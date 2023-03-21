@@ -85,7 +85,7 @@ import TxHistoryNftFamilyGroup from '@/components/SidePanels/TxHistoryNftFamilyG
 import { getTransactionSummary } from '@/helpers/history_helper'
 import BaseTxOutput from '@/components/SidePanels/History/ViewTypes/BaseTxOutput.vue'
 import BaseTxNFTOutput from '@/components/SidePanels/History/ViewTypes/BaseTxNFTOutput.vue'
-import { ZeroBN } from '@/store/types'
+import { ZeroBN } from '@/constants'
 
 let payloadtypes = PayloadTypes.getInstance()
 

@@ -159,5 +159,3 @@ export interface PlatformBalances {
     deposited: IBalanceDict
     bondedDeposited: IBalanceDict
 }
-
-export const ZeroBN = new BN(0)

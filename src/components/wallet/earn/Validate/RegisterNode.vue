@@ -47,7 +47,7 @@
                 </h4>
             </div>
             <div class="requirement_title">
-                <fa icon="question-circle"></fa>
+                <fa class="error_status_icon" icon="times-circle"></fa>
                 <h4>
                     {{ $t('earn.validate.warns.consortium_member_address_linked_to_node') }}
                     <a
@@ -73,10 +73,9 @@
                 <h4 class="input_label">{{ $t('earn.validate.label_1') }}</h4>
                 <input
                     class="high_input"
-                    type="password"
                     v-model="nodePrivateKey"
                     style="width: 100%; border-radius: var(--border-radius-sm)"
-                    :placeholder="$t('earn.validate.description_1')"
+                    :placeholder="$t('earn.validate.description_1').toString()"
                 />
             </div>
             <v-btn
