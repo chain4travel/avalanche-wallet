@@ -23,6 +23,9 @@ const network_module: Module<NetworkState, RootState> = {
         addNetwork(state, net: AvaNetwork) {
             state.networks.push(net)
         },
+        selectNetwork(state, net: AvaNetwork) {
+            state.selectedNetwork = net
+        },
     },
     getters: {
         allNetworks(state) {
@@ -30,6 +33,9 @@ const network_module: Module<NetworkState, RootState> = {
         },
         depositAndBond(state) {
             return state.depositAndBond
+        },
+        selectedNetwork(state) {
+            return state.selectedNetwork
         },
     },
     actions: {
@@ -120,7 +126,7 @@ const network_module: Module<NetworkState, RootState> = {
             ava.PChain().getAVAXAssetID(true)
             ava.CChain().getAVAXAssetID(true)
 
-            state.selectedNetwork = net
+            commit('selectNetwork', net)
             dispatch('saveSelectedNetwork')
 
             state.depositAndBond =
