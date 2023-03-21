@@ -465,7 +465,7 @@
             "nodeId": "Node ID",
             "label_1": "Validator Node's Private Key",
             "description_1": "Please enter the Node's Static Private Key (you can receive one by calling admin.getNodeSigner on your node)",
-            "label_3": "P-chain address your validator node will be registered with",
+            "label_3": "P-Chain address your validator node will be assigned to",
             "duration": {
                 "label": "Validation End Date",
                 "desc": "Your @.native:(0) tokens will be locked until this date.",

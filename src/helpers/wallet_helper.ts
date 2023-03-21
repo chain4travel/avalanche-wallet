@@ -157,9 +157,8 @@ class WalletHelper {
         utxos?: PlatformUTXO[]
     ): Promise<string> {
         let utxoSet = wallet.getPlatformUTXOSet()
-        let pAddressStrings = wallet.getAllAddressesP()
-
-        let stakeAmount = amt
+        const pAddressStrings = wallet.getAllAddressesP()
+        const signerAddresses = wallet.getSignerAddresses('P')
 
         // If given custom UTXO set use that
         if (utxos) {
@@ -184,12 +183,12 @@ class WalletHelper {
         const unsignedTx = await ava.PChain().buildAddDelegatorTx(
             utxoSet,
             [stakeReturnAddr],
-            pAddressStrings,
+            [pAddressStrings, signerAddresses],
             [changeAddress],
             nodeID,
             startTime,
             endTime,
-            stakeAmount,
+            amt,
             [rewardAddress] // reward address
         )
 
@@ -201,8 +200,6 @@ class WalletHelper {
         return await ava.PChain().getAddressStates(address)
     }
 
-    // Single sig in this first implementation
-    // For MultiSig extend consortiumMemberAuthCredentials
     static async registerNodeTx(
         wallet: WalletType,
         nodePrivateKey: string,
@@ -219,16 +216,18 @@ class WalletHelper {
             utxoSet.addArray(utxos)
         }
 
-        let pAddressStrings = wallet.getAllAddressesP()
+        const pAddressStrings = wallet.getAllAddressesP()
+        const signerAddresses = wallet.getSignerAddresses('P')
+
         // For change address use first available on the platform chain
-        let changeAddress = wallet.getChangeAddressPlatform()
+        const changeAddress = wallet.getChangeAddressPlatform()
         const consortiumMemberAuthCredentials: [number, Buffer | string][] = [
             [0, pAddressStrings[0]],
         ]
 
         const unsignedTx = await ava.PChain().buildRegisterNodeTx(
             utxoSet,
-            pAddressStrings, // from
+            [pAddressStrings, signerAddresses], // from + possible signers
             [changeAddress], // change
             oldNodeID,
             newNodeID,
