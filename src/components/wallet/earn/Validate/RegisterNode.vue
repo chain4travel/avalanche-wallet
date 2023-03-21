@@ -30,7 +30,7 @@
             </div>
             <div class="requirement_title">
                 <fa
-                    v-if="hasEnoughUnlockedPlatformBalance"
+                    v-if="hasEnoughLockablePlatformBalance"
                     class="success_status_icon"
                     icon="check-circle"
                 ></fa>
@@ -60,7 +60,7 @@
             </div>
         </div>
         <div
-            v-if="isKycVerified && isConsortiumMember && hasEnoughUnlockedPlatformBalance"
+            v-if="isKycVerified && isConsortiumMember && hasEnoughLockablePlatformBalance"
             class="input_section"
         >
             <div>
@@ -85,7 +85,7 @@
                 :disabled="
                     !isKycVerified ||
                     !isConsortiumMember ||
-                    !hasEnoughUnlockedPlatformBalance ||
+                    !hasEnoughLockablePlatformBalance ||
                     !nodePrivateKey
                 "
                 block
@@ -116,7 +116,7 @@ export default class RegisterNode extends Vue {
     @Prop() isKycVerified!: boolean
     @Prop() isConsortiumMember!: boolean
     @Prop() minPlatformUnlocked!: BN
-    @Prop() hasEnoughUnlockedPlatformBalance!: boolean
+    @Prop() hasEnoughLockablePlatformBalance!: boolean
 
     nodePrivateKey = ''
 

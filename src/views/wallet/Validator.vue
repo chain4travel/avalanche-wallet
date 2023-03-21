@@ -14,7 +14,7 @@
                         :isKycVerified="isKycVerified"
                         :isConsortiumMember="isConsortiumMember"
                         :minPlatformUnlocked="minPlatformUnlocked"
-                        :hasEnoughUnlockedPlatformBalance="hasEnoughUnlockedPlatformBalance"
+                        :hasEnoughLockablePlatformBalance="hasEnoughLockablePlatformBalance"
                         @registered="isNodeRegistered = true"
                     ></register-node>
                 </p>
@@ -27,7 +27,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import AddValidator from '@/components/wallet/earn/Validate/AddValidator.vue'
 import { BN } from '@c4tplatform/caminojs/dist'
 import { bnToBig } from '@/helpers/helper'
@@ -69,6 +69,8 @@ export default class Validator extends Vue {
         clearInterval(this.intervalID)
     }
 
+    @Watch('selectedNetwork')
+    @Watch('addresses')
     async evaluateCanRegisterNode() {
         const BN_ONE = new BN(1)
         const result = await WalletHelper.getAddressState(this.addresses[0])
@@ -77,8 +79,8 @@ export default class Validator extends Vue {
         this.isNodeRegistered = false
     }
 
-    get hasEnoughUnlockedPlatformBalance(): boolean {
-        return this.platformUnlocked.gte(this.minPlatformUnlocked)
+    get hasEnoughLockablePlatformBalance(): boolean {
+        return this.totBal.gte(this.minPlatformUnlocked)
     }
 
     get addresses() {
@@ -100,24 +102,16 @@ export default class Validator extends Vue {
     }
 
     get platformLockedStakeable(): BN {
-        // return this.$store.getters.walletPlatformBalanceLockedStakeable
+        if (this.depositAndBond) return this.$store.getters['Assets/walletPlatformBalanceDeposited']
         return this.$store.getters['Assets/walletPlatformBalanceLockedStakeable']
     }
 
-    get platformTotalLocked(): BN {
-        return this.$store.getters['Assets/walletPlatformBalanceTotalLocked']
-    }
-
     get totBal(): BN {
-        if (this.depositAndBond) {
-            return this.platformUnlocked.add(this.platformTotalLocked)
-        }
         return this.platformUnlocked.add(this.platformLockedStakeable)
     }
 
     get pNoBalance() {
-        if (this.depositAndBond) return this.platformUnlocked.add(this.platformTotalLocked).isZero()
-        return this.platformUnlocked.add(this.platformLockedStakeable).isZero()
+        return this.totBal.isZero()
     }
 
     get canValidate(): boolean {
@@ -136,6 +130,10 @@ export default class Validator extends Vue {
     get minDelegationAmt(): Big {
         let bn = this.$store.state.Platform.minStakeDelegation
         return bnToBig(bn, 9)
+    }
+
+    get selectedNetwork() {
+        return this.$store.getters['Network/selectedNetwork']
     }
 }
 </script>
