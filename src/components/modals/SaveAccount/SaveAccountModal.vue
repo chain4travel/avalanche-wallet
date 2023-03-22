@@ -48,7 +48,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import Modal from '../Modal.vue'
 import { SaveAccountInput } from '@/store/types'
@@ -62,6 +62,7 @@ import Identicon from '@/components/misc/Identicon.vue'
     },
 })
 export default class SaveAccountModal extends Vue {
+    @Prop() setAccount: any
     password: string = ''
     password_confirm: string = ''
     isLoading: boolean = false
@@ -99,8 +100,14 @@ export default class SaveAccountModal extends Vue {
             accountName: accountName,
             password: pass,
         }
+        let notificationMessage = this.$t('notifications.save_account')
         await this.$store.dispatch('Accounts/saveAccount', input)
-
+        this.setAccount(this.$store.getters['Accounts/account'])
+        let { dispatchNotification } = this.globalHelper()
+        dispatchNotification({
+            message: notificationMessage,
+            type: 'success',
+        })
         this.isLoading = false
         this.onsuccess()
     }
@@ -110,12 +117,6 @@ export default class SaveAccountModal extends Vue {
     }
 
     onsuccess() {
-        let { dispatchNotification } = this.globalHelper()
-        dispatchNotification({
-            title: 'Account Saved',
-            message: 'Your keys are now stored under a new local account.',
-            type: 'info',
-        })
         this.close()
     }
 
