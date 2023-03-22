@@ -11,6 +11,7 @@ import { WalletNameType, WalletType } from '@/js/wallets/types'
 import { KeystoreFileKeyType } from '@/js/IKeystore'
 
 export interface RootState {
+    networkName: string
     isAuth: boolean
     storedActiveWallet: null | WalletType
     activeWallet: null | WalletType

@@ -57,6 +57,7 @@ export default new Vuex.Store({
         Launch,
     },
     state: {
+        networkName: '',
         isAuth: false,
         activeWallet: null,
         storedActiveWallet: null,
@@ -103,6 +104,9 @@ export default new Vuex.Store({
         setActiveWallet(state, wallet) {
             state.activeWallet = wallet
             if (!state.storedActiveWallet) state.storedActiveWallet = wallet
+        },
+        setNetworkName(state, netName: string) {
+            state.networkName = netName
         },
     },
     actions: {

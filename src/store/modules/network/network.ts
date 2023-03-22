@@ -34,9 +34,6 @@ const network_module: Module<NetworkState, RootState> = {
         depositAndBond(state) {
             return state.depositAndBond
         },
-        selectedNetwork(state) {
-            return state.selectedNetwork
-        },
     },
     actions: {
         addCustomNetwork({ state, dispatch }, net: AvaNetwork) {
@@ -165,7 +162,8 @@ const network_module: Module<NetworkState, RootState> = {
 
             // Set the SDK Network
             setAvalanche(ava)
-            // state.isConnected = true;
+
+            commit('setNetworkName', net.name, { root: true })
             state.status = 'connected'
             return true
         },

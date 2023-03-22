@@ -69,8 +69,8 @@ export default class Validator extends Vue {
         clearInterval(this.intervalID)
     }
 
-    @Watch('selectedNetwork')
-    @Watch('addresses')
+    @Watch('$store.state.networkName')
+    @Watch('$store.state.activeWallet')
     async evaluateCanRegisterNode() {
         const BN_ONE = new BN(1)
         const result = await WalletHelper.getAddressState(this.addresses[0])
@@ -130,10 +130,6 @@ export default class Validator extends Vue {
     get minDelegationAmt(): Big {
         let bn = this.$store.state.Platform.minStakeDelegation
         return bnToBig(bn, 9)
-    }
-
-    get selectedNetwork() {
-        return this.$store.getters['Network/selectedNetwork']
     }
 }
 </script>
