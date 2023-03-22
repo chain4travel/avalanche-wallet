@@ -156,7 +156,7 @@ const accounts_module: Module<AccountsState, RootState> = {
             let index = state.accountIndex
             let account: iUserAccountEncrypted = getters.account
 
-            if (!index) return
+            if (index === null || index === undefined) return
 
             let passCorrect = await verifyAccountPassword(account, pass)
             if (!passCorrect) throw new Error('Invalid password.')
