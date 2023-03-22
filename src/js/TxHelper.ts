@@ -241,10 +241,10 @@ export async function buildEvmTransferNativeTx(
     let tx = new Transaction(
         {
             nonce: nonce,
-            gasPrice: gasPrice.toString('hex'),
+            gasPrice: prefixHex(gasPrice.toString('hex')),
             gasLimit: gasLimit,
             to: to,
-            value: amount.toString('hex'),
+            value: prefixHex(amount.toString('hex')),
             data: '0x',
         },
         chainParams
@@ -281,7 +281,7 @@ export async function buildEvmTransferErc20Tx(
     let tx = new Transaction(
         {
             nonce: nonce,
-            gasPrice: gasPrice.toString('hex'),
+            gasPrice: prefixHex(gasPrice.toString('hex')),
             gasLimit: gasLimit,
             value: '0x0',
             to: token.data.address,
@@ -321,7 +321,7 @@ export async function buildEvmTransferERCNftTx(
     let tx = new Transaction(
         {
             nonce: nonce,
-            gasPrice: gasPrice.toString('hex'),
+            gasPrice: prefixHex(gasPrice.toString('hex')),
             gasLimit: gasLimit,
             value: '0x0',
             to: token.data.address,
@@ -331,6 +331,8 @@ export async function buildEvmTransferERCNftTx(
     )
     return tx
 }
+
+const prefixHex = (s: string): string => '0x' + s
 
 export enum AvmTxNameEnum {
     'Transaction' = AVMConstants.BASETX,
