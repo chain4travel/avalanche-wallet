@@ -75,7 +75,7 @@ export default class Validator extends Vue {
 
     @Watch('$store.state.networkName')
     @Watch('$store.state.activeWallet')
-    async evaluateCanRegisterNode() {
+    evaluateCanRegisterNode() {
         const BN_ONE = new BN(1)
         WalletHelper.getAddressState(this.staticAddress).then((result) => {
             this.isKycVerified = !result.and(BN_ONE.shln(ADDRESSSTATEKYCVERIFIED)).isZero()

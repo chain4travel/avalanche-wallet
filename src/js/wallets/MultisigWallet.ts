@@ -1,5 +1,5 @@
 import { ava, bintools } from '@/AVA'
-import { AvaWalletCore, WalletNameType } from './types'
+import { AvaWalletCore, ChainAlias, WalletNameType } from './types'
 import { ChainIdType } from '../../constants'
 import { WalletCore } from './WalletCore'
 import { BN, Buffer } from '@c4tplatform/caminojs/dist'
@@ -262,6 +262,10 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
 
     getCurrentAddressPlatform(): string {
         return this._aliasAddress(this.pchainId)
+    }
+
+    getStaticAddress(chainID: ChainAlias): string {
+        return this._aliasAddress(chainID)
     }
 
     getStaticKeyPair(): SECP256k1KeyPair | undefined {
