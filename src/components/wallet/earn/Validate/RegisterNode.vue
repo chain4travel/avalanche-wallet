@@ -66,7 +66,7 @@
             <div>
                 <h4 class="input_label">{{ $t('earn.validate.label_3') }}</h4>
                 <span class="disabled_input" role="textbox">
-                    {{ pChainAddress }}
+                    {{ staticAddress }}
                 </span>
             </div>
             <div>
@@ -125,18 +125,13 @@ export default class RegisterNode extends Vue {
         return big.toLocaleString()
     }
 
-    get addresses() {
-        let wallet: MnemonicWallet = this.$store.state.activeWallet
-        return wallet.getAllAddressesP()
-    }
-
     get wallet() {
         let wallet: SingletonWallet = this.$store.state.activeWallet
         return wallet
     }
 
-    get pChainAddress() {
-        return this.wallet.getCurrentAddressPlatform()
+    get staticAddress() {
+        return this.wallet.getStaticAddress('P')
     }
 
     async registerNode() {
@@ -151,7 +146,7 @@ export default class RegisterNode extends Vue {
                 this.nodePrivateKey.trim(),
                 undefined,
                 nodeId,
-                this.addresses[0]
+                this.staticAddress
             )
             console.log(result)
             this.$emit('registered')
