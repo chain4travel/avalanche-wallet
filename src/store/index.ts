@@ -136,6 +136,7 @@ export default new Vuex.Store({
                     continue
                 }
             }
+            if (activeIndex >= keyList.length) activeIndex = 0
             commit('setActiveWallet', state.wallets[activeIndex])
             dispatch('onAccess', state.wallets[activeIndex])
             dispatch('updateMultisigWallets')

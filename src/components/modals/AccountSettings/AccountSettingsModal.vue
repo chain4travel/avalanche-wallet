@@ -2,8 +2,8 @@
     <modal ref="modal" title="Account Settings" class="modal_main" @beforeClose="clear">
         <div class="modal_body">
             <div class="header">
-                <Identicon :value="account.name"></Identicon>
-                <p style="text-align: center">{{ account.name }}</p>
+                <Identicon :value="accountName"></Identicon>
+                <p style="text-align: center">{{ accountName }}</p>
 
                 <p class="err small" style="text-align: center">
                     Clearing your browser cache will remove this account. Make sure you have your
@@ -63,6 +63,9 @@ export default class AccountSettingsModal extends Vue {
 
     get account(): iUserAccountEncrypted {
         return this.$store.getters['Accounts/account']
+    }
+    get accountName(): string {
+        return this.account?.name ?? 'New Account'
     }
     open() {
         this.$refs.modal.open()

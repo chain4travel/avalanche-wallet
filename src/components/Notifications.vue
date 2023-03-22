@@ -31,8 +31,8 @@ export default {
     display: flex;
     flex-direction: column;
     top: 0;
-    right: 0;
-    padding: 30px 3vw;
+    left: 0;
+    padding: 8px 1vw;
     z-index: 9;
 }
 
@@ -63,7 +63,7 @@ export default {
 }
 .list-enter, .list-leave-to /* .list-leave-active below version 2.1.8 */ {
     opacity: 0;
-    transform: translateX(30px);
+    transform: translateX(-30px);
 }
 
 p {
