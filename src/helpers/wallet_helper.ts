@@ -200,6 +200,10 @@ class WalletHelper {
         return await ava.PChain().getAddressStates(address)
     }
 
+    static async getRegisteredNode(address: string): Promise<string> {
+        return await ava.PChain().getRegisteredShortIDLink(address)
+    }
+
     static async registerNodeTx(
         wallet: WalletType,
         nodePrivateKey: string,

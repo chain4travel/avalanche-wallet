@@ -9,17 +9,17 @@
                 <p v-else-if="!canValidate" class="no_balance">
                     {{ $t('earn.warning_1', [minStakeAmt.toLocaleString()]) }}
                 </p>
-                <p v-else-if="!isNodeRegistered" class="no_balance">
+                <p v-else-if="registeredNodeID === ''" class="no_balance">
                     <register-node
                         :isKycVerified="isKycVerified"
                         :isConsortiumMember="isConsortiumMember"
                         :minPlatformUnlocked="minPlatformUnlocked"
                         :hasEnoughLockablePlatformBalance="hasEnoughLockablePlatformBalance"
-                        @registered="isNodeRegistered = true"
+                        @registered="nodeRegistered"
                     ></register-node>
                 </p>
                 <template v-else>
-                    <add-validator></add-validator>
+                    <add-validator :nodeID="registeredNodeID"></add-validator>
                 </template>
             </div>
         </transition>
@@ -33,12 +33,12 @@ import { BN } from '@c4tplatform/caminojs/dist'
 import { bnToBig } from '@/helpers/helper'
 import Big from 'big.js'
 import { WalletHelper } from '@/helpers/wallet_helper'
-import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import RegisterNode from '@/components/wallet/earn/Validate/RegisterNode.vue'
 import {
     ADDRESSSTATECONSORTIUM,
     ADDRESSSTATEKYCVERIFIED,
 } from '@c4tplatform/caminojs/dist/apis/platformvm/addressstatetx'
+import { WalletCore } from '@/js/wallets/WalletCore'
 
 @Component({
     name: 'validator',
@@ -50,7 +50,7 @@ import {
 export default class Validator extends Vue {
     isKycVerified = false
     isConsortiumMember = false
-    isNodeRegistered = false
+    registeredNodeID = ''
     intervalID: any = null
 
     updateValidators() {
@@ -69,23 +69,30 @@ export default class Validator extends Vue {
         clearInterval(this.intervalID)
     }
 
+    nodeRegistered(ev: any, nodeId: string) {
+        this.registeredNodeID = nodeId
+    }
+
     @Watch('$store.state.networkName')
     @Watch('$store.state.activeWallet')
     async evaluateCanRegisterNode() {
         const BN_ONE = new BN(1)
-        const result = await WalletHelper.getAddressState(this.addresses[0])
-        this.isKycVerified = !result.and(BN_ONE.shln(ADDRESSSTATEKYCVERIFIED)).isZero()
-        this.isConsortiumMember = !result.and(BN_ONE.shln(ADDRESSSTATECONSORTIUM)).isZero()
-        this.isNodeRegistered = false
+        WalletHelper.getAddressState(this.staticAddress).then((result) => {
+            this.isKycVerified = !result.and(BN_ONE.shln(ADDRESSSTATEKYCVERIFIED)).isZero()
+            this.isConsortiumMember = !result.and(BN_ONE.shln(ADDRESSSTATECONSORTIUM)).isZero()
+        })
+        WalletHelper.getRegisteredNode(this.staticAddress).then(
+            (nodeID) => (this.registeredNodeID = nodeID),
+            () => (this.registeredNodeID = '')
+        )
     }
 
     get hasEnoughLockablePlatformBalance(): boolean {
         return this.totBal.gte(this.minPlatformUnlocked)
     }
 
-    get addresses() {
-        let wallet: MnemonicWallet = this.$store.state.activeWallet
-        return wallet.getAllAddressesP()
+    get staticAddress() {
+        return (this.$store.state.activeWallet as WalletCore).getStaticAddress('P')
     }
 
     get platformUnlocked(): BN {

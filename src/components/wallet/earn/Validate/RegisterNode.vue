@@ -149,7 +149,7 @@ export default class RegisterNode extends Vue {
                 this.staticAddress
             )
             console.log(result)
-            this.$emit('registered')
+            this.$emit('registered', nodeId)
             await this.$store.dispatch('Notifications/add', {
                 type: 'success',
                 title: 'Node Registered',

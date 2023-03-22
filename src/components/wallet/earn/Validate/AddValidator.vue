@@ -8,7 +8,7 @@
                             <h4>{{ $t('earn.validate.nodeId') }}</h4>
                             <input
                                 type="text"
-                                v-model="nodeId"
+                                v-model="nodeID"
                                 style="width: 100%; border-radius: var(--border-radius-sm)"
                                 placeholder="NodeID-"
                             />
@@ -41,7 +41,7 @@
                     <ConfirmPage
                         key="confirm"
                         v-show="isConfirm"
-                        :node-i-d="nodeId"
+                        :node-i-d="nodeID"
                         :end="formEnd"
                         :amount="formAmt"
                         :reward-address="rewardIn"
@@ -126,7 +126,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 //@ts-ignore
 import AvaxInput from '@/components/misc/AvaxInput.vue'
 import { BN } from '@c4tplatform/caminojs/dist'
@@ -170,10 +170,10 @@ const MAX_STAKE_DURATION = DAY_MS * 365
     },
 })
 export default class AddValidator extends Vue {
+    @Prop() nodeID!: string
+
     startDate: string = new Date(Date.now() + MIN_MS * 15).toISOString()
     endDate: string = new Date().toISOString()
-    // delegationFee: string = '2.0'
-    nodeId = ''
     rewardIn: string = ''
     rewardDestination = 'local' // local || custom
     isLoading = false
@@ -183,7 +183,7 @@ export default class AddValidator extends Vue {
 
     minFee = 2
 
-    formNodeId = ''
+    formNodeID = ''
     formAmt: BN = new BN(0)
     formEnd: Date = new Date()
     formFee: number = 0
@@ -276,28 +276,8 @@ export default class AddValidator extends Vue {
         return ava.getNetwork().P.minStake
     }
 
-    // get avaxPrice(): Big {
-    //     return Big(this.$store.state.prices.usd)
-    // }
-
-    // get estimatedReward(): Big {
-    //     let start = new Date(this.startDate)
-    //     let end = new Date(this.endDate)
-    //     let duration = end.getTime() - start.getTime() // in ms
-
-    //     let currentSupply = this.$store.state.Platform.currentSupply
-    //     let estimation = calculateStakingReward(this.stakeAmt, duration / 1000, currentSupply)
-    //     let res = bnToBig(estimation, 9)
-
-    //     return res
-    // }
-
-    // get estimatedRewardUSD() {
-    //     return this.estimatedReward.times(this.avaxPrice)
-    // }
-
     updateFormData() {
-        this.formNodeId = this.nodeId.trim()
+        this.formNodeID = this.nodeID.trim()
         this.formAmt = this.stakeAmt
         this.formEnd = new Date(this.endDate)
         this.formRewardAddr = this.rewardIn
@@ -318,7 +298,7 @@ export default class AddValidator extends Vue {
     }
 
     get canSubmit() {
-        if (!this.nodeId) {
+        if (!this.nodeID) {
             return false
         }
 
@@ -356,7 +336,7 @@ export default class AddValidator extends Vue {
         }
 
         // Not a valid Node ID
-        if (!this.nodeId.includes('NodeID-')) {
+        if (!this.nodeID.includes('NodeID-')) {
             this.err = this.$t('earn.validate.errs.id') as string
             return false
         }
@@ -391,7 +371,7 @@ export default class AddValidator extends Vue {
             const endTime = this.formEnd.getTime() / 1000
             let txId = await WalletHelper.addValidatorTx(
                 wallet,
-                this.formNodeId,
+                this.formNodeID,
                 new BN(startTime),
                 new BN(endTime),
                 new BN(this.formAmt.toString())
