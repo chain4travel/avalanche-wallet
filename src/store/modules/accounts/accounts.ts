@@ -73,7 +73,6 @@ const accounts_module: Module<AccountsState, RootState> = {
                 // If this is an active account, get its index
                 let activeAccount = getters.account
                 let accountIndex = state.accountIndex
-                console.log('Saving account', activeAccount, accountIndex)
                 let wallet = rootState.activeWallet as MnemonicWallet | SingletonWallet | null
                 let pass = data.password
                 if (!pass || wallet?.type === 'ledger') return
@@ -124,7 +123,7 @@ const accounts_module: Module<AccountsState, RootState> = {
             if (!passCorrect) throw new Error('Invalid password.')
             let index = state.accountIndex
 
-            if (!acct || !index) return
+            if (!acct || (index === null || index === undefined)) return
 
             removeAccountByIndex(index)
             state.accountIndex = null

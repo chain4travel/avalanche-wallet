@@ -13,7 +13,6 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 @Component
 export default class DeleteAccount extends Vue {
     @Prop() setAccount: any
-    helpers = this.globalHelper()
     pass = ''
     error = ''
 
@@ -27,14 +26,15 @@ export default class DeleteAccount extends Vue {
         try {
             let notificationMessage = this.$t('notifications.delete_account')
             await this.$store.dispatch('Accounts/deleteAccount', this.pass)
-            this.helpers.setAccount(null)
-            this.helpers.dispatchNotification({
+            let { dispatchNotification, setAccount } = this.globalHelper()
+            setAccount(null)
+            dispatchNotification({
                 message: notificationMessage,
                 type: 'success',
             })
-        } catch (err) {
-            let error = err as Error
-            this.error = error.message
+        } catch (err: any) {
+            console.error(err)
+            this.error = err.message
         }
     }
 }
