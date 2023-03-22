@@ -92,7 +92,7 @@ const accounts_module: Module<AccountsState, RootState> = {
                 }
 
                 // Remove old account, add new one
-                if (accountIndex != null) {
+                if (accountIndex != null && accountIndex >= 0) {
                     overwriteAccountAtIndex(encryptedWallet, accountIndex)
                 } else {
                     addAccountToStorage(encryptedWallet)
@@ -123,7 +123,7 @@ const accounts_module: Module<AccountsState, RootState> = {
             if (!passCorrect) throw new Error('Invalid password.')
             let index = state.accountIndex
 
-            if (!acct || (index === null || index === undefined)) return
+            if (!acct || index === null || index === undefined) return
 
             removeAccountByIndex(index)
             state.accountIndex = null

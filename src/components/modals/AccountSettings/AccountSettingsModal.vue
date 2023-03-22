@@ -1,7 +1,7 @@
 <template>
     <modal ref="modal" title="Account Settings" class="modal_main" @beforeClose="clear">
         <div class="modal_body">
-            <div class="header">
+            <div class="header" v-if="account">
                 <Identicon :value="account.name"></Identicon>
                 <p style="text-align: center">{{ account.name }}</p>
 
@@ -31,7 +31,7 @@
                 <component
                     v-if="subComponent"
                     :is="subComponent"
-                    v-bind="[{ accountName: account.name }]"
+                    v-bind="[{ accountName: account?.name }]"
                 ></component>
                 <button @click="clear">{{ $t('access.cancel') }}</button>
             </template>

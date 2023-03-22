@@ -9,12 +9,14 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import AccountSettingsModal from "@/components/modals/AccountSettings/AccountSettingsModal.vue";
 
 @Component
 export default class DeleteAccount extends Vue {
     @Prop() setAccount: any
     pass = ''
     error = ''
+    $parent!: AccountSettingsModal
 
     get canSubmit() {
         if (this.pass.length < 1) return false
@@ -32,6 +34,7 @@ export default class DeleteAccount extends Vue {
                 message: notificationMessage,
                 type: 'success',
             })
+            this.$parent.close()
         } catch (err: any) {
             console.error(err)
             this.error = err.message
