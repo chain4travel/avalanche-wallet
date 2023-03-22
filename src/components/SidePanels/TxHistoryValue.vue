@@ -72,7 +72,7 @@ export default class TxHistoryValue extends Vue {
                 return this.operationDirection
             case 'deposit':
                 return 'Deposit'
-            case 'undeposit':
+            case 'unlock_deposit':
                 return 'Undeposit'
             default:
                 // Capitalize first letter

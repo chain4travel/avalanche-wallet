@@ -89,7 +89,7 @@ export default class ExportAvaxCsvModal extends Vue {
 
             if (!avaxOutAmt) return false
 
-            return ['base', 'operation', 'deposit', 'undeposit'].includes(tx.type)
+            return ['base', 'operation', 'deposit', 'unlock_deposit'].includes(tx.type)
         })
 
         let txFee = ava.XChain().getTxFee()
