@@ -169,13 +169,16 @@ const accounts_module: Module<AccountsState, RootState> = {
         async updateKycStatus({ state, rootState, dispatch }) {
             if (!rootState.activeWallet || rootState.activeWallet.type === 'ledger') return null
             const wallet = rootState.activeWallet as SingletonWallet | MnemonicWallet
+            const privKey = wallet.getStaticKeyPair()?.getPrivateKey().toString('hex')
+            if (!privKey) return null
             try {
                 state.kycStatus = await checkVerificationStatus(
-                    wallet.ethKey,
+                    privKey,
                     //@ts-ignore
                     rootState.Network.selectedNetwork.name.toLowerCase()
                 )
             } catch (e) {
+                console.log((e as Error).message)
                 this.dispatch('Notifications/add', {
                     title: 'KYC Status',
                     message: 'Error Updating KYC Status.',
