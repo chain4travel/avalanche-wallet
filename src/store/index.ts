@@ -44,6 +44,7 @@ import { privateToAddress } from '@ethereumjs/util'
 import { updateFilterAddresses } from '../providers'
 import { getAvaxPriceUSD } from '@/helpers/price_helper'
 import createHash from 'create-hash'
+import router from '@/router'
 
 export default new Vuex.Store({
     modules: {
@@ -188,7 +189,7 @@ export default new Vuex.Store({
             store.state.storedActiveWallet = null
             store.state.address = null
             store.state.isAuth = false
-
+            router.push('/login')
             store.dispatch('Accounts/onLogout')
             store.dispatch('Assets/onLogout')
             store.dispatch('Launch/onLogout')
