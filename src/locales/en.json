@@ -357,7 +357,7 @@
         "password_validation": "Password must be at least 9 characters long.",
         "password_validation2": "Password do not match.",
         "account_name_required": "Account Name Required.",
-        "view_multisig_owners": "View Owners"
+        "view_multisig_owners": "Multisig Owners"
     },
     "portfolio": {
         "assets": "Assets",

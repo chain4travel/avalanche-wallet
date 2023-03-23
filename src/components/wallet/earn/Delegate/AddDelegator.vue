@@ -41,14 +41,14 @@
                         <div class="reward_tabs">
                             <button
                                 @click="rewardSelect('local')"
-                                :selected="this.rewardDestination === 'local'"
+                                :selected="rewardDestination === 'local'"
                             >
                                 {{ $t('earn.delegate.form.reward.chip_1') }}
                             </button>
                             <span>or</span>
                             <button
                                 @click="rewardSelect('custom')"
-                                :selected="this.rewardDestination === 'custom'"
+                                :selected="rewardDestination === 'custom'"
                             >
                                 {{ $t('earn.delegate.form.reward.chip_2') }}
                             </button>

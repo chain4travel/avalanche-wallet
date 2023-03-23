@@ -218,6 +218,10 @@ abstract class HdWalletCore extends WalletCore {
 
     onNetworkChange(): void {
         this.hdKeysLoaded = false
+
+        this.externalHelper.onNetworkChange()
+        this.internalHelper.onNetworkChange()
+        this.platformHelper.onNetworkChange()
     }
 
     async initialize() {
@@ -227,13 +231,13 @@ abstract class HdWalletCore extends WalletCore {
         this.isInit = false
         this.stakeAmount = new BN(0)
 
-        this.externalHelper.onNetworkChange().then(() => {
+        this.externalHelper.findHdIndex().then(() => {
             this.updateInitState()
         })
-        this.internalHelper.onNetworkChange().then(() => {
+        this.internalHelper.findHdIndex().then(() => {
             this.updateInitState()
         })
-        this.platformHelper.onNetworkChange().then(() => {
+        this.platformHelper.findHdIndex().then(() => {
             this.updateInitState()
         })
 

@@ -48,7 +48,7 @@ export default class MultisigOwnersModal extends Vue {
     }
 
     get unlinkedOwners() {
-        return this.wallet.unlinkedOwners
+        return this.wallet.getUnlinkedOwners()
     }
 }
 </script>

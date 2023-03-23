@@ -72,7 +72,7 @@
                             class="row_but circle"
                             @click.native="showExportModal"
                         >
-                            <fa icon="upload"></fa>
+                            <fa class="fa-regular" icon="upload"></fa>
                         </Tooltip>
                         <div class="text_buts">
                             <button
@@ -97,28 +97,28 @@
                                 {{ $t('keys.view_static_keys') }}
                             </button>
                         </div>
-                        <div v-if="!is_default" class="text_buts">
-                            <Tooltip
-                                :text="$t('keys.activate_key')"
-                                class="row_but circle"
-                                :disabled="activating"
-                                @click.native="select"
-                            >
-                                <Spinner v-if="activating" class="spinner"></Spinner>
-                                <fa v-else icon="thumbtack"></fa>
-                            </Tooltip>
-                            <Tooltip :text="$t('keys.remove_key')" class="row_but circle">
-                                <button @click.prevent="remove">
-                                    <img
-                                        src="@/assets/trash_can_dark.svg"
-                                        style="height: 16px"
-                                        alt="Trashcan"
-                                    />
-                                </button>
-                            </Tooltip>
-                        </div>
                     </div>
                 </div>
+            </div>
+            <div v-if="!is_default" class="text_buts">
+                <Tooltip
+                    :text="$t('keys.activate_key')"
+                    class="row_but circle"
+                    :disabled="activating"
+                    @click.native="select"
+                >
+                    <Spinner v-if="activating" class="spinner"></Spinner>
+                    <fa v-else icon="star"></fa>
+                </Tooltip>
+                <Tooltip :text="$t('keys.remove_key')" class="row_but circle">
+                    <button @click.prevent="remove">
+                        <img
+                            src="@/assets/trash_can_dark.svg"
+                            style="height: 16px"
+                            alt="Trashcan"
+                        />
+                    </button>
+                </Tooltip>
             </div>
         </div>
     </div>
@@ -328,22 +328,6 @@ export default class KeyRow extends Vue {
         margin: 0px 4px !important;
     }
 
-    $but_w: 32px;
-
-    .circle {
-        width: $but_w;
-        height: $but_w;
-        border-radius: $but_w;
-        background-color: rgba(0, 0, 0, 0.1);
-        display: flex;
-        justify-content: center;
-        align-self: center;
-
-        &:hover {
-            background-color: var(--bg);
-        }
-    }
-
     .text_buts {
         display: flex;
         flex-direction: column;
@@ -360,11 +344,30 @@ export default class KeyRow extends Vue {
 }
 
 .row_but {
-    margin: 0 4px;
+    margin: 0 8px;
+    font-size: 16px;
+}
+
+.row_but.circle {
+    $but_w: 32px;
+
+    width: $but_w;
+    height: $but_w;
+    border-radius: $but_w;
+    background-color: rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-self: center;
+
+    &:hover {
+        background-color: var(--bg);
+    }
 }
 
 .rows {
     overflow: auto;
+    display: flex;
+    flex-direction: row;
 }
 
 .addressItem .selBut {
@@ -386,6 +389,7 @@ export default class KeyRow extends Vue {
     display: grid;
     grid-template-columns: 32px 1fr;
     grid-gap: 14px;
+    width: 100%;
 }
 
 .header_cols {
