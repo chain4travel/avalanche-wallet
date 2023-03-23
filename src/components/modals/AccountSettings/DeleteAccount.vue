@@ -9,7 +9,7 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import AccountSettingsModal from "@/components/modals/AccountSettings/AccountSettingsModal.vue";
+import AccountSettingsModal from '@/components/modals/AccountSettings/AccountSettingsModal.vue'
 
 @Component
 export default class DeleteAccount extends Vue {
