@@ -1,24 +1,27 @@
 import { ava, bintools } from '@/AVA'
-import { AvaWalletCore, WalletNameType } from './types'
+import { AvaWalletCore, ChainAlias, WalletNameType } from './types'
+import { ChainIdType } from '../../constants'
 import { WalletCore } from './WalletCore'
 import { BN, Buffer } from '@c4tplatform/caminojs/dist'
-import { PayloadBase } from '@c4tplatform/caminojs/dist/utils'
+import { PayloadBase, privateKeyStringToBuffer } from '@c4tplatform/caminojs/dist/utils'
 import {
-    KeyChain,
     Tx as AVMTx,
     UnsignedTx as AVMUnsignedTx,
     UTXO as AVMUTXO,
     UTXOSet as AVMUTXOSet,
 } from '@c4tplatform/caminojs/dist/apis/avm'
 import {
+    KeyPair,
     Owner,
+    PlatformVMConstants,
     Tx as PlatformTx,
     UnsignedTx as PlatformUnsignedTx,
     UTXO as PlatformUTXO,
     UTXOSet as PlatformUTXOSet,
 } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import {
-    MultisigAliasSet,
+    MultisigKeyChain,
+    MultisigKeyPair,
     OutputOwners,
     SECP256k1KeyPair,
     SignerKeyPair,
@@ -34,6 +37,7 @@ import Erc20Token from '@/js/Erc20Token'
 import { Transaction } from '@ethereumjs/tx'
 import { ITransaction } from '@/components/wallet/transfer/types'
 import { buildUnsignedTransaction } from '../TxHelper'
+import createHash from 'create-hash'
 
 const NotImplementedError = new Error('Not implemented in MultisigWwallet')
 
@@ -87,7 +91,7 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
 
     outputOwners(): OutputOwners {
         return new OutputOwners(
-            this.keyData.owner.addresses.map((a) => bintools.parseAddress(a, '')),
+            this.keyData.owner.addresses.map((a) => bintools.stringToAddress(a)),
             new BN(this.keyData.owner.locktime),
             this.keyData.owner.threshold
         )
@@ -186,8 +190,8 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         throw NotImplementedError
     }
 
-    async signP(unsignedTx: PlatformUnsignedTx): Promise<PlatformTx> {
-        return this._sign(unsignedTx) as PlatformTx
+    async signP(unsignedTx: PlatformUnsignedTx, additionalSigners?: string[]): Promise<PlatformTx> {
+        return this._sign(unsignedTx, additionalSigners) as PlatformTx
     }
 
     async signC(unsignedTx: EVMUnsignedTx): Promise<EVMTx> {
@@ -260,6 +264,10 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         return this._aliasAddress(this.pchainId)
     }
 
+    getStaticAddress(chainID: ChainAlias): string {
+        return this._aliasAddress(chainID)
+    }
+
     getStaticKeyPair(): SECP256k1KeyPair | undefined {
         return undefined
     }
@@ -315,6 +323,11 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         return this.getCurrentAddressPlatform()
     }
 
+    getSignerAddresses(chainID: ChainIdType): string[] {
+        if (chainID !== 'P') throw NotImplementedError
+        return this.keyData.owner.addresses
+    }
+
     /******************** INTERNAL *******************************/
 
     _aliasAddress(chainID: string) {
@@ -322,43 +335,67 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         return bintools.addressToString(hrp, chainID, this.keyData.alias)
     }
 
-    _sign(utx: AbstractUnsignedTx): AbstractTx {
-        // create a keychain from the wallets
-        const kc = new KeyChain('', '')
+    _sign(utx: AbstractUnsignedTx, additionalSigners?: string[]): AbstractTx {
+        // Create the hash from the tx
+        const txbuff = utx.toBuffer()
+        const msg: Buffer = Buffer.from(createHash('sha256').update(txbuff).digest())
+
+        const outputOwner = this.outputOwners()
+
+        // Crreate Multisig KeyChain
+        const msKeyChain = new MultisigKeyChain(
+            ava.getHRP(),
+            ava.getNetwork().P.alias,
+            msg,
+            PlatformVMConstants.SECPMULTISIGCREDENTIAL,
+            (utx as PlatformUnsignedTx).getTransaction().getOutputOwners(),
+            new Map([[this.keyData.alias.toString('hex'), outputOwner]])
+        )
+
+        // Insert all signatures
         this.wallets.forEach((w) => {
             const key = w.getStaticKeyPair()
-            if (key) kc.addKey(key)
+            if (key) {
+                const signature = key.sign(msg)
+                msKeyChain.addKey(new MultisigKeyPair(msKeyChain, key.getAddress(), signature))
+            }
         })
 
-        // Check if we are able to send this TX directly
-        const resolver = new MultisigAliasSet(
-            new Map([[this.keyData.alias.toString('hex'), this.outputOwners()]]),
-            new Set(kc.getAddresses().map((a) => a.toString('hex')))
-        )
-        resolver.dryRun(true)
+        // Additional signers
+        if (additionalSigners) {
+            const key = new KeyPair('', '')
+            additionalSigners.forEach((pk) => {
+                key.importKey(privateKeyStringToBuffer(pk))
+                const signature = key.sign(msg)
+                msKeyChain.addKey(new MultisigKeyPair(msKeyChain, key.getAddress(), signature))
+            })
+        }
+
+        // Create signature indices (throws if not able to do so)
         try {
-            utx.getTransaction().resolveMultisigIndices(resolver)
-            // If the resolving step succeeds, we can fire the TX
-            resolver.dryRun(false)
-            // resolve all sigIdxs so they are ready to sign
-            utx.getTransaction().resolveMultisigIndices(resolver)
-            // sign the TX and return it for issueing
-            return utx.sign(kc)
-        } catch (e: any) {
+            msKeyChain.buildSignatureIndices()
+            // No exception, we can sign directly and issue tx
+            return utx.sign(msKeyChain)
+        } catch (e) {
+            // Signmature errors are thrown if not enough signers are present
             if (!(e instanceof SignatureError)) throw e
         }
-        // Resolver we not get all signatures -> signaVault
 
-        // Force resolver to create wildcard sigIdx by removing addresses
-        resolver.clearAddresses()
-        // Switch off dry run to let resolver create wildcard sig indices
-        resolver.dryRun(false)
-        // resolve all sigIdxs so they are ready to sign
-        utx.getTransaction().resolveMultisigIndices(resolver)
-        //TODO:
-        // - Collect everything required for signaVault
-        // - Send the Tx to signavault
-        // - Trigger refresh of multisigTx List
+        // This is the place where we can need to do some signavault activities
+        // - check if the tx is already in signavault
+        // - if so:
+        // -- pull signatures, and insert them into mskeychain
+        // -- call buildSignatureIndices again
+        // -- if successful, tx can be signed
+        // - if not:
+        // -- serialize tx into hex bytes (hexm)
+        // -- serialize utx.getTransaction().getOutputOwners (hexo)
+        // -- send hexbytes, transaction.outputowners, txID to signavault
+        // -- for every wallet here send the signature (loop)
+
+        // txbuff <- the unsigned transac
+        // msg <- the hash of unsigned tx (key in signavault)
+        // OutputOwners.toArray((utx.getTransaction() as PlatformBaseTx).getOutputOwners())
 
         // Throw to supress issueTx
         throw new SignatureError('Transaction added into signavault')

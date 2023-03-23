@@ -21,7 +21,7 @@ import {
 } from '@c4tplatform/caminojs/dist/apis/evm'
 
 import { ITransaction } from '@/components/wallet/transfer/types'
-import { BN, Buffer } from '@c4tplatform/caminojs'
+import { BN, Buffer } from '@c4tplatform/caminojs/dist'
 import { PayloadBase } from '@c4tplatform/caminojs/dist/utils'
 import Erc20Token from '@/js/Erc20Token'
 
@@ -137,25 +137,4 @@ export interface IAvaHdWallet extends AvaWalletCore, UnsafeWallet {
     getMnemonic(): string
     getCurrentKey(): AVMKeyPair
     getKeyChain(): AVMKeyChain
-}
-
-export type RewardOwner = {
-    locktime: string
-    threshold: string
-    addresses: string[]
-}
-
-export type NodeInfo = {
-    txID: string
-    startTime: string
-    endTime: string
-    stakeAmount: string
-    nodeID: string
-    rewardOwner: RewardOwner
-    validationRewardOwner: RewardOwner
-    delegationRewardOwner: RewardOwner
-    potentialReward: string
-    delegationFee: string
-    uptime: string
-    connected: boolean
 }
