@@ -1,10 +1,8 @@
-process.env['NODE_OPTIONS'] = '--openssl_legacy-provider'
-
 module.exports = {
     modulePathIgnorePatterns: ['camino-wallet-sdk'],
     moduleFileExtensions: ['js', 'ts', 'json', 'vue'],
     transform: {
-        '.*\\.(vue)$': '@vue/vue2-jest',
+        '.*\\.(vue)$': 'vue-jest',
         '^.+\\.ts?$': 'ts-jest',
         '^.+\\.js?$': 'babel-jest',
     },
@@ -12,9 +10,7 @@ module.exports = {
         '@/(.*)$': '<rootDir>/src/$1',
     },
     setupFilesAfterEnv: ['./jest.setup.js'],
-    testEnvironmentOptions: {
-        url: 'https://localhost/',
-    },
-    testEnvironment: '<rootDir>/jest.environment.jsdom.js',
+    testURL: 'https://localhost/',
+    testEnvironment: 'jsdom',
     testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
 }
