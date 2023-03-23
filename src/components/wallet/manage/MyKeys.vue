@@ -38,7 +38,6 @@ import { WalletType } from '@/js/wallets/types'
 export default class MyKeys extends Vue {
     selectWallet(wallet: WalletType) {
         this.$store.dispatch('activateWallet', wallet)
-        this.$store.dispatch('History/updateTransactionHistory')
     }
 
     get account() {

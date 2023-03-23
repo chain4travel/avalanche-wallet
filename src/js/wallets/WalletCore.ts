@@ -96,6 +96,9 @@ abstract class WalletCore {
         return []
     }
 
+    onNetworkChange(): void {}
+    async initialize() {}
+
     async evmGetAtomicUTXOs(sourceChain: ExportChainsC) {
         let addrs = [this.getEvmAddressBech()]
         return await UtxoHelper.evmGetAtomicUTXOs(addrs, sourceChain)

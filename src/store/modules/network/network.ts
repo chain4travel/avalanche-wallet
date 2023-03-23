@@ -144,9 +144,11 @@ const network_module: Module<NetworkState, RootState> = {
 
             // If authenticated
             if (rootState.isAuth) {
-                for (var i = 0; i < rootState.wallets.length; i++) {
-                    let w = rootState.wallets[i]
-                    w.onnetworkchange()
+                for (const w of rootState.wallets) {
+                    w.onNetworkChange()
+                }
+                if (rootState.activeWallet) {
+                    rootState.activeWallet.initialize()
                 }
             }
 
@@ -163,7 +165,7 @@ const network_module: Module<NetworkState, RootState> = {
             // Set the SDK Network
             setAvalanche(ava)
 
-            commit('setNetworkName', net.name, { root: true })
+            commit('setNetwork', net, { root: true })
             state.status = 'connected'
             return true
         },

@@ -68,7 +68,7 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
 
     constructor(alias?: Buffer, memo?: string, owner?: Owner) {
         super()
-        this.name = 'Multisig Wallet'
+        this.name = 'Multisig Wallet' + memo ? ` (${memo})` : ''
         this.keyData = {
             alias: alias ?? Buffer.alloc(0),
             memo: memo ?? '',
@@ -117,7 +117,7 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         }
     }
 
-    onnetworkchange(): void {
+    onNetworkChange(): void {
         this.chainId = ava.XChain().getBlockchainAlias()
         this.pchainId = ava.PChain().getBlockchainAlias()
     }

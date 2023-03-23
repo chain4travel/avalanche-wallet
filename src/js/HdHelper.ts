@@ -77,11 +77,6 @@ class HdHelper {
         if (ethKey) {
             this.ethKeyPair = this.keyChain.importKey(Buffer.from(ethKey.privateKey))
         }
-        // this.oninit()
-    }
-
-    async oninit() {
-        await this.findHdIndex()
     }
 
     // When the wallet connects to a different network
@@ -100,7 +95,7 @@ class HdHelper {
         this.hdIndex = 0
         this.addressCache = {}
         this.keyCache = {}
-        await this.oninit()
+        await this.findHdIndex()
     }
 
     // Increments the hd index by one and adds the key

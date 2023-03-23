@@ -54,24 +54,12 @@
                         <Tooltip :text="$t('keys.tooltip')" v-if="isVolatile">
                             <fa icon="exclamation-triangle" class="volatile_alert"></fa>
                         </Tooltip>
-                        <button class="selBut" @click="select" v-if="!is_default">
-                            <span>{{ $t('keys.activate_key') }}</span>
-                        </button>
                         <Tooltip
-                            :text="$t('keys.remove_key')"
-                            class="row_but circle"
-                            v-if="!is_default"
-                        >
-                            <button @click.prevent="remove">
-                                <img
-                                    src="@/assets/trash_can_dark.svg"
-                                    style="height: 16px"
-                                    alt="Trashcan"
-                                />
-                            </button>
-                        </Tooltip>
-                        <Tooltip
-                            v-if="walletType !== 'singleton' && walletType !== 'multisig'"
+                            v-if="
+                                is_default &&
+                                walletType !== 'singleton' &&
+                                walletType !== 'multisig'
+                            "
                             :text="$t('keys.hd_addresses')"
                             class="row_but circle"
                             @click.native="showPastAddresses"
@@ -79,7 +67,7 @@
                             <fa icon="list-ol"></fa>
                         </Tooltip>
                         <Tooltip
-                            v-if="walletType === 'mnemonic'"
+                            v-if="walletType === 'singleton' || walletType === 'mnemonic'"
                             :text="$t('keys.export_key')"
                             class="row_but circle"
                             @click.native="showExportModal"
@@ -87,7 +75,10 @@
                             <fa icon="upload"></fa>
                         </Tooltip>
                         <div class="text_buts">
-                            <button v-if="walletType === 'mnemonic'" @click="showModal">
+                            <button
+                                v-if="walletType === 'mnemonic' && is_default"
+                                @click="showModal"
+                            >
                                 {{ $t('keys.view_key') }}
                             </button>
                             <button v-if="walletType === 'singleton'" @click="showPrivateKeyModal">
@@ -106,6 +97,26 @@
                                 {{ $t('keys.view_static_keys') }}
                             </button>
                         </div>
+                        <div v-if="!is_default" class="text_buts">
+                            <Tooltip
+                                :text="$t('keys.activate_key')"
+                                class="row_but circle"
+                                :disabled="activating"
+                                @click.native="select"
+                            >
+                                <Spinner v-if="activating" class="spinner"></Spinner>
+                                <fa v-else icon="thumbtack"></fa>
+                            </Tooltip>
+                            <Tooltip :text="$t('keys.remove_key')" class="row_but circle">
+                                <button @click.prevent="remove">
+                                    <img
+                                        src="@/assets/trash_can_dark.svg"
+                                        style="height: 16px"
+                                        alt="Trashcan"
+                                    />
+                                </button>
+                            </Tooltip>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -120,6 +131,7 @@ import MnemonicPhraseModal from '@/components/modals/MnemonicPhraseModal.vue'
 import HdDerivationListModal from '@/components/modals/HdDerivationList/HdDerivationListModal.vue'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import Tooltip from '@/components/misc/Tooltip.vue'
+import Spinner from '@/components/misc/Spinner.vue'
 
 import ExportKeys from '@/components/modals/ExportKeys.vue'
 import PrivateKey from '@/components/modals/PrivateKey.vue'
@@ -135,6 +147,7 @@ import { MultisigWallet } from '@/js/wallets/MultisigWallet'
         MnemonicPhraseModal,
         HdDerivationListModal,
         MultisigOwnersModal,
+        Spinner,
         Tooltip,
         ExportKeys,
         PrivateKey,
@@ -146,6 +159,7 @@ export default class KeyRow extends Vue {
 
     isEditable = false
     customWalletName = this.walletName
+    activating = false
 
     $refs!: {
         export_wallet: ExportKeys
@@ -243,7 +257,8 @@ export default class KeyRow extends Vue {
     }
 
     select() {
-        this.$emit('select', this.wallet)
+        this.activating = true
+        setTimeout(() => this.$emit('select', this.wallet), 100)
     }
 
     showModal() {
@@ -310,7 +325,7 @@ export default class KeyRow extends Vue {
     flex-wrap: wrap;
 
     > * {
-        margin: 0px 8px !important;
+        margin: 0px 4px !important;
     }
 
     $but_w: 32px;
@@ -345,7 +360,7 @@ export default class KeyRow extends Vue {
 }
 
 .row_but {
-    margin: 0 12px;
+    margin: 0 4px;
 }
 
 .rows {
@@ -360,6 +375,11 @@ export default class KeyRow extends Vue {
         font-size: 12px;
         line-height: normal;
     }
+}
+
+.spinner {
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .header {
