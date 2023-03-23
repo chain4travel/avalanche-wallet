@@ -1004,7 +1004,7 @@
 "@c4tplatform/camino-wallet-sdk@file:camino-wallet-sdk":
   version "0.0.2"
   dependencies:
-    "@c4tplatform/caminojs" "file:../../AppData/Local/Yarn/Cache/v6/npm-@c4tplatform-camino-wallet-sdk-0.0.2-ccbdbcbc-db30-40ae-8f30-8ee7db11c33b-1679578709672/node_modules/@c4tplatform/camino-wallet-sdk/caminojs"
+    "@c4tplatform/caminojs" "file:../../AppData/Local/Yarn/Cache/v6/npm-@c4tplatform-camino-wallet-sdk-0.0.2-5a7ecbbb-9a87-43d6-ad89-3e4c82d40814-1679584595366/node_modules/@c4tplatform/camino-wallet-sdk/caminojs"
     "@ethereumjs/tx" "3.4.0"
     "@ledgerhq/hw-app-eth" "6.12.2"
     "@ledgerhq/hw-transport" "^6.19.0"
