@@ -92,11 +92,11 @@ const accounts_module: Module<AccountsState, RootState> = {
                 }
 
                 // Remove old account, add new one
-                if (accountIndex != null && accountIndex >= 0) {
+                if (accountIndex != null) {
                     overwriteAccountAtIndex(encryptedWallet, accountIndex)
                 } else {
                     addAccountToStorage(encryptedWallet)
-                    state.accountIndex = state.accounts.length - 1
+                    state.accountIndex = state.accounts.length
                 }
 
                 // No more volatile wallets
