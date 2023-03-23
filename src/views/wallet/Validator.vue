@@ -18,6 +18,12 @@
                         @registered="nodeRegistered"
                     ></register-node>
                 </p>
+                <p v-else-if="isSuspended" class="wrong_network">
+                    {{ $t('earn.validate.errs.suspended') }}
+                </p>
+                <p v-else-if="hasValidator" class="wrong_network">
+                    {{ $t('earn.validate.errs.validating', { nodeID: registeredNodeID }) }}
+                </p>
                 <template v-else>
                     <add-validator :nodeID="registeredNodeID"></add-validator>
                 </template>
@@ -36,6 +42,7 @@ import { WalletHelper } from '@/helpers/wallet_helper'
 import RegisterNode from '@/components/wallet/earn/Validate/RegisterNode.vue'
 import {
     ADDRESSSTATECONSORTIUM,
+    ADDRESSSTATEDEFERRED,
     ADDRESSSTATEKYCVERIFIED,
 } from '@c4tplatform/caminojs/dist/apis/platformvm/addressstatetx'
 import { WalletCore } from '@/js/wallets/WalletCore'
@@ -50,6 +57,7 @@ import { WalletCore } from '@/js/wallets/WalletCore'
 export default class Validator extends Vue {
     isKycVerified = false
     isConsortiumMember = false
+    isSuspended = false
     registeredNodeID = ''
     intervalID: any = null
 
@@ -80,6 +88,7 @@ export default class Validator extends Vue {
         WalletHelper.getAddressState(this.staticAddress).then((result) => {
             this.isKycVerified = !result.and(BN_ONE.shln(ADDRESSSTATEKYCVERIFIED)).isZero()
             this.isConsortiumMember = !result.and(BN_ONE.shln(ADDRESSSTATECONSORTIUM)).isZero()
+            this.isSuspended = !result.and(BN_ONE.shln(ADDRESSSTATEDEFERRED)).isZero()
         })
         WalletHelper.getRegisteredNode(this.staticAddress).then(
             (nodeID) => (this.registeredNodeID = nodeID),
@@ -137,6 +146,10 @@ export default class Validator extends Vue {
     get minDelegationAmt(): Big {
         let bn = this.$store.state.Platform.minStakeDelegation
         return bnToBig(bn, 9)
+    }
+
+    get hasValidator(): boolean {
+        return this.$store.getters['Platform/isValidator'](this.registeredNodeID)
     }
 }
 </script>

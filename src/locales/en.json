@@ -526,7 +526,9 @@
                 "amount": "Stake amount must be at least {0} @.native:(0)",
                 "id": "Invalid Node ID.",
                 "fee": "Delegation fee must be at least {0}%",
-                "address": "Invalid address. Reward address must be a valid P chain address."
+                "address": "Invalid address. Reward address must be a valid P chain address.",
+                "validating": "Your registered node: {nodeID} is already validating.",
+                "suspended": "Your registered node: {nodeID} is suspended."
             }
         },
         "delegate": {
