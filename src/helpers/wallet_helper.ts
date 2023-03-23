@@ -23,6 +23,8 @@ import { getStakeForAddresses } from '@/helpers/utxo_helper'
 import ERCNftToken from '@/js/ERCNftToken'
 import { UnsignedTx, UTXOSet } from '@c4tplatform/caminojs/dist/apis/platformvm'
 
+import { GetValidatorsResponse } from '@/store/modules/platform/types'
+
 class WalletHelper {
     static async getStake(wallet: WalletType): Promise<BN> {
         let addrs = wallet.getAllAddressesP()

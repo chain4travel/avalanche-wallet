@@ -102,11 +102,12 @@ abstract class WalletCore {
 
         let toAddress = '0x' + hexAddr
         let ownerAddresses = [bechAddr]
+        let fromAddresses = ownerAddresses
         const sourceChainId = chainIdFromAlias(sourceChain)
 
         return await ava
             .CChain()
-            .buildImportTx(utxoSet, toAddress, ownerAddresses, sourceChainId, fee)
+            .buildImportTx(utxoSet, toAddress, ownerAddresses, sourceChainId, fromAddresses, fee)
     }
 
     /**
