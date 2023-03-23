@@ -64,6 +64,7 @@ export default new Vuex.Store({
         wallets: [],
         volatileWallets: [], // will be forgotten when tab is closed
         warnUpdateKeyfile: false, // If true will promt the user the export a new keyfile
+        theme: 'night',
         walletsDeleted: false,
         prices: {
             usd: 0,
@@ -89,6 +90,10 @@ export default new Vuex.Store({
         },
     },
     mutations: {
+        updateTheme(state) {
+            if (state.theme === 'night') state.theme = 'day'
+            else state.theme = 'night'
+        },
         updateActiveAddress(state) {
             if (!state.activeWallet) {
                 state.address = null
