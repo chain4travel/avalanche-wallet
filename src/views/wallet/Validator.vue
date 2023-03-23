@@ -69,7 +69,7 @@ export default class Validator extends Vue {
         clearInterval(this.intervalID)
     }
 
-    nodeRegistered(ev: any, nodeId: string) {
+    nodeRegistered(nodeId: string) {
         this.registeredNodeID = nodeId
     }
 
