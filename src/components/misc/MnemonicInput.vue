@@ -4,9 +4,8 @@
             <div v-for="i in wordNum" :key="i" class="word">
                 <p class="index">{{ i }}.</p>
                 <input
-                    :type="isHidden ? 'password' : 'text'"
-                    class="phrase_word"
-                    :class="isWordValid(phrase[i - 1]) ? '' : 'invalid_input'"
+                    :type="isHidden && password ? 'password' : 'text'"
+                    :class="getClass(phrase[i - 1])"
                     v-model.trim="phrase[i - 1]"
                     @keydown.space.prevent="onSpace()"
                     @keyup="$emit('update', { value: phrase[i - 1], index: i - 1 })"
@@ -37,6 +36,14 @@ export default class MnemonicDisplay extends Vue {
     @Prop() phrase!: string[]
     isHidden: boolean = true
     wordNum: number = 24
+    password: boolean = false
+
+    async mounted() {
+        if (!(window.getComputedStyle(this.$el) as any).webkitTextSecurity) {
+            this.password = true
+        }
+    }
+
     onSpace() {
         let inputs = document.getElementsByTagName('input')
         let currInput = document.activeElement!
@@ -51,12 +58,16 @@ export default class MnemonicDisplay extends Vue {
             }
         }
     }
-    isWordValid(word: string) {
-        return wordlists.EN.includes(word) || !word
-    }
 
     getDataCY(pos: number) {
         return `mnemonic-field-${pos}`
+    }
+
+    getClass(word: string): string {
+        let ret = 'phrase_word'
+        if (!(wordlists.EN.includes(word) || !word)) ret = ret + ' invalid_input'
+        if (!this.password && this.isHidden) ret = ret + ' pass'
+        return ret
     }
 }
 </script>
