@@ -1,7 +1,7 @@
 <template>
     <modal ref="modal" :title="$t('modal.priv_key.title')" class="modal_main">
         <div class="singleton_modal_body">
-            <p class="key_raw">{{ privateKey }}</p>
+            <p class="key_raw" data-cy="private-key-display">{{ privateKey }}</p>
             <p class="warning_text">
                 Warning: Never disclose this key. Anyone with your private keys can steal any assets
                 held in your wallet.
