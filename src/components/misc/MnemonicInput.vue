@@ -128,7 +128,6 @@ span {
     text-align: center;
 }
 
-}
 .invalid_input {
     border: #ff2115 1px solid;
 }

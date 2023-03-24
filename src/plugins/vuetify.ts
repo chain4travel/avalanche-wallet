@@ -151,7 +151,7 @@ library.add(
     faUnlock,
     faUpload,
     faUsers,
-    faVideo
+    faVideo,
     faFileCsv,
     faExternalLinkAlt,
     faExternalLinkSquareAlt,

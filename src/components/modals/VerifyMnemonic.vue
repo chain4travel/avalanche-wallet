@@ -21,7 +21,7 @@
             >
                 Verify
             </button>
-        </div>
+        </form>
     </modal>
 </template>
 

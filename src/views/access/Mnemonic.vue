@@ -29,7 +29,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import MnemonicDisplay from '@/components/misc/MnemonicDisplay.vue'
 import * as bip39 from 'bip39'
@@ -196,7 +196,7 @@ textarea {
 }
 
 .link {
-  margin-bottom: 0px;
+    margin-bottom: 0px;
 }
 
 @include mixins.mobile_device {
