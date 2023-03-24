@@ -28,6 +28,10 @@ export default class Modal extends Vue {
 
     isActive: boolean = false
 
+    destroyed() {
+        document.body.style.overflow = 'auto'
+    }
+
     public open() {
         this.isActive = true
         document.body.style.overflow = 'hidden'

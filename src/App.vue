@@ -111,7 +111,7 @@ export default {
 
 .main_cols {
     &[wallet_view] {
-        height: 100vh;
+        // height: 100vh;
 
         #router_view {
             padding: 0;
