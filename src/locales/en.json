@@ -731,7 +731,8 @@
             "title": "Key Phrase"
         },
         "multisig": {
-            "title": "Multisignature owners"
+            "title": "Multisignature owners",
+            "subtitle": "{n}, Threshold: {t}"
         },
         "priv_key": {
             "title": "Private Key"

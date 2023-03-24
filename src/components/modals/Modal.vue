@@ -5,7 +5,10 @@
             <div class="modal_container">
                 <div class="modal_body">
                     <div class="modal_topbar">
-                        <h4 class="modal_title">{{ title }}</h4>
+                        <div class="modal_title">
+                            <h4>{{ title }}</h4>
+                            <p v-if="subtitle" class="modal_subtitle">{{ subtitle }}</p>
+                        </div>
                         <button class="modalClose" @click="close" v-if="can_close">
                             <fa icon="times"></fa>
                         </button>
@@ -23,6 +26,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 @Component
 export default class Modal extends Vue {
     @Prop({ default: 'Modal Title' }) title!: string
+    @Prop({ default: '' }) subtitle!: string
     @Prop({ default: true }) can_close!: boolean
     @Prop({ default: false }) icy!: boolean
 
@@ -69,6 +73,10 @@ export default class Modal extends Vue {
     flex-grow: 1;
     margin: 0;
     font-weight: lighter;
+}
+
+.modal_subtitle {
+    font-size: 14px;
 }
 
 .modalClose {
