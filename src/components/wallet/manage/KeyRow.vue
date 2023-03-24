@@ -82,7 +82,10 @@
                             >
                                 {{ $t('keys.view_key') }}
                             </button>
-                            <button v-if="walletType === 'singleton'" @click="showPrivateKeyModal"                                 data-cy="manage-key-singleton"
+                            <button
+                                v-if="walletType === 'singleton'"
+                                @click="showPrivateKeyModal"
+                                data-cy="manage-key-singleton"
                             >
                                 {{ $t('keys.view_priv_key') }}
                             </button>
@@ -398,7 +401,6 @@ export default class KeyRow extends Vue {
         display: flex;
         align-items: center;
     }
-
 }
 
 .header_cols {
