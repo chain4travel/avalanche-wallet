@@ -33,7 +33,7 @@ export default class Modal extends Vue {
     isActive: boolean = false
 
     destroyed() {
-        document.body.style.overflow = 'auto'
+        setTimeout(() => (document.body.style.overflow = 'auto'), 1000)
     }
 
     public open() {

@@ -69,10 +69,11 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
 
     constructor(alias?: Buffer, memo?: string, owner?: Owner) {
         super()
-        this.name = 'Multisig Wallet' + memo ? ` (${memo})` : ''
+        const parsedMemo = memo ? Buffer.from(memo.slice(2), 'hex').toString() : ''
+        this.name = 'Multisig Wallet' + (memo ? ` (${parsedMemo})` : '')
         this.keyData = {
             alias: alias ?? Buffer.alloc(0),
-            memo: memo ?? '',
+            memo: parsedMemo,
             owner: owner ?? ({ addresses: [], threshold: 0, locktime: '0' } as Owner),
         }
         this.ethAddress = this.keyData.alias.toString('hex')
