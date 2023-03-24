@@ -5,20 +5,15 @@
             <div class="modal_container">
                 <div class="modal_body">
                     <div class="modal_topbar">
-                        <h4 class="modal_title">{{ title }}</h4>
-                        <p v-if="subtitle" class="modal_subtitle">{{ subtitle }}</p>
-                        <button
-                            class="modalClose"
-                            @click="close"
-                            v-if="can_close"
-                            data-cy="btn-modal-close"
-                        >
+                        <div class="modal_title">
+                            <h4>{{ title }}</h4>
+                            <p v-if="subtitle" class="modal_subtitle">{{ subtitle }}</p>
+                        </div>
+                        <button class="modalClose" @click="close" v-if="can_close">
                             <fa icon="times"></fa>
                         </button>
                     </div>
-                    <div class="modal_slot">
-                        <slot></slot>
-                    </div>
+                    <slot></slot>
                 </div>
             </div>
         </div>
@@ -55,7 +50,7 @@ export default class Modal extends Vue {
     public close() {
         this.$emit('beforeClose')
         this.isActive = false
-        document.body.style.overflow = 'initial'
+        document.body.style.overflow = 'auto'
     }
 }
 </script>
@@ -81,7 +76,7 @@ export default class Modal extends Vue {
     text-align: left;
     flex-grow: 1;
     margin: 0;
-    font-weight: normal;
+    font-weight: lighter;
 }
 
 .modal_subtitle {
@@ -138,14 +133,6 @@ export default class Modal extends Vue {
     border-radius: var(--border-radius-lg);
     overflow: hidden;
     max-height: 90%;
-    display: flex;
-    flex-direction: column;
-}
-
-.modal_slot {
-  overflow-y: auto;
-  height: 100%;
-  flex: 1;
 }
 
 @include mixins.mobile-device {
