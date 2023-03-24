@@ -1,6 +1,12 @@
 <template>
     <div>
-        <v-checkbox :label="explain" v-model="value" @change="change" class="checkbox"></v-checkbox>
+        <v-checkbox
+            :label="explain"
+            :value="value"
+            @input="$emit('input', $event.target.value)"
+            @change="change"
+            class="checkbox"
+        ></v-checkbox>
     </div>
 </template>
 <script>
@@ -25,8 +31,6 @@ export default {
 </script>
 
 <style lang="scss">
-@use '../../styles/main';
-
 .checkbox {
     .v-label {
         color: var(--primary-color);

@@ -6,6 +6,7 @@
                 <div class="modal_body">
                     <div class="modal_topbar">
                         <h4 class="modal_title">{{ title }}</h4>
+                        <p v-if="subtitle" class="modal_subtitle">{{ subtitle }}</p>
                         <button
                             class="modalClose"
                             @click="close"
@@ -30,10 +31,15 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 @Component
 export default class Modal extends Vue {
     @Prop({ default: 'Modal Title' }) title!: string
+    @Prop({ default: '' }) subtitle!: string
     @Prop({ default: true }) can_close!: boolean
     @Prop({ default: false }) icy!: boolean
 
     isActive: boolean = false
+
+    destroyed() {
+        setTimeout(() => (document.body.style.overflow = 'auto'), 1000)
+    }
 
     public open() {
         this.isActive = true
@@ -54,7 +60,7 @@ export default class Modal extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
 .modal_topbar {
     background-color: var(--bg);
@@ -76,6 +82,10 @@ export default class Modal extends Vue {
     flex-grow: 1;
     margin: 0;
     font-weight: normal;
+}
+
+.modal_subtitle {
+    font-size: 14px;
 }
 
 .modalClose {
@@ -133,12 +143,12 @@ export default class Modal extends Vue {
 }
 
 .modal_slot {
-    overflow-y: auto;
-    height: 100%;
-    flex: 1;
+  overflow-y: auto;
+  height: 100%;
+  flex: 1;
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .modal_body {
         position: absolute;
         width: max-content;
