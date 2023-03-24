@@ -201,7 +201,7 @@ export default class PaperWallet extends Vue {
         )
 
         QRCode.toDataURL(
-            this.wallet.getMnemonic(),
+            this.wallet?.getMnemonic(),
             {
                 width: this.designPxToReal(90),
             },
