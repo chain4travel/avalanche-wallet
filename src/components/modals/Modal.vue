@@ -9,7 +9,12 @@
                             <h4>{{ title }}</h4>
                             <p v-if="subtitle" class="modal_subtitle">{{ subtitle }}</p>
                         </div>
-                        <button class="modalClose" @click="close" v-if="can_close">
+                        <button
+                            class="modalClose"
+                            @click="close"
+                            v-if="can_close"
+                            data-cy="btn-modal-close"
+                        >
                             <fa icon="times"></fa>
                         </button>
                     </div>
