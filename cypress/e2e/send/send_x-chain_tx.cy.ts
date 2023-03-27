@@ -111,7 +111,7 @@ describe('Send transaction with x-chain balance', { tags: ['@send'] }, () => {
                 cy.get('@currentRpcHost').then((currentRpcHost) => {
                     cy.request({
                         method: 'POST',
-                        //  e.g.,  url: 'https://columbus.camino.foundation:443/ext/bc/X',
+                        //  e.g.,  url: 'https://columbus.camino.network:443/ext/bc/X',
                         url:
                             currentRpcHost.protocol +
                             '//' +
