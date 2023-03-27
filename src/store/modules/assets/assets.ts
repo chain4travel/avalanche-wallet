@@ -41,7 +41,6 @@ import { AvaNetwork } from '@/js/AvaNetwork'
 import { web3 } from '@/evm'
 
 const TOKEN_LISTS: string[] = []
-const ZeroBN = new BN(0)
 
 import ERCNftModule from './modules/ercNft'
 import ERC20_TOKEN_LIST from '@/ERC20Tokenlist.json'
