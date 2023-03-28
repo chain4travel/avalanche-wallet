@@ -1,31 +1,5 @@
 <template>
     <div class="offer_row">
-        <!-- <div class="top_bar">
-            <div style="display: flex; justify-content: space-between">
-                <p>{{ startDate.toLocaleString() }}</p>
-                <p>{{ endDate.toLocaleString() }}</p>
-            </div>
-            <div
-                class="reward_bar"
-                :style="{
-                    width: `${percFull * 100}%`,
-                }"
-            ></div>
-        </div>
-        <div class="data_row stake_info">
-            <div>
-                <label>NodeID</label>
-                <p class="reward node_id">{{ staker.nodeID }}</p>
-            </div>
-            <div>
-                <label>{{ $t('earn.rewards.row.stake') }}</label>
-                <p class="reward">{{ stakeBig.toLocaleString() }} {{ nativeAssetSymbol }}</p>
-            </div>
-            <div style="text-align: right">
-                <label>{{ $t('earn.rewards.row.reward') }}</label>
-                <p class="reward">{{ rewardBig.toLocaleString() }} {{ nativeAssetSymbol }}</p>
-            </div>
-        </div> -->
         <h2 class="offer_title">{{ rewardTitle }}</h2>
         <div class="offer_detail">
             <div class="offer_detail_left">
@@ -114,11 +88,11 @@ export default class UserRewardCard extends Vue {
     }
 
     get startDate() {
-        return new Date(parseInt(this.start.toString()))
+        return new Date(parseInt(this.start.toString()) * 1000)
     }
 
     get endDate() {
-        return new Date(parseInt(this.end.toString()))
+        return new Date(parseInt(this.end.toString()) * 1000)
     }
 
     get minLockAmount() {

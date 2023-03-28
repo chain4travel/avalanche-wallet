@@ -13,7 +13,9 @@
         </div>
         <div class="pages">
             <transition-group name="fade" mode="out-in">
-                <div v-show="tab === `earn_now`" key="earn_now"></div>
+                <div v-show="tab === `earn_now`" key="earn_now">
+                    Currently there is no saving pool rewards available
+                </div>
                 <UserRewards v-show="tab === `actine_earning`" key="actine_earning"></UserRewards>
             </transition-group>
         </div>
