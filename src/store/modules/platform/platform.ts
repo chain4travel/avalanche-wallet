@@ -15,6 +15,7 @@ import {
 import {
     DelegatorPendingRaw,
     DelegatorRaw,
+    DepositOffer,
     ValidatorRaw,
 } from '@/components/misc/ValidatorList/types'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
@@ -33,6 +34,8 @@ const platform_module: Module<PlatformState, RootState> = {
         minStake: new BN(0),
         minStakeDelegation: new BN(0),
         currentSupply: new BN(1),
+        depositOffers: [],
+        activeDepositOffer: [],
     },
     mutations: {
         setValidators(state, validators: ValidatorRaw[]) {
@@ -57,6 +60,7 @@ const platform_module: Module<PlatformState, RootState> = {
             dispatch('updateValidators')
             dispatch('updateValidatorsPending')
             dispatch('updateCurrentSupply')
+            dispatch('updateAllDepositOffers')
         },
 
         async updateValidators({ state, commit }) {
@@ -74,6 +78,22 @@ const platform_module: Module<PlatformState, RootState> = {
             //@ts-ignore
             state.validatorsPending = validators
             state.delegatorsPending = delegators
+        },
+
+        async updateAllDepositOffers({ state, commit }) {
+            console.log('updateAllDepositOffers')
+            const promises = [
+                ava.PChain().getAllDepositOffers(true),
+                ava.PChain().getAllDepositOffers(false),
+            ]
+
+            const results = await Promise.all(promises)
+            const concatenatedResults = results[0].concat(results[1])
+            const res = concatenatedResults.filter((value, index, self) => {
+                return self.findIndex((t) => t.id === value.id) === index
+            })
+
+            state.depositOffers = res
         },
     },
     getters: {

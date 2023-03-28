@@ -439,6 +439,8 @@
             "validation": "Validation",
             "delegation": "Delegation",
             "empty": "You do not have any pending rewards.",
+            "earn_now": "Earn Now",
+            "active_earning": "Active Earning",
             "row": {
                 "start": "Start",
                 "end": "End",
