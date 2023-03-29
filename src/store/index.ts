@@ -318,7 +318,7 @@ export default new Vuex.Store({
                 if (!response.addresses.some((address) => staticAddresses.includes(address)))
                     continue
 
-                const wallet = new MultisigWallet(aliasBuffer, (response as any).memo, response)
+                const wallet = new MultisigWallet(aliasBuffer, response.memo, response)
                 wallet.accountHash = createHash('sha256').update(wallet.getKey()).digest()
                 wallets.push(wallet)
                 state.wallets.push(wallet)
