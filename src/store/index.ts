@@ -367,7 +367,6 @@ export default new Vuex.Store({
             dispatch('Assets/updateWallet').then(() => {
                 dispatch('Assets/updateAvaAsset')
                 dispatch('Assets/updateUTXOs')
-                dispatch('Platform/update')
                 dispatch('Accounts/updateKycStatus')
                 dispatch('History/updateTransactionHistory')
                 updateFilterAddresses()
