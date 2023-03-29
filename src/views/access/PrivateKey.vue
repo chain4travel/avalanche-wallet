@@ -53,7 +53,7 @@ export default class PrivateKey extends Vue {
 
         try {
             await this.$store.dispatch('accessWalletSingleton', key)
-            let { updateSuiteStore } = parent.globalHelper()
+            let { updateSuiteStore } = this.globalHelper()
             updateSuiteStore(this.$store.state)
             this.onsuccess()
         } catch (e) {
