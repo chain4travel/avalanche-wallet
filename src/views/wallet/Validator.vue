@@ -66,7 +66,7 @@ import {
 } from '@c4tplatform/caminojs/dist/apis/platformvm/addressstatetx'
 import ValidatorInfo from '@/components/wallet/earn/Validate/ValidatorInfo.vue'
 import ValidatorSuspended from '@/components/wallet/earn/Validate/ValidatorSuspended.vue'
-import { NodeInfo } from '@/js/wallets/types'
+import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 
 @Component({
     name: 'validator',
@@ -83,11 +83,11 @@ export default class Validator extends Vue {
     isNodeRegistered = false
     intervalID: any = null
     nodeId = ''
-    nodeInfo: NodeInfo | null = null
+    nodeInfo: ValidatorRaw | null = null
     validatorIsSuspended: boolean = false
     loadingRefreshRegisterNode: boolean = false
 
-    verifyValidatorIsReady(val: NodeInfo) {
+    verifyValidatorIsReady(val: ValidatorRaw) {
         this.nodeInfo = val
     }
 
