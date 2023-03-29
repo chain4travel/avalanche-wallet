@@ -159,8 +159,8 @@ const network_module: Module<NetworkState, RootState> = {
             dispatch('Platform/updateMinStakeAmount', null, { root: true })
             dispatch('updateTxFee')
             // Update tx history
-            this.dispatch('History/getAliasChains')
-            this.dispatch('History/updateTransactionHistory', null, { root: true })
+            dispatch('History/getAliasChains', null, { root: true })
+            dispatch('History/updateTransactionHistory', null, { root: true })
 
             // Set the SDK Network
             setAvalanche(ava)
