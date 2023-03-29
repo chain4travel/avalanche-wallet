@@ -106,6 +106,7 @@ const accounts_module: Module<AccountsState, RootState> = {
                 rootState.walletsDeleted = false
                 commit('loadAccounts')
             } catch (e) {
+                throw (<Error>e).message
             }
         },
 
