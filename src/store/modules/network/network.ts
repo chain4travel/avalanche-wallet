@@ -156,7 +156,6 @@ const network_module: Module<NetworkState, RootState> = {
             await dispatch('Launch/onNetworkChange', net, { root: true })
             dispatch('Assets/updateUTXOs', null, { root: true })
             dispatch('Platform/update', null, { root: true })
-            dispatch('Platform/updateMinStakeAmount', null, { root: true })
             dispatch('updateTxFee')
             // Update tx history
             dispatch('History/getAliasChains', null, { root: true })
