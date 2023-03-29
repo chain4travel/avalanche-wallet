@@ -38,7 +38,7 @@
                     <ConfirmPage
                         key="confirm"
                         v-show="isConfirm"
-                        :node-i-d="nodeID"
+                        :node-i-d="nodeId"
                         :end="formEnd"
                         :amount="formAmt"
                         :reward-address="rewardIn"
@@ -311,7 +311,7 @@ export default class AddValidator extends Vue {
     }
 
     get canSubmit() {
-        if (!this.nodeID) {
+        if (!this.nodeId) {
             return false
         }
 
