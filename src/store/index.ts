@@ -173,19 +173,6 @@ export default new Vuex.Store({
             dispatch('activateWallet', state.activeWallet)
         },
 
-        // TODO: Parts can be shared with the logout function below
-        // Similar to logout but keeps the Remembered keys.
-        async timeoutLogout(store) {
-            let { dispatchNotification } = this.globalHelper()
-            dispatchNotification({
-                title: 'Session Timeout',
-                message: 'You are logged out due to inactivity.',
-                type: 'warning',
-            })
-
-            store.dispatch('logout')
-        },
-
         async logout(store) {
             localStorage.removeItem('w')
             store.state.wallets = []
