@@ -69,7 +69,7 @@ import AccountSettingsModal from '@/components/modals/AccountSettings/AccountSet
     },
 })
 export default class ManageKeys extends Vue {
-    helpers = this.globalHelper()
+    helpers? = this.globalHelper()
     $refs!: {
         import: ImportKeys
         export: ExportKeys
@@ -119,7 +119,7 @@ export default class ManageKeys extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
 .button_container {
     display: flex;
@@ -140,7 +140,7 @@ h1 {
     color: var(--warning);
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     header {
         display: block;
     }
@@ -150,7 +150,7 @@ h1 {
         flex-direction: column;
         justify-content: flex-start;
         align-items: flex-start;
-        /*flex-wrap: wrap;*/
+        flex-wrap: wrap;
 
         button {
             padding: 8px 0;
