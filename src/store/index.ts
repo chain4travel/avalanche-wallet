@@ -325,10 +325,16 @@ export default new Vuex.Store({
 
         removeWallet({ state, dispatch, commit }, wallet: WalletType) {
             let index = state.wallets.indexOf(wallet)
-            state.wallets.splice(index, 1)
+            let wallets = [...state.wallets]
+            wallets.splice(index, 1)
+            state.wallets = wallets
             state.walletsDeleted = true
             index = state.volatileWallets.indexOf(wallet)
-            if (index >= 0) state.volatileWallets.splice(index, 1)
+            if (index >= 0) {
+                let volatileWallets = [...state.volatileWallets]
+                volatileWallets.splice(index, 1)
+                state.volatileWallets = volatileWallets
+            }
             commit('Accounts/deleteKey', wallet)
             dispatch('updateMultisigWallets')
         },
