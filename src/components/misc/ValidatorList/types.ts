@@ -60,6 +60,22 @@ export interface DepositOffer {
     flags: BN
 }
 
+export interface ActiveDepositOffer {
+    id: string
+    interestRateNominator: BN
+    start: BN
+    end: BN
+    minAmount: BN
+    minDuration: number
+    maxDuration: number
+    unlockPeriodDuration: number
+    noRewardsPeriodDuration: number
+    memo: string
+    flags: BN
+    amount: BN
+    claimedRewardAmount: BN
+}
+
 export interface ValidatorDict {
     [nodeId: string]: ValidatorRaw
 }

@@ -40,7 +40,12 @@
 import 'reflect-metadata'
 import { Vue, Component } from 'vue-property-decorator'
 import { AvaWalletCore } from '../../../js/wallets/types'
-import { DelegatorRaw, ValidatorRaw, DepositOffer } from '@/components/misc/ValidatorList/types'
+import {
+    DelegatorRaw,
+    ValidatorRaw,
+    DepositOffer,
+    ActiveDepositOffer,
+} from '@/components/misc/ValidatorList/types'
 import UserRewardRow from '@/components/wallet/earn/UserRewardRow.vue'
 import UserRewardCard from '@/components/wallet/earn/UserRewardCard.vue'
 import { bnToBig } from '@/helpers/helper'
@@ -56,7 +61,7 @@ import { ava } from '@/AVA'
 })
 export default class UserRewards extends Vue {
     depositOffers: DepositOffer[] = []
-    activeOffers = []
+    activeOffers: ActiveDepositOffer[] = []
     get userAddresses() {
         let wallet: AvaWalletCore = this.$store.state.activeWallet
         if (!wallet) return []
@@ -131,18 +136,20 @@ export default class UserRewards extends Vue {
             await ava.PChain().getUTXOs(pAddressStrings)
         ).utxos.getLockedTxIDs()
         const activeDepositOffers = await ava.PChain().getDeposits(lockedTxIDs.depositIDs)
+        console.log(activeDepositOffers)
 
         const activeOffers = depositOffers
-            .filter((offer) =>
+            .filter((offer: ActiveDepositOffer) =>
                 activeDepositOffers.some((active) => active.depositOfferID === offer.id)
             )
-            .map((offer) => {
+            .map((offer: ActiveDepositOffer) => {
+                console.log(offer)
+
                 const active = activeDepositOffers.find(
                     (active) => active.depositOfferID === offer.id
                 )
                 return { ...offer, ...active }
             })
-        console.log(activeOffers)
 
         this.activeOffers = activeOffers
     }

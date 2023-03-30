@@ -5,11 +5,11 @@
             <div class="offer_detail_left">
                 <div>
                     <label>Lock Start:</label>
-                    <p class="reward">{{ startDate.toLocaleString() }}</p>
+                    <p class="reward">{{ startDate }}</p>
                 </div>
                 <div>
                     <label>Lock End:</label>
-                    <p class="reward">{{ endDate.toLocaleString() }}</p>
+                    <p class="reward">{{ endDate }}</p>
                 </div>
                 <div>
                     <label>Minmum Lock:</label>
@@ -37,6 +37,7 @@
                 </div>
             </div>
         </div>
+        <button class="claim_button button_primary">Claim</button>
     </div>
 </template>
 <script lang="ts">
@@ -47,6 +48,7 @@ import { BN } from '@c4tplatform/caminojs'
 import Big from 'big.js'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import AvaAsset from '@/js/AvaAsset'
+import { ava } from '@/AVA'
 
 @Component({
     filters: {
@@ -88,11 +90,29 @@ export default class UserRewardCard extends Vue {
     }
 
     get startDate() {
-        return new Date(parseInt(this.start.toString()) * 1000)
+        const startDate = new Date(parseInt(this.start.toString()) * 1000)
+
+        return startDate.toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+        })
     }
 
     get endDate() {
-        return new Date(parseInt(this.end.toString()) * 1000)
+        const endDate = new Date(parseInt(this.end.toString()) * 1000)
+
+        return endDate.toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+        })
     }
 
     get minLockAmount() {
@@ -128,6 +148,8 @@ export default class UserRewardCard extends Vue {
 @use '../../../styles/main';
 
 .offer_row {
+    display: flex;
+    flex-direction: column;
     border-radius: var(--border-radius-sm);
     overflow: hidden;
     font-size: 14px;
@@ -202,6 +224,13 @@ export default class UserRewardCard extends Vue {
 
 label {
     color: var(--primary-color-light) !important;
+}
+
+.claim_button {
+    border-radius: var(--border-radius-sm);
+    width: min-content;
+    padding: 8px 30px;
+    margin-left: auto;
 }
 
 @include main.mobile-device {
