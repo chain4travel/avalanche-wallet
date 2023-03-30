@@ -106,12 +106,7 @@ const accounts_module: Module<AccountsState, RootState> = {
                 rootState.walletsDeleted = false
                 commit('loadAccounts')
             } catch (e) {
-                let { dispatchNotification } = this.globalHelper()
-                dispatchNotification({
-                    title: 'Account Save',
-                    message: 'Error Saving Account.',
-                    type: 'error',
-                })
+                throw (<Error>e).message
             }
         },
 
@@ -170,14 +165,16 @@ const accounts_module: Module<AccountsState, RootState> = {
         async updateKycStatus({ state, rootState, dispatch }) {
             if (!rootState.activeWallet || rootState.activeWallet.type === 'ledger') return null
             const wallet = rootState.activeWallet as SingletonWallet | MnemonicWallet
+            const privKey = wallet.getStaticKeyPair()?.getPrivateKey().toString('hex')
+            if (!privKey) return null
             try {
                 state.kycStatus = await checkVerificationStatus(
-                    wallet.ethKey,
+                    privKey,
                     //@ts-ignore
                     rootState.Network.selectedNetwork.name.toLowerCase()
                 )
-            } catch (error) {
-                console.log(error)
+            } catch (e) {
+                console.log((e as Error).message)
                 state.kycStatus = false
             }
         },

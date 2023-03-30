@@ -87,7 +87,8 @@ export default class Earn extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
+
 .earn_page {
     display: grid;
     grid-template-rows: max-content 1fr;
@@ -121,7 +122,7 @@ export default class Earn extends Vue {
     }
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .header {
         display: block;
 
@@ -138,7 +139,7 @@ export default class Earn extends Vue {
     }
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .header {
         button {
             font-size: 13px;

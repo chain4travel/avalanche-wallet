@@ -45,7 +45,7 @@ import UserRewardRow from '@/components/wallet/earn/UserRewardRow.vue'
 import UserRewardCard from '@/components/wallet/earn/UserRewardCard.vue'
 import { bnToBig } from '@/helpers/helper'
 import Big from 'big.js'
-import { BN } from '@c4tplatform/caminojs'
+import { BN } from '@c4tplatform/caminojs/dist'
 import { ava } from '@/AVA'
 
 @Component({
