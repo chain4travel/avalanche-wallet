@@ -1,5 +1,6 @@
 <template>
-    <div class="activity_page">
+    <MultisigTx v-if="multisig" :txId="$route.query.multisigTx" />
+    <div v-else class="activity_page">
         <ExportCsvModal ref="csv_modal"></ExportCsvModal>
         <ExportAvaxCsvModal ref="avax_csv_modal"></ExportAvaxCsvModal>
         <div class="explorer_warning" v-if="!hasExplorer">
@@ -91,6 +92,7 @@ import {
 import TxRow from '@/components/wallet/activity/TxRow.vue'
 import RadioButtons from '@/components/misc/RadioButtons.vue'
 import Spinner from '@/components/misc/Spinner.vue'
+import MultisigTx from '@/components/wallet/activity/MultisigTx.vue'
 
 type ModeKeyType = 'all' | 'transfer' | 'swap' | 'stake'
 
@@ -110,6 +112,7 @@ const MONTH_MIN = 8
     components: {
         ExportAvaxCsvModal,
         ExportCsvModal,
+        MultisigTx,
         Spinner,
         TxRow,
         RadioButtons,
@@ -137,6 +140,8 @@ export default class Activity extends Vue {
     $refs!: {
         csv_modal: ExportCsvModal
         avax_csv_modal: ExportAvaxCsvModal
+        list: any
+        vlist: any
     }
 
     openCsvModal() {
@@ -181,6 +186,10 @@ export default class Activity extends Vue {
         return true
     }
 
+    get multisig(): boolean {
+        return this.$route.query.multisigTx !== undefined
+    }
+
     mounted() {
         this.updateHistory()
         let now = new Date()
@@ -215,8 +224,6 @@ export default class Activity extends Vue {
     }
 
     get allTxs(): ITransactionData[] {
-        // console.log(this.$store.state.History.allTransactions)
-
         return this.$store.state.History.allTransactions
     }
 
@@ -342,14 +349,14 @@ export default class Activity extends Vue {
     }
 
     scrollToTop() {
-        //@ts-ignore
-        this.$refs.vlist.scrollToIndex(0)
+        if (this.$refs.vlist) this.$refs.vlist.scrollToIndex(0)
     }
     // The virtual scroll needs to be given a height in pixels
     setScrollHeight() {
-        //@ts-ignore
-        let h = this.$refs.list.clientHeight
-        this.listH = h
+        if (this.$refs.list) {
+            let h = this.$refs.list.clientHeight
+            this.listH = h
+        }
     }
 }
 </script>

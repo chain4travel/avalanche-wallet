@@ -19,6 +19,9 @@
                         {{ date.toDateString() }}
                         <span>{{ date.toLocaleTimeString() }}</span>
                     </p>
+                    <router-link v-if="multisigTx !== ''" :to="multisigTx" class="msig">
+                        {{ $t('transactions.multisig') }}
+                    </router-link>
                 </div>
                 <div v-if="memo" class="memo">
                     <label>MEMO</label>
@@ -39,6 +42,7 @@ import { AssetsDict, NftFamilyDict } from '@/store/modules/assets/types'
 import StakingTx from '@/components/SidePanels/History/ViewTypes/StakingTx.vue'
 import BaseTx from '@/components/SidePanels/History/ViewTypes/BaseTx.vue'
 import ImportExport from '@/components/SidePanels/History/ViewTypes/ImportExport.vue'
+import RegisterNodeTx from '@/components/SidePanels/History/ViewTypes/RegisterNodeTx.vue'
 import moment from 'moment'
 import { AvaNetwork } from '@/js/AvaNetwork'
 import getMemoFromByteString from '@/services/history/utils'
@@ -83,6 +87,8 @@ export default class TxRow extends Vue {
             case 'add_delegator':
             case 'add_validator':
                 return StakingTx
+            case 'register_node':
+                return RegisterNodeTx
             default:
                 return BaseTx
         }
@@ -116,6 +122,12 @@ export default class TxRow extends Vue {
     get yearLabel(): string {
         return this.mom.format('Y')
     }
+
+    get multisigTx(): string {
+        return this.source.multisigStatus !== undefined
+            ? '/wallet/activity?multisigTx=' + this.source.id
+            : ''
+    }
 }
 </script>
 <style scoped lang="scss">
@@ -145,24 +157,22 @@ export default class TxRow extends Vue {
     border-radius: var(--border-radius-sm);
 }
 
+.msig {
+    color: var(--warning);
+}
+
 .date {
     color: var(--primary-color);
     font-size: 14px;
-    //display: flex;
-    //max-width: 320px;
-    //justify-content: space-between;
     padding-right: 30px;
     text-align: right;
-    //padding-left: 40%;
 }
 
 .tx_detail {
-    //margin-bottom: 8px;
     width: 100%;
 }
 
 .time {
-    //color: var(--primary-color-light);
     font-size: 13px;
 
     span {
@@ -192,7 +202,6 @@ export default class TxRow extends Vue {
     font-size: 24px;
     width: max-content;
     z-index: 2;
-    //background-color: var(--bg);
 }
 
 .explorer_col {
