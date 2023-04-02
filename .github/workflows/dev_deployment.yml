@@ -4,15 +4,12 @@ on:
   workflow_dispatch:
   push:
     branches: [dev, dev-deploy]
-    
 
 env:
   repo_name: wallet-standalone-dev
   repo: https://github.com/chain4travel/camino-wallet.git
-  docker_image: "europe-west3-docker.pkg.dev/pwk-c4t-dev/internal-camino-dev/camino-wallet"
+  docker_image: 'europe-west3-docker.pkg.dev/pwk-c4t-dev/internal-camino-dev/camino-wallet'
   cloudrun_region: europe-west1
-
-  
 
 jobs:
   build_and_deploy:
@@ -35,7 +32,7 @@ jobs:
 
       - name: create docker image
         run: |
-          docker build . -t ${{ steps.setDefaults.outputs.docker_image }}:
+          docker build . -t ${{ steps.setDefaults.outputs.docker_image }}
 
       - name: Cloud authentication
         id: auth
