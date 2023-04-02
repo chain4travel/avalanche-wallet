@@ -1,11 +1,14 @@
 import { Module } from 'vuex'
-import { RootState } from '@/store/types'
-import { getAddressHistory, getAliasChains } from '@/explorer_api'
 import moment from 'moment'
 
-import { Chain, HistoryState } from '@/store/modules/history/types'
-import { ava } from '@/AVA'
-import { filterDuplicateTransactions } from '@/helpers/history_helper'
+import { ava, bintools } from '@/AVA'
+import { RootState } from '@/store/types'
+import { getAddressHistory } from '@/explorer_api'
+import { Buffer } from '@c4tplatform/caminojs/dist'
+
+import { ITransactionData, HistoryState } from '@/store/modules/history/types'
+import { MultisigTx } from '@/store/modules/signavault/types'
+import { parse, UnparsedTx } from './history_utils'
 
 const history_module: Module<HistoryState, RootState> = {
     namespaced: true,
@@ -24,7 +27,10 @@ const history_module: Module<HistoryState, RootState> = {
         },
     },
     actions: {
-        async updateTransactionHistory({ state, rootState, rootGetters, dispatch }) {
+        async updateTransactionHistory(
+            { state, rootState, rootGetters, dispatch },
+            limit: number = 20
+        ) {
             let wallet = rootState.activeWallet
             if (!wallet) return
 
@@ -55,64 +61,65 @@ const history_module: Module<HistoryState, RootState> = {
                 return
             }
 
-            let limit = 20
+            const txsSRaw = rootGetters['Signavault/transactions'] as MultisigTx[]
+            const txsS = parse(
+                txsSRaw.map(
+                    (r): UnparsedTx => {
+                        return {
+                            multisigStatus: r.state,
+                            timestamp: r.tx.timestamp,
+                            txID: bintools.cb58Encode(Buffer.from(r.tx.id, 'hex')),
+                            txBytes: r.tx.unsignedTx,
+                        }
+                    }
+                )
+            )
 
-            let txs = await getAddressHistory(avmAddrs, limit, ava.XChain().getBlockchainID())
-            let txsP = await getAddressHistory(pvmAddrs, limit, ava.PChain().getBlockchainID())
+            var txs: ITransactionData[]
+            var txsP: ITransactionData[]
+            try {
+                txs = await getAddressHistory(avmAddrs, limit, ava.XChain().getBlockchainID())
+                txsP = await getAddressHistory(pvmAddrs, limit, ava.PChain().getBlockchainID())
+            } catch (e: any) {
+                txs = []
+                txsP = []
+                console.log(e)
+            }
 
             let transactions = txs
                 .concat(txsP)
+                .concat(txsS)
                 .sort((x, y) => (moment(x.timestamp).isBefore(moment(y.timestamp)) ? 1 : -1))
-
-            state.transactions = transactions
+            if (limit === 0) state.allTransactions = transactions
+            else state.transactions = transactions
             state.isUpdating = false
         },
-
-        async updateAllTransactionHistory({ state, rootState, rootGetters, dispatch }) {
-            let wallet = rootState.activeWallet
-            if (!wallet) return
-
-            // If wallet is still loading delay
-            // @ts-ignore
-            let network = rootState.Network.selectedNetwork
-
-            if (!wallet.isInit) {
-                setTimeout(() => {
-                    dispatch('updateAllTransactionHistory')
-                }, 500)
-                return false
-            }
-
-            // can't update if there is no explorer or no wallet
-            if (!network.explorerUrl || rootState.address === null) {
-                return false
-            }
-
-            state.isUpdatingAll = true
-
-            let avmAddrs: string[] = wallet.getAllAddressesX()
-            let pvmAddrs: string[] = wallet.getAllAddressesP()
-
-            // this shouldnt ever happen, but to avoid getting every transaction...
-            if (avmAddrs.length === 0) {
-                state.isUpdatingAll = false
-                return
-            }
-
-            let limit = 0
-
-            let txsX = await getAddressHistory(avmAddrs, limit, ava.XChain().getBlockchainID())
-            let txsP = await getAddressHistory(pvmAddrs, limit, ava.PChain().getBlockchainID())
-
-            let txsXFiltered = filterDuplicateTransactions(txsX)
-            let txsPFiltered = filterDuplicateTransactions(txsP)
-
-            let transactions = txsXFiltered
-                .concat(txsPFiltered)
+        async updateAllTransactionHistory({ dispatch }) {
+            return await dispatch('updateTransactionHistory', 0)
+        },
+        // Only refresh MultisigTransaction
+        async updateMultisigTransactionHistory({ state, rootGetters, commit }) {
+            const txsSRaw = rootGetters['Signavault/transactions'] as MultisigTx[]
+            const txsS = parse(
+                txsSRaw.map(
+                    (r): UnparsedTx => {
+                        return {
+                            multisigStatus: r.state,
+                            timestamp: r.tx.timestamp,
+                            txID: bintools.cb58Encode(Buffer.from(r.tx.id, 'hex')),
+                            txBytes: r.tx.unsignedTx,
+                        }
+                    }
+                )
+            )
+            var txs = state.transactions.filter((t) => t.multisigStatus === undefined)
+            state.transactions = txs
+                .concat(txsS)
                 .sort((x, y) => (moment(x.timestamp).isBefore(moment(y.timestamp)) ? 1 : -1))
-
-            state.allTransactions = transactions
-            state.isUpdatingAll = false
+            txs = state.allTransactions.filter((t) => t.multisigStatus === undefined)
+            state.allTransactions = txs
+                .concat(txsS)
+                .sort((x, y) => (moment(x.timestamp).isBefore(moment(y.timestamp)) ? 1 : -1))
         },
         getAliasChains({ state, rootState }) {
             //@ts-ignore

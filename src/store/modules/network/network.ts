@@ -34,6 +34,9 @@ const network_module: Module<NetworkState, RootState> = {
         depositAndBond(state) {
             return state.depositAndBond
         },
+        selectedNetwork(state) {
+            return state.selectedNetwork
+        },
     },
     actions: {
         addCustomNetwork({ state, dispatch }, net: AvaNetwork) {
@@ -159,6 +162,7 @@ const network_module: Module<NetworkState, RootState> = {
             dispatch('updateTxFee')
             // Update tx history
             dispatch('History/getAliasChains', null, { root: true })
+            await dispatch('Signavault/updateTransaction', undefined, { root: true })
             dispatch('History/updateTransactionHistory', null, { root: true })
 
             // Set the SDK Network

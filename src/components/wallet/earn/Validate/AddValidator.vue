@@ -357,9 +357,13 @@ export default class AddValidator extends Vue {
 
         // Start delegation in 5 minutes
         let startDate = new Date(Date.now() + 5 * MIN_MS)
-        let endMs = this.formEnd.getTime()
+        let endDate = this.formEnd
         let startMs = startDate.getTime()
+        let endMs = endDate.getTime()
 
+        if (endMs - startMs < MIN_STAKE_DURATION) {
+            endDate = new Date(startMs + MIN_STAKE_DURATION)
+        }
         // If End date - start date is greater than max stake duration, adjust start date
         if (endMs - startMs > MAX_STAKE_DURATION) {
             startDate = new Date(endMs - MAX_STAKE_DURATION)
@@ -367,14 +371,13 @@ export default class AddValidator extends Vue {
         try {
             this.isLoading = true
             this.err = ''
-            const startTime = startDate.getTime() / 1000
-            const endTime = this.formEnd.getTime() / 1000
-            let txId = await WalletHelper.addValidatorTx(
+            let txId = await WalletHelper.validate(
                 wallet,
                 this.formNodeID,
-                new BN(startTime),
-                new BN(endTime),
-                new BN(this.formAmt.toString())
+                new BN(this.formAmt.toString()),
+                startDate,
+                this.formEnd,
+                10
             )
             this.isLoading = false
             this.onTxSubmit(txId)

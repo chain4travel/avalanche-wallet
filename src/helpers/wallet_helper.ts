@@ -21,7 +21,6 @@ import { web3 } from '@/evm'
 import Erc20Token from '@/js/Erc20Token'
 import { getStakeForAddresses } from '@/helpers/utxo_helper'
 import ERCNftToken from '@/js/ERCNftToken'
-import { UnsignedTx, UTXOSet } from '@c4tplatform/caminojs/dist/apis/platformvm'
 
 class WalletHelper {
     static async getStake(wallet: WalletType): Promise<BN> {
@@ -35,14 +34,13 @@ class WalletHelper {
         symbol: string,
         groupNum: number
     ) {
-        let fromAddresses = wallet.getDerivedAddresses()
-        let changeAddress = wallet.getChangeAddressAvm()
+        const fromAddresses = wallet.getDerivedAddresses()
+        const changeAddress = wallet.getChangeAddressAvm()
+        const minterAddress = wallet.getCurrentAddressAvm()
 
-        let minterAddress = wallet.getCurrentAddressAvm()
+        const utxoSet = wallet.utxoset
 
-        let utxoSet = wallet.utxoset
-
-        let unsignedTx = await buildCreateNftFamilyTx(
+        const unsignedTx = await buildCreateNftFamilyTx(
             name,
             symbol,
             groupNum,
@@ -112,7 +110,8 @@ class WalletHelper {
             utxoSet.addArray(utxos)
         }
 
-        let pAddressStrings = wallet.getAllAddressesP()
+        const pAddressStrings = wallet.getAllAddressesP()
+        const signerAddresses = wallet.getSignerAddresses('P')
 
         let stakeAmount = amt
 
@@ -133,7 +132,7 @@ class WalletHelper {
         const unsignedTx = await ava.PChain().buildAddValidatorTx(
             utxoSet,
             [stakeReturnAddr],
-            pAddressStrings, // from
+            [pAddressStrings, signerAddresses], // from
             [changeAddress], // change
             nodeID,
             startTime,
@@ -244,34 +243,6 @@ class WalletHelper {
 
         let tx = await wallet.signP(unsignedTx, [nodePrivateKey])
         return await ava.PChain().issueTx(tx)
-    }
-
-    static async addValidatorTx(
-        wallet: WalletType,
-        nodeID: string,
-        startTime: BN,
-        endTime: BN,
-        stakeAmount: BN
-    ): Promise<string> {
-        let pAddressStrings = wallet.getAllAddressesP()
-        const pchain = ava.PChain()
-        const utxoSet: UTXOSet = (await pchain.getUTXOs(pAddressStrings)).utxos
-
-        const unsignedTx: UnsignedTx = await pchain.buildAddValidatorTx(
-            utxoSet,
-            pAddressStrings,
-            pAddressStrings,
-            pAddressStrings,
-            nodeID,
-            startTime,
-            endTime,
-            stakeAmount,
-            pAddressStrings,
-            10
-        )
-
-        let tx = await wallet.signP(unsignedTx)
-        return await pchain.issueTx(tx)
     }
 
     static async getEthBalance(wallet: WalletType) {
