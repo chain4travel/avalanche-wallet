@@ -5,6 +5,9 @@
         .
     </p>
 </template>
+<script lang="ts">
+export default {}
+</script>
 <style scoped lang="scss">
 p {
     color: var(--primary-color-light);
