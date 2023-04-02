@@ -34,7 +34,11 @@
                     <v-icon>mdi-file-table-box-multiple-outline</v-icon>
                     {{ $t('wallet.sidebar.studio') }}
                 </router-link>
-                <router-link to="/wallet/activity" data-cy="wallet_activity" class="wallet_link">
+                <router-link
+                    to="/wallet/activity"
+                    data-cy="wallet_activity"
+                    class="wallet_link wallet_active"
+                >
                     <v-icon>mdi-update</v-icon>
                     {{ $t('wallet.sidebar.activity') }}
                 </router-link>

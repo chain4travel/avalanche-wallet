@@ -68,7 +68,7 @@
                         <router-link to="/wallet/studio">
                             {{ $t('wallet.sidebar.studio') }}
                         </router-link>
-                        <router-link to="/wallet/activity">
+                        <router-link to="/wallet/activity" class="wallet_active">
                             {{ $t('wallet.sidebar.activity') }}
                         </router-link>
                         <router-link to="/wallet/keys">
@@ -196,9 +196,6 @@ button {
 
 .mobile_right {
     display: none;
-}
-
-.mobile_bottom {
 }
 
 .mobile_account_menu {

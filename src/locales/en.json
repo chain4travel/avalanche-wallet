@@ -676,6 +676,9 @@
             "9": "October",
             "10": "November",
             "11": "December"
+        },
+        "multisig": {
+            "title": "Multisig Transaction"
         }
     },
     "launch": {
@@ -707,7 +710,8 @@
         "date_reward": "Reward Date",
         "reward_amount": "Reward Received",
         "fee_amount": "Fee Received",
-        "reward_pending": "Reward Pending"
+        "reward_pending": "Reward Pending",
+        "multisig": "Pending Multisig Transaction"
     },
     "modal": {
         "qr": {
