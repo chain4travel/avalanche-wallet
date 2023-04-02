@@ -1,4 +1,4 @@
-name: 'Wallet Standalone Production'
+name: 'Wallet Standalone Dev Deployment'
 
 on:
   workflow_dispatch:
