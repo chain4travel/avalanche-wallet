@@ -6,7 +6,7 @@
             </a>
         </td>
         <td class="col_id">
-            <p>{{ utxo.getUTXOID() }}</p>
+            <ellipsis :text="utxo.getUTXOID()"></ellipsis>
         </td>
         <td>{{ typeName }}</td>
         <td class="col_locktime">{{ locktimeText }}</td>
@@ -35,8 +35,11 @@ import AvaAsset from '@/js/AvaAsset'
 import { bnToBig } from '@/helpers/helper'
 import { UnixNow } from '@c4tplatform/caminojs/dist/utils'
 import { AvaNetwork } from '@/js/AvaNetwork'
+import Ellipsis from '@/components/misc/Ellipsis.vue'
 
-@Component
+@Component({
+    components: { Ellipsis },
+})
 export default class UTXORow extends Vue {
     @Prop() utxo!: AVMUTXO | PlatformUTXO
     @Prop({ default: true }) isX!: boolean
@@ -158,11 +161,7 @@ td {
 }
 
 .col_id {
-    p {
-        width: 80px;
-        overflow: auto;
-        text-overflow: ellipsis;
-    }
+    width: 100px;
 }
 .col_bal {
     > div {

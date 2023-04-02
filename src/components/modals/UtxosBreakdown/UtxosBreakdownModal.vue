@@ -219,8 +219,6 @@ thead {
 <style lang="scss">
 .utxos_breakdown_body {
     .col_id {
-        //padding-left: 12px !important;
-        //width: 60px;
         display: block;
     }
 
