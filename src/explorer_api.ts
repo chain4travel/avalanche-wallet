@@ -33,6 +33,7 @@ async function getAddressHistory(
         disableCount: ['1'],
         chainID: [chainID],
         disableGenesis: ['false'],
+        raw: ['false'],
     }
 
     if (limit > 0) {

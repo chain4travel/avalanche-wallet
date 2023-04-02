@@ -14,6 +14,7 @@ export interface HistoryState {
 }
 
 export interface ITransactionData {
+    multisigStatus?: number
     chainID: string
     id: string
     inputTotals: {
@@ -83,6 +84,7 @@ export type TransactionType =
     | 'reward_validator'
     | 'deposit'
     | 'unlock_deposit'
+    | 'register_node'
 
 // CSV Staking Row
 export type CsvRowStakingTxType = 'add_validator' | 'add_delegator' | 'fee_received'

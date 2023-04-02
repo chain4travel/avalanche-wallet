@@ -9,6 +9,7 @@ import Platform from './modules/platform/platform'
 import Ledger from './modules/ledger/ledger'
 import Accounts from './modules/accounts/accounts'
 import Launch from './modules/launch/launch'
+import Signavault from './modules/signavault/signavault'
 
 import {
     RootState,
@@ -55,6 +56,7 @@ export default new Vuex.Store({
         Ledger,
         Accounts,
         Launch,
+        Signavault,
     },
     state: {
         network: { name: '' },
@@ -367,7 +369,9 @@ export default new Vuex.Store({
                 dispatch('Assets/updateAvaAsset')
                 dispatch('Assets/updateUTXOs')
                 dispatch('Accounts/updateKycStatus')
-                dispatch('History/updateTransactionHistory')
+                dispatch('Signavault/updateTransaction', undefined, { root: true }).then(() => {
+                    dispatch('History/updateTransactionHistory')
+                })
                 updateFilterAddresses()
             })
         },

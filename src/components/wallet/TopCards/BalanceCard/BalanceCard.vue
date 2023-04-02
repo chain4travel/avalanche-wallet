@@ -122,7 +122,9 @@ export default class BalanceCard extends Vue {
 
     updateBalance(): void {
         this.$store.dispatch('Assets/updateUTXOs')
-        this.$store.dispatch('History/updateTransactionHistory')
+        this.$store.dispatch('Signavault/updateTransaction').then(() => {
+            this.$store.dispatch('History/updateTransactionHistory')
+        })
     }
 
     showUTXOsModal() {
