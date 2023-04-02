@@ -3,7 +3,7 @@ name: 'Wallet Standalone Dev Deployment'
 on:
   workflow_dispatch:
   push:
-    branches: [dev]
+    branches: [dev, dev-deploy]
     
 
 env:
