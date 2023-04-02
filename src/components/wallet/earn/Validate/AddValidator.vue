@@ -147,6 +147,7 @@ import { AmountOutput, UTXO } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { WalletType } from '@/js/wallets/types'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import { bnToBig } from '@/helpers/helper'
+import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 const MIN_MS = 60000
 const HOUR_MS = MIN_MS * 60
@@ -383,6 +384,9 @@ export default class AddValidator extends Vue {
             this.onTxSubmit(txId)
         } catch (err) {
             this.isLoading = false
+            if (err instanceof SignatureError) {
+                return this.onTxRecorded(err)
+            }
             this.onerror(err)
         }
     }
@@ -393,7 +397,7 @@ export default class AddValidator extends Vue {
         this.updateTxStatus(txId)
     }
 
-    onsuccess() {
+    onSuccess() {
         this.$store.dispatch('Notifications/add', {
             type: 'success',
             title: 'Validator Added',
@@ -404,6 +408,21 @@ export default class AddValidator extends Vue {
         setTimeout(() => {
             this.$store.dispatch('Assets/updateUTXOs')
             this.$store.dispatch('History/updateTransactionHistory')
+        }, 3000)
+    }
+
+    onTxRecorded(err: any) {
+        this.$store.dispatch('Notifications/add', {
+            type: 'info',
+            title: 'Multisignature',
+            message: err.message,
+        })
+        // Update History
+        setTimeout(() => {
+            this.$store.dispatch('Assets/updateUTXOs')
+            this.$store.dispatch('Signavault/updateTransaction').then(() => {
+                this.$store.dispatch('History/updateMultisigTransactionHistory')
+            })
         }, 3000)
     }
 
@@ -427,7 +446,7 @@ export default class AddValidator extends Vue {
             this.txReason = reason
 
             if (status === 'Committed') {
-                this.onsuccess()
+                this.onSuccess()
             }
         }
     }

@@ -100,7 +100,6 @@ import 'reflect-metadata'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { BN } from '@c4tplatform/caminojs/dist'
 import { WalletHelper } from '@/helpers/wallet_helper'
-import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import { ava } from '@/AVA'
 import { KeyPair } from '@c4tplatform/caminojs/dist/apis/avm'
@@ -110,6 +109,7 @@ import {
     privateKeyStringToBuffer,
 } from '@c4tplatform/caminojs/dist/utils'
 import Big from 'big.js'
+import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 @Component
 export default class RegisterNode extends Vue {
@@ -150,18 +150,39 @@ export default class RegisterNode extends Vue {
             )
             console.log(result)
             this.$emit('registered', nodeId)
-            await this.$store.dispatch('Notifications/add', {
+            this.$store.dispatch('Notifications/add', {
                 type: 'success',
                 title: 'Node Registered',
                 message: 'Your node registered successfully.',
             })
+            setTimeout(() => {
+                this.$store.dispatch('Assets/updateUTXOs')
+                this.$store.dispatch('Signavault/updateTransaction').then(() => {
+                    this.$store.dispatch('History/updateTransactionHistory')
+                })
+            }, 3000)
         } catch (error) {
-            console.error(error)
-            await this.$store.dispatch('Notifications/add', {
-                type: 'error',
-                title: 'Registering Node Failed',
-                message: error,
-            })
+            if (error instanceof SignatureError) {
+                this.$store.dispatch('Notifications/add', {
+                    type: 'info',
+                    title: 'Multisignature',
+                    message: error.message,
+                })
+                setTimeout(() => {
+                    this.$store.dispatch('Assets/updateUTXOs')
+                    this.$store.dispatch('Signavault/updateTransaction').then(() => {
+                        this.$store.dispatch('History/updateMultisigTransactionHistory')
+                    })
+                }, 3000)
+            } else {
+                console.error(error)
+                this.$store.dispatch('Notifications/add', {
+                    type: 'error',
+                    title: 'Registering Node Failed',
+                    message: error,
+                })
+                return
+            }
         }
     }
 }
