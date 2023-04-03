@@ -12,6 +12,7 @@
                 :rewards="v.interestRateNominator"
                 :lockedAmount="v.amount"
                 :alreadyClaimed="v.claimedRewardAmount"
+                :pendingRewards="v.pendingRewards"
                 class="reward_card"
             ></UserRewardCard>
         </div>
@@ -40,18 +41,12 @@
 import 'reflect-metadata'
 import { Vue, Component } from 'vue-property-decorator'
 import { AvaWalletCore } from '../../../js/wallets/types'
-import {
-    DelegatorRaw,
-    ValidatorRaw,
-    DepositOffer,
-    ActiveDepositOffer,
-} from '@/components/misc/ValidatorList/types'
+import { DelegatorRaw, ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import UserRewardRow from '@/components/wallet/earn/UserRewardRow.vue'
 import UserRewardCard from '@/components/wallet/earn/UserRewardCard.vue'
 import { bnToBig } from '@/helpers/helper'
 import Big from 'big.js'
 import { BN } from '@c4tplatform/caminojs/dist'
-import { ava } from '@/AVA'
 
 @Component({
     components: {
@@ -60,24 +55,15 @@ import { ava } from '@/AVA'
     },
 })
 export default class UserRewards extends Vue {
-    depositOffers: DepositOffer[] = []
-    activeOffers: ActiveDepositOffer[] = []
+    get activeOffers() {
+        return this.$store.state.Platform.activeDepositOffer
+    }
+
     get userAddresses() {
         let wallet: AvaWalletCore = this.$store.state.activeWallet
         if (!wallet) return []
 
         return wallet.getAllAddressesP()
-    }
-    hexToString(memo: string) {
-        return Buffer.from(memo.replace('0x', ''), 'hex').toString()
-    }
-    numberToDateTime(timestamp: number) {
-        return new Date(timestamp).toLocaleString()
-    }
-    mounted() {
-        console.log(this.$store.state.Platform.depositOffers)
-
-        this.activeDepositOffers()
     }
 
     get validators(): ValidatorRaw[] {
@@ -86,21 +72,8 @@ export default class UserRewards extends Vue {
         return this.cleanList(validators) as ValidatorRaw[]
     }
 
-    get delegators(): DelegatorRaw[] {
-        let delegators: DelegatorRaw[] = []
-        let validators: ValidatorRaw[] = this.$store.state.Platform.validators
-
-        for (var i = 0; i < validators?.length; i++) {
-            let v = validators[i]
-            if (v.delegators === null) continue
-            delegators.push(...v.delegators)
-        }
-
-        return this.cleanList(delegators) as DelegatorRaw[]
-    }
-
     get totLength() {
-        return this.validators?.length + this.delegators.length
+        return this.validators?.length
     }
 
     get totalReward() {
@@ -108,11 +81,7 @@ export default class UserRewards extends Vue {
             return acc.add(new BN(val.potentialReward))
         }, new BN(0))
 
-        let dels = this.delegators.reduce((acc, val: DelegatorRaw) => {
-            return acc.add(new BN(val.potentialReward))
-        }, new BN(0))
-
-        return vals.add(dels)
+        return vals
     }
 
     get totalRewardBig(): Big {
@@ -121,37 +90,6 @@ export default class UserRewards extends Vue {
 
     get nativeAssetSymbol(): string {
         return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
-    }
-
-    async allDepositOffers() {
-        this.depositOffers = this.$store.state.Platform.depositOffers
-    }
-
-    async activeDepositOffers() {
-        let wallet = this.$store.state.activeWallet
-        let depositOffers = this.$store.state.Platform.depositOffers
-        let pAddressStrings = wallet.getAllAddressesP()
-
-        const lockedTxIDs = await (
-            await ava.PChain().getUTXOs(pAddressStrings)
-        ).utxos.getLockedTxIDs()
-        const activeDepositOffers = await ava.PChain().getDeposits(lockedTxIDs.depositIDs)
-        console.log(activeDepositOffers)
-
-        const activeOffers = depositOffers
-            .filter((offer: ActiveDepositOffer) =>
-                activeDepositOffers.some((active) => active.depositOfferID === offer.id)
-            )
-            .map((offer: ActiveDepositOffer) => {
-                console.log(offer)
-
-                const active = activeDepositOffers.find(
-                    (active) => active.depositOfferID === offer.id
-                )
-                return { ...offer, ...active }
-            })
-
-        this.activeOffers = activeOffers
     }
 
     cleanList(list: ValidatorRaw[] | DelegatorRaw[]) {

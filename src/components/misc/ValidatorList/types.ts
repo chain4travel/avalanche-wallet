@@ -46,7 +46,7 @@ export interface ValidatorRewardOwner {
     threshold: string
 }
 
-export interface DepositOffer {
+export interface DepositOfferRaw {
     id: string
     interestRateNominator: BN
     start: BN
@@ -60,7 +60,23 @@ export interface DepositOffer {
     flags: BN
 }
 
-export interface ActiveDepositOffer {
+export interface Deposit {
+    depositTxID: string
+    depositOfferID: string
+    unlockedAmount: BN
+    claimedRewardAmount: BN
+    start: BN
+    duration: number
+    amount: BN
+}
+
+export interface GetDepositsRaw {
+    deposits: Deposit[]
+    availableRewards: BN[]
+    timestamp: BN
+}
+
+export interface ActiveDeposit {
     id: string
     interestRateNominator: BN
     start: BN
@@ -74,6 +90,7 @@ export interface ActiveDepositOffer {
     flags: BN
     amount: BN
     claimedRewardAmount: BN
+    pendingRewards: BN
 }
 
 export interface ValidatorDict {

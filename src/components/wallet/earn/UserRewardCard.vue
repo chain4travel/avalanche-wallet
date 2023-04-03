@@ -27,7 +27,9 @@
                 </div>
                 <div>
                     <label>Pending Rewards:</label>
-                    <p class="reward">- CAM</p>
+                    <p class="reward">
+                        {{ pendingRewardsAmount | cleanAvaxBN }} {{ nativeAssetSymbol }}
+                    </p>
                 </div>
                 <div>
                     <label>Already Claimed:</label>
@@ -121,6 +123,10 @@ export default class UserRewardCard extends Vue {
 
     get depositAmount() {
         return new Big(this.lockedAmount.toString())
+    }
+
+    get pendingRewardsAmount() {
+        return new Big(this.pendingRewards.toString())
     }
 
     get alreadyClaimedAmount() {
