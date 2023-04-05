@@ -1,6 +1,5 @@
 <template>
     <div>
-        <h3>Offers</h3>
         <div class="user_offers" v-if="activeOffers.length > 0">
             <UserRewardCard
                 v-for="(v, i) in activeOffers"
@@ -17,24 +16,6 @@
             ></UserRewardCard>
         </div>
         <div v-else class="empty">No Active Earning</div>
-        <h3>{{ $t('earn.rewards.validation') }}</h3>
-        <div v-if="totLength > 0" class="user_rewards">
-            <div>
-                <label>{{ $t('earn.rewards.total') }}</label>
-                <p class="amt">{{ totalRewardBig.toLocaleString(9) }} {{ nativeAssetSymbol }}</p>
-            </div>
-            <div v-if="validators.length > 0">
-                <UserRewardRow
-                    v-for="(v, i) in validators"
-                    :key="i"
-                    :staker="v"
-                    class="reward_row"
-                ></UserRewardRow>
-            </div>
-        </div>
-        <div v-else class="empty">
-            <p>{{ $t('earn.rewards.empty') }}</p>
-        </div>
     </div>
 </template>
 <script lang="ts">

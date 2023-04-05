@@ -34,7 +34,7 @@
                 <div>
                     <label>Already Claimed:</label>
                     <p class="reward">
-                        {{ alreadyClaimedAmount.toLocaleString() }} {{ nativeAssetSymbol }}
+                        {{ alreadyClaimedAmount | cleanAvaxBN }} {{ nativeAssetSymbol }}
                     </p>
                 </div>
             </div>
@@ -51,6 +51,7 @@ import Big from 'big.js'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import AvaAsset from '@/js/AvaAsset'
 import { ava } from '@/AVA'
+import { WalletHelper } from '@/helpers/wallet_helper'
 
 @Component({
     filters: {
@@ -147,6 +148,47 @@ export default class UserRewardCard extends Vue {
 
     get nativeAssetSymbol(): string {
         return this.ava_asset?.symbol ?? ''
+    }
+
+    async claim() {
+        const wallet = this.$store.state.activeWallet
+        let pAddressStrings = wallet.getAllAddressesP()
+        const pchain = ava.PChain()
+        const utxoSet = (await pchain.getUTXOs(pAddressStrings)).utxos
+        // const l = pchain.buildClaimTx(
+        //     utxoSet,
+        //     pAddressStrings,
+        //     pAddressStrings,
+        //     Buffer.from(''),
+        //     new BN(Date.now()),
+        //     1,
+        //     [this.staker.id],
+        //     [this.pendingRewardsAmount.toString()]
+        // )
+
+        // @param utxoset — A set of UTXOs that the transaction is built on
+        // @param fromAddresses — The addresses being used to send the funds from the UTXOs https://github.com/feross/bufferBuffer
+        // @param changeAddresses — The addresses that can spend the change remaining from the spent UTXOs.
+        // @param memo — Optional contains arbitrary bytes, up to 256 bytes
+        // @param asOf — Optional. The timestamp to verify the transaction against as a https://github.com/indutny/bn.js/BN
+        // @param changeThreshold — Optional. The number of signatures required to spend the funds in the resultant change UTXO
+        // @param depositTxs — The deposit transactions with which the claiblable rewards are associated
+        // @param claimableOwnerIDs — The ownerIDs of the rewards to claim
+        // @param claimedAmounts — The amounts of the rewards to claim
+        // @param claimTo — The address to claimed rewards will be directed to
+        // @param claimableSigners — The signers of the claimable rewards
+
+        //     const l = pchain.buildClaimTx(
+        //         undefined,
+        //         [P(addrB)],
+        //         [P(addrB)],
+        //         activeOffer.id,
+        //         activeOffer.minDuration,
+        //         new OutputOwners([pAddresses[1]]),
+        //         memo,
+        //         new BN(0),
+        //         activeOffer.minAmount
+        //     )
     }
 }
 </script>

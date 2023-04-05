@@ -122,6 +122,10 @@ export default class Earn extends Vue {
     }
 }
 
+.pages {
+    margin-top: 1rem;
+}
+
 @include mixins.mobile-device {
     .header {
         display: block;
