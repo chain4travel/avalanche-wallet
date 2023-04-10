@@ -66,6 +66,7 @@ const history_module: Module<HistoryState, RootState> = {
                 txsSRaw.map(
                     (r): UnparsedTx => {
                         return {
+                            chainID: r.tx.chainId,
                             multisigStatus: r.state,
                             timestamp: r.tx.timestamp,
                             txID: bintools.cb58Encode(Buffer.from(r.tx.id, 'hex')),
@@ -90,8 +91,14 @@ const history_module: Module<HistoryState, RootState> = {
                 .concat(txsP)
                 .concat(txsS)
                 .sort((x, y) => (moment(x.timestamp).isBefore(moment(y.timestamp)) ? 1 : -1))
-            if (limit === 0) state.allTransactions = transactions
-            else state.transactions = transactions
+            if (limit === 0) {
+                state.allTransactions = transactions
+                state.transactions = txs
+                    .slice(0, 20)
+                    .concat(txsP.slice(0, 20))
+                    .concat(txsS)
+                    .sort((x, y) => (moment(x.timestamp).isBefore(moment(y.timestamp)) ? 1 : -1))
+            } else state.transactions = transactions
             state.isUpdating = false
         },
         async updateAllTransactionHistory({ dispatch }) {
@@ -104,6 +111,7 @@ const history_module: Module<HistoryState, RootState> = {
                 txsSRaw.map(
                     (r): UnparsedTx => {
                         return {
+                            chainID: r.tx.chainId,
                             multisigStatus: r.state,
                             timestamp: r.tx.timestamp,
                             txID: bintools.cb58Encode(Buffer.from(r.tx.id, 'hex')),

@@ -5,7 +5,7 @@ import { ava, bintools } from '@/AVA'
 import { ChainIdType } from '@/constants'
 import { AvmImportChainType, ChainAlias } from '@/js/wallets/types'
 
-import { BN } from '@c4tplatform/caminojs/dist'
+import { BN, Buffer as AvalancheBuffer } from '@c4tplatform/caminojs/dist'
 import {
     chainIdFromAlias,
     ExportChainsC,
@@ -123,7 +123,12 @@ abstract class WalletCore {
      * @param fee Fee to use in nNative
      * @param utxoSet
      */
-    async importToCChain(sourceChain: ExportChainsC, fee: BN, utxoSet?: EVMUTXOSet) {
+    async importToCChain(
+        sourceChain: ExportChainsC,
+        fee: BN,
+        utxoSet?: EVMUTXOSet,
+        exportTxID?: string
+    ) {
         if (!utxoSet) {
             utxoSet = await this.evmGetAtomicUTXOs(sourceChain)
         }
@@ -133,6 +138,14 @@ abstract class WalletCore {
 
         if (utxoSet.getAllUTXOs().length === 0) {
             throw new Error('Nothing to import.')
+        }
+
+        if (exportTxID) {
+            const etxBuffer = bintools.cb58Decode(exportTxID)
+            utxoSet = utxoSet.filter(
+                [etxBuffer],
+                (utxo, b: AvalancheBuffer) => utxo.getTxID().compare(b) === 0
+            )
         }
 
         const unsignedTxFee = await this.createImportTxC(sourceChain, utxoSet, fee)
@@ -181,8 +194,10 @@ abstract class WalletCore {
     async exportFromPChain(amt: BN, destinationChain: ExportChainsP, importFee?: BN) {
         let utxoSet = this.getPlatformUTXOSet()
 
-        let pChangeAddr = this.getCurrentAddressPlatform()
         let fromAddrs = this.getAllAddressesP()
+        const signerAddrs = this.getSignerAddresses('P')
+
+        let pChangeAddr = this.getCurrentAddressPlatform()
 
         if (destinationChain === 'C' && !importFee)
             throw new Error('Exports to C chain must specify an import fee.')
@@ -201,15 +216,16 @@ abstract class WalletCore {
         let destinationAddr =
             destinationChain === 'C' ? this.getEvmAddressBech() : this.getCurrentAddressAvm()
 
-        const exportTx = await TxHelper.buildPlatformExportTransaction(
-            utxoSet,
-            fromAddrs,
-            destinationAddr,
-            amtFee,
-            pChangeAddr,
-            destinationChain
-        )
-
+        const exportTx = await ava
+            .PChain()
+            .buildExportTx(
+                utxoSet,
+                amtFee,
+                chainIdFromAlias(destinationChain),
+                [destinationAddr],
+                [fromAddrs, signerAddrs],
+                [pChangeAddr]
+            )
         let tx = await this.signP(exportTx)
         return await ava.PChain().issueTx(tx)
     }

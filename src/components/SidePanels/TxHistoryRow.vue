@@ -34,7 +34,6 @@ import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import moment from 'moment'
-// import TxHistoryValue from '@/components/SidePanels/TxHistoryValue.vue'
 import TxHistoryNftFamilyGroup from '@/components/SidePanels/TxHistoryNftFamilyGroup.vue'
 import { Chain, ITransactionData } from '@/store/modules/history/types'
 import { AvaNetwork } from '@/js/AvaNetwork'
@@ -48,9 +47,7 @@ import Ellipsis from '@/components/misc/Ellipsis.vue'
 @Component({
     components: {
         Ellipsis,
-        // TxHistoryValue,
         TxHistoryNftFamilyGroup,
-        // TxHistoryValueFunctional,
     },
 })
 export default class TxHistoryRow extends Vue {

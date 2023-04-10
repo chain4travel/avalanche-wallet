@@ -11,11 +11,27 @@
     </div>
 </template>
 <script lang="ts">
+import { ava, bintools } from '@/AVA'
+import { bnToBig } from '@/helpers/helper'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { ITransactionData } from '@/store/modules/history/types'
-import { ava } from '@/AVA'
-import { BN } from '@c4tplatform/caminojs/dist'
-import { bnToBig } from '@/helpers/helper'
+
+import { BN, Buffer } from '@c4tplatform/caminojs/dist'
+import {
+    StandardAmountOutput,
+    StandardAmountInput,
+    StandardTransferableOutput,
+} from '@c4tplatform/caminojs/dist/common'
+
+interface ExportTx {
+    getDestinationChain(): Buffer
+    getExportOutputs(): StandardTransferableOutput[]
+}
+
+interface ImportTx {
+    getSourceChain(): Buffer
+    getImportInputs(): StandardAmountInput[]
+}
 
 @Component
 export default class ImportExport extends Vue {
@@ -26,11 +42,24 @@ export default class ImportExport extends Vue {
     }
 
     get fromChainId() {
+        // Future format
+        if (this.transaction.rawTx) {
+            const c = this.isExport
+                ? this.transaction.rawTx.getBlockchainID()
+                : ((this.transaction.rawTx as unknown) as ImportTx).getSourceChain()
+            return bintools.cb58Encode(c)
+        }
         if (!this.transaction.inputs) return '?'
         return this.transaction.inputs[0].output.chainID
     }
 
     get destinationChainId() {
+        if (this.transaction.rawTx) {
+            const c = this.isExport
+                ? ((this.transaction.rawTx as unknown) as ExportTx).getDestinationChain()
+                : this.transaction.rawTx.getBlockchainID()
+            return bintools.cb58Encode(c)
+        }
         let outs = this.transaction.outputs
 
         for (var i = 0; i < outs.length; i++) {
@@ -43,31 +72,40 @@ export default class ImportExport extends Vue {
         return this.fromChainId
     }
 
-    // get chainId() {
-    //     if (!this.isExport) {
-    //         return this.transaction.outputs[0].chainID
-    //     } else {
-    //         return this.transaction.outputs[0].chainID
-    //     }
-    // }
-
     get chainAlias() {
-        let chainId
+        let chainId: string
         if (this.isExport) {
             chainId = this.fromChainId
         } else {
             chainId = this.destinationChainId
         }
 
-        if (chainId === ava.PChain().getBlockchainID()) {
-            return 'P'
-        } else if (chainId === ava.XChain().getBlockchainID()) {
-            return 'X'
-        }
+        const chains = ava.getChains()
+        const idx = chains.findIndex((c) => c.id === chainId)
+
+        if (idx >= 0) return chains[idx].alias
         return chainId
     }
 
     get amt(): BN {
+        if (this.transaction.rawTx) {
+            if (this.isExport) {
+                return ((this.transaction.rawTx as unknown) as ExportTx)
+                    .getExportOutputs()
+                    .reduce(
+                        (acc, val) =>
+                            acc.add((val.getOutput() as StandardAmountOutput).getAmount()),
+                        new BN(0)
+                    )
+            } else {
+                return ((this.transaction.rawTx as unknown) as ImportTx)
+                    .getImportInputs()
+                    .reduce(
+                        (acc, val) => acc.add((val.getInput() as StandardAmountInput).getAmount()),
+                        new BN(0)
+                    )
+            }
+        }
         if (this.isExport) {
             let outs = []
             let allOuts = this.transaction.outputs

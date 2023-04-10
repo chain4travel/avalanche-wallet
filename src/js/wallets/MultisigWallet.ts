@@ -3,6 +3,7 @@ import { AxiosError } from 'axios'
 import { AvaWalletCore, ChainAlias, WalletNameType } from './types'
 import { ChainIdType } from '../../constants'
 import { WalletCore } from './WalletCore'
+import { WalletHelper } from '@/helpers/wallet_helper'
 
 import { BN, Buffer } from '@c4tplatform/caminojs/dist'
 import { PayloadBase, privateKeyStringToBuffer } from '@c4tplatform/caminojs/dist/utils'
@@ -17,7 +18,6 @@ import {
     Owner,
     PlatformVMConstants,
     Tx as PlatformTx,
-    BaseTx as PlatformBaseTx,
     UnsignedTx as PlatformUnsignedTx,
     UTXO as PlatformUTXO,
     UTXOSet as PlatformUTXOSet,
@@ -27,12 +27,8 @@ import {
     MultisigKeyPair,
     OutputOwners,
     SECP256k1KeyPair,
-    SignerKeyPair,
     SignerKeyChain,
     SignatureError,
-    StandardBaseTx,
-    StandardTx,
-    StandardUnsignedTx,
 } from '@c4tplatform/caminojs/dist/common'
 import { Tx as EVMTx, UnsignedTx as EVMUnsignedTx } from '@c4tplatform/caminojs/dist/apis/evm'
 
@@ -57,6 +53,11 @@ interface KeyChainResult {
     signers: Set<string>
 }
 
+export interface ExtIssueResult {
+    tx: AbstractTx
+    txID: string
+}
+
 // BitMask of current tx signatures
 enum SignatureStatus {
     AlreadySigned = 0,
@@ -64,13 +65,23 @@ enum SignatureStatus {
     CanExecute = 2,
 }
 
-type AbstractUnsignedTx = StandardUnsignedTx<
-    SignerKeyPair,
-    SignerKeyChain,
-    StandardBaseTx<SignerKeyPair, SignerKeyChain>
->
+interface AbstractBaseTx {
+    getOutputOwners(): OutputOwners[]
+    getBlockchainID(): Buffer
+    getTxType(): number
+}
 
-type AbstractTx = StandardTx<SignerKeyPair, SignerKeyChain, AbstractUnsignedTx>
+interface AbstractUnsignedTx {
+    getTransaction(): AbstractBaseTx
+    sign(kc: SignerKeyChain): AbstractTx
+    getBurn(assetID: Buffer): BN
+    toBuffer(): Buffer
+}
+
+interface AbstractTx {
+    getUnsignedTx(): AbstractUnsignedTx
+    toBuffer(): Buffer
+}
 
 class MultisigWallet extends WalletCore implements AvaWalletCore {
     type: WalletNameType = 'multisig'
@@ -197,7 +208,9 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
     }
 
     async getEthBalance(): Promise<BN> {
-        return new BN(0)
+        let bal = await WalletHelper.getEthBalance(this)
+        this.ethBalance = bal
+        return bal
     }
 
     async sendEth(to: string, amount: BN, gasPrice: BN, gasLimit: number): Promise<string> {
@@ -227,7 +240,7 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
     }
 
     async signC(unsignedTx: EVMUnsignedTx): Promise<EVMTx> {
-        throw NotImplementedError
+        return (await this._sign(unsignedTx)) as EVMTx
     }
 
     async signEvm(tx: Transaction): Promise<Transaction> {
@@ -348,7 +361,7 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
     }
 
     getEvmAddressBech(): string {
-        return ''
+        return this._aliasAddress('C')
     }
 
     getFirstAvailableAddressPlatform(): string {
@@ -419,7 +432,7 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         }
     }
 
-    async issueExternal(tx: ModelMultisigTx): Promise<void> {
+    async issueExternal(tx: ModelMultisigTx): Promise<ExtIssueResult> {
         // Recover data from tx
         const kcData = this._buildMultisigKeychain(tx)
         // Add our own signatures. we usw the last for signing external rq
@@ -438,19 +451,31 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         // Sign will provide them in a MultisigCredential structure to the node
         kcData.kc.buildSignatureIndices()
 
-        const utx = new PlatformUnsignedTx()
-        utx.fromBuffer(Buffer.from(tx.unsignedTx, 'hex'))
-        const signedTx = utx.sign(kcData.kc)
-        const signedTxBytes = signedTx.toBuffer()
+        var signedTx: AbstractTx
+        if (tx.chainId === ava.PChain().getBlockchainID()) {
+            const utx = new PlatformUnsignedTx()
+            utx.fromBuffer(Buffer.from(tx.unsignedTx, 'hex'))
+            signedTx = utx.sign(kcData.kc)
+        } else if (tx.chainId === ava.CChain().getBlockchainID()) {
+            const utx = new EVMUnsignedTx()
+            utx.fromBuffer(Buffer.from(tx.unsignedTx, 'hex'))
+            console.log(utx.serialize())
+            signedTx = utx.sign(kcData.kc)
+        } else {
+            throw Error('cannot execute on this chain')
+        }
 
+        const signedTxBytes = signedTx.toBuffer()
         const signedTxHash = Buffer.from(createHash('sha256').update(signedTxBytes).digest())
         const signature = signer.sign(signedTxHash)
 
         const sv = SignaVault()
-        await sv.issueMultisigTx({
+        const res = await sv.issueMultisigTx({
             signature: signature.toString('hex'),
             signedTx: signedTxBytes.toString('hex'),
         })
+
+        return { tx: signedTx, txID: res.data.txID ?? '' }
     }
 
     /******************** INTERNAL *******************************/
@@ -472,7 +497,7 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
             ava.getNetwork().P.alias,
             msg,
             PlatformVMConstants.SECPMULTISIGCREDENTIAL,
-            (utx as PlatformUnsignedTx).getTransaction().getOutputOwners(),
+            utx.getTransaction().getOutputOwners(),
             new Map([[this.keyData.alias.toString('hex'), outputOwner]])
         )
 
@@ -532,11 +557,12 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         try {
             await sv.createMultisigTx({
                 alias: this._aliasAddress('P'),
+                chainId: bintools.cb58Encode(utx.getTransaction().getBlockchainID()),
                 unsignedTx: txbuff.toString('hex'),
                 signature: walletSigs[0].toString('hex'),
-                outputOwners: OutputOwners.toArray(
-                    (utx.getTransaction() as PlatformBaseTx).getOutputOwners()
-                ).toString('hex'),
+                outputOwners: OutputOwners.toArray(utx.getTransaction().getOutputOwners()).toString(
+                    'hex'
+                ),
                 // we send node's signature as metadata so it can be used form the issuer
                 metadata: metadata,
             })

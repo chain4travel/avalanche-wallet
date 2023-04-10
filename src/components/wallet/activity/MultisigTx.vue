@@ -35,14 +35,26 @@
     </div>
 </template>
 <script lang="ts">
-import { bintools } from '@/AVA'
 import { Component, Prop, Vue } from 'vue-property-decorator'
+
+import { BN } from '@c4tplatform/caminojs/dist'
+import { ava, bintools } from '@/AVA'
+import { ChainIdType } from '@/constants'
+import { ExtIssueResult, MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { platformUTXOsToEvmSet } from '@/helpers/utxo_helper'
+import { TransactionType } from '@/store/modules/history/types'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+
+import {
+    PlatformVMConstants,
+    ExportTx as PVMExportTx,
+} from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { avaxCtoX, GasHelper } from '@c4tplatform/camino-wallet-sdk/dist'
 
 @Component
 export default class MultisigTx extends Vue {
     @Prop() txId!: string
+    @Prop() type!: TransactionType
     signing = false
     issueing = false
 
@@ -53,6 +65,20 @@ export default class MultisigTx extends Vue {
 
     get txState(): number {
         return this.tx?.state ?? -1
+    }
+
+    async importFee(chain: ChainIdType): Promise<BN> {
+        if (chain === 'X') {
+            return ava.XChain().getTxFee()
+        } else if (chain === 'P') {
+            return ava.PChain().getTxFee()
+        } else {
+            const baseFee = await GasHelper.getBaseFeeRecommended()
+
+            const fee = GasHelper.estimateImportGasFeeFromMockTx(1, 1)
+            const totFeeWei = baseFee.mul(new BN(fee))
+            return avaxCtoX(totFeeWei)
+        }
     }
 
     async sign() {
@@ -94,15 +120,16 @@ export default class MultisigTx extends Vue {
 
         this.issueing = true
         try {
-            await wallet.issueExternal(this.tx?.tx)
+            const signedTx = await wallet.issueExternal(this.tx?.tx)
             this.$store.dispatch('Notifications/add', {
                 title: 'Multisignature',
                 message: 'Transaction issued.',
             })
+            await this.buildImportFromExport(wallet, signedTx)
             setTimeout(() => {
                 this.$store
                     .dispatch('Signavault/updateTransaction')
-                    .then(() => this.$store.dispatch('History/updateTransactionHistory'))
+                    .then(() => this.$store.dispatch('History/updateAllTransactionHistory'))
             }, 3000)
             this.$router.replace('activity')
         } catch (e: any) {
@@ -114,6 +141,31 @@ export default class MultisigTx extends Vue {
             })
         }
         this.issueing = false
+    }
+
+    async buildImportFromExport(wallet: MultisigWallet, txData: ExtIssueResult): Promise<boolean> {
+        const utx = txData.tx.getUnsignedTx()
+        const baseTx = utx.getTransaction()
+        const chainID = bintools.cb58Encode(baseTx.getBlockchainID())
+        const assetID = bintools.cb58Decode(ava.getNetwork().X.avaxAssetID)
+        const txID = bintools.cb58Decode(txData.txID)
+        if (chainID === ava.PChain().getBlockchainID()) {
+            if (baseTx.getTxType() === PlatformVMConstants.EXPORTTX) {
+                const utxos = (baseTx as PVMExportTx).getUTXOs(txID)
+                const destChainID = bintools.cb58Encode(
+                    (baseTx as PVMExportTx).getDestinationChain()
+                )
+                if (destChainID === ava.CChain().getBlockchainID()) {
+                    const evmSet = platformUTXOsToEvmSet(utxos)
+                    const fee = await this.importFee('C')
+                    wallet.importToCChain('P', fee, evmSet)
+                } else {
+                    // X-Chain
+                }
+                return true
+            }
+        }
+        return false
     }
 }
 </script>
