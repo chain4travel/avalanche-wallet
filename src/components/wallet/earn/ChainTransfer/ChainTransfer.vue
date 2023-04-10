@@ -134,6 +134,7 @@ import ChainSwapForm from '@/components/wallet/earn/ChainTransfer/Form.vue'
 
 import { WalletType } from '@/js/wallets/types'
 import * as SDK from '@c4tplatform/camino-wallet-sdk/dist'
+import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 const IMPORT_DELAY = 5000 // in ms
 const BALANCE_DELAY = 2000 // in ms
@@ -345,32 +346,54 @@ export default class ChainTransfer extends Vue {
         let exportTxId
         this.exportState = TxState.started
 
-        switch (sourceChain) {
-            case 'X':
-                exportTxId = await wallet.exportFromXChain(
-                    amt,
-                    destinationChain as SDK.ExportChainsX,
-                    this.importFeeBN
-                )
-                break
-            case 'P':
-                exportTxId = await wallet.exportFromPChain(
-                    amt,
-                    destinationChain as SDK.ExportChainsP,
-                    this.importFeeBN
-                )
-                break
-            case 'C':
-                exportTxId = await wallet.exportFromCChain(
-                    amt,
-                    destinationChain as SDK.ExportChainsC,
-                    this.exportFeeBN
-                )
-                break
-        }
+        try {
+            switch (sourceChain) {
+                case 'X':
+                    exportTxId = await wallet.exportFromXChain(
+                        amt,
+                        destinationChain as SDK.ExportChainsX,
+                        this.importFeeBN
+                    )
+                    break
+                case 'P':
+                    exportTxId = await wallet.exportFromPChain(
+                        amt,
+                        destinationChain as SDK.ExportChainsP,
+                        this.importFeeBN
+                    )
+                    break
+                case 'C':
+                    exportTxId = await wallet.exportFromCChain(
+                        amt,
+                        destinationChain as SDK.ExportChainsC,
+                        this.exportFeeBN
+                    )
+                    break
+            }
 
-        this.exportId = exportTxId
-        this.waitExportStatus(exportTxId)
+            this.exportId = exportTxId
+            this.waitExportStatus(exportTxId)
+        } catch (e: any) {
+            if (e instanceof SignatureError) {
+                this.$store.dispatch('Notifications/add', {
+                    type: 'info',
+                    title: 'Multisignature',
+                    message: e.message,
+                })
+                setTimeout(() => {
+                    this.$store.dispatch('Assets/updateUTXOs')
+                    this.$store.dispatch('Signavault/updateTransaction').then(() => {
+                        this.$store.dispatch('History/updateMultisigTransactionHistory')
+                    })
+                }, 3000)
+                this.exportState = TxState.success
+                this.exportStatus = 'Recorded'
+            } else {
+                this.exportState = TxState.failed
+                this.exportStatus = 'Failed'
+                throw e
+            }
+        }
     }
 
     // STEP 2
@@ -436,11 +459,11 @@ export default class ChainTransfer extends Vue {
             } else if (this.targetChain === 'X') {
                 importTxId = await wallet.importToXChain(this.sourceChain as SDK.ExportChainsX)
             } else {
-                //TODO: Import only the exported UTXO
-
                 importTxId = await wallet.importToCChain(
                     this.sourceChain as SDK.ExportChainsC,
-                    this.importFeeBN
+                    this.importFeeBN,
+                    undefined,
+                    this.exportId
                 )
             }
         } catch (e) {

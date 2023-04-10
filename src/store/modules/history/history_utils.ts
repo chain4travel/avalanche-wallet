@@ -11,6 +11,8 @@ import {
     PlatformVMConstants,
     UnsignedTx as PlatformUnsignedTx,
 } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { EVMConstants, UnsignedTx as EVMUnsignedTx } from '@c4tplatform/caminojs/dist/apis/evm'
+
 import { bufferToNodeIDString } from '@c4tplatform/caminojs/dist/utils'
 import moment from 'moment'
 
@@ -19,6 +21,7 @@ export type UnparsedTx = {
     timestamp: string
     txID: string
     txBytes: string
+    chainID: string
 }
 
 export function isArraysOverlap(arr1: any[], arr2: any[]): boolean {
@@ -186,47 +189,78 @@ export function parse(uptxs: UnparsedTx[]): ITransactionData[] {
     const result: ITransactionData[] = []
     const asset = ava.getNetwork().X.avaxAssetID
     const assetBuf = bintools.cb58Decode(asset)
-    const utx = new PlatformUnsignedTx()
 
     uptxs.forEach((uptx) => {
-        utx.fromBuffer(Buffer.from(uptx.txBytes, 'hex'))
-        const tx = utx.getTransaction()
-
-        //const tx = utx.tx.getTransaction()
         const itd: ITransactionData = {
             multisigStatus: uptx.multisigStatus,
-            chainID: bintools.cb58Encode(tx.getBlockchainID()),
+            chainID: uptx.chainID,
             id: uptx.txID,
-            inputTotals: { [asset]: utx.getInputTotal(assetBuf).toString('hex') },
+            inputTotals: {},
             inputs: null,
-            memo: tx.getMemo().toString(),
-            outputTotals: { [asset]: utx.getOutputTotal(assetBuf).toString('hex') },
+            memo: '',
+            outputTotals: {},
             outputs: [],
             reusedAddressTotals: null,
             rewarded: false,
             rewardedTime: '',
             timestamp: uptx.timestamp,
-            txFee: utx.getBurn(assetBuf).toNumber(),
+            txFee: 0,
             type: 'base',
             validatorStart: 0,
             validatorEnd: 0,
             validatorNodeID: '',
         }
-        switch (tx.getTypeID()) {
-            case PlatformVMConstants.ADDVALIDATORTX:
-            case PlatformVMConstants.CAMINOADDVALIDATORTX: {
-                itd.type = 'add_validator'
-                const typedTx = tx as AddValidatorTx
-                itd.validatorStart = typedTx.getStartTime().toNumber()
-                itd.validatorEnd = typedTx.getEndTime().toNumber()
-                itd.validatorNodeID = bufferToNodeIDString(typedTx.getNodeID())
-                break
+        if (uptx.chainID === ava.PChain().getBlockchainID()) {
+            const utx = new PlatformUnsignedTx()
+            utx.fromBuffer(Buffer.from(uptx.txBytes, 'hex'))
+            const tx = utx.getTransaction()
+
+            itd.inputTotals = { [asset]: utx.getInputTotal(assetBuf).toString('hex') }
+            ;(itd.memo = tx.getMemo().toString()),
+                (itd.outputTotals = { [asset]: utx.getOutputTotal(assetBuf).toString('hex') }),
+                (itd.txFee = utx.getBurn(assetBuf).toNumber())
+
+            switch (tx.getTypeID()) {
+                case PlatformVMConstants.ADDVALIDATORTX:
+                case PlatformVMConstants.CAMINOADDVALIDATORTX: {
+                    itd.type = 'add_validator'
+                    const typedTx = tx as AddValidatorTx
+                    itd.validatorStart = typedTx.getStartTime().toNumber()
+                    itd.validatorEnd = typedTx.getEndTime().toNumber()
+                    itd.validatorNodeID = bufferToNodeIDString(typedTx.getNodeID())
+                    break
+                }
+                case PlatformVMConstants.REGISTERNODETX:
+                    itd.type = 'register_node'
+                    break
+                case PlatformVMConstants.IMPORTTX:
+                    itd.type = 'import'
+                    itd.rawTx = tx
+                    break
+                case PlatformVMConstants.EXPORTTX:
+                    itd.type = 'export'
+                    itd.rawTx = tx
+                    break
+                default:
+                    break
             }
-            case PlatformVMConstants.REGISTERNODETX:
-                itd.type = 'register_node'
-                break
-            default:
-                break
+        } else if (uptx.chainID === ava.CChain().getBlockchainID()) {
+            const utx = new EVMUnsignedTx()
+            utx.fromBuffer(Buffer.from(uptx.txBytes, 'hex'))
+            const tx = utx.getTransaction()
+
+            itd.inputTotals = { [asset]: utx.getInputTotal(assetBuf).toString('hex') }
+            ;(itd.outputTotals = { [asset]: utx.getOutputTotal(assetBuf).toString('hex') }),
+                (itd.txFee = utx.getBurn(assetBuf).toNumber())
+
+            switch (tx.getTypeID()) {
+                case EVMConstants.IMPORTTX:
+                    itd.type = 'import'
+                    itd.rawTx = tx
+                    break
+                default:
+                    break
+            }
         }
         result.push(itd)
     })

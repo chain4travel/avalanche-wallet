@@ -1,5 +1,9 @@
 import { UTXOSet as AVMUTXOSet } from '@c4tplatform/caminojs/dist/apis/avm/utxos'
-import { UTXOSet as PlatformUTXOSet } from '@c4tplatform/caminojs/dist/apis/platformvm/utxos'
+import {
+    UTXO as PlatformUTXO,
+    UTXOSet as PlatformUTXOSet,
+} from '@c4tplatform/caminojs/dist/apis/platformvm/utxos'
+import { UTXO as EVMUTXO, UTXOSet as EVMUTXOSet } from '@c4tplatform/caminojs/dist/apis/evm/utxos'
 import { ava } from '@/AVA'
 import { BN } from '@c4tplatform/caminojs/dist'
 
@@ -93,4 +97,21 @@ export async function platformGetAllUTXOsForAddresses(
     }
 
     return utxoSet
+}
+
+export function platformUTXOsToEvmSet(utxos: PlatformUTXO[]): EVMUTXOSet {
+    const ret = new EVMUTXOSet()
+    ret.addArray(
+        utxos.map(
+            (pu) =>
+                new EVMUTXO(
+                    pu.getCodecID(),
+                    pu.getTxID(),
+                    pu.getOutputIdx(),
+                    pu.getAssetID(),
+                    pu.getOutput()
+                )
+        )
+    )
+    return ret
 }

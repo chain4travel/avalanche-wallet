@@ -51,6 +51,7 @@ import {
     GasHelper,
     avaxCtoX,
 } from '@c4tplatform/camino-wallet-sdk/dist'
+import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 @Component({
     components: { Spinner },
@@ -158,6 +159,18 @@ export default class ChainImport extends Vue {
 
     onError(err: Error) {
         this.isLoading = false
+        if (err instanceof SignatureError) {
+            this.$store.dispatch('Notifications/add', {
+                title: 'Multisignature',
+                message: 'Signature recorded.',
+            })
+            setTimeout(() => {
+                this.$store.dispatch('Assets/updateUTXOs')
+                this.$store.dispatch('History/updateTransactionHistory')
+            }, 3000)
+            return
+        }
+
         let msg = ''
         if (err.message.includes('No atomic')) {
             this.err = 'Nothing found to import.'
