@@ -1,4 +1,4 @@
-import { ava } from '@/AVA'
+import { ava, bintools } from '@/AVA'
 import {
     UTXO as PlatformUTXO,
     UTXOSet as PlatformUTXOSet,
@@ -23,6 +23,7 @@ import { getStakeForAddresses } from '@/helpers/utxo_helper'
 import ERCNftToken from '@/js/ERCNftToken'
 import { UnsignedTx, UTXOSet } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { GetValidatorsResponse } from '@/store/modules/platform/types'
+import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
 
 class WalletHelper {
     static async getStake(wallet: WalletType): Promise<BN> {
@@ -354,6 +355,34 @@ class WalletHelper {
             .getCurrentValidators(subnets[0].ids, [nodeID])) as GetValidatorsResponse
         let validator = res.validators[0]
         return validator
+    }
+
+    static async buildClaimDepositTx(wallet: WalletType, depositTxID: string, amount: BN) {
+        const pchain = ava.PChain()
+        let pAddressStrings = wallet.getAllAddressesP()
+
+        let addressBufferTest = ava.PChain().parseAddress(pAddressStrings[0])
+        const claimableSigners: [number, Buffer][] = [[0, addressBufferTest]]
+        let rewardsOwner = new OutputOwners([addressBufferTest])
+        const utxoSet: UTXOSet = (await pchain.getUTXOs(pAddressStrings)).utxos
+
+        const unsignedTx = await ava.PChain().buildClaimTx(
+            //@ts-ignore
+            utxoSet,
+            [pAddressStrings[0]],
+            [pAddressStrings[0]],
+            undefined,
+            new BN(0),
+            1,
+            [depositTxID],
+            [rewardsOwner],
+            [amount],
+            rewardsOwner,
+            new BN(2),
+            claimableSigners
+        )
+        let tx = await wallet.signP(unsignedTx)
+        return await ava.PChain().issueTx(tx)
     }
 }
 

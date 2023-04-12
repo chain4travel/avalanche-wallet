@@ -4,6 +4,7 @@
             <UserRewardCard
                 v-for="(v, i) in activeOffers"
                 :key="i"
+                :depositTxID="v.depositTxID"
                 :title="v.memo"
                 :start="v.start"
                 :end="v.end"
