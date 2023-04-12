@@ -10,7 +10,6 @@ env:
   suite_image: 'europe-west3-docker.pkg.dev/pwk-c4t-dev/internal-camino-dev/camino-suite-host'
   explorer_image: 'europe-west3-docker.pkg.dev/pwk-c4t-dev/internal-camino-dev/camino-suite-explorer'
 
-
 jobs:
   build:
     runs-on: ubuntu-latest

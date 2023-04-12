@@ -3,22 +3,22 @@ name: build-docker-image
 on:
   pull_request:
     branches:
-        - c4t
-        - dev
-        - suite
+      - c4t
+      - dev
+      - suite
   push:
     branches:
-        - c4t
-        - dev
-        - suite
-        - workflow-optimize
+      - c4t
+      - dev
+      - suite
+      - workflow-optimize
 
 env:
   node_version: 16
-  module_docker_image: "europe-west3-docker.pkg.dev/pwk-c4t-dev/internal-camino-dev/camino-suite-wallet"
+  module_docker_image: 'europe-west3-docker.pkg.dev/pwk-c4t-dev/internal-camino-dev/camino-suite-wallet'
 
 jobs:
-  build_docker:    
+  build_docker:
     name: Build Docker
     runs-on: ubuntu-latest
     steps:
@@ -28,7 +28,7 @@ jobs:
         id: setDefaults
         run: |
           DOCKER_IMAGE_NAME="europe-west3-docker.pkg.dev/pwk-c4t-dev/internal-camino-dev/camino-suite"
-          
+
           if [[ "${{ github.ref }}" == "refs/heads/c4t" ]]; then
               echo "docker_image=$DOCKER_IMAGE_NAME:stage" >> $GITHUB_OUTPUT
               echo "build_env=stage" >> $GITHUB_OUTPUT
@@ -58,8 +58,7 @@ jobs:
         uses: 'google-github-actions/auth@v1'
         with:
           credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
-          
-      
+
       - name: push and deploy docker
         if: github.event_name == 'push'
         run: |
