@@ -217,6 +217,8 @@ export default class AddValidator extends Vue {
     mounted() {
         this.rewardSelect('local')
         this.validateReadyValidator()
+        //@ts-ignore
+        this.$refs.avaxinput.maxOut()
     }
 
     async validateReadyValidator() {
