@@ -47,6 +47,7 @@ import BalanceDropdown from '@/components/misc/BalancePopup/BalanceDropdown.vue'
 import { ava } from '@/AVA'
 import Big from 'big.js'
 import { bnToBig } from '@/helpers/helper'
+import { ChainIdType } from '@/constants'
 
 @Component({
     components: {
@@ -61,6 +62,7 @@ export default class CurrencyInputDropdown extends Vue {
     @Prop({ default: () => [] }) disabled_assets!: AvaAsset[]
     @Prop({ default: '' }) initial!: string
     @Prop({ default: false }) disabled!: boolean
+    @Prop() chainId!: ChainIdType
 
     $refs!: {
         bigIn: BigNumInput
@@ -156,12 +158,10 @@ export default class CurrencyInputDropdown extends Vue {
     }
 
     get walletAssetsArray(): AvaAsset[] {
-        // return this.$store.getters.walletAssetsArray
         return this.$store.getters['Assets/walletAssetsArray']
     }
 
     get walletAssetsDict(): IWalletAssetsDict {
-        // return this.$store.getters['walletAssetsDict']
         return this.$store.getters['Assets/walletAssetsDict']
     }
 
@@ -175,6 +175,7 @@ export default class CurrencyInputDropdown extends Vue {
 
         let assetId = this.asset_now.id
         let balance = this.walletAssetsDict[assetId]
+        const amount = this.chainId === 'P' ? balance.amountExtra : balance.amount
 
         let avaxId = this.avaxAsset.id
 
@@ -182,15 +183,15 @@ export default class CurrencyInputDropdown extends Vue {
         if (assetId === avaxId) {
             let fee = ava.XChain().getTxFee()
             // console.log(fee);
-            if (fee.gte(balance.amount)) {
+            if (fee.gte(amount)) {
                 return new BN(0)
             } else {
-                return balance.amount.sub(fee)
+                return amount.sub(fee)
             }
         }
 
-        if (balance.amount.isZero()) return null
-        return balance.amount
+        if (amount.isZero()) return null
+        return amount
     }
 
     get maxAmountBig(): Big {

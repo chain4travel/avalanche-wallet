@@ -8,7 +8,7 @@
             <FormC v-show="formType === 'C'">
                 <ChainInput v-model="formType" :disabled="isConfirm"></ChainInput>
             </FormC>
-            <div class="new_order_Form" v-show="formType === 'X'">
+            <div class="new_order_Form" v-show="formType !== 'C'">
                 <div class="lists">
                     <ChainInput v-model="formType" :disabled="isConfirm"></ChainInput>
                     <div>
@@ -17,6 +17,7 @@
                             ref="txList"
                             @change="updateTxList"
                             :disabled="isConfirm"
+                            :chainId="formType"
                         ></tx-list>
                         <template v-if="hasNFT">
                             <NftList
@@ -38,10 +39,10 @@
                         ></qr-input>
                     </div>
                     <div>
-                        <!--                        <template v-if="isConfirm && formMemo.length > 0">-->
-                        <!--                            <h4>Memo (Optional)</h4>-->
-                        <!--                            <p class="confirm_val">{{ formMemo }}</p>-->
-                        <!--                        </template>-->
+                        <template v-if="isConfirm && formMemo.length > 0">
+                            <h4>Memo (Optional)</h4>
+                            <p class="confirm_val">{{ formMemo }}</p>
+                        </template>
                         <h4 v-if="memo || !isConfirm">{{ $t('transfer.memo') }}</h4>
                         <textarea
                             class="memo"
@@ -55,7 +56,7 @@
                     <div class="fees">
                         <p>
                             {{ $t('transfer.fee_tx') }}
-                            <span>{{ txFee.toLocaleString(9) }} {{ nativeAssetSymbol }}</span>
+                            <span>{{ txFeeBig.toLocaleString(9) }} {{ nativeAssetSymbol }}</span>
                         </p>
                         <p>
                             {{ $t('transfer.total_native') }}
@@ -150,6 +151,7 @@ import TxSummary from '@/components/wallet/transfer/TxSummary.vue'
 import { priceDict, IssueBatchTxInput } from '@/store/types'
 import { WalletType } from '@/js/wallets/types'
 import { bnToBig } from '@/helpers/helper'
+import { WalletHelper } from '@/helpers/wallet_helper'
 import * as bip39 from 'bip39'
 import FormC from '@/components/wallet/transfer/FormC.vue'
 import { ChainIdType } from '@/constants'
@@ -157,6 +159,7 @@ import { ChainIdType } from '@/constants'
 import ChainInput from '@/components/wallet/transfer/ChainInput.vue'
 import AvaAsset from '../../js/AvaAsset'
 import { TxState } from '@/components/wallet/earn/ChainTransfer/types'
+import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 @Component({
     components: {
         FaucetLink,
@@ -233,7 +236,7 @@ export default class Transfer extends Vue {
 
         let chain = addr.split('-')
 
-        if (chain[0] !== 'X') {
+        if (chain[0] !== this.formType[0]) {
             err.push('Invalid address. You can only send to other X addresses.')
         }
 
@@ -297,7 +300,7 @@ export default class Transfer extends Vue {
         }
     }
 
-    async onsuccess(tx: string) {
+    async onSuccess(tx: string) {
         this.isAjax = false
         this.isSuccess = true
         this.txId = tx
@@ -325,7 +328,7 @@ export default class Transfer extends Vue {
         }
     }
 
-    onerror(err: any) {
+    onError(err: any) {
         this.err = err
         this.isAjax = false
         this.$store.dispatch('Notifications/add', {
@@ -342,6 +345,7 @@ export default class Transfer extends Vue {
         let sumArray: (ITransaction | UTXO)[] = [...this.formOrders, ...this.formNftOrders]
 
         let txList: IssueBatchTxInput = {
+            chainId: this.formType,
             toAddress: this.formAddress,
             memo: Buffer.from(this.formMemo),
             orders: sumArray,
@@ -355,12 +359,33 @@ export default class Transfer extends Vue {
                 this.txId = res
             })
             .catch((err) => {
-                this.onerror(err)
+                if (err instanceof SignatureError) {
+                    this.$store.dispatch('Notifications/add', {
+                        type: 'info',
+                        title: 'Multisignature',
+                        message: err.message,
+                    })
+                    setTimeout(() => {
+                        this.$store.dispatch('Assets/updateUTXOs')
+                        this.$store.dispatch('Signavault/updateTransaction').then(() => {
+                            this.$store.dispatch('History/updateMultisigTransactionHistory')
+                        })
+                    }, 3000)
+                    this.canSendAgain = false
+                    this.isAjax = false
+                    this.isSuccess = true
+                    this.txState = TxState.success
+                }
+                this.onError(err)
             })
     }
 
     async waitTxConfirm(txId: string) {
-        let status = await ava.XChain().getTxStatus(txId)
+        let status =
+            this.formType === 'P'
+                ? await ava.PChain().getTxStatus(txId)
+                : await ava.XChain().getTxStatus(txId)
+
         if (status === 'Unknown' || status === 'Processing') {
             // if not confirmed ask again
             setTimeout(() => {
@@ -374,7 +399,7 @@ export default class Transfer extends Vue {
         } else {
             // If success display success page
             this.txState = TxState.success
-            this.onsuccess(txId)
+            this.onSuccess(txId)
         }
     }
 
@@ -384,8 +409,7 @@ export default class Transfer extends Vue {
     }
 
     get hasNFT(): boolean {
-        // return this.$store.getters.walletNftUTXOs.length > 0
-        return this.$store.state.Assets.nftUTXOs.length > 0
+        return this.formType === 'X' && this.$store.state.Assets.nftUTXOs.length > 0
     }
 
     get faucetLink() {
@@ -439,13 +463,16 @@ export default class Transfer extends Vue {
         return this.$store.state.activeWallet
     }
 
-    get txFee(): Big {
-        let fee = ava.XChain().getTxFee()
-        return bnToBig(fee, 9)
+    get txFee(): BN {
+        return this.formType === 'P' ? ava.PChain().getTxFee() : ava.XChain().getTxFee()
+    }
+
+    get txFeeBig(): Big {
+        return bnToBig(this.txFee, 9)
     }
 
     get totalUSD(): Big {
-        let totalAsset = this.avaxTxSize.add(ava.XChain().getTxFee())
+        let totalAsset = this.avaxTxSize.add(this.txFee)
         let bigAmt = bnToBig(totalAsset, 9)
         let usdPrice = this.priceDict.usd
         let usdBig = bigAmt.times(usdPrice)
@@ -476,12 +503,8 @@ export default class Transfer extends Vue {
         this.clearForm()
 
         if (this.$route.query.chain) {
-            let chain = this.$route.query.chain as string
-            if (chain === 'X') {
-                this.formType = 'X'
-            } else {
-                this.formType = 'C'
-            }
+            let chain = this.$route.query.chain as ChainIdType
+            if (['P', 'X', 'C'].includes(chain)) this.formType = chain
         }
 
         if (this.$route.query.nft) {
@@ -569,7 +592,6 @@ h4 {
     margin-top: 4px;
     display: flex;
     background-color: #404040;
-    /*cursor: pointer;*/
 }
 .readerBut button {
     opacity: 0.6;
@@ -607,17 +629,12 @@ h4 {
 }
 
 .new_order_Form > div {
-    /*padding: 10px 0;*/
     margin-bottom: 15px;
 }
+
 .lists {
-    /*padding-right: 45px;*/
     border-right: 1px solid var(--bg-light);
     grid-column: 1/3;
-
-    /*> div{*/
-    /*    margin: 14px 0;*/
-    /*}*/
 }
 
 .tx_list {
@@ -638,9 +655,6 @@ h4 {
 
 .fees span {
     float: right;
-}
-
-.to_address {
 }
 
 label {
@@ -678,16 +692,6 @@ label {
     word-break: break-all;
     padding: 8px 16px;
 }
-
-//@media only screen and (max-width: 600px) {
-//    .order_form {
-//        display: block;
-//    }
-//    .asset_select button {
-//        flex-grow: 1;
-//        word-break: break-word;
-//    }
-//}
 
 @include mixins.medium-device {
     .new_order_Form {

@@ -271,11 +271,12 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
     }
 
     async issueBatchTx(
+        chainId: ChainIdType,
         orders: (AVMUTXO | ITransaction)[],
         addr: string,
         memo?: Buffer
     ): Promise<string> {
-        throw NotImplementedError
+        return await WalletHelper.issueBatchTx(this, chainId, orders, addr, memo)
     }
 
     async buildUnsignedTransaction(
