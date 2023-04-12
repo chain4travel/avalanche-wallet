@@ -2,6 +2,7 @@
     <div v-if="isEVMSupported" class="header">
         <h1>{{ $t('transfer.source_chain.title') }}</h1>
         <div class="chain_select">
+            <button :active="formType === 'P'" @click="set('P')">P</button>
             <button :active="formType === 'X'" @click="set('X')">X</button>
             <button :active="formType === 'C'" @click="set('C')">C</button>
         </div>
@@ -10,11 +11,10 @@
 <script lang="ts">
 import { Vue, Component, Model, Prop } from 'vue-property-decorator'
 import { ChainIdType } from '@/constants'
-import { CurrencyType } from '@/components/misc/CurrencySelect/types'
 
 @Component
 export default class ChainInput extends Vue {
-    @Model('change', { type: String }) readonly formType!: CurrencyType
+    @Model('change', { type: String }) readonly formType!: ChainIdType
     @Prop({ default: false }) disabled!: boolean
 
     set(val: ChainIdType) {
@@ -46,14 +46,11 @@ label {
     display: flex;
     width: max-content;
     > button {
-        //border: 1px solid var(--primary-color);
-        //margin-right: 14px;
         padding-right: 14px;
         opacity: 0.2;
         transition-duration: 0.1s;
         cursor: pointer;
         color: var(--primary-color);
-        //background-color: var(--bg-light);
         display: flex;
         align-items: center;
         font-size: 28px;
@@ -62,9 +59,7 @@ label {
             opacity: 1;
         }
         &[active] {
-            //background-color: var(--secondary-color);
             color: var(--secondary-color);
-            //border-color: var(--primary-color-light);
             opacity: 1;
         }
     }
@@ -74,7 +69,7 @@ label {
     .chain_select {
         width: 100%;
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
         column-gap: 14px;
         > button {
             margin: 0;

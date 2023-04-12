@@ -87,10 +87,18 @@ class WalletHelper {
 
     static async issueBatchTx(
         wallet: WalletType,
+        chainId: ChainIdType,
         orders: (ITransaction | AVMUTXO)[],
         addr: string,
         memo: Buffer | undefined
     ): Promise<string> {
+        if (chainId === 'P') {
+            if (orders.length !== 1 || !(orders[0] as ITransaction).asset)
+                throw new Error('Can only process 1 fungible order')
+            const order = orders[0] as ITransaction
+            return await this.platformBaseTx(wallet, order.amount, addr, memo ?? Buffer.alloc(0))
+        }
+
         let unsignedTx = await wallet.buildUnsignedTransaction(orders, addr, memo)
         const tx = await wallet.signX(unsignedTx)
         const txId: string = await ava.XChain().issueTx(tx)
@@ -309,6 +317,44 @@ class WalletHelper {
             console.error(err)
             return
         }
+    }
+
+    static async platformBaseTx(
+        wallet: WalletType,
+        amount: BN,
+        toAddress: string,
+        memo: Buffer,
+        utxos?: PlatformUTXO[]
+    ): Promise<string> {
+        let utxoSet = wallet.getPlatformUTXOSet()
+
+        // If given custom UTXO set use that
+        if (utxos) {
+            utxoSet = new PlatformUTXOSet()
+            utxoSet.addArray(utxos)
+        }
+
+        const pAddressStrings = wallet.getAllAddressesP()
+        const signerAddresses = wallet.getSignerAddresses('P')
+
+        // For change address use first available on the platform chain
+        const changeAddress = wallet.getChangeAddressPlatform()
+
+        const unsignedTx = await ava.PChain().buildBaseTx(
+            utxoSet,
+            amount,
+            [toAddress],
+            [pAddressStrings, signerAddresses], // from + possible signers
+            [changeAddress], // change
+            memo,
+            undefined, // asOf
+            undefined, // lockTime
+            1, // toThreshold
+            1 // changeThreshold
+        )
+
+        let tx = await wallet.signP(unsignedTx)
+        return await ava.PChain().issueTx(tx)
     }
 
     static async getEthBalance(wallet: WalletType) {
