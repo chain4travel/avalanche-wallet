@@ -357,31 +357,28 @@ class WalletHelper {
         return validator
     }
 
-    static async buildClaimDepositTx(wallet: WalletType, depositTxID: string, amount: BN) {
-        const pchain = ava.PChain()
-        let pAddressStrings = wallet.getAllAddressesP()
-
-        let addressBufferTest = ava.PChain().parseAddress(pAddressStrings[0])
-        const claimableSigners: [number, Buffer][] = [[0, addressBufferTest]]
-        let rewardsOwner = new OutputOwners([addressBufferTest])
-        const utxoSet: UTXOSet = (await pchain.getUTXOs(pAddressStrings)).utxos
+    static async buildClaimTx(addresses: string[], activeWallet: WalletType, depositTxID: string) {
+        let addressBuffer = ava.PChain().parseAddress(addresses[0])
+        const claimableSigners: [number, Buffer][] = [[0, addressBuffer]]
+        let rewardsOwner = new OutputOwners([addressBuffer])
+        let utxoSet = activeWallet.utxoset
 
         const unsignedTx = await ava.PChain().buildClaimTx(
-            //@ts-ignore
+            // @ts-ignore
             utxoSet,
-            [pAddressStrings[0]],
-            [pAddressStrings[0]],
+            addresses,
+            addresses,
             undefined,
             new BN(0),
             1,
             [depositTxID],
-            [rewardsOwner],
-            [amount],
+            [],
+            [],
             rewardsOwner,
             new BN(2),
             claimableSigners
         )
-        let tx = await wallet.signP(unsignedTx)
+        let tx = await activeWallet.signP(unsignedTx)
         return await ava.PChain().issueTx(tx)
     }
 }

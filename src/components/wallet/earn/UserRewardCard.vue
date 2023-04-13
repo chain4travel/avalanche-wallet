@@ -39,7 +39,13 @@
                 </div>
             </div>
         </div>
-        <button class="claim_button button_primary" @click="claimRewards">Claim</button>
+        <button
+            class="claim_button button_secondary"
+            @click="claimRewards"
+            :disabled="isClaimDisabled"
+        >
+            Claim
+        </button>
     </div>
 </template>
 <script lang="ts">
@@ -62,6 +68,7 @@ import { WalletHelper } from '@/helpers/wallet_helper'
 export default class UserRewardCard extends Vue {
     now: number = Date.now()
     intervalID: any = null
+    claimDisabled: boolean = true
 
     @Prop() depositTxID!: string
     @Prop() title!: string
@@ -84,6 +91,15 @@ export default class UserRewardCard extends Vue {
     }
     destroyed() {
         clearInterval(this.intervalID)
+    }
+
+    mounted() {
+        console.log(parseInt(this.pendingRewards.toString()) > 0)
+
+        // every 2 seconds update the active deposit offer
+        // this.intervalID = setInterval(() => {
+        //     this.$store.dispatch('Platform/updateActiveDepositOffer')
+        // }, 60000)
     }
 
     get rewardTitle() {
@@ -148,9 +164,27 @@ export default class UserRewardCard extends Vue {
         return this.ava_asset?.symbol ?? ''
     }
 
+    updateBalance(): void {
+        this.$store.dispatch('Assets/updateUTXOs')
+        this.$store.dispatch('History/updateTransactionHistory')
+    }
+
+    get isClaimDisabled() {
+        return !(parseInt(this.pendingRewards.toString()) > 0)
+    }
+
     async claimRewards() {
         const wallet = this.$store.state.activeWallet
-        return WalletHelper.buildClaimDepositTx(wallet, this.depositTxID, this.pendingRewards)
+        const addresses = wallet.getAllAddressesP()
+
+        WalletHelper.buildClaimTx(addresses, wallet, this.depositTxID)
+            .then(() => {
+                this.updateBalance()
+                this.$store.dispatch('Platform/updateActiveDepositOffer')
+            })
+            .catch((err) => {
+                console.log(err)
+            })
     }
 }
 </script>
@@ -241,6 +275,10 @@ label {
     width: min-content;
     padding: 8px 30px;
     margin-left: auto;
+    &:disabled {
+        background-color: var(--primary-color);
+        color: var(--primary-color);
+    }
 }
 
 @include main.mobile-device {
