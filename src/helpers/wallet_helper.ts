@@ -26,6 +26,7 @@ import { GetValidatorsResponse } from '@/store/modules/platform/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
+import { ChainIdType } from '@/constants'
 
 class WalletHelper {
     static async getStake(wallet: WalletType): Promise<BN> {

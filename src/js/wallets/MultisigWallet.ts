@@ -43,6 +43,7 @@ import { Transaction } from '@ethereumjs/tx'
 import { ITransaction } from '@/components/wallet/transfer/types'
 import { buildUnsignedTransaction } from '../TxHelper'
 import createHash from 'create-hash'
+import { WalletHelper } from '@/helpers/wallet_helper'
 
 const NotImplementedError = new Error('Not implemented in MultisigWwallet')
 

@@ -65,7 +65,35 @@
                                 {{ err }}
                             </li>
                         </ul>
-                        <template v-if="!isConfirm">
+                        <template v-if="!!pendingSendMultisigTX && formType === 'P'">
+                            <!--  hna -->
+                            <div class="multi-sig__container">
+                                <p class="err">{{ err }}</p>
+                                <v-btn
+                                    depressed
+                                    class="button_primary"
+                                    :loading="isAjax"
+                                    :ripple="false"
+                                    @click="issue"
+                                    block
+                                    :disabled="canExecuteTx"
+                                >
+                                    execute Transaction
+                                </v-btn>
+                                <v-btn
+                                    depressed
+                                    class="button_primary"
+                                    :loading="isAjax"
+                                    :ripple="false"
+                                    @click="sign"
+                                    :disabled="disableSignButton"
+                                    block
+                                >
+                                    Sign Transaction
+                                </v-btn>
+                            </div>
+                        </template>
+                        <template v-else-if="!isConfirm">
                             <v-btn
                                 depressed
                                 class="button_primary"
@@ -156,6 +184,9 @@ import ChainInput from '@/components/wallet/transfer/ChainInput.vue'
 import AvaAsset from '../../js/AvaAsset'
 import { TxState } from '@/components/wallet/earn/ChainTransfer/types'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 @Component({
     components: {
         FaucetLink,
@@ -189,6 +220,8 @@ export default class Transfer extends Vue {
 
     canSendAgain = false
     txState: TxState | null = null
+
+    helpers = this.globalHelper()
 
     $refs!: {
         txList: TxList
@@ -233,7 +266,7 @@ export default class Transfer extends Vue {
         let chain = addr.split('-')
 
         if (chain[0] !== this.formType[0]) {
-            err.push('Invalid address. You can only send to other X addresses.')
+            err.push(`Invalid address. You can only send to other ${this.formType} addresses.`)
         }
 
         if (!isValidAddress(addr)) {
@@ -331,7 +364,107 @@ export default class Transfer extends Vue {
             type: 'error',
         })
     }
+    // multiSigLogicStart
+    get pendingSendMultisigTX(): SignavaultTx | undefined {
+        return this.$store.getters['Signavault/transactions'].find(
+            (item: any) => item?.tx?.alias === this.wallet.getAllAddressesP()[0]
+        )
+    }
 
+    get sigValue() {
+        return this.pendingSendMultisigTX?.tx.owners?.filter((owner) => !!owner.signature)?.length
+    }
+
+    get txOwners() {
+        return this.pendingSendMultisigTX?.tx?.owners ?? []
+    }
+
+    get activeWallet(): MultisigWallet {
+        return this.$store.state.activeWallet
+    }
+
+    get multiSigTxState(): number {
+        return this.pendingSendMultisigTX?.state ?? -1
+    }
+
+    async sign() {
+        const wallet = this.activeWallet
+        if (!wallet || !(wallet instanceof MultisigWallet))
+            return console.debug('MultiSigTx::sign: Invalid wallet')
+        if (!this.pendingSendMultisigTX) return console.debug('MultiSigTx::sign: Invalid Tx')
+        try {
+            await wallet.addSignatures(this.pendingSendMultisigTX?.tx)
+            this.helpers.dispatchNotification({
+                message: 'Your signature saved successfully!',
+                type: 'success',
+            })
+            this.$store.dispatch('Signavault/updateTransaction')
+        } catch (e: any) {
+            this.helpers.dispatchNotification({
+                message: 'Your signature is not saved.',
+                type: 'error',
+            })
+        }
+    }
+
+    async issue() {
+        const wallet = this.activeWallet
+        if (!wallet || !(wallet instanceof MultisigWallet))
+            return console.log('MultiSigTx::sign: Invalid wallet')
+        if (!this.pendingSendMultisigTX) return console.log('MultiSigTx::sign: Invalid Tx')
+        try {
+            await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
+            this.helpers.dispatchNotification({
+                message: this.$t('notifications.register_node_success'),
+                type: 'success',
+            })
+            this.$store.dispatch('Signavault/updateTransaction')
+            this.$emit('issued', 'issued')
+        } catch (e: any) {
+            console.log(e)
+            this.helpers.dispatchNotification({
+                message: this.$t('notifications.execute_multisig_transaction_error'),
+                type: 'error',
+            })
+        }
+    }
+
+    get disableSignButton(): boolean {
+        let isSigned = false
+        this.txOwners.forEach((owner) => {
+            if (
+                this.activeWallet.wallets.find((w) => w?.getAllAddressesP()?.[0] === owner.address)
+            ) {
+                if (owner.signature) isSigned = true
+            }
+        })
+        return isSigned
+        // return !!this.activeWallet.wallets.find((w) => w?.getAllAddressesP()?.[0] === pAddress)
+    }
+    get canExecuteTx(): boolean {
+        let signers = 0
+        this.txOwners.forEach((owner) => {
+            if (owner.signature) signers++
+        })
+        return signers !== this.pendingSendMultisigTX?.tx?.threshold
+    }
+    async txDetails() {
+        if (this.pendingSendMultisigTX) {
+            let unsignedTx = new UnsignedTx()
+            unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
+            const utx = unsignedTx.getTransaction()
+            this.memo = utx.getMemo().toString()
+        }
+    }
+    async beforeMount() {
+        console.log({
+            transactoins: this.$store.getters['Signavault/transactions'],
+            pendingMultisig: this.pendingSendMultisigTX?.tx,
+        })
+        await this.txDetails()
+    }
+
+    // multiSigLogicStart
     submit() {
         this.isAjax = true
         this.err = ''
@@ -354,10 +487,10 @@ export default class Transfer extends Vue {
             })
             .catch((err) => {
                 if (err instanceof SignatureError) {
-                    this.$store.dispatch('Notifications/add', {
-                        type: 'info',
-                        title: 'Multisignature',
-                        message: err.message,
+                    let { dispatchNotification } = this.globalHelper()
+                    dispatchNotification({
+                        message: this.$t('notifications.transfer_success_msg'),
+                        type: 'success',
                     })
                     setTimeout(() => {
                         this.$store.dispatch('Assets/updateUTXOs')
@@ -516,6 +649,11 @@ export default class Transfer extends Vue {
 </script>
 
 <style lang="scss">
+.multi-sig__container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 .advanced_panel {
     .v-expansion-panel-header {
         padding: 0;
