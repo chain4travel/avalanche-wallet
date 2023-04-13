@@ -202,7 +202,7 @@ export default class Validator extends Vue {
         return this.platformStakeable.gte(this.minPlatformUnlocked)
     }
 
-	get platformStakeable(): BN {
+    get platformStakeable(): BN {
         return this.platformUnlocked.add(this.platformLockedStakeable)
     }
 
