@@ -367,7 +367,9 @@ export default class Transfer extends Vue {
     // multiSigLogicStart
     get pendingSendMultisigTX(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
-            (item: any) => item?.tx?.alias === this.wallet.getAllAddressesP()[0]
+            (item: any) =>
+                item?.tx?.alias === this.wallet.getAllAddressesP()[0] &&
+                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'BaseTx'
         )
     }
 

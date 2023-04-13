@@ -3,6 +3,7 @@ import {
     UTXO as PlatformUTXO,
     UTXOSet as PlatformUTXOSet,
 } from '@c4tplatform/caminojs/dist/apis/platformvm/utxos'
+import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm/utxos'
 import { WalletType } from '@/js/wallets/types'
 
@@ -341,6 +342,9 @@ class WalletHelper {
         // For change address use first available on the platform chain
         const changeAddress = wallet.getChangeAddressPlatform()
 
+        const threshold =
+            wallet.type === 'multisig' ? (wallet as MultisigWallet)?.keyData?.owner?.threshold : 1
+
         const unsignedTx = await ava.PChain().buildBaseTx(
             utxoSet,
             amount,
@@ -351,7 +355,7 @@ class WalletHelper {
             undefined, // asOf
             undefined, // lockTime
             1, // toThreshold
-            1 // changeThreshold
+            threshold // changeThreshold
         )
 
         let tx = await wallet.signP(unsignedTx)
@@ -507,6 +511,11 @@ class WalletHelper {
         )
         let tx = await activeWallet.signP(unsignedTx)
         return await ava.PChain().issueTx(tx)
+    }
+    static getUnsignedTxType(utx: string): string {
+        let unsignedTx = new UnsignedTx()
+        unsignedTx.fromBuffer(Buffer.from(utx, 'hex'))
+        return unsignedTx.getTransaction().getTypeName()
     }
 }
 
