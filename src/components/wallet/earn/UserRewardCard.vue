@@ -4,48 +4,49 @@
         <div class="offer_detail">
             <div class="offer_detail_left">
                 <div>
-                    <label>Lock Start:</label>
+                    <label>{{ $t('earn.rewards.active_earning.lock_start') }}:</label>
                     <p class="reward">{{ startDate }}</p>
                 </div>
                 <div>
-                    <label>Lock End:</label>
+                    <label>{{ $t('earn.rewards.active_earning.lock_end') }}:</label>
                     <p class="reward">{{ endDate }}</p>
                 </div>
                 <div>
-                    <label>Minmum Lock:</label>
+                    <label>{{ $t('earn.rewards.active_earning.min_lock') }}:</label>
                     <p class="reward">{{ minLockAmount.toLocaleString() }} CAM</p>
                 </div>
                 <div>
-                    <label>Rewards:</label>
+                    <label>{{ $t('earn.rewards.active_earning.reward') }}:</label>
                     <p class="reward">{{ rewardPercent }} %</p>
                 </div>
             </div>
             <div class="offer_detail_right">
                 <div>
-                    <label>Locked Amount:</label>
+                    <label>{{ $t('earn.rewards.active_earning.locked_amount') }}:</label>
                     <p class="reward">{{ depositAmount | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
                 </div>
                 <div>
-                    <label>Pending Rewards:</label>
+                    <label>{{ $t('earn.rewards.active_earning.pending_reward') }}:</label>
                     <p class="reward">
                         {{ pendingRewardsAmount | cleanAvaxBN }} {{ nativeAssetSymbol }}
                     </p>
                 </div>
                 <div>
-                    <label>Already Claimed:</label>
+                    <label>{{ $t('earn.rewards.active_earning.already_claimed') }}:</label>
                     <p class="reward">
                         {{ alreadyClaimedAmount | cleanAvaxBN }} {{ nativeAssetSymbol }}
                     </p>
                 </div>
             </div>
         </div>
-        <button
-            class="claim_button button_secondary"
-            @click="claimRewards"
-            :disabled="isClaimDisabled"
-        >
-            Claim
+        <button class="claim_button button_primary" @click="openModal" :disabled="!claimDisabled">
+            {{ $t('earn.rewards.active_earning.claim') }}
         </button>
+        <ModalClaimDepositReward
+            ref="modal_claim_reward"
+            :depositTxID="depositTxID"
+            :amount="pendingRewards"
+        />
     </div>
 </template>
 <script lang="ts">
@@ -55,7 +56,7 @@ import { BN } from '@c4tplatform/caminojs'
 import Big from 'big.js'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import AvaAsset from '@/js/AvaAsset'
-import { WalletHelper } from '@/helpers/wallet_helper'
+import ModalClaimDepositReward from './ClaimDepositRewardModal.vue'
 
 @Component({
     filters: {
@@ -63,6 +64,9 @@ import { WalletHelper } from '@/helpers/wallet_helper'
             let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
             return big.toLocaleString()
         },
+    },
+    components: {
+        ModalClaimDepositReward,
     },
 })
 export default class UserRewardCard extends Vue {
@@ -80,6 +84,10 @@ export default class UserRewardCard extends Vue {
     @Prop() pendingRewards!: BN
     @Prop() alreadyClaimed!: BN
 
+    $refs!: {
+        modal_claim_reward: ModalClaimDepositReward
+    }
+
     updateNow() {
         this.now = Date.now()
     }
@@ -91,15 +99,6 @@ export default class UserRewardCard extends Vue {
     }
     destroyed() {
         clearInterval(this.intervalID)
-    }
-
-    mounted() {
-        console.log(parseInt(this.pendingRewards.toString()) > 0)
-
-        // every 2 seconds update the active deposit offer
-        // this.intervalID = setInterval(() => {
-        //     this.$store.dispatch('Platform/updateActiveDepositOffer')
-        // }, 60000)
     }
 
     get rewardTitle() {
@@ -164,27 +163,12 @@ export default class UserRewardCard extends Vue {
         return this.ava_asset?.symbol ?? ''
     }
 
-    updateBalance(): void {
-        this.$store.dispatch('Assets/updateUTXOs')
-        this.$store.dispatch('History/updateTransactionHistory')
-    }
-
     get isClaimDisabled() {
         return !(parseInt(this.pendingRewards.toString()) > 0)
     }
 
-    async claimRewards() {
-        const wallet = this.$store.state.activeWallet
-        const addresses = wallet.getAllAddressesP()
-
-        WalletHelper.buildClaimTx(addresses, wallet, this.depositTxID)
-            .then(() => {
-                this.updateBalance()
-                this.$store.dispatch('Platform/updateActiveDepositOffer')
-            })
-            .catch((err) => {
-                console.log(err)
-            })
+    openModal() {
+        this.$refs.modal_claim_reward.open()
     }
 }
 </script>
@@ -275,9 +259,8 @@ label {
     width: min-content;
     padding: 8px 30px;
     margin-left: auto;
-    &:disabled {
-        background-color: var(--primary-color);
-        color: var(--primary-color);
+    &[disabled] {
+        background-color: var(--primary-color) !important;
     }
 }
 

@@ -4,17 +4,17 @@
             <h1>{{ $t('earn.title') }}</h1>
             <div>
                 <button @click="tab = 'earn_now'" :active="tab === `earn_now`">
-                    {{ $t('earn.rewards.earn_now') }}
+                    {{ $t('earn.rewards.earn_now.title') }}
                 </button>
                 <button @click="tab = 'actine_earning'" :active="tab === `actine_earning`">
-                    {{ $t('earn.rewards.active_earning') }}
+                    {{ $t('earn.rewards.active_earning.title') }}
                 </button>
             </div>
         </div>
         <div class="pages">
             <transition-group name="fade" mode="out-in">
                 <div v-show="tab === `earn_now`" key="earn_now">
-                    Currently there is no saving pool rewards available
+                    {{ $t('earn.rewards.no_saving_pool') }}
                 </div>
                 <UserRewards v-show="tab === `actine_earning`" key="actine_earning"></UserRewards>
             </transition-group>

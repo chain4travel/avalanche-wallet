@@ -1,5 +1,13 @@
 <template>
     <div>
+        <div class="refresh_div">
+            <div class="refresh">
+                <Spinner v-if="loadingRefreshDepositRewards" class="spinner"></Spinner>
+                <button v-else @click="refresh">
+                    <v-icon>mdi-refresh</v-icon>
+                </button>
+            </div>
+        </div>
         <div class="user_offers" v-if="activeOffers.length > 0">
             <UserRewardCard
                 v-for="(v, i) in activeOffers"
@@ -21,7 +29,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { AvaWalletCore } from '../../../js/wallets/types'
 import { DelegatorRaw, ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import UserRewardRow from '@/components/wallet/earn/UserRewardRow.vue'
@@ -37,6 +45,7 @@ import { BN } from '@c4tplatform/caminojs/dist'
     },
 })
 export default class UserRewards extends Vue {
+    @Prop() loadingRefreshDepositRewards!: boolean
     get activeOffers() {
         return this.$store.state.Platform.activeDepositOffer
     }
@@ -90,6 +99,10 @@ export default class UserRewards extends Vue {
         })
         return res
     }
+
+    refresh() {
+        this.$store.dispatch('Platform/updateActiveDepositOffer')
+    }
 }
 </script>
 <style scoped lang="scss">
@@ -125,6 +138,31 @@ label {
 
 .amt {
     font-size: 2em;
+}
+
+.refresh {
+    width: 20px;
+    height: 20px;
+    margin-left: auto;
+    .v-icon {
+        color: var(--primary-color);
+    }
+
+    button {
+        outline: none !important;
+    }
+    img {
+        object-fit: contain;
+        width: 100%;
+    }
+
+    .spinner {
+        color: var(--primary-color) !important;
+    }
+}
+
+.refresh_div {
+    margin-bottom: 10px;
 }
 
 @include main.medium-device {

@@ -357,7 +357,11 @@ class WalletHelper {
         return validator
     }
 
-    static async buildClaimTx(addresses: string[], activeWallet: WalletType, depositTxID: string) {
+    static async buildDepositClaimTx(
+        addresses: string[],
+        activeWallet: WalletType,
+        depositTxID: string
+    ) {
         let addressBuffer = ava.PChain().parseAddress(addresses[0])
         const claimableSigners: [number, Buffer][] = [[0, addressBuffer]]
         let rewardsOwner = new OutputOwners([addressBuffer])
