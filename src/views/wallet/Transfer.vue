@@ -91,6 +91,16 @@
                                 >
                                     Sign Transaction
                                 </v-btn>
+                                <v-btn
+                                    depressed
+                                    class="button_primary"
+                                    :loading="isAjax"
+                                    :ripple="false"
+                                    @click="cancelMultisigTx"
+                                    block
+                                >
+                                    Cancel Transaction
+                                </v-btn>
                             </div>
                         </template>
                         <template v-else-if="!isConfirm">
@@ -426,6 +436,27 @@ export default class Transfer extends Vue {
             console.log(e)
             this.helpers.dispatchNotification({
                 message: this.$t('notifications.execute_multisig_transaction_error'),
+                type: 'error',
+            })
+        }
+    }
+
+    async cancelMultisigTx() {
+        try {
+            const wallet = this.wallet as MultisigWallet
+            if (this.pendingSendMultisigTX) {
+                // cancel from the wallet
+                await wallet.cancelExternal(this.pendingSendMultisigTX?.tx)
+                await this.$store.dispatch('Signavault/updateTransaction')
+                this.helpers.dispatchNotification({
+                    message: 'Transaction has been cancelled',
+                    type: 'success',
+                })
+            }
+        } catch (err) {
+            console.log(err)
+            this.helpers.dispatchNotification({
+                message: 'Cancelling the transaction failed',
                 type: 'error',
             })
         }

@@ -457,6 +457,25 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         })
     }
 
+    async cancelExternal(tx: ModelMultisigTx) {
+        const sv = SignaVault()
+        const timestamp = Math.floor(Date.now() / 1000).toString()
+        const signingKeyPair = this.wallets?.[0]?.getStaticKeyPair()
+
+        if (!signingKeyPair) {
+            console.log('wallet returned undefined staticKeyPair')
+            return
+        }
+        const signatureAliasTimestamp = signingKeyPair
+            .sign(Buffer.from(createHash('sha256').update(Buffer.from(timestamp)).digest()))
+            ?.toString('hex')
+        return sv.cancelMultisigTx(tx.id, {
+            timestamp: timestamp,
+            signature: signatureAliasTimestamp,
+            id: tx?.id,
+        })
+    }
+
     /******************** INTERNAL *******************************/
 
     _aliasAddress(chainID: string) {
