@@ -1,4 +1,4 @@
-import { ava } from '@/AVA'
+import { ava, bintools } from '@/AVA'
 import {
     UTXO as PlatformUTXO,
     UTXOSet as PlatformUTXOSet,
@@ -516,6 +516,32 @@ class WalletHelper {
         let unsignedTx = new UnsignedTx()
         unsignedTx.fromBuffer(Buffer.from(utx, 'hex'))
         return unsignedTx.getTransaction().getTypeName()
+    }
+
+    static getToAddressFromUtx(utx: UnsignedTx, msigAlias?: string) {
+        const tx = utx.getTransaction()
+
+        const el = tx?.getOuts()?.find((o) => {
+            const _address =
+                'P' +
+                bintools.addressToString(
+                    ava.getHRP(),
+                    tx?.getBlockchainID().toString(),
+                    o?.getAddresses()?.[0]
+                )
+            return _address !== msigAlias
+        })
+
+        if (el) {
+            const toAddress =
+                'P' +
+                bintools.addressToString(
+                    ava.getHRP(),
+                    tx?.getBlockchainID().toString(),
+                    el?.getAddresses()?.[0]
+                )
+            return toAddress
+        }
     }
 }
 

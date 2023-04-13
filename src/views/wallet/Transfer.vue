@@ -456,6 +456,13 @@ export default class Transfer extends Vue {
             unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
             const utx = unsignedTx.getTransaction()
             this.memo = utx.getMemo().toString()
+
+            const toAddress = WalletHelper.getToAddressFromUtx(
+                unsignedTx,
+                this.wallet.getAllAddressesP()[0]
+            )
+
+            // TODO @Achraf
         }
     }
     async beforeMount() {
