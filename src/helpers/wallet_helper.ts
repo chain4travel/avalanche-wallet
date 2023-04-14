@@ -1,4 +1,4 @@
-import { ava, bintools } from '@/AVA'
+import { ava } from '@/AVA'
 import {
     UTXO as PlatformUTXO,
     UTXOSet as PlatformUTXOSet,
@@ -21,11 +21,8 @@ import { web3 } from '@/evm'
 import Erc20Token from '@/js/Erc20Token'
 import { getStakeForAddresses } from '@/helpers/utxo_helper'
 import ERCNftToken from '@/js/ERCNftToken'
-import { UnsignedTx, UTXOSet, Tx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
-import { SingletonWallet } from '@c4tplatform/camino-wallet-sdk'
 import { GetValidatorsResponse } from '@/store/modules/platform/types'
-import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
