@@ -1,6 +1,13 @@
 <template>
     <div v-if="isEVMSupported" class="header">
-        <h1>{{ $t('transfer.source_chain.title') }}</h1>
+        <div class="test">
+            <h1>{{ $t('transfer.source_chain.title') }}</h1>
+            <div v-if="formType === 'P'" class="refresh">
+                <button @click="refresh">
+                    <v-icon>mdi-refresh</v-icon>
+                </button>
+            </div>
+        </div>
         <div class="chain_select">
             <button :active="formType === 'P'" @click="set('P')">P</button>
             <button :active="formType === 'X'" @click="set('X')">X</button>
@@ -22,6 +29,9 @@ export default class ChainInput extends Vue {
         this.$emit('change', val)
     }
 
+    refresh() {
+        this.$emit('refresh')
+    }
     get wallet() {
         return this.$store.state.activeWallet
     }
@@ -40,6 +50,15 @@ label {
 .header {
     h1 {
         font-weight: normal;
+    }
+}
+.test {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    i {
+        color: white;
+        margin-right: 1rem;
     }
 }
 .chain_select {

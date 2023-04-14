@@ -10,7 +10,11 @@
             </FormC>
             <div class="new_order_Form" v-show="formType !== 'C'">
                 <div class="lists">
-                    <ChainInput v-model="formType" :disabled="isConfirm"></ChainInput>
+                    <ChainInput
+                        @refresh="refresh"
+                        v-model="formType"
+                        :disabled="isConfirm"
+                    ></ChainInput>
                     <div>
                         <tx-list
                             class="tx_list"
@@ -35,14 +39,14 @@
                             v-model="addressIn"
                             class="qrIn hover_border"
                             placeholder="xxx"
-                            :disabled="isConfirm"
+                            :disabled="isConfirm || (!!pendingSendMultisigTX && formType === 'P')"
                         ></qr-input>
                     </div>
                     <div>
-                        <template v-if="isConfirm && formMemo.length > 0">
+                        <!-- <template v-if="isConfirm && formMemo.length > 0">
                             <h4>Memo (Optional)</h4>
                             <p class="confirm_val">{{ formMemo }}</p>
-                        </template>
+                        </template> -->
                         <h4 v-if="memo || !isConfirm">{{ $t('transfer.memo') }}</h4>
                         <textarea
                             class="memo"
@@ -50,7 +54,7 @@
                             placeholder="Memo"
                             v-model="memo"
                             v-if="memo || !isConfirm"
-                            :disabled="isConfirm"
+                            :disabled="isConfirm || (!!pendingSendMultisigTX && formType === 'P')"
                         ></textarea>
                     </div>
                     <div class="fees">
@@ -68,29 +72,6 @@
                         <template v-if="!!pendingSendMultisigTX && formType === 'P'">
                             <!--  hna -->
                             <div class="multi-sig__container">
-                                <p class="err">{{ err }}</p>
-                                <v-btn
-                                    depressed
-                                    class="button_primary"
-                                    :loading="isAjax"
-                                    :ripple="false"
-                                    @click="issue"
-                                    block
-                                    :disabled="canExecuteTx"
-                                >
-                                    execute Transaction
-                                </v-btn>
-                                <v-btn
-                                    depressed
-                                    class="button_primary"
-                                    :loading="isAjax"
-                                    :ripple="false"
-                                    @click="sign"
-                                    :disabled="disableSignButton"
-                                    block
-                                >
-                                    Sign Transaction
-                                </v-btn>
                                 <v-btn
                                     depressed
                                     class="button_primary"
@@ -99,7 +80,26 @@
                                     @click="cancelMultisigTx"
                                     block
                                 >
-                                    Cancel Transaction
+                                    Abort Transaction
+                                </v-btn>
+                                <v-btn
+                                    v-if="canExecuteTx"
+                                    depressed
+                                    class="button_primary"
+                                    :loading="isAjax"
+                                    @click="issue"
+                                >
+                                    Execute Transaction
+                                </v-btn>
+                                <v-btn
+                                    v-else
+                                    class="button_secondary"
+                                    @click="sign"
+                                    depressed
+                                    :loading="isAjax"
+                                    :disabled="disableSignButton"
+                                >
+                                    Sign Transaction
                                 </v-btn>
                             </div>
                         </template>
@@ -143,7 +143,7 @@
                                 <fa icon="check-circle"></fa>
                                 Transaction Sent
                             </p>
-                            <label style="word-break: break-all">
+                            <label v-if="pendingSendMultisigTX" style="word-break: break-all">
                                 <b>ID:</b>
                                 {{ txId }}
                             </label>
@@ -167,7 +167,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 
 import TxList from '@/components/wallet/transfer/TxList.vue'
 import Big from 'big.js'
@@ -327,8 +327,10 @@ export default class Transfer extends Vue {
     }
 
     clearForm() {
-        this.addressIn = ''
-        this.memo = ''
+        if (!this.pendingSendMultisigTX) {
+            this.addressIn = ''
+            this.memo = ''
+        }
 
         // Clear transactions list
         this.$refs.txList.reset()
@@ -343,8 +345,7 @@ export default class Transfer extends Vue {
         this.isAjax = false
         this.isSuccess = true
         this.txId = tx
-        let { dispatchNotification } = this.globalHelper()
-        dispatchNotification({
+        this.helpers.dispatchNotification({
             message: this.$t('notifications.transfer_success_msg'),
             type: 'success',
         })
@@ -368,13 +369,23 @@ export default class Transfer extends Vue {
     onError(err: any) {
         this.err = err
         this.isAjax = false
-        let { dispatchNotification } = this.globalHelper()
-        dispatchNotification({
+        this.helpers.dispatchNotification({
             message: this.$t('notifications.transfer_error_msg'),
             type: 'error',
         })
     }
-    // multiSigLogicStart
+    @Watch('formType', { immediate: true })
+    updateDetails() {
+        if (this.formType === 'P') this.txDetails()
+        else {
+            this.memo = ''
+            this.addressIn = ''
+        }
+    }
+    refresh() {
+        this.$store.dispatch('Signavault/updateTransaction')
+        this.txDetails()
+    }
     get pendingSendMultisigTX(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
             (item: any) =>
@@ -427,13 +438,15 @@ export default class Transfer extends Vue {
         try {
             await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
             this.helpers.dispatchNotification({
-                message: this.$t('notifications.register_node_success'),
+                message: 'Your Transaction sent successfully.',
                 type: 'success',
             })
-            this.$store.dispatch('Signavault/updateTransaction')
-            this.$emit('issued', 'issued')
+            this.$store.dispatch('Signavault/updateTransaction').then(() => {
+                this.txDetails()
+                this.canSendAgain = true
+            })
+            this.clearForm()
         } catch (e: any) {
-            console.log(e)
             this.helpers.dispatchNotification({
                 message: this.$t('notifications.execute_multisig_transaction_error'),
                 type: 'error',
@@ -472,39 +485,28 @@ export default class Transfer extends Vue {
             }
         })
         return isSigned
-        // return !!this.activeWallet.wallets.find((w) => w?.getAllAddressesP()?.[0] === pAddress)
     }
     get canExecuteTx(): boolean {
         let signers = 0
         this.txOwners.forEach((owner) => {
             if (owner.signature) signers++
         })
-        return signers !== this.pendingSendMultisigTX?.tx?.threshold
+        return signers === this.pendingSendMultisigTX?.tx?.threshold
     }
     async txDetails() {
+        await this.$store.dispatch('Signavault/updateTransaction')
         if (this.pendingSendMultisigTX) {
             let unsignedTx = new UnsignedTx()
             unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
             const utx = unsignedTx.getTransaction()
             this.memo = utx.getMemo().toString()
-
             const toAddress = WalletHelper.getToAddressFromUtx(
                 unsignedTx,
                 this.wallet.getAllAddressesP()[0]
             )
-
-            // TODO @Achraf
+            if (toAddress) this.addressIn = toAddress
         }
     }
-    async beforeMount() {
-        console.log({
-            transactoins: this.$store.getters['Signavault/transactions'],
-            pendingMultisig: this.pendingSendMultisigTX?.tx,
-        })
-        await this.txDetails()
-    }
-
-    // multiSigLogicStart
     submit() {
         this.isAjax = true
         this.err = ''
@@ -537,7 +539,7 @@ export default class Transfer extends Vue {
                         this.$store.dispatch('Signavault/updateTransaction').then(() => {
                             this.$store.dispatch('History/updateMultisigTransactionHistory')
                         })
-                    }, 3000)
+                    }, 1000)
                     this.canSendAgain = false
                     this.isAjax = false
                     this.isSuccess = true
