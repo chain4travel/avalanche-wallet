@@ -208,7 +208,7 @@ import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
     },
 })
 export default class Transfer extends Vue {
-    formType: ChainIdType = 'X'
+    formType: ChainIdType = 'P'
     showAdvanced: boolean = false
     isAjax: boolean = false
     addressIn: string = ''
@@ -326,7 +326,7 @@ export default class Transfer extends Vue {
     }
 
     clearForm() {
-        if (!this.pendingSendMultisigTX) {
+        if (!this.pendingSendMultisigTX || this.formType !== 'P') {
             this.addressIn = ''
             this.memo = ''
         }
@@ -479,10 +479,12 @@ export default class Transfer extends Vue {
     }
     get canExecuteMultisigTx(): boolean {
         let signers = 0
+        let threshold = this.pendingSendMultisigTX?.tx?.threshold
         this.txOwners.forEach((owner) => {
             if (owner.signature) signers++
         })
-        return signers === this.pendingSendMultisigTX?.tx?.threshold
+        if (threshold) return signers >= threshold
+        return false
     }
     async updateMultisigTxDetails() {
         await this.$store.dispatch('Signavault/updateTransaction')

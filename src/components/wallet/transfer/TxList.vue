@@ -50,7 +50,6 @@ export default class TxList extends Vue {
     tx_list: ITransaction[] = []
     disabledAssets: AvaAsset[][] = []
     next_initial: AvaAsset | null = null
-    dummy = new BN(100)
 
     @Prop({ default: false }) disabled!: boolean
     @Prop() chainId!: ChainIdType
