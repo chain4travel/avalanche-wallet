@@ -1,6 +1,6 @@
 <template>
     <div v-if="isEVMSupported" class="header">
-        <div class="test">
+        <div class="header__container">
             <h1>{{ $t('transfer.source_chain.title') }}</h1>
             <div v-if="formType === 'P'" class="refresh">
                 <button @click="refresh">
@@ -51,16 +51,17 @@ label {
     h1 {
         font-weight: normal;
     }
-}
-.test {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    i {
-        color: white;
-        margin-right: 1rem;
+    &__container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        i {
+            color: white;
+            margin-right: 1rem;
+        }
     }
 }
+
 .chain_select {
     display: flex;
     width: max-content;

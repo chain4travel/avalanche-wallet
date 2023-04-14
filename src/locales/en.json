@@ -167,6 +167,11 @@
             "amount": "Amount",
             "token": "Token"
         },
+        "multisig": {
+            "execute_transaction": "Execute transaction",
+            "sign_transaction": "Sign transaction",
+            "abort_transaction": "Abort transaction"
+        },
         "source_chain": {
             "title": "Source Chain"
         },

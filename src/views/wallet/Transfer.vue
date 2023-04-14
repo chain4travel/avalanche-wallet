@@ -70,7 +70,6 @@
                             </li>
                         </ul>
                         <template v-if="!!pendingSendMultisigTX && formType === 'P'">
-                            <!--  hna -->
                             <div class="multi-sig__container">
                                 <v-btn
                                     depressed
@@ -80,26 +79,26 @@
                                     @click="cancelMultisigTx"
                                     block
                                 >
-                                    Abort Transaction
+                                    {{ $t('transfer.multisig.abort_transaction') }}
                                 </v-btn>
                                 <v-btn
-                                    v-if="canExecuteTx"
+                                    v-if="canExecuteMultisigTx"
                                     depressed
                                     class="button_primary"
                                     :loading="isAjax"
-                                    @click="issue"
+                                    @click="issueMultisigTx"
                                 >
-                                    Execute Transaction
+                                    {{ $t('transfer.multisig.execute_transaction') }}
                                 </v-btn>
                                 <v-btn
                                     v-else
                                     class="button_secondary"
-                                    @click="sign"
+                                    @click="signMultisigTx"
                                     depressed
                                     :loading="isAjax"
                                     :disabled="disableSignButton"
                                 >
-                                    Sign Transaction
+                                    {{ $t('transfer.multisig.sign_transaction') }}
                                 </v-btn>
                             </div>
                         </template>
@@ -376,7 +375,7 @@ export default class Transfer extends Vue {
     }
     @Watch('formType', { immediate: true })
     updateDetails() {
-        if (this.formType === 'P') this.txDetails()
+        if (this.formType === 'P') this.updateMultisigTxDetails()
         else {
             this.memo = ''
             this.addressIn = ''
@@ -384,7 +383,7 @@ export default class Transfer extends Vue {
     }
     refresh() {
         this.$store.dispatch('Signavault/updateTransaction')
-        this.txDetails()
+        this.updateMultisigTxDetails()
     }
     get pendingSendMultisigTX(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
@@ -392,10 +391,6 @@ export default class Transfer extends Vue {
                 item?.tx?.alias === this.wallet.getAllAddressesP()[0] &&
                 WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'BaseTx'
         )
-    }
-
-    get sigValue() {
-        return this.pendingSendMultisigTX?.tx.owners?.filter((owner) => !!owner.signature)?.length
     }
 
     get txOwners() {
@@ -406,11 +401,7 @@ export default class Transfer extends Vue {
         return this.$store.state.activeWallet
     }
 
-    get multiSigTxState(): number {
-        return this.pendingSendMultisigTX?.state ?? -1
-    }
-
-    async sign() {
+    async signMultisigTx() {
         const wallet = this.activeWallet
         if (!wallet || !(wallet instanceof MultisigWallet))
             return console.debug('MultiSigTx::sign: Invalid wallet')
@@ -430,7 +421,7 @@ export default class Transfer extends Vue {
         }
     }
 
-    async issue() {
+    async issueMultisigTx() {
         const wallet = this.activeWallet
         if (!wallet || !(wallet instanceof MultisigWallet))
             return console.log('MultiSigTx::sign: Invalid wallet')
@@ -442,7 +433,7 @@ export default class Transfer extends Vue {
                 type: 'success',
             })
             this.$store.dispatch('Signavault/updateTransaction').then(() => {
-                this.txDetails()
+                this.updateMultisigTxDetails()
                 this.canSendAgain = true
             })
             this.clearForm()
@@ -486,14 +477,14 @@ export default class Transfer extends Vue {
         })
         return isSigned
     }
-    get canExecuteTx(): boolean {
+    get canExecuteMultisigTx(): boolean {
         let signers = 0
         this.txOwners.forEach((owner) => {
             if (owner.signature) signers++
         })
         return signers === this.pendingSendMultisigTX?.tx?.threshold
     }
-    async txDetails() {
+    async updateMultisigTxDetails() {
         await this.$store.dispatch('Signavault/updateTransaction')
         if (this.pendingSendMultisigTX) {
             let unsignedTx = new UnsignedTx()
