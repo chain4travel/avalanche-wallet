@@ -155,12 +155,7 @@ export default class RegisterNode extends Vue {
                 title: 'Node Registered',
                 message: 'Your node registered successfully.',
             })
-            setTimeout(() => {
-                this.$store.dispatch('Assets/updateUTXOs')
-                this.$store.dispatch('Signavault/updateTransaction').then(() => {
-                    this.$store.dispatch('History/updateTransactionHistory')
-                })
-            }, 3000)
+            this.$store.dispatch('updateTransaction')
         } catch (error) {
             if (error instanceof SignatureError) {
                 this.$store.dispatch('Notifications/add', {
@@ -168,12 +163,7 @@ export default class RegisterNode extends Vue {
                     title: 'Multisignature',
                     message: error.message,
                 })
-                setTimeout(() => {
-                    this.$store.dispatch('Assets/updateUTXOs')
-                    this.$store.dispatch('Signavault/updateTransaction').then(() => {
-                        this.$store.dispatch('History/updateMultisigTransactionHistory')
-                    })
-                }, 3000)
+                this.$store.dispatch('updateTransaction', { onlyMultisig: true })
             } else {
                 console.error(error)
                 this.$store.dispatch('Notifications/add', {

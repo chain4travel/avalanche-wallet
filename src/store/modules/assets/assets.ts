@@ -618,8 +618,7 @@ const assets_module: Module<AssetsState, RootState> = {
                 if (asset.id === state.AVA_ASSET_ID) {
                     if (depositAndBond) {
                         asset.addExtra(getters.walletPlatformBalanceUnlocked)
-                        asset.addExtraLocked(getters.walletPlatformBalanceLocked)
-                        asset.addExtraLocked(getters.walletPlatformBalanceLockedStakeable)
+                        asset.addExtraLocked(getters.walletPlatformBalanceTotalLocked)
                     } else {
                         asset.addExtra(getters.walletPlatformBalance)
                         asset.addExtraLocked(getters.walletPlatformBalanceLocked)

@@ -2,7 +2,7 @@
     <div>
         <div class="utxos">
             <div v-if="hasReceived">
-                <label>Received</label>
+                <label>Receive</label>
                 <BaseTxOutput
                     v-for="(asset, assetId) in tokensReceived"
                     :key="assetId"
@@ -37,7 +37,7 @@
                 ></BaseTxOutput>
             </div>
             <div v-if="hasSent">
-                <label>Sent</label>
+                <label>Send</label>
                 <BaseTxOutput
                     v-for="(asset, assetId) in tokensSent"
                     :key="assetId"
@@ -345,11 +345,11 @@ export default class BaseTx extends Vue {
             })
         })
 
-        return isFromWallet ? 'Sent' : 'Received'
+        return isFromWallet ? 'Send' : 'Receive'
     }
 
     get operationColor() {
-        return this.operationDirection === 'Received' ? 'success' : 'sent'
+        return this.operationDirection === 'Receive' ? 'success' : 'sent'
     }
 }
 </script>

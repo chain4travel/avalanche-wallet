@@ -360,23 +360,20 @@ export default class Transfer extends Vue {
             })
             .catch((err) => {
                 if (err instanceof SignatureError) {
-                    this.$store.dispatch('Notifications/add', {
-                        type: 'info',
-                        title: 'Multisignature',
-                        message: err.message,
+                    this.$store.dispatch('updateTransaction', {
+                        onlyMultisig: true,
+                        msgType: 'info',
+                        msgTitle: 'Multisignature',
+                        msgText: err.message,
                     })
-                    setTimeout(() => {
-                        this.$store.dispatch('Assets/updateUTXOs')
-                        this.$store.dispatch('Signavault/updateTransaction').then(() => {
-                            this.$store.dispatch('History/updateMultisigTransactionHistory')
-                        })
-                    }, 3000)
+
                     this.canSendAgain = false
                     this.isAjax = false
                     this.isSuccess = true
                     this.txState = TxState.success
+                } else {
+                    this.onError(err)
                 }
-                this.onError(err)
             })
     }
 

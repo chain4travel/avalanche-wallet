@@ -398,32 +398,22 @@ export default class AddValidator extends Vue {
     }
 
     onSuccess() {
-        this.$store.dispatch('Notifications/add', {
-            type: 'success',
-            title: 'Validator Added',
-            message: 'Your tokens are now locked to stake.',
-        })
-
         // Update History
-        setTimeout(() => {
-            this.$store.dispatch('Assets/updateUTXOs')
-            this.$store.dispatch('History/updateTransactionHistory')
-        }, 3000)
+        this.$store.dispatch('updateTransaction', {
+            onlyMultisig: true,
+            msgType: 'success',
+            msgTitle: 'Validator Added',
+            msgText: 'Your tokens are now locked to stake.',
+        })
     }
 
     onTxRecorded(err: any) {
-        this.$store.dispatch('Notifications/add', {
-            type: 'info',
-            title: 'Multisignature',
-            message: err.message,
+        this.$store.dispatch('updateTransaction', {
+            onlyMultisig: true,
+            msgType: 'info',
+            msgTitle: 'Multisignature',
+            msgText: err.message,
         })
-        // Update History
-        setTimeout(() => {
-            this.$store.dispatch('Assets/updateUTXOs')
-            this.$store.dispatch('Signavault/updateTransaction').then(() => {
-                this.$store.dispatch('History/updateMultisigTransactionHistory')
-            })
-        }, 3000)
     }
 
     async updateTxStatus(txId: string) {

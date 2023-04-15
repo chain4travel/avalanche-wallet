@@ -14,7 +14,7 @@ export interface HistoryState {
     chains: Chain[]
 }
 
-interface RawTx {
+export interface RawTx {
     getBlockchainID: () => Buffer
 }
 

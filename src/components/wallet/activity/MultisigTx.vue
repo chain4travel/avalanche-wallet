@@ -91,15 +91,12 @@ export default class MultisigTx extends Vue {
         this.signing = true
         try {
             await wallet.addSignatures(this.tx?.tx)
-            this.$store.dispatch('Notifications/add', {
-                title: 'Multisignature',
-                message: 'Signature recorded.',
+            this.$store.dispatch('updateTransaction', {
+                onlyMultisig: true,
+                msgType: 'success',
+                msgTitle: 'Multisignature',
+                msgText: 'Signature recorded.',
             })
-            setTimeout(() => {
-                this.$store
-                    .dispatch('Signavault/updateTransaction')
-                    .then(() => this.$store.dispatch('History/updateMultisigTransactionHistory'))
-            }, 3000)
         } catch (e: any) {
             console.log(e.response)
             this.$store.dispatch('Notifications/add', {
@@ -121,16 +118,14 @@ export default class MultisigTx extends Vue {
         this.issueing = true
         try {
             const signedTx = await wallet.issueExternal(this.tx?.tx)
-            this.$store.dispatch('Notifications/add', {
-                title: 'Multisignature',
-                message: 'Transaction issued.',
-            })
             await this.buildImportFromExport(wallet, signedTx)
-            setTimeout(() => {
-                this.$store
-                    .dispatch('Signavault/updateTransaction')
-                    .then(() => this.$store.dispatch('History/updateAllTransactionHistory'))
-            }, 3000)
+            this.$store.dispatch('updateTransaction', {
+                fullHistory: true,
+                withMultisig: true,
+                msgType: 'success',
+                msgTitle: 'Multisignature',
+                msgText: 'Transaction issued.',
+            })
             this.$router.replace('activity')
         } catch (e: any) {
             console.log(e.response)
@@ -147,7 +142,6 @@ export default class MultisigTx extends Vue {
         const utx = txData.tx.getUnsignedTx()
         const baseTx = utx.getTransaction()
         const chainID = bintools.cb58Encode(baseTx.getBlockchainID())
-        const assetID = bintools.cb58Decode(ava.getNetwork().X.avaxAssetID)
         const txID = bintools.cb58Decode(txData.txID)
         if (chainID === ava.PChain().getBlockchainID()) {
             if (baseTx.getTxType() === PlatformVMConstants.EXPORTTX) {

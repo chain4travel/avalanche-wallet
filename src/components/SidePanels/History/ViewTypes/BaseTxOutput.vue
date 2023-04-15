@@ -41,9 +41,9 @@ export default class BaseTxOutput extends Vue {
 
     get actionText() {
         if (this.isProfit) {
-            return 'Received'
+            return 'Receive'
         } else {
-            return 'Sent'
+            return 'Send'
         }
     }
 

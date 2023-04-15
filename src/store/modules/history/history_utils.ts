@@ -137,7 +137,7 @@ export function avaxTransferDataToCsvRow(rowData: CsvRowAvaxTransferData): strin
     let froms = rowData.from ? `"${rowData.from?.join('\n')}"` : '-'
     let tos = rowData.to ? `"${rowData.to?.join('\n')}"` : '-'
 
-    let sendReceive = rowData.isGain ? 'Received' : 'Sent'
+    let sendReceive = rowData.isGain ? 'Receive' : 'Send'
     return [
         rowData.txId,
         rowData.date.toLocaleDateString(),
@@ -239,6 +239,10 @@ export function parse(uptxs: UnparsedTx[]): ITransactionData[] {
                     break
                 case PlatformVMConstants.EXPORTTX:
                     itd.type = 'export'
+                    itd.rawTx = tx
+                    break
+                case PlatformVMConstants.BASETX:
+                    itd.type = 'base'
                     itd.rawTx = tx
                     break
                 default:
