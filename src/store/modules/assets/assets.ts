@@ -622,14 +622,14 @@ const assets_module: Module<AssetsState, RootState> = {
                 // @ts-ignore
                 if (asset.id === state.AVA_ASSET_ID) {
                     if (depositAndBond) {
-                        asset.addExtra(getters.walletPlatformBalanceUnlocked)
-                        asset.addExtraLocked(getters.walletPlatformBalanceLocked)
-                        asset.addExtraLocked(getters.walletPlatformBalanceLockedStakeable)
-                    } else {
                         asset.addExtra(getters.walletPlatformBalance)
-                        asset.addExtraLocked(getters.walletPlatformBalanceLocked)
-                        asset.addExtraLocked(getters.walletPlatformBalanceLockedStakeable)
-                        asset.addExtraLocked(getters.walletStakingBalance)
+                        asset.addExtra(getters.walletPlatformBalanceLocked)
+                        asset.addExtra(getters.walletPlatformBalanceLockedStakeable)
+                    } else {
+                        asset.addExtra(getters.walletStakingBalance)
+                        asset.addExtra(getters.walletPlatformBalance)
+                        asset.addExtra(getters.walletPlatformBalanceLocked)
+                        asset.addExtra(getters.walletPlatformBalanceLockedStakeable)
                     }
                 }
 
