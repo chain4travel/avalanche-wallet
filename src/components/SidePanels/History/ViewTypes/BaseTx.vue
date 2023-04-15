@@ -27,7 +27,7 @@
                 </div>
             </div>
             <div v-if="['deposit', 'unlock_deposit'].includes(type)">
-                <label>{{ type == 'deposit' ? 'Deposited' : 'Undeposited' }}</label>
+                <label>{{ type == 'deposit' ? 'Deposit' : 'Undeposit' }}</label>
                 <BaseTxOutput
                     v-for="(asset, assetId) in tokensDeposited"
                     :key="assetId"
