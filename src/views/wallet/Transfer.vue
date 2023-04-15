@@ -39,17 +39,18 @@
                         ></qr-input>
                     </div>
                     <div>
-                        <template v-if="isConfirm && formMemo.length > 0">
-                            <h4>Memo (Optional)</h4>
-                            <p class="confirm_val">{{ formMemo }}</p>
-                        </template>
-                        <h4 v-if="memo || !isConfirm">{{ $t('transfer.memo') }}</h4>
+                        <h4 v-if="!isConfirm || formMemo.length > 0">
+                            {{ $t('transfer.memo').toString() }}
+                        </h4>
+                        <p v-if="isConfirm && formMemo.length > 0" class="confirm_val">
+                            {{ formMemo }}
+                        </p>
                         <textarea
+                            v-if="!isConfirm"
                             class="memo"
                             maxlength="256"
                             placeholder="Memo"
                             v-model="memo"
-                            v-if="memo || !isConfirm"
                             :disabled="isConfirm"
                         ></textarea>
                     </div>
@@ -151,7 +152,6 @@ import TxSummary from '@/components/wallet/transfer/TxSummary.vue'
 import { priceDict, IssueBatchTxInput } from '@/store/types'
 import { WalletType } from '@/js/wallets/types'
 import { bnToBig } from '@/helpers/helper'
-import { WalletHelper } from '@/helpers/wallet_helper'
 import * as bip39 from 'bip39'
 import FormC from '@/components/wallet/transfer/FormC.vue'
 import { ChainIdType } from '@/constants'
@@ -315,7 +315,7 @@ export default class Transfer extends Vue {
         this.$store.dispatch('Assets/updateUTXOs').then(() => {
             this.updateSendAgainLock()
         })
-        this.$store.dispatch('History/updateTransactionHistory')
+        setTimeout(() => this.$store.dispatch('History/updateTransactionHistory'), 3000)
     }
 
     updateSendAgainLock() {
