@@ -343,8 +343,8 @@
         "import_mnemonic_err": "Invalid key phrase.",
         "tooltip": "This key will be forgotten when you refresh the browser.",
         "edit_wallet_name_tooltip": "Edit wallet name",
-        "view_priv_key": "View Private Key",
-        "view_static_keys": "View Static Keys",
+        "keys_info": "Key Info",
+        "static_keys_info": "Static Key Info",
         "view_key": "View Key Phrase",
         "export_key": "Export Key",
         "hd_addresses": "HD Addresses",
@@ -739,6 +739,7 @@
             "subtitle": "{n}, Threshold: {t}"
         },
         "priv_key": {
+            "info": "Key Info",
             "title": "Private Key"
         },
         "activateWallet": {
