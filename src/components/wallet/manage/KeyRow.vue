@@ -13,15 +13,10 @@
             v-if="walletType === 'multisig'"
         />
         <PrivateKey
-            v-if="walletType === 'singleton'"
-            :privateKey="privateKey"
-            ref="modal_priv_key"
-        />
-        <PrivateKey
-            v-if="walletType !== 'ledger' && walletType !== 'multisig'"
+            v-if="walletType === 'singleton' || walletType === 'mnemonic'"
             :privateKey="privateKeyC"
             :publicKey="publicKeyC"
-            ref="modal_priv_key_c"
+            ref="modal_keys_info"
         />
         <div class="rows">
             <div class="header">
@@ -101,7 +96,10 @@
                                 @click="showPrivateKeyCModal"
                                 data-cy="manage-key-private-key-c"
                             >
-                                {{ $t('keys.view_static_keys') }}
+                                {{ $t('keys.keys_info') }}
+                            </button>
+                            <button v-else-if="walletType === 'mnemonic'" @click="showKeyInfoModal">
+                                {{ $t('keys.static_keys_info') }}
                             </button>
                         </div>
                     </div>
@@ -289,14 +287,9 @@ export default class KeyRow extends Vue {
         this.$refs.export_wallet.open()
     }
 
-    showPrivateKeyModal() {
+    showKeyInfoModal() {
         //@ts-ignore
-        this.$refs.modal_priv_key.open()
-    }
-
-    showPrivateKeyCModal() {
-        //@ts-ignore
-        this.$refs.modal_priv_key_c.open()
+        this.$refs.modal_keys_info.open()
     }
 
     showMultisigOwnerModal() {

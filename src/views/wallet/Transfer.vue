@@ -72,19 +72,9 @@
                         <template v-if="!!pendingSendMultisigTX && formType === 'P'">
                             <div class="multi-sig__container">
                                 <v-btn
-                                    depressed
-                                    class="button_primary"
-                                    :loading="isAjax"
-                                    :ripple="false"
-                                    @click="cancelMultisigTx"
-                                    block
-                                >
-                                    {{ $t('transfer.multisig.abort_transaction') }}
-                                </v-btn>
-                                <v-btn
                                     v-if="canExecuteMultisigTx"
                                     depressed
-                                    class="button_primary"
+                                    class="button_secondary"
                                     :loading="isAjax"
                                     @click="issueMultisigTx"
                                 >
@@ -99,6 +89,16 @@
                                     :disabled="disableSignButton"
                                 >
                                     {{ $t('transfer.multisig.sign_transaction') }}
+                                </v-btn>
+                                <v-btn
+                                    depressed
+                                    class="button_primary"
+                                    :loading="isAjax"
+                                    :ripple="false"
+                                    @click="cancelMultisigTx"
+                                    block
+                                >
+                                    {{ $t('transfer.multisig.abort_transaction') }}
                                 </v-btn>
                             </div>
                         </template>
@@ -352,6 +352,7 @@ export default class Transfer extends Vue {
         this.$store.dispatch('Assets/updateUTXOs').then(() => {
             this.updateSendAgainLock()
         })
+        setTimeout(() => this.$store.dispatch('History/updateTransactionHistory'), 3000)
     }
 
     updateSendAgainLock() {
