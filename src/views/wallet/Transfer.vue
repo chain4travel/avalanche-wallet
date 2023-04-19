@@ -501,6 +501,11 @@ export default class Transfer extends Vue {
             )
             // eslint-disable-next-line no-control-regex
             if (toAddress) this.addressIn = 'P' + toAddress?.replace(/\x00/g, '')
+            const amount = toAddress
+                ? WalletHelper.getTotalAmountFromUtx(unsignedTx, toAddress)
+                : undefined
+            // TODO @Achraf
+            // Show the amount wherever you need to
         } else {
             this.canSendAgain = true
         }
