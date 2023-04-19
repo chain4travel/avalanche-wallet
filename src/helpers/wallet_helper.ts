@@ -533,13 +533,12 @@ class WalletHelper {
         })
 
         if (el) {
-            const toAddress =
-                'P' +
-                bintools.addressToString(
-                    ava.getHRP(),
-                    tx?.getBlockchainID().toString(),
-                    el?.getAddresses()?.[0]
-                )
+            const toAddress = bintools.addressToString(
+                ava.getHRP(),
+                tx?.getBlockchainID().toString(),
+                el?.getAddresses()?.[0]
+            )
+
             return toAddress
         }
     }

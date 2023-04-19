@@ -382,9 +382,13 @@ export default class Transfer extends Vue {
             this.addressIn = ''
         }
     }
-    refresh() {
-        this.$store.dispatch('Signavault/updateTransaction')
+    async refresh() {
+        await this.$store.dispatch('Signavault/updateTransaction')
         this.updateMultisigTxDetails()
+        if (!this.pendingSendMultisigTX) {
+            this.memo = ''
+            this.addressIn = ''
+        }
     }
     get pendingSendMultisigTX(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
@@ -433,10 +437,7 @@ export default class Transfer extends Vue {
                 message: 'Your Transaction sent successfully.',
                 type: 'success',
             })
-            this.$store.dispatch('Signavault/updateTransaction').then(() => {
-                this.updateMultisigTxDetails()
-                this.canSendAgain = true
-            })
+            this.updateMultisigTxDetails()
             this.clearForm()
         } catch (e: any) {
             this.helpers.dispatchNotification({
@@ -498,7 +499,10 @@ export default class Transfer extends Vue {
                 unsignedTx,
                 this.wallet.getAllAddressesP()[0]
             )
-            if (toAddress) this.addressIn = toAddress
+            // eslint-disable-next-line no-control-regex
+            if (toAddress) this.addressIn = 'P' + toAddress?.replace(/\x00/g, '')
+        } else {
+            this.canSendAgain = true
         }
     }
     submit() {

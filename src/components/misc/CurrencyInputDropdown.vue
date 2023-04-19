@@ -161,13 +161,16 @@ export default class CurrencyInputDropdown extends Vue {
         return this.$store.getters['Assets/AssetAVA']
     }
 
+    get platformUnlocked(): BN {
+        return this.$store.getters['Assets/walletPlatformBalanceUnlocked']
+    }
     get max_amount(): null | BN {
         if (!this.asset_now) return null
         if (!this.avaxAsset) return null
 
         let assetId = this.asset_now.id
         let balance = this.walletAssetsDict[assetId]
-        const amount = this.chainId === 'P' ? balance.amountExtra : balance.amount
+        const amount = this.chainId === 'P' ? this.platformUnlocked : balance.amount
 
         let avaxId = this.avaxAsset.id
 
