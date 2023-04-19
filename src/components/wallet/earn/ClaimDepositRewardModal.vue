@@ -55,14 +55,12 @@ import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import { ava } from '@/AVA'
 import AvaAsset from '@/js/AvaAsset'
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { SignatureError } from '@c4tplatform/caminojs/dist/common'
+import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 
 @Component({
-    filters: {
-        cleanAvaxBN(val: BN) {
-            let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
-            return big.toLocaleString()
-        },
-    },
     components: {
         Modal,
     },
@@ -76,9 +74,11 @@ export default class ModalClaimDepositReward extends Vue {
     $refs!: {
         modal: Modal
     }
+
     open() {
         this.$refs.modal.open()
     }
+
     close() {
         this.$refs.modal.close()
     }
@@ -99,6 +99,10 @@ export default class ModalClaimDepositReward extends Vue {
         return big.toLocaleString()
     }
 
+    get wallet(): MultisigWallet {
+        return this.$store.state.activeWallet
+    }
+
     get feeAmt(): string {
         return this.formattedAmount(ava.PChain().getTxFee())
     }
@@ -116,20 +120,57 @@ export default class ModalClaimDepositReward extends Vue {
         return this.ava_asset?.symbol ?? ''
     }
 
-    async confirmClaim() {
-        const wallet = this.$store.state.activeWallet
-        const addresses = wallet.getAllAddressesP()
+    get pendingSendMultisigTX(): SignavaultTx | undefined {
+        return this.$store.getters['Signavault/transactions'].find(
+            (item: any) =>
+                item?.tx?.alias === this.wallet.getAllAddressesP()[0] &&
+                // this needs to be changed
+                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
+        )
+    }
 
-        WalletHelper.buildDepositClaimTx(addresses, wallet, this.depositTxID)
+    get txOwners() {
+        return this.pendingSendMultisigTX?.tx?.owners ?? []
+    }
+
+    get disableClaimButton(): boolean {
+        let isSigned = false
+        this.txOwners.forEach((owner) => {
+            if (this.wallet.wallets.find((w) => w?.getAllAddressesP()?.[0] === owner.address)) {
+                if (owner.signature) isSigned = true
+            }
+        })
+        return isSigned
+    }
+
+    async confirmClaim() {
+        const addresses = this.wallet.getAllAddressesP()
+
+        WalletHelper.buildDepositClaimTx(addresses, this.wallet, this.depositTxID)
             .then(() => {
                 this.confiremedClaimedAmount = this.formattedAmount(this.amount)
-                setTimeout(() => {
-                    this.updateBalance()
-                }, 500)
+                setTimeout(() => this.updateBalance(), 500)
                 this.$store.dispatch('Platform/updateActiveDepositOffer')
                 this.claimed = true
             })
             .catch((err) => {
+                if (err instanceof SignatureError) {
+                    // @ts-ignore
+                    let { dispatchNotification } = this.globalHelper()
+                    // change this local en
+                    dispatchNotification({
+                        message: this.$t('notifications.claim_success_msg'),
+                        type: 'success',
+                    })
+
+                    setTimeout(() => {
+                        // this.$store.dispatch('Assets/updateUTXOs')
+                        this.$store.dispatch('Signavault/updateTransaction').then(() => {
+                            this.$store.dispatch('History/updateMultisigTransactionHistory')
+                        })
+                    }, 1000)
+                }
+
                 console.log(err)
                 this.claimed = false
             })
