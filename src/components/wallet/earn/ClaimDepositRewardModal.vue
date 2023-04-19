@@ -71,6 +71,9 @@ export default class ModalClaimDepositReward extends Vue {
     claimed: boolean = false
     confiremedClaimedAmount: string = ''
 
+    // @ts-ignore
+    helpers = this.globalHelper()
+
     $refs!: {
         modal: Modal
     }
@@ -99,7 +102,7 @@ export default class ModalClaimDepositReward extends Vue {
         return big.toLocaleString()
     }
 
-    get wallet(): MultisigWallet {
+    get activeWallet(): MultisigWallet {
         return this.$store.state.activeWallet
     }
 
@@ -123,30 +126,15 @@ export default class ModalClaimDepositReward extends Vue {
     get pendingSendMultisigTX(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
             (item: any) =>
-                item?.tx?.alias === this.wallet.getAllAddressesP()[0] &&
-                // this needs to be changed
+                item?.tx?.alias === this.activeWallet.getAllAddressesP()[0] &&
                 WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
         )
     }
 
-    get txOwners() {
-        return this.pendingSendMultisigTX?.tx?.owners ?? []
-    }
-
-    get disableClaimButton(): boolean {
-        let isSigned = false
-        this.txOwners.forEach((owner) => {
-            if (this.wallet.wallets.find((w) => w?.getAllAddressesP()?.[0] === owner.address)) {
-                if (owner.signature) isSigned = true
-            }
-        })
-        return isSigned
-    }
-
     async confirmClaim() {
-        const addresses = this.wallet.getAllAddressesP()
+        const addresses = this.activeWallet.getAllAddressesP()
 
-        WalletHelper.buildDepositClaimTx(addresses, this.wallet, this.depositTxID)
+        WalletHelper.buildDepositClaimTx(addresses, this.activeWallet, this.depositTxID)
             .then(() => {
                 this.confiremedClaimedAmount = this.formattedAmount(this.amount)
                 setTimeout(() => this.updateBalance(), 500)
