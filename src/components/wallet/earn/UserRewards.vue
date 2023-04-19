@@ -102,6 +102,7 @@ export default class UserRewards extends Vue {
 
     refresh() {
         this.$store.dispatch('Platform/updateActiveDepositOffer')
+        this.$store.dispatch('Signavault/updateTransaction')
     }
 }
 </script>

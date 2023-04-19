@@ -253,6 +253,8 @@ export default class UserRewardCard extends Vue {
     }
 
     get canExecuteMultisigTx(): boolean {
+        // TODO @Ayoub
+        // use getSignatureStatus from MultisigWallet.ts
         let signers = 0
         let threshold = this.pendingSendMultisigTX?.tx?.threshold
         this.txOwners.forEach((owner) => {
