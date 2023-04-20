@@ -27,14 +27,21 @@
             </div>
             <div class="confirmed-claimed" v-else>
                 <br />
-                <h2>
-                    {{
-                        $t('validator.rewards.modal_claim.confirmed_claimed', {
-                            amount: confirmedClaimedAmountText,
-                            symbol: symbol,
-                        })
-                    }}
-                </h2>
+
+                <div v-if="isMultisignTx">
+                    <h2>Tx Pending</h2>
+                </div>
+                <div v-else>
+                    <h2>
+                        {{
+                            $t('validator.rewards.modal_claim.confirmed_claimed', {
+                                amount: confirmedClaimedAmountText,
+                                symbol: symbol,
+                            })
+                        }}
+                    </h2>
+                </div>
+
                 <br />
             </div>
         </div>
@@ -59,6 +66,9 @@ export default class ModalClaimReward extends Vue {
     @Prop() amountText!: string
     @Prop() symbol!: string
     @Prop() amount!: BN
+    @Prop() rewardOwner!: string
+    @Prop() pChainddress!: string
+    @Prop() isMultisignTx!: boolean
 
     claimed: boolean = false
     confirmedClaimedAmountText: string = ''
@@ -81,16 +91,28 @@ export default class ModalClaimReward extends Vue {
 
     async confirmClaim() {
         try {
-            await WalletHelper.buildClaimTx(
-                this.nodeInfo.rewardOwner.addresses[0],
+            let claimTx = await WalletHelper.buildClaimTx(
+                this.pChainddress,
                 new BN(this.amount),
-                this.$store.state.activeWallet
+                this.$store.state.activeWallet,
+                this.rewardOwner,
+                this.isMultisignTx
             )
-            this.confirmedClaimedAmountText = new BN(this.amount).toString()
-            this.claimed = true
+
+            if (this.isMultisignTx) {
+                this.claimed = true
+            } else {
+                this.confirmedClaimedAmountText = new BN(this.amount).toString()
+                this.claimed = true
+            }
         } catch (e) {
             console.error(e)
-            this.claimed = false
+            if (this.isMultisignTx) {
+                this.close()
+                this.$emit('beforeCloseModal', false)
+            } else {
+                this.claimed = false
+            }
         }
     }
 }

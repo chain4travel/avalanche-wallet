@@ -1,36 +1,47 @@
 <template>
     <div>
-        <div class="rewards-div">
-            <div>
-                <h4 class="input_label">{{ $t('validator.rewards.claim.reward_owner') }}</h4>
-                <span class="disabled_input" role="textbox">
-                    {{ rewardOwner }}
-                </span>
-            </div>
-            <br />
-            <div>
-                <h4>{{ $t('validator.rewards.claim.claimable_validation') }}</h4>
-                <div class="reward-claim-div">
-                    <h1>{{ pRewardAmountText }} {{ symbol }}</h1>
-                    <v-btn
-                        class="button_secondary btn-claim-reward"
-                        depressed
-                        @click="openModalClaimReward"
-                    >
-                        {{ $t('validator.rewards.claim.claim_rewards') }}
-                    </v-btn>
+        <pending-multisig
+            v-if="pendingTx !== undefined && pendingTx !== null"
+            :multisigTx="pendingTx"
+            @issued="issueClaimTx"
+            @refresh="getPendingTransaction"
+        ></pending-multisig>
+        <div v-else>
+            <div class="rewards-div">
+                <div>
+                    <h4 class="input_label">{{ $t('validator.rewards.claim.reward_owner') }}</h4>
+                    <span class="disabled_input" role="textbox">
+                        {{ rewardOwner }}
+                    </span>
+                </div>
+                <br />
+                <div>
+                    <h4>{{ $t('validator.rewards.claim.claimable_validation') }}</h4>
+                    <div class="reward-claim-div">
+                        <h1>{{ pRewardAmountText }} {{ symbol }}</h1>
+                        <v-btn
+                            class="button_secondary btn-claim-reward"
+                            depressed
+                            @click="openModalClaimReward"
+                        >
+                            {{ $t('validator.rewards.claim.claim_rewards') }}
+                        </v-btn>
+                    </div>
                 </div>
             </div>
+            <ModalClaimReward
+                :nodeId="nodeId"
+                :nodeInfo="nodeInfo"
+                ref="modal_claim_reward"
+                :amountText="pRewardAmountText"
+                :symbol="symbol"
+                :amount="rewardAmount"
+                @beforeCloseModal="beforeCloseModal"
+                :rewardOwner="rewardOwner"
+                :pChainddress="pChainddress"
+                :isMultisignTx="isMultisignTx"
+            ></ModalClaimReward>
         </div>
-        <ModalClaimReward
-            :nodeId="nodeId"
-            :nodeInfo="nodeInfo"
-            ref="modal_claim_reward"
-            :amountText="pRewardAmountText"
-            :symbol="symbol"
-            :amount="rewardAmount"
-            @beforeCloseModal="beforeCloseModal"
-        ></ModalClaimReward>
     </div>
 </template>
 <script lang="ts">
@@ -42,10 +53,15 @@ import { WalletHelper } from '../../../../helpers/wallet_helper'
 import { BN } from '@c4tplatform/caminojs'
 import AvaAsset from '@/js/AvaAsset'
 import Big from 'big.js'
+import { WalletType } from '@c4tplatform/camino-wallet-sdk'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import PendingMultisig from './PendingMultisig.vue'
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 
 @Component({
     components: {
         ModalClaimReward,
+        PendingMultisig,
     },
 })
 export default class ClaimRewards extends Vue {
@@ -54,6 +70,9 @@ export default class ClaimRewards extends Vue {
 
     rewardAmount: BN = new BN(0)
     loading: boolean = false
+    pChainddress: string = ''
+    isMultisignTx: boolean = false
+    pendingTx: any = undefined
 
     get symbol(): string {
         return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
@@ -65,6 +84,8 @@ export default class ClaimRewards extends Vue {
 
     mounted() {
         this.getClaimableReward()
+        this.getPChainAddress()
+        this.getPendingTransaction()
     }
 
     beforeCloseModal(claimed: boolean) {
@@ -72,6 +93,8 @@ export default class ClaimRewards extends Vue {
             this.getClaimableReward()
             this.$store.dispatch('Assets/updateUTXOs')
             this.$store.dispatch('History/updateTransactionHistory')
+        } else if (this.isMultisignTx) {
+            this.getPendingTransaction()
         }
     }
 
@@ -119,6 +142,41 @@ export default class ClaimRewards extends Vue {
         } else {
             return bigBal.toLocaleString(3)
         }
+    }
+
+    async getPChainAddress() {
+        try {
+            if (this.$store.state.activeWallet instanceof MultisigWallet) {
+                let activeWallet: MultisigWallet = this.$store.state.activeWallet
+                let address = activeWallet.getCurrentAddressPlatform()
+                this.pChainddress = address
+                this.isMultisignTx = true
+            } else {
+                let activeWallet: WalletType = this.$store.state.activeWallet
+                let address = await activeWallet.getAllAddressesP()
+                this.pChainddress = address[0]
+                this.isMultisignTx = false
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    async getPendingTransaction() {
+        if (this.isMultisignTx) {
+            let txClaim = this.$store.getters['Signavault/transactions'].find(
+                (item: any) =>
+                    item?.tx?.alias === this.pChainddress &&
+                    WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
+            )
+            this.pendingTx = txClaim
+        } else {
+            this.pendingTx = undefined
+        }
+    }
+
+    async issued() {
+        console.log('Issued Tx')
     }
 }
 </script>

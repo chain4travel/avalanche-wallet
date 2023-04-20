@@ -452,14 +452,20 @@ class WalletHelper {
         }
     }
 
-    static async buildClaimTx(address: string, amount: BN, activeWallet: WalletType) {
-        let addressBufferTest = ava.PChain().parseAddress(address)
-        const claimableSigners: [number, Buffer][] = [[0, addressBufferTest]]
-        let rewardsOwner = new OutputOwners([addressBufferTest])
+    static async buildClaimTx(
+        address: string,
+        amount: BN,
+        activeWallet: WalletType,
+        rewardOwnerAddress: string,
+        isMultisignTx: boolean
+    ) {
+        let addressRewardOwnerBuffer = ava.PChain().parseAddress(rewardOwnerAddress)
+        const claimableSigners: [number, Buffer][] = [[0, addressRewardOwnerBuffer]]
+        let rewardsOwner = new OutputOwners([addressRewardOwnerBuffer])
         const unsignedTx = await ava.PChain().buildClaimTx(
             //@ts-ignore
             undefined,
-            [address],
+            [rewardOwnerAddress],
             [address],
             undefined,
             new BN(0),
@@ -471,8 +477,13 @@ class WalletHelper {
             new BN(1),
             claimableSigners
         )
-        let tx = await activeWallet.signP(unsignedTx)
-        return await ava.PChain().issueTx(tx)
+
+        if (isMultisignTx) {
+            let tx = await activeWallet.signP(unsignedTx)
+            return await ava.PChain().issueTx(tx)
+        } else {
+            return unsignedTx
+        }
     }
 
     static async findPendingValidator(nodeID: string): Promise<ValidatorRaw> {
