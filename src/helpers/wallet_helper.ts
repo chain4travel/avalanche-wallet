@@ -531,8 +531,8 @@ class WalletHelper {
 
     static getUnsignedTxType(utx: string): string {
         let unsignedTx = new UnsignedTx()
-        unsignedTx?.fromBuffer(Buffer.from(utx, 'hex'))
-        return unsignedTx?.getTransaction()?.getTypeName()
+        unsignedTx.fromBuffer(Buffer.from(utx, 'hex'))
+        return unsignedTx.getTransaction().getTypeName()
     }
 
     static getToAddressFromUtx(utx: UnsignedTx, msigAlias?: string) {

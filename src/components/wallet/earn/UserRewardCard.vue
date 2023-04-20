@@ -46,26 +46,26 @@
         </template>
         <template v-else>
             <button
-                v-if="canClaim && !alreadySigned && !canExecuteMultisigTx"
+                v-if="signatureStatus === -1"
                 class="claim_button button_primary"
-                @click="openModal"
+                @click="confirmClaim"
+                :disabled="!canClaim"
             >
-                Sign
+                Confirm claim
             </button>
-            <v-btn
-                v-if="canClaim && alreadySigned && !canExecuteMultisigTx"
-                depressed
+            <button
+                v-else-if="signatureStatus === 1"
                 class="claim_button button_primary"
-                @click="openModal"
-                disabled
+                @click="signMultisigTx"
+                :disabled="alreadySigned"
             >
                 Confirm claiming rewards {{ numberOfSignatures }}/{{ threshold }}
-            </v-btn>
+            </button>
             <button
-                v-if="canClaim && alreadySigned && canExecuteMultisigTx"
-                depressed
+                v-else-if="signatureStatus === 2"
                 class="claim_button button_primary"
                 @click="issueMultisigTx"
+                :disabled="!canClaim"
             >
                 Execute
             </button>
@@ -74,12 +74,13 @@
             ref="modal_claim_reward"
             :depositTxID="depositTxID"
             :amount="pendingRewards"
+            :confirmClaim="confirmClaim"
         />
     </div>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import { BN } from '@c4tplatform/caminojs'
 import Big from 'big.js'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
@@ -90,6 +91,7 @@ import { WalletHelper } from '@/helpers/wallet_helper'
 import { WalletType } from '@/js/wallets/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
+import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 @Component({
     filters: {
@@ -107,10 +109,14 @@ export default class UserRewardCard extends Vue {
     intervalID: any = null
     claimDisabled: boolean = true
 
+    claimed: boolean = false
+    confiremedClaimedAmount: string = ''
+
     // @ts-ignore
     helpers = this.globalHelper()
 
-    @Prop() depositTxID!: string
+    @Prop()
+    depositTxID!: string
     @Prop() title!: string
     @Prop() start!: BN
     @Prop() end!: BN
@@ -137,7 +143,7 @@ export default class UserRewardCard extends Vue {
         clearInterval(this.intervalID)
     }
 
-    get activeWallet(): WalletType {
+    get activeWallet(): MultisigWallet {
         return this.$store.state.activeWallet
     }
 
@@ -235,9 +241,29 @@ export default class UserRewardCard extends Vue {
                 if (owner.signature) isSigned = true
             }
         })
-        console.log('isSigned', isSigned)
 
         return isSigned
+    }
+
+    get signatureStatus(): number {
+        console.log('signatureStatus Changed')
+
+        // first claim
+        if (!this.pendingSendMultisigTX?.tx) {
+            console.log('signatureStatus Changed, -1')
+            return -1
+        }
+        // has signed and cannot execute
+        else if (!this.canExecuteMultisigTx) {
+            console.log('signatureStatus Changed, 1')
+            return 1
+        }
+        // has signed and can execute
+        else if (this.canExecuteMultisigTx) {
+            console.log('signatureStatus Changed, 2')
+            return 2
+        }
+        return 0
     }
 
     get numberOfSignatures() {
@@ -262,6 +288,62 @@ export default class UserRewardCard extends Vue {
         })
         if (threshold) return signers >= threshold
         return false
+    }
+
+    updateBalance(): void {
+        this.$store.dispatch('Assets/updateUTXOs')
+        this.$store.dispatch('History/updateTransactionHistory')
+    }
+
+    async confirmClaim() {
+        const wallet = this.$store.state.activeWallet
+        const addresses = wallet.getAllAddressesP()
+        // @ts-ignore
+        let { dispatchNotification } = this.globalHelper()
+
+        WalletHelper.buildDepositClaimTx(addresses, wallet, this.depositTxID)
+            .then(() => {
+                setTimeout(() => {
+                    this.updateBalance()
+                }, 500)
+                this.$store.dispatch('Platform/updateActiveDepositOffer')
+                this.$store.dispatch('Signavault/updateTransaction')
+            })
+            .catch((err) => {
+                if (err instanceof SignatureError) {
+                    dispatchNotification({
+                        message: this.$t('notifications.transfer_success_msg'),
+                        type: 'success',
+                    })
+                    setTimeout(() => {
+                        this.$store.dispatch('Assets/updateUTXOs')
+                        this.$store.dispatch('Signavault/updateTransaction').then(() => {
+                            this.$store.dispatch('History/updateMultisigTransactionHistory')
+                        })
+                    }, 1000)
+                }
+                console.log(err)
+            })
+    }
+
+    async signMultisigTx() {
+        const wallet = this.activeWallet
+        if (!wallet || !(wallet instanceof MultisigWallet))
+            return console.debug('MultiSigTx::sign: Invalid wallet')
+        if (!this.pendingSendMultisigTX) return console.debug('MultiSigTx::sign: Invalid Tx')
+        try {
+            await wallet.addSignatures(this.pendingSendMultisigTX?.tx)
+            this.helpers.dispatchNotification({
+                message: 'Your signature saved successfully!',
+                type: 'success',
+            })
+            this.$store.dispatch('Signavault/updateTransaction')
+        } catch (e: any) {
+            this.helpers.dispatchNotification({
+                message: 'Your signature is not saved.',
+                type: 'error',
+            })
+        }
     }
 
     async issueMultisigTx() {
