@@ -513,8 +513,8 @@ class WalletHelper {
             [],
             [],
             rewardsOwner,
-            new BN(3),
-            claimableSigners
+            [addressBuffer],
+            new BN(3)
         )
 
         try {
