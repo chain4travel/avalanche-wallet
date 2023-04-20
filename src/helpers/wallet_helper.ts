@@ -474,8 +474,8 @@ class WalletHelper {
             [rewardsOwner],
             [amount],
             rewardsOwner,
-            new BN(1),
-            claimableSigners
+            [addressRewardOwnerBuffer],
+            new BN(1)
         )
 
         if (isMultisignTx) {
