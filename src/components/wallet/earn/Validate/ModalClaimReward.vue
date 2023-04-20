@@ -3,7 +3,10 @@
         <div class="modal-claim-reward-div">
             <div v-if="!claimed">
                 <div>
-                    <h3>
+                    <h3 v-if="isMultisignTx">
+                        {{ $t('validator.transaction_reward.are_you_want') }}
+                    </h3>
+                    <h3 v-else>
                         {{
                             $t('validator.rewards.modal_claim.are_you_sure', {
                                 amountClaim: amountText,
@@ -29,7 +32,7 @@
                 <br />
 
                 <div v-if="isMultisignTx">
-                    <h2>Tx Pending</h2>
+                    <h2>Tx Pending for approve</h2>
                 </div>
                 <div v-else>
                     <h2>

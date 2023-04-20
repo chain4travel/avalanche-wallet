@@ -3,8 +3,10 @@
         <pending-multisig
             v-if="pendingTx !== undefined && pendingTx !== null"
             :multisigTx="pendingTx"
-            @issued="issueClaimTx"
+            @issued="issued"
             @refresh="getPendingTransaction"
+            :nodeId="nodeId"
+            :nodeInfo="nodeInfo"
         ></pending-multisig>
         <div v-else>
             <div class="rewards-div">
@@ -56,7 +58,6 @@ import Big from 'big.js'
 import { WalletType } from '@c4tplatform/camino-wallet-sdk'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import PendingMultisig from './PendingMultisig.vue'
-import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 
 @Component({
     components: {
