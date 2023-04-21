@@ -46,12 +46,20 @@
         </template>
         <template v-else>
             <v-btn
-                v-if="signatureStatus === -1"
+                v-if="signatureStatus === -1 && !disclamer"
+                class="claim_button button_primary"
+                @click="disclamer = true"
+                :disabled="!canClaim"
+            >
+                {{ $t('earn.rewards.active_earning.claim') }}
+            </v-btn>
+            <v-btn
+                v-if="signatureStatus === -1 && disclamer"
                 class="claim_button button_primary"
                 @click="confirmClaim"
                 :disabled="!canClaim"
             >
-                {{ $t('earn.rewards.active_earning.confirm_claim') }}
+                {{ $t('earn.rewards.active_earning.initiate_transaction') }}
             </v-btn>
             <v-btn
                 v-else-if="signatureStatus === 1"
@@ -60,10 +68,12 @@
                 :disabled="alreadySigned"
             >
                 {{
-                    $t('earn.rewards.active_earning.pending_claim', {
-                        nbSigners: numberOfSignatures,
-                        threshold: threshold,
-                    })
+                    !alreadySigned
+                        ? $t('earn.rewards.active_earning.sign')
+                        : $t('earn.rewards.active_earning.signed', {
+                              nbSigners: numberOfSignatures,
+                              threshold: threshold,
+                          })
                 }}
             </v-btn>
             <v-btn
@@ -72,8 +82,11 @@
                 @click="openModal"
                 :disabled="!canClaim"
             >
-                {{ $t('earn.rewards.active_earning.execute_claim') }}
+                {{ $t('earn.rewards.active_earning.claim') }}
             </v-btn>
+            <div v-if="disclamer && !alreadySigned" class="err">
+                {{ $t('earn.rewards.active_earning.are_you_sure') }}
+            </div>
         </template>
         <ModalClaimDepositReward
             ref="modal_claim_reward"
@@ -116,6 +129,7 @@ export default class UserRewardCard extends Vue {
 
     claimed: boolean = false
     confiremedClaimedAmount: string = ''
+    disclamer: boolean = false
 
     // @ts-ignore
     helpers = this.globalHelper()
@@ -471,6 +485,13 @@ label {
     &[disabled] {
         background-color: var(--primary-color) !important;
     }
+}
+
+.err {
+    text-align: left;
+    color: var(--error);
+    font-size: 0.8rem;
+    margin-top: 10px;
 }
 
 @include main.mobile-device {
