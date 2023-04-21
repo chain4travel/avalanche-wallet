@@ -82,6 +82,7 @@ export default {
 
 <style scoped lang="scss">
 @use './styles/main';
+@use './styles/abstracts/variables';
 
 .main_cols {
     &[wallet_view] {
@@ -118,8 +119,8 @@ body {
     height: 100%;
 }
 
-p {
-    margin: 0px !important;
+.v-application.v-application p {
+    margin-bottom: 0px;
 }
 
 .v-application--wrap {

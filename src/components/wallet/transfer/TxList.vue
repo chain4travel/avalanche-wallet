@@ -11,6 +11,7 @@
                 :disabled_assets="disabledAssets[i]"
                 :initial="tx.asset.id"
                 :disabled="disabled"
+                :chainId="chainId"
             ></currency-input-dropdown>
             <button
                 @click="removeTx(i)"
@@ -33,11 +34,12 @@ import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 
 const uuidv1 = require('uuid/v1')
 
-import { BN } from '@c4tplatform/caminojs'
+import { BN } from '@c4tplatform/caminojs/dist'
 import CurrencyInputDropdown from '@/components/misc/CurrencyInputDropdown.vue'
 import AvaAsset from '@/js/AvaAsset'
 import { AssetsDict } from '@/store/modules/assets/types'
 import { ICurrencyInputDropdownValue, ITransaction } from '@/components/wallet/transfer/types'
+import { ChainIdType } from '@/constants'
 
 @Component({
     components: {
@@ -50,6 +52,7 @@ export default class TxList extends Vue {
     next_initial: AvaAsset | null = null
 
     @Prop({ default: false }) disabled!: boolean
+    @Prop() chainId!: ChainIdType
 
     deactivated() {
         this.reset()
@@ -159,15 +162,16 @@ export default class TxList extends Vue {
     }
 
     get assets_list(): AvaAsset[] {
-        // return this.$store.getters.walletAssetsArray
         return this.$store.getters['Assets/walletAssetsArray']
     }
+
     get assets(): AssetsDict {
-        // return this.$store.getters.walletAssetsDict
         return this.$store.getters['Assets/walletAssetsDict']
     }
+
     get showAdd(): boolean {
         if (this.disabled) return false
+        if (this.chainId === 'P') return false
         if (this.tx_list.length === this.assets_list.length || this.assets_list.length === 0) {
             return false
         }
@@ -176,7 +180,7 @@ export default class TxList extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
 
 $right_pad: 60px;
 
@@ -291,7 +295,7 @@ $right_pad: 60px;
     pointer-events: none;
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .list_item {
         column-gap: 12px;
         grid-template-columns: 1fr max-content;

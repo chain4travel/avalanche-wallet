@@ -53,7 +53,7 @@ import Modal from '@/components/modals/Modal.vue'
 import { generateToken } from '@/kyc_api'
 import snsWebSdk from '@sumsub/websdk'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
-import { WalletType, WalletNameType } from '@c4tplatform/camino-wallet-sdk/dist'
+import { WalletType, WalletNameType } from '@/js/wallets/types'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import { kycStyleDay, kycStyleNight } from '@/constants'
 interface UserData {
@@ -171,7 +171,7 @@ export default class KycModal extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
 .modal_main::v-deep {
     .modal_body {
@@ -182,7 +182,7 @@ export default class KycModal extends Vue {
         border-radius: var(--border-radius-sm) !important;
         overflow: auto;
         min-height: 200px;
-        @include main.mobile-device {
+        @include mixins.mobile-device {
             max-height: 90vh;
             max-width: none;
             width: 80%;

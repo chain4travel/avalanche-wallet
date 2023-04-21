@@ -7,7 +7,7 @@ import {
 import { UTXOSet as PlatformUTXOSet } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { ava, bintools } from '@/AVA'
 import HDKey from 'hdkey'
-import { Buffer } from '@c4tplatform/caminojs'
+import { Buffer } from '@c4tplatform/caminojs/dist'
 import {
     KeyChain as PlatformVMKeyChain,
     KeyPair as PlatformVMKeyPair,
@@ -73,20 +73,16 @@ class HdHelper {
         this.hdIndex = 0
         this.isPublic = isPublic
         this.ethKeyPair = undefined
+        this.ethKeyPair = undefined
 
         if (ethKey) {
             this.ethKeyPair = this.keyChain.importKey(Buffer.from(ethKey.privateKey))
         }
-        // this.oninit()
-    }
-
-    async oninit() {
-        await this.findHdIndex()
     }
 
     // When the wallet connects to a different network
     // Clear internal data and scan again
-    async onNetworkChange() {
+    onNetworkChange() {
         this.clearCache()
         this.isInit = false
         let hrp = ava.getHRP()
@@ -100,7 +96,6 @@ class HdHelper {
         this.hdIndex = 0
         this.addressCache = {}
         this.keyCache = {}
-        await this.oninit()
     }
 
     // Increments the hd index by one and adds the key
@@ -241,10 +236,14 @@ class HdHelper {
         return set
     }
 
+    getStaticAddress(): string {
+        return this.ethKeyPair
+            ? bintools.addressToString(ava.getHRP(), this.chainId, this.ethKeyPair.getAddress())
+            : ''
+    }
+
     getAllDerivedAddresses(upTo = this.hdIndex, start = 0): string[] {
-        let res = this.ethKeyPair
-            ? [bintools.addressToString(ava.getHRP(), this.chainId, this.ethKeyPair.getAddress())]
-            : []
+        let res = this.ethKeyPair ? [this.getStaticAddress()] : []
         for (var i = start; i <= upTo; i++) {
             let addr = this.getAddressForIndex(i)
             res.push(addr)

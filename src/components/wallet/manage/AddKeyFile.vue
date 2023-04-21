@@ -131,7 +131,7 @@ export default class AddKeyFile extends Vue {
 }
 </style>
 <style scoped lang="scss">
-@use '../../../styles/main';
+@use '../../../styles/abstracts/variables';
 .add_key_file {
     padding: 14px 0;
 }
@@ -144,20 +144,13 @@ export default class AddKeyFile extends Vue {
 
 label {
     font-size: 12px;
-    color: main.$primary-color-light;
+    color: variables.$primary-color-light;
 }
 
 .err {
     color: var(--error);
     margin: 4px 0px;
     font-size: 12px;
-}
-
-.formIn {
-    height: 40px;
-    font-size: 12px;
-    background-color: var(--bg-light) !important;
-    border-radius: 2px;
 }
 </style>
 <style lang="scss">

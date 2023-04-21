@@ -27,7 +27,7 @@
                     <div>
                         <Tooltip style="display: inline-block" :text="$t('validator.info.up_time')">
                             <v-icon class="icon-mdi-camino">mdi-arrow-up-bold</v-icon>
-                            <label>{{ upTime }} %</label>
+                            <label>{{ upTime.toFixed() }} %</label>
                         </Tooltip>
                     </div>
                     <div>
@@ -49,7 +49,7 @@
                 </span>
             </div>
             <div>
-                <h4 class="input_label">{{ $t('validator.info.deposit_amount') }}</h4>
+                <h4 class="input_label">{{ $t('validator.info.bonded_amount') }}</h4>
                 <AvaxInput
                     v-model="depositAmount"
                     :max="maxAmt"
@@ -76,7 +76,7 @@ import { ava } from '@/AVA'
 import { BN } from '@c4tplatform/caminojs'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
 import Tooltip from '@/components/misc/Tooltip.vue'
-import { NodeInfo } from '@/js/wallets/types'
+import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 
 @Component({
     name: 'validator_info',
@@ -88,7 +88,7 @@ import { NodeInfo } from '@/js/wallets/types'
 })
 export default class ValidatorInfo extends Vue {
     @Prop() nodeId!: string
-    @Prop() nodeInfo!: NodeInfo
+    @Prop() nodeInfo!: ValidatorRaw
 
     startTime: string = ''
     endTime: string = ''
@@ -121,10 +121,12 @@ export default class ValidatorInfo extends Vue {
             this.upTime = parseFloat(this.nodeInfo.uptime) * 100
 
             var reaminingValidationDuration = moment.duration(
-                today.diff(moment(new Date(parseInt(this.nodeInfo.startTime) * 1000)))
+                moment(new Date(parseInt(this.nodeInfo.endTime) * 1000)).diff(today)
             )
 
             let dataReaminingValdiationDuration = {
+                years: reaminingValidationDuration.years(),
+                months: reaminingValidationDuration.months(),
                 days: reaminingValidationDuration.days().toString(),
                 hours:
                     reaminingValidationDuration.hours() > 9
@@ -141,6 +143,15 @@ export default class ValidatorInfo extends Vue {
             }
 
             let strRemainingValidation = `${dataReaminingValdiationDuration.days} Days ${dataReaminingValdiationDuration.hours}h ${dataReaminingValdiationDuration.minutes}m ${dataReaminingValdiationDuration.seconds}s`
+
+            if (dataReaminingValdiationDuration.months > 0) {
+                strRemainingValidation = `${dataReaminingValdiationDuration.months} Months ${strRemainingValidation}`
+            }
+
+            if (dataReaminingValdiationDuration.years > 0) {
+                strRemainingValidation = `${dataReaminingValdiationDuration.years} Years ${strRemainingValidation}`
+            }
+
             this.reaminingValidation = strRemainingValidation
             this.depositAmount = parseFloat(this.nodeInfo.stakeAmount) / 1000000000
             this.txID = this.nodeInfo.txID
@@ -219,6 +230,7 @@ h4 {
 
 .amt_in {
     width: 70%;
+    pointer-events: none;
 }
 
 .space-div {

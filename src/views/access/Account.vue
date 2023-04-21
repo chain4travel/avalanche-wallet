@@ -1,9 +1,10 @@
 <template>
     <div class="access_card">
         <div class="content">
-            <Identicon :value="account.baseAddresses.join('')"></Identicon>
+            <Identicon :value="account.name"></Identicon>
             <h1>{{ account.name }}</h1>
             <form @submit.prevent="access">
+                <input class="pass_name" :value="account.name" />
                 <input
                     class="single_line_input hover_border pass"
                     type="password"
@@ -71,6 +72,7 @@ export default class Account extends Vue {
         let parent = this
         this.error = ''
         this.isLoading = true
+
         let data: ImportKeyfileInput = {
             password: this.password,
             data: account.wallet,
@@ -117,16 +119,21 @@ export default class Account extends Vue {
 </script>
 <style scoped lang="scss">
 @use '../../styles/main';
+@use '../../styles/abstracts/variables';
 .pass {
     text-align: center;
     background-color: var(--bg-light) !important;
 }
+
 .ava_button {
     width: 100%;
     margin-bottom: 22px;
     height: 40px !important;
 }
 .access_card {
+    /*max-width: 80vw;*/
+    //background-color: var(--bg-light);
+    //padding: variables.$container-padding;
     width: 100%;
 
     display: flex;
@@ -142,7 +149,7 @@ export default class Account extends Vue {
     text-align: center;
 }
 h1 {
-    font-size: main.$m-size;
+    font-size: variables.$m-size;
     font-weight: 400;
 }
 
@@ -157,7 +164,7 @@ form {
     /*min-width: 200px*/
 }
 a {
-    color: main.$primary-color-light !important;
+    color: variables.$primary-color-light !important;
     text-decoration: underline !important;
     margin: 10px 0 20px;
 }
@@ -172,15 +179,15 @@ a {
     color: var(--error);
     margin: 14px 0px !important;
 }
-@media only screen and (max-width: main.$mobile_width) {
+@media only screen and (max-width: variables.$mobile_width) {
     h1 {
-        font-size: main.$m-size-mobile;
+        font-size: variables.$m-size-mobile;
     }
     .but_primary {
         width: 100%;
     }
 }
-@media only screen and (max-width: main.$mobile_width) {
+@media only screen and (max-width: variables.$mobile_width) {
     .access_card {
         padding: main.$container-padding-mobile;
     }

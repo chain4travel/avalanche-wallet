@@ -11,9 +11,10 @@
                 :centered="true"
                 :mobile-breakpoint="900"
             >
-                <v-tab key="mnemonic">{{ $t('keys.import_key_option1') }}</v-tab>
-                <v-tab key="keystore">{{ $t('keys.import_key_option2') }}</v-tab>
-                <v-tab key="priv_key">{{ $t('keys.import_key_option3') }}</v-tab>
+                <v-tab key="mnemonic"><v-icon>mdi-list-box-outline</v-icon></v-tab>
+                <v-tab key="keystore"><v-icon>mdi-file-key-outline</v-icon></v-tab>
+                <v-tab key="priv_key"><v-icon>mdi-shield-key-outline</v-icon></v-tab>
+                <v-tab key="multisig"><v-icon>mdi-account-group-outline</v-icon></v-tab>
                 <v-tab-item>
                     <AddMnemonic @success="handleImportSuccess" ref="mnemonic"></AddMnemonic>
                 </v-tab-item>
@@ -22,6 +23,12 @@
                 </v-tab-item>
                 <v-tab-item>
                     <add-key-string @success="handleImportSuccess" ref="keyString"></add-key-string>
+                </v-tab-item>
+                <v-tab-item>
+                    <AddMultisigAlias
+                        @success="handleImportSuccess($event)"
+                        ref="multisigAlias"
+                    ></AddMultisigAlias>
                 </v-tab-item>
             </v-tabs>
         </div>
@@ -35,6 +42,8 @@ import Modal from '@/components/modals/Modal.vue'
 import AddKeyFile from '@/components/wallet/manage/AddKeyFile.vue'
 import AddKeyString from '@/components/wallet/manage/AddKeyString.vue'
 import AddMnemonic from '@/components/wallet/manage/AddMnemonic.vue'
+import AddMultisigAlias from '@/components/wallet/manage/AddMultisigAlias.vue'
+import { getMultisigAliases } from '@/explorer_api'
 
 @Component({
     components: {
@@ -42,6 +51,7 @@ import AddMnemonic from '@/components/wallet/manage/AddMnemonic.vue'
         AddKeyFile,
         AddKeyString,
         AddMnemonic,
+        AddMultisigAlias,
     },
 })
 export default class ImportKeys extends Vue {
@@ -53,6 +63,7 @@ export default class ImportKeys extends Vue {
         keyfile: AddKeyFile
         keyString: AddKeyString
         mnemonic: AddMnemonic
+        multisigAlias: AddMultisigAlias
     }
     created() {
         this.title = this.$t('keys.import_key_title') as string
@@ -69,20 +80,27 @@ export default class ImportKeys extends Vue {
         this.$refs.mnemonic?.clear()
     }
 
-    handleImportSuccess() {
+    handleImportSuccess(event?: any) {
         this.$refs.modal.close()
-        let { dispatchNotification } = this.globalHelper()
-        dispatchNotification({
-            message: this.$t('notifications.import_key_success'),
+        const payload = event ?? {
+            message: this.$t('keys.import_key_success_msg'),
             type: 'success',
-        })
+        }
+        let { dispatchNotification, updateShowAlias } = this.globalHelper()
+        this.$store.dispatch('fetchMultiSigAliases', { disable: false })
+        updateShowAlias()
+        dispatchNotification(payload)
     }
 }
 </script>
 
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
+.v-tabs > .v-tabs-bar .v-tab:not(.v-tab--active) > .v-icon {
+    color: var(--primary-color);
+    opacity: 0.6;
+}
 .add_key_body {
     padding: 30px;
     max-width: 450px;
@@ -116,7 +134,7 @@ export default class ImportKeys extends Vue {
     margin: 14px 0 !important;
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .add_key_body {
         max-width: 100%;
     }
@@ -124,15 +142,15 @@ export default class ImportKeys extends Vue {
 </style>
 
 <style lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/variables';
 
 .v-tab.v-tab {
     font-weight: 700;
 }
 
 .v-tabs-slider-wrapper {
-    color: main.$secondary-color;
-    caret-color: main.$secondary-color;
+    color: variables.$secondary-color;
+    caret-color: variables.$secondary-color;
     height: 3px !important;
 }
 </style>

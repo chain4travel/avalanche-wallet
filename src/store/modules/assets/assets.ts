@@ -17,6 +17,7 @@ import {
 } from '@/store/types'
 import { ava, bintools } from '@/AVA'
 import Vue from 'vue'
+import { ZeroBN } from '@/constants'
 import AvaAsset from '@/js/AvaAsset'
 import { WalletType } from '@/js/wallets/types'
 import { AvaNftFamily } from '@/js/AvaNftFamily'
@@ -38,10 +39,8 @@ import axios from 'axios'
 import Erc20Token from '@/js/Erc20Token'
 import { AvaNetwork } from '@/js/AvaNetwork'
 import { web3 } from '@/evm'
-// import ERCNftToken from '@/js/ERCNftToken'
 
 const TOKEN_LISTS: string[] = []
-const ZeroBN = new BN(0)
 
 import ERCNftModule from './modules/ercNft'
 import ERC20_TOKEN_LIST from '@/ERC20Tokenlist.json'
@@ -57,7 +56,7 @@ const assets_module: Module<AssetsState, RootState> = {
         ERCNft: ERCNftModule,
     },
     state: {
-        AVA_ASSET_ID: null,
+        AVA_ASSET_ID: '',
         // isUpdateBalance: false,
         assets: [],
         assetsDict: {}, // holds meta data of assets
@@ -121,7 +120,7 @@ const assets_module: Module<AssetsState, RootState> = {
             state.nftUTXOs = []
             state.nftMintUTXOs = []
             state.balanceDict = {}
-            state.AVA_ASSET_ID = null
+            state.AVA_ASSET_ID = ''
         },
         saveCustomErc20Tokens(state) {
             let tokens: Erc20Token[] = state.erc20TokensCustom
@@ -149,9 +148,12 @@ const assets_module: Module<AssetsState, RootState> = {
         },
     },
     actions: {
-        async onNetworkChange({ state }, network: AvaNetwork) {
+        async onNetworkChange({ state, rootState, dispatch }, network: AvaNetwork) {
             let id = await web3.eth.getChainId()
             state.evmChainId = id
+
+            let wallet: WalletType | null = rootState.activeWallet
+            if (wallet) dispatch('updateWallet')
         },
         // Called everytime a new wallet is selected
         updateWallet({ dispatch }) {
@@ -637,7 +639,6 @@ const assets_module: Module<AssetsState, RootState> = {
         },
 
         walletAssetsArray(state, getters): AvaAsset[] {
-            // let assetsDict: IWalletAssetsDict = getters.walletAssetsDict
             let assetsDict: IWalletAssetsDict = getters.walletAssetsDict
             let res: AvaAsset[] = []
 
@@ -658,35 +659,31 @@ const assets_module: Module<AssetsState, RootState> = {
             return state.nftFams
         },
 
-        walletStakingBalance(state, getters, rootState, rootGetters): BN {
+        walletStakingBalance(state, getters, rootState): BN {
             let wallet = rootState.activeWallet
             if (!wallet) return new BN(0)
 
             return wallet.stakeAmount
         },
 
-        walletPlatformBalance(state, getters, rootState): BN {
-            const avaxAssetID = state.AVA_ASSET_ID ?? ''
-            return state.platformBalances.balances[avaxAssetID] ?? ZeroBN
+        walletPlatformBalance(state): BN {
+            return state.platformBalances.balances[state.AVA_ASSET_ID] ?? ZeroBN
         },
 
-        walletPlatformBalanceUnlocked(state, getters, rootState): BN {
-            const avaxAssetID = state.AVA_ASSET_ID ?? ''
-            return state.platformBalances.unlocked[avaxAssetID] ?? ZeroBN
+        walletPlatformBalanceUnlocked(state): BN {
+            return state.platformBalances.unlocked[state.AVA_ASSET_ID] ?? ZeroBN
         },
 
-        walletPlatformBalanceLocked(state, getters, rootState): BN {
-            const avaxAssetID = state.AVA_ASSET_ID ?? ''
-            return state.platformBalances.locked[avaxAssetID] ?? ZeroBN
+        walletPlatformBalanceLocked(state): BN {
+            return state.platformBalances.locked[state.AVA_ASSET_ID] ?? ZeroBN
         },
 
-        walletPlatformBalanceLockedStakeable(state, getters, rootState): BN {
-            const avaxAssetID = state.AVA_ASSET_ID ?? ''
-            return state.platformBalances.lockedStakeable[avaxAssetID] ?? ZeroBN
+        walletPlatformBalanceLockedStakeable(state): BN {
+            return state.platformBalances.lockedStakeable[state.AVA_ASSET_ID] ?? ZeroBN
         },
 
-        walletPlatformBalanceTotalLocked(state, getters, rootState): BN {
-            const avaxAssetID = state.AVA_ASSET_ID ?? ''
+        walletPlatformBalanceTotalLocked(state): BN {
+            const avaxAssetID = state.AVA_ASSET_ID
             return (state.platformBalances.deposited[avaxAssetID] ?? ZeroBN)
                 .add(state.platformBalances.bonded[avaxAssetID] ?? ZeroBN)
                 .add(state.platformBalances.bondedDeposited[avaxAssetID] ?? ZeroBN)
@@ -694,19 +691,16 @@ const assets_module: Module<AssetsState, RootState> = {
                 .add(state.platformBalances.lockedStakeable[avaxAssetID] ?? ZeroBN)
         },
 
-        walletPlatformBalanceDeposited(state, getters, rootState): BN {
-            const avaxAssetID = state.AVA_ASSET_ID ?? ''
-            return state.platformBalances.deposited[avaxAssetID] ?? ZeroBN
+        walletPlatformBalanceDeposited(state): BN {
+            return state.platformBalances.deposited[state.AVA_ASSET_ID] ?? ZeroBN
         },
 
-        walletPlatformBalanceBonded(state, getters, rootState): BN {
-            const avaxAssetID = state.AVA_ASSET_ID ?? ''
-            return state.platformBalances.bonded[avaxAssetID] ?? ZeroBN
+        walletPlatformBalanceBonded(state): BN {
+            return state.platformBalances.bonded[state.AVA_ASSET_ID] ?? ZeroBN
         },
 
-        walletPlatformBalanceBondedDeposited(state, getters, rootState): BN {
-            const avaxAssetID = state.AVA_ASSET_ID ?? ''
-            return state.platformBalances.bondedDeposited[avaxAssetID] ?? ZeroBN
+        walletPlatformBalanceBondedDeposited(state): BN {
+            return state.platformBalances.bondedDeposited[state.AVA_ASSET_ID] ?? ZeroBN
         },
 
         nftMintDict(state): IWalletNftMintDict {
@@ -742,10 +736,10 @@ const assets_module: Module<AssetsState, RootState> = {
                 return asset.id
             })
         },
-        AssetAVA(state, getters, rootState, rootGetters): AvaAsset | null {
+        AssetAVA(state, getters): AvaAsset | null {
             let walletBalanceDict = getters.walletAssetsDict
             let AVA_ASSET_ID = state.AVA_ASSET_ID
-            if (AVA_ASSET_ID) {
+            if (AVA_ASSET_ID !== '') {
                 if (walletBalanceDict[AVA_ASSET_ID]) {
                     return walletBalanceDict[AVA_ASSET_ID]
                 }

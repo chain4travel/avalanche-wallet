@@ -1,5 +1,14 @@
 <template>
     <div>
+        <div class="refresh_div">
+            <div class="refresh">
+                <Spinner v-if="loadingRefreshRegisterNode" class="spinner"></Spinner>
+                <button v-else @click="refresh">
+                    <v-icon>mdi-refresh</v-icon>
+                </button>
+            </div>
+        </div>
+        <br />
         <div class="requirements_list">
             <h4>{{ $t('earn.validate.requirements_introduction') }}</h4>
             <div class="requirement_title">
@@ -30,7 +39,7 @@
             </div>
             <div class="requirement_title">
                 <fa
-                    v-if="hasEnoughUnlockedPlatformBalance"
+                    v-if="hasEnoughLockablePlatformBalance"
                     class="success_status_icon"
                     icon="check-circle"
                 ></fa>
@@ -61,23 +70,22 @@
             </div>
         </div>
         <div
-            v-if="isKycVerified && isConsortiumMember && hasEnoughUnlockedPlatformBalance"
+            v-if="isKycVerified && isConsortiumMember && hasEnoughLockablePlatformBalance"
             class="input_section"
         >
             <div>
                 <h4 class="input_label">{{ $t('earn.validate.label_3') }}</h4>
                 <span class="disabled_input" role="textbox">
-                    {{ pChainAddress }}
+                    {{ staticAddress }}
                 </span>
             </div>
             <div>
                 <h4 class="input_label">{{ $t('earn.validate.label_1') }}</h4>
                 <input
                     class="high_input"
-                    type="password"
                     v-model="nodePrivateKey"
                     style="width: 100%; border-radius: var(--border-radius-sm)"
-                    :placeholder="$t('earn.validate.description_1')"
+                    :placeholder="$t('earn.validate.description_1').toString()"
                 />
             </div>
             <v-btn
@@ -87,12 +95,34 @@
                 :disabled="
                     !isKycVerified ||
                     !isConsortiumMember ||
-                    !hasEnoughUnlockedPlatformBalance ||
-                    !nodePrivateKey
+                    !hasEnoughLockablePlatformBalance ||
+                    !nodePrivateKey ||
+                    showMultisigTransactionDisclaimer
                 "
                 block
             >
-                {{ $t('earn.validate.register_validator_node') }}
+                <Spinner
+                    v-if="loadingRegisterNode && !showMultisigTransactionDisclaimer"
+                    class="spinner"
+                ></Spinner>
+                <span v-else>
+                    {{ $t('earn.validate.register_validator_node') }}
+                </span>
+            </v-btn>
+        </div>
+        <div v-if="showMultisigTransactionDisclaimer" class="input_section mt2">
+            <div>
+                <h4 class="input_label">{{ $t('earn.validate.label_4') }}</h4>
+                <h4 class="mt2">{{ $t('earn.validate.label_5') }}</h4>
+                <span class="disabled_input" role="textbox">
+                    {{ nodeId }}
+                </span>
+            </div>
+            <v-btn @click="registerNode($event, true)" class="button_secondary" depressed block>
+                <Spinner v-if="loadingRegisterNode" class="spinner"></Spinner>
+                <span v-else>
+                    {{ $t('earn.validate.initiate_transaction') }}
+                </span>
             </v-btn>
         </div>
     </div>
@@ -112,16 +142,26 @@ import {
     privateKeyStringToBuffer,
 } from '@c4tplatform/caminojs/dist/utils'
 import Big from 'big.js'
+import Spinner from '@/components/misc/Spinner.vue'
 
-@Component
+@Component({
+    components: {
+        Spinner,
+    },
+})
 export default class RegisterNode extends Vue {
     @Prop() isKycVerified!: boolean
     @Prop() isConsortiumMember!: boolean
     @Prop() minPlatformUnlocked!: BN
-    @Prop() hasEnoughUnlockedPlatformBalance!: boolean
+    @Prop() hasEnoughLockablePlatformBalance!: boolean
     @Prop() isNodeRegistered!: boolean
+    @Prop() loadingRefreshRegisterNode!: boolean
+
     helpers = this.globalHelper()
     nodePrivateKey = ''
+    loadingRegisterNode: boolean = false
+    nodeId = ''
+    showMultisigTransactionDisclaimer = false
 
     cleanAvaxBN(val: BN) {
         let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
@@ -138,28 +178,38 @@ export default class RegisterNode extends Vue {
         return wallet
     }
 
-    get pChainAddress() {
-        return this.wallet.getCurrentAddressPlatform()
+    get staticAddress() {
+        return this.wallet.getStaticAddress('P')
     }
 
-    async registerNode() {
+    async registerNode(ev: PointerEvent, bypassMultisig = false) {
+        this.loadingRegisterNode = true
         try {
             let hrp = ava.getHRP()
             let keypair = new KeyPair(hrp, 'P')
             keypair.importKey(privateKeyStringToBuffer(this.nodePrivateKey.trim()))
-            let nodeId = bufferToNodeIDString(keypair.getAddress())
-            console.log(nodeId)
+            const nodeId = bufferToNodeIDString(keypair.getAddress())
+            const nodeAddress = keypair.getAddressString()
+            this.nodeId = nodeId
+
+            if (this.wallet?.type === 'multisig' && !bypassMultisig) {
+                // Multisig wallet active, show disaclaimer
+                this.showMultisigTransactionDisclaimer = true
+                return
+            }
             const result = await WalletHelper.registerNodeTx(
                 this.wallet,
                 this.nodePrivateKey.trim(),
                 undefined,
                 nodeId,
-                this.addresses[0]
+                this.staticAddress,
+                nodeAddress
             )
-            console.log(result)
-            this.$emit('registered')
+            this.$emit('registered', result ? 'issued' : 'pending')
             this.helpers.dispatchNotification({
-                message: this.$t('notifications.register_node_success'),
+                message: result
+                    ? this.$t('notifications.register_node_success')
+                    : this.$t('notifications.register_node_initiated'),
                 type: 'success',
             })
         } catch (error) {
@@ -168,12 +218,18 @@ export default class RegisterNode extends Vue {
                 message: this.$t('notifications.register_node_failed'),
                 type: 'error',
             })
+        } finally {
+            this.loadingRegisterNode = false
         }
+    }
+
+    refresh() {
+        this.$emit('refresh')
     }
 }
 </script>
 <style scoped lang="scss">
-@use '../../../../styles/main';
+@use '../../../../styles/abstracts/variables';
 
 .success_status_icon {
     color: var(--success);
@@ -235,9 +291,39 @@ input::placeholder {
     transform: translateY(-50%);
 }
 
-@media only screen and (max-width: main.$mobile_width) {
+@media only screen and (max-width: variables.$mobile_width) {
     .high_input {
         line-height: 4;
     }
+}
+
+.refresh {
+    width: 20px;
+    height: 20px;
+    .v-icon {
+        color: var(--primary-color);
+    }
+
+    button {
+        outline: none !important;
+    }
+    img {
+        object-fit: contain;
+        width: 100%;
+    }
+
+    .spinner {
+        color: var(--primary-color) !important;
+    }
+}
+
+.refresh_div {
+    position: relative;
+    float: right;
+    margin-top: -5%;
+}
+
+.mt2 {
+    margin-top: 1rem;
 }
 </style>

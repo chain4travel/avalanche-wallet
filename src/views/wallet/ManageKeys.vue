@@ -21,6 +21,11 @@
                             <fa icon="exclamation-triangle"></fa>
                             {{ $t('keys.button1') }}
                         </button>
+                        <button class="but_primary ava_button_secondary" @click="importKeys">
+                            <fa icon="download"></fa>
+                            {{ $t('keys.button2') }}
+                        </button>
+                        <ImportKeys ref="import"></ImportKeys>
                         <button class="but_primary ava_button_secondary" @click="exportKeys">
                             <fa icon="upload"></fa>
                             {{ $t('keys.button3') }}
@@ -64,7 +69,7 @@ import AccountSettingsModal from '@/components/modals/AccountSettings/AccountSet
     },
 })
 export default class ManageKeys extends Vue {
-    helpers = this.globalHelper()
+    helpers? = this.globalHelper()
     $refs!: {
         import: ImportKeys
         export: ExportKeys
@@ -93,7 +98,7 @@ export default class ManageKeys extends Vue {
     }
 
     get canEncryptWallet() {
-        return ['mnemonic', 'singleton'].includes(this.walletType)
+        return ['mnemonic', 'singleton', 'multisig'].includes(this.walletType)
     }
 
     get walletType(): WalletNameType {
@@ -101,7 +106,7 @@ export default class ManageKeys extends Vue {
     }
 
     get hasVolatile() {
-        return this.$store.state.volatileWallets.length > 0
+        return this.$store.getters.accountChanged
     }
 
     get allWallets(): MnemonicWallet[] {
@@ -114,7 +119,7 @@ export default class ManageKeys extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
 .button_container {
     display: flex;
@@ -135,7 +140,7 @@ h1 {
     color: var(--warning);
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     header {
         display: block;
     }
@@ -145,7 +150,7 @@ h1 {
         flex-direction: column;
         justify-content: flex-start;
         align-items: flex-start;
-        /*flex-wrap: wrap;*/
+        flex-wrap: wrap;
 
         button {
             padding: 8px 0;
