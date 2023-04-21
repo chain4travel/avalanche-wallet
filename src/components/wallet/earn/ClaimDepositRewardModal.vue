@@ -163,7 +163,7 @@ export default class ModalClaimDepositReward extends Vue {
         } else {
             this.confiremedClaimedAmount = this.formattedAmount(this.amount)
             this.issueMultisigTx().then(() => {
-                this.claimed = true
+                this.claimed = false
             })
         }
     }
