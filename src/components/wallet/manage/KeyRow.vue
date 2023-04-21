@@ -264,12 +264,8 @@ export default class KeyRow extends Vue {
 
     select() {
         this.activating = true
-        Promise.resolve()
-            .then(() => new Promise((resolve) => setTimeout(resolve, 100)))
-            .then(() => this.$emit('select', this.wallet))
-            .then(() => new Promise((resolve) => setTimeout(resolve, 50)))
-            .then(() => this.$store.dispatch('Platform/updateActiveDepositOffer'))
-            .catch((error) => console.error(error))
+        setTimeout(() => this.$emit('select', this.wallet), 100)
+        this.$store.dispatch('Platform/updateActiveDepositOffer')
     }
 
     showModal() {

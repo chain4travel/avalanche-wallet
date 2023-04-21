@@ -45,36 +45,35 @@
             </button>
         </template>
         <template v-else>
-            <button
+            <v-btn
                 v-if="signatureStatus === -1"
                 class="claim_button button_primary"
                 @click="confirmClaim"
                 :disabled="!canClaim"
             >
                 Confirm claim
-            </button>
-            <button
+            </v-btn>
+            <v-btn
                 v-else-if="signatureStatus === 1"
                 class="claim_button button_primary"
                 @click="signMultisigTx"
                 :disabled="alreadySigned"
             >
                 Confirm claiming rewards {{ numberOfSignatures }}/{{ threshold }}
-            </button>
-            <button
+            </v-btn>
+            <v-btn
                 v-else-if="signatureStatus === 2"
                 class="claim_button button_primary"
-                @click="issueMultisigTx"
+                @click="openModal"
                 :disabled="!canClaim"
             >
                 Execute
-            </button>
+            </v-btn>
         </template>
         <ModalClaimDepositReward
             ref="modal_claim_reward"
             :depositTxID="depositTxID"
             :amount="pendingRewards"
-            :confirmClaim="confirmClaim"
         />
     </div>
 </template>
@@ -92,6 +91,7 @@ import { WalletType } from '@/js/wallets/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
+import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
 
 @Component({
     filters: {
@@ -119,7 +119,7 @@ export default class UserRewardCard extends Vue {
     depositTxID!: string
     @Prop() title!: string
     @Prop() start!: BN
-    @Prop() end!: BN
+    @Prop() duration!: BN
     @Prop() minLock!: BN
     @Prop() rewards!: string
     @Prop() lockedAmount!: BN
@@ -147,16 +147,16 @@ export default class UserRewardCard extends Vue {
         return this.$store.state.activeWallet
     }
 
-    get isMultiSig() {
+    get isMultiSig(): boolean {
         let wallet: WalletType = this.$store.state.activeWallet
         return wallet.type === 'multisig'
     }
 
-    get rewardTitle() {
+    get rewardTitle(): string {
         return Buffer.from(this.title.replace('0x', ''), 'hex').toString()
     }
 
-    get startDate() {
+    get startDate(): string {
         const startDate = new Date(parseInt(this.start.toString()) * 1000)
 
         return startDate.toLocaleString('en-US', {
@@ -169,8 +169,10 @@ export default class UserRewardCard extends Vue {
         })
     }
 
-    get endDate() {
-        const endDate = new Date(parseInt(this.end.toString()) * 1000)
+    get endDate(): string {
+        const endDate = new Date(
+            parseInt(this.start.toString()) * 1000 + parseInt(this.duration.toString()) * 1000
+        )
 
         return endDate.toLocaleString('en-US', {
             year: 'numeric',
@@ -182,15 +184,15 @@ export default class UserRewardCard extends Vue {
         })
     }
 
-    get minLockAmount() {
+    get minLockAmount(): Big {
         return new Big(this.minLock.toString())
     }
 
-    get depositAmount() {
+    get depositAmount(): Big {
         return new Big(this.lockedAmount.toString())
     }
 
-    get pendingRewardsAmount() {
+    get pendingRewardsAmount(): Big {
         return new Big(this.pendingRewards.toString())
     }
 
@@ -198,7 +200,7 @@ export default class UserRewardCard extends Vue {
         return new Big(this.alreadyClaimed.toString())
     }
 
-    get rewardPercent() {
+    get rewardPercent(): number {
         const interestRateBase = 365 * 24 * 60 * 60
         const interestRateDenominator = 1000000 * interestRateBase
 
@@ -214,23 +216,23 @@ export default class UserRewardCard extends Vue {
         return this.ava_asset?.symbol ?? ''
     }
 
-    get canClaim() {
+    get canClaim(): boolean {
         return parseInt(this.pendingRewards.toString()) > 0
     }
 
     get pendingSendMultisigTX(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
             (item: any) =>
-                item?.tx?.alias === this.activeWallet.getAllAddressesP()[0] &&
+                item?.tx?.alias === this.activeWallet.getStaticAddress('P') &&
                 WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
         )
     }
 
-    get txOwners() {
+    get txOwners(): ModelMultisigTxOwner[] | [] {
         return this.pendingSendMultisigTX?.tx?.owners ?? []
     }
 
-    get alreadySigned() {
+    get alreadySigned(): boolean {
         let isSigned = false
         this.txOwners.forEach((owner) => {
             if (
@@ -246,27 +248,17 @@ export default class UserRewardCard extends Vue {
     }
 
     get signatureStatus(): number {
-        console.log('signatureStatus Changed')
-
         // first claim
-        if (!this.pendingSendMultisigTX?.tx) {
-            console.log('signatureStatus Changed, -1')
-            return -1
-        }
+        if (!this.pendingSendMultisigTX?.tx) return -1
         // has signed and cannot execute
-        else if (!this.canExecuteMultisigTx) {
-            console.log('signatureStatus Changed, 1')
-            return 1
-        }
+        else if (!this.canExecuteMultisigTx) return 1
         // has signed and can execute
-        else if (this.canExecuteMultisigTx) {
-            console.log('signatureStatus Changed, 2')
-            return 2
-        }
+        else if (this.canExecuteMultisigTx) return 2
+
         return 0
     }
 
-    get numberOfSignatures() {
+    get numberOfSignatures(): number {
         let signers = 0
         this.txOwners.forEach((owner) => {
             if (owner.signature) signers++
@@ -274,13 +266,11 @@ export default class UserRewardCard extends Vue {
         return signers
     }
 
-    get threshold() {
-        return this.pendingSendMultisigTX?.tx?.threshold
+    get threshold(): number {
+        return this.pendingSendMultisigTX?.tx?.threshold ?? 0
     }
 
     get canExecuteMultisigTx(): boolean {
-        // TODO @Ayoub
-        // use getSignatureStatus from MultisigWallet.ts
         let signers = 0
         let threshold = this.pendingSendMultisigTX?.tx?.threshold
         this.txOwners.forEach((owner) => {
@@ -288,6 +278,11 @@ export default class UserRewardCard extends Vue {
         })
         if (threshold) return signers >= threshold
         return false
+    }
+
+    formattedAmount(val: BN): string {
+        let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
+        return big.toLocaleString()
     }
 
     updateBalance(): void {
@@ -301,29 +296,38 @@ export default class UserRewardCard extends Vue {
         // @ts-ignore
         let { dispatchNotification } = this.globalHelper()
 
-        WalletHelper.buildDepositClaimTx(addresses, wallet, this.depositTxID)
-            .then(() => {
-                setTimeout(() => {
-                    this.updateBalance()
-                }, 500)
-                this.$store.dispatch('Platform/updateActiveDepositOffer')
-                this.$store.dispatch('Signavault/updateTransaction')
-            })
-            .catch((err) => {
-                if (err instanceof SignatureError) {
+        if (!this.pendingSendMultisigTX) {
+            WalletHelper.buildDepositClaimTx(addresses, wallet, this.depositTxID)
+                .then(() => {
+                    this.confiremedClaimedAmount = this.formattedAmount(this.pendingRewards)
+                    setTimeout(() => this.updateBalance(), 500)
+                    this.$store.dispatch('Platform/updateActiveDepositOffer')
+                    this.$store.dispatch('Signavault/updateTransaction')
                     dispatchNotification({
                         message: this.$t('notifications.transfer_success_msg'),
                         type: 'success',
                     })
-                    setTimeout(() => {
-                        this.$store.dispatch('Assets/updateUTXOs')
-                        this.$store.dispatch('Signavault/updateTransaction').then(() => {
-                            this.$store.dispatch('History/updateMultisigTransactionHistory')
+                    this.claimed = true
+                })
+                .catch((err) => {
+                    if (err instanceof SignatureError) {
+                        dispatchNotification({
+                            message: this.$t('notifications.transfer_success_msg'),
+                            type: 'success',
                         })
-                    }, 1000)
-                }
-                console.log(err)
-            })
+                        setTimeout(() => {
+                            this.$store.dispatch('Assets/updateUTXOs')
+                            this.$store.dispatch('Signavault/updateTransaction').then(() => {
+                                this.$store.dispatch('History/updateMultisigTransactionHistory')
+                            })
+                        }, 1000)
+                    }
+                    console.log(err)
+                    this.claimed = false
+                })
+        } else {
+            this.issueMultisigTx()
+        }
     }
 
     async signMultisigTx() {
@@ -357,6 +361,7 @@ export default class UserRewardCard extends Vue {
                 message: 'Your Transaction sent successfully.',
                 type: 'success',
             })
+            this.$store.dispatch('Platform/updateActiveDepositOffer')
             this.$store.dispatch('Signavault/updateTransaction')
         } catch (e: any) {
             this.helpers.dispatchNotification({
