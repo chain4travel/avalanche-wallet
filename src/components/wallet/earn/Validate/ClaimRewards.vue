@@ -1,48 +1,55 @@
 <template>
     <div>
-        <pending-multisig
-            v-if="pendingTx !== undefined && pendingTx !== null"
-            :multisigTx="pendingTx"
-            @issued="issued"
-            @refresh="getPendingTransaction"
-            :nodeId="nodeId"
-            :nodeInfo="nodeInfo"
-        ></pending-multisig>
+        <div v-if="loading">
+            <Spinner class="spinner"></Spinner>
+        </div>
         <div v-else>
-            <div class="rewards-div">
-                <div>
-                    <h4 class="input_label">{{ $t('validator.rewards.claim.reward_owner') }}</h4>
-                    <span class="disabled_input" role="textbox">
-                        {{ rewardOwner }}
-                    </span>
-                </div>
-                <br />
-                <div>
-                    <h4>{{ $t('validator.rewards.claim.claimable_validation') }}</h4>
-                    <div class="reward-claim-div">
-                        <h1>{{ pRewardAmountText }} {{ symbol }}</h1>
-                        <v-btn
-                            class="button_secondary btn-claim-reward"
-                            depressed
-                            @click="openModalClaimReward"
-                        >
-                            {{ $t('validator.rewards.claim.claim_rewards') }}
-                        </v-btn>
-                    </div>
-                </div>
-            </div>
-            <ModalClaimReward
+            <pending-multisig
+                v-if="pendingTx !== undefined && pendingTx !== null"
+                :multisigTx="pendingTx"
+                @issued="issued"
+                @refresh="getPendingTransaction"
                 :nodeId="nodeId"
                 :nodeInfo="nodeInfo"
-                ref="modal_claim_reward"
-                :amountText="pRewardAmountText"
-                :symbol="symbol"
-                :amount="rewardAmount"
-                @beforeCloseModal="beforeCloseModal"
-                :rewardOwner="rewardOwner"
-                :pChainddress="pChainddress"
-                :isMultisignTx="isMultisignTx"
-            ></ModalClaimReward>
+            ></pending-multisig>
+            <div v-else>
+                <div class="rewards-div">
+                    <div>
+                        <h4 class="input_label">
+                            {{ $t('validator.rewards.claim.reward_owner') }}
+                        </h4>
+                        <span class="disabled_input" role="textbox">
+                            {{ rewardOwner }}
+                        </span>
+                    </div>
+                    <br />
+                    <div>
+                        <h4>{{ $t('validator.rewards.claim.claimable_validation') }}</h4>
+                        <div class="reward-claim-div">
+                            <h1>{{ pRewardAmountText }} {{ symbol }}</h1>
+                            <v-btn
+                                class="button_secondary btn-claim-reward"
+                                depressed
+                                @click="openModalClaimReward"
+                            >
+                                {{ $t('validator.rewards.claim.claim_rewards') }}
+                            </v-btn>
+                        </div>
+                    </div>
+                </div>
+                <ModalClaimReward
+                    :nodeId="nodeId"
+                    :nodeInfo="nodeInfo"
+                    ref="modal_claim_reward"
+                    :amountText="pRewardAmountText"
+                    :symbol="symbol"
+                    :amount="rewardAmount"
+                    @beforeCloseModal="beforeCloseModal"
+                    :rewardOwner="rewardOwner"
+                    :pChainddress="pChainddress"
+                    :isMultisignTx="isMultisignTx"
+                ></ModalClaimReward>
+            </div>
         </div>
     </div>
 </template>
@@ -58,11 +65,13 @@ import Big from 'big.js'
 import { WalletType } from '@c4tplatform/camino-wallet-sdk'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import PendingMultisig from './PendingMultisig.vue'
+import Spinner from '@/components/misc/Spinner.vue'
 
 @Component({
     components: {
         ModalClaimReward,
         PendingMultisig,
+        Spinner,
     },
 })
 export default class ClaimRewards extends Vue {
@@ -95,7 +104,12 @@ export default class ClaimRewards extends Vue {
             this.$store.dispatch('Assets/updateUTXOs')
             this.$store.dispatch('History/updateTransactionHistory')
         } else if (this.isMultisignTx) {
-            this.getPendingTransaction()
+            this.loading = true
+            this.$store.dispatch('Signavault/updateTransaction')
+            setTimeout(() => {
+                this.getPendingTransaction()
+                this.loading = false
+            }, 100)
         }
     }
 
@@ -108,7 +122,6 @@ export default class ClaimRewards extends Vue {
     }
 
     async getClaimableReward() {
-        this.loading = true
         let responseClaimable = await WalletHelper.getClaimables(
             this.nodeInfo.rewardOwner.addresses[0].toString(),
             this.nodeInfo.txID
@@ -117,8 +130,6 @@ export default class ClaimRewards extends Vue {
         if (responseClaimable != null && responseClaimable != undefined) {
             this.rewardAmount = responseClaimable.validatorRewards
         }
-
-        this.loading = false
     }
 
     openModalClaimReward() {
@@ -174,10 +185,22 @@ export default class ClaimRewards extends Vue {
         } else {
             this.pendingTx = undefined
         }
+
+        console.log('pendingTxData', this.pendingTx)
     }
 
-    async issued() {
-        console.log('Issued Tx')
+    issued() {
+        this.loading = true
+        this.$store.dispatch('Signavault/updateTransaction')
+
+        setTimeout(() => {
+            this.getClaimableReward()
+            this.$store.dispatch('Assets/updateUTXOs')
+            this.$store.dispatch('History/updateTransactionHistory')
+            this.pendingTx = undefined
+            this.loading = false
+            console.log('pendingTxDataIssued', this.pendingTx)
+        }, 100)
     }
 }
 </script>

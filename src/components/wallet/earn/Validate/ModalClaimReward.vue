@@ -94,7 +94,7 @@ export default class ModalClaimReward extends Vue {
 
     async confirmClaim() {
         try {
-            let claimTx = await WalletHelper.buildClaimTx(
+            await WalletHelper.buildClaimTx(
                 this.pChainddress,
                 new BN(this.amount),
                 this.$store.state.activeWallet,
@@ -104,6 +104,7 @@ export default class ModalClaimReward extends Vue {
 
             if (this.isMultisignTx) {
                 this.claimed = true
+                this.$emit('beforeCloseModal', false)
             } else {
                 this.confirmedClaimedAmountText = new BN(this.amount).toString()
                 this.claimed = true

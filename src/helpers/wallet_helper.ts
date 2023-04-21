@@ -478,12 +478,8 @@ class WalletHelper {
             new BN(1)
         )
 
-        if (isMultisignTx) {
-            let tx = await activeWallet.signP(unsignedTx)
-            return await ava.PChain().issueTx(tx)
-        } else {
-            return unsignedTx
-        }
+        let tx = await activeWallet.signP(unsignedTx)
+        return await ava.PChain().issueTx(tx)
     }
 
     static async findPendingValidator(nodeID: string): Promise<ValidatorRaw> {
