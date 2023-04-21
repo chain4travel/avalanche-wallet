@@ -60,8 +60,7 @@
                 :disabled="alreadySigned"
             >
                 {{
-                    ($t('earn.rewards.active_earning.pending_claim'),
-                    {
+                    $t('earn.rewards.active_earning.pending_claim', {
                         nbSigners: numberOfSignatures,
                         threshold: threshold,
                     })
