@@ -21,6 +21,7 @@
                             ref="txList"
                             @change="updateTxList"
                             :disabled="isConfirm"
+                            :totalAmount="totalAmount"
                             :chainId="formType"
                         ></tx-list>
                         <template v-if="hasNFT">
@@ -217,6 +218,7 @@ export default class Transfer extends Vue {
     nftOrders: UTXO[] = []
     formErrors: string[] = []
     err = ''
+    totalAmount? = 0
 
     formAddress: string = ''
     formOrders: ITransaction[] = []
@@ -393,7 +395,7 @@ export default class Transfer extends Vue {
     get pendingSendMultisigTX(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
             (item: any) =>
-                item?.tx?.alias === this.wallet.getAllAddressesP()[0] &&
+                item?.tx?.alias === this.wallet.getStaticAddress('P') &&
                 WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'BaseTx'
         )
     }
@@ -497,15 +499,13 @@ export default class Transfer extends Vue {
             this.memo = utx.getMemo().toString()
             const toAddress = WalletHelper.getToAddressFromUtx(
                 unsignedTx,
-                this.wallet.getAllAddressesP()[0]
+                this.wallet.getStaticAddress('P')
             )
             // eslint-disable-next-line no-control-regex
             if (toAddress) this.addressIn = 'P' + toAddress?.replace(/\x00/g, '')
-            const amount = toAddress
+            this.totalAmount = toAddress
                 ? WalletHelper.getTotalAmountFromUtx(unsignedTx, toAddress)
                 : undefined
-            // TODO @Achraf
-            // Show the amount wherever you need to
         } else {
             this.canSendAgain = true
         }

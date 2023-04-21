@@ -1,23 +1,19 @@
 <template>
-    <modal ref="modal" :title="$t('modal.priv_key.info')" class="modal_main">
+    <modal ref="modal" :title="$t('modal.priv_key.title')" class="modal_main">
         <div class="singleton_modal_body">
-            <div data-cy="private-key-display" class="key_raw">
-                <span class="key_raw_title">{{ $t('modal.priv_key.title') }}</span>
-                <br />
-                {{ privateKey }}
-            </div>
+            <p class="key_raw" data-cy="private-key-display">{{ privateKey }}</p>
             <p class="warning_text">
                 Warning: Never disclose this key. Anyone with your private keys can steal any assets
                 held in your wallet.
             </p>
             <template v-if="publicKey">
                 <div class="key_raw">
-                    <span class="key_raw_title">Public Key</span>
+                    Public Key
                     <br />
                     {{ publicKey }}
                 </div>
                 <div class="key_raw">
-                    <span class="key_raw_title">Compressed Public Key</span>
+                    Compressed Public Key
                     <br />
                     {{ compressedPublicKey }}
                 </div>
@@ -69,13 +65,6 @@ export default class PrivateKey extends Vue {
     height: 20px;
     margin: 15px auto;
     margin-bottom: 0;
-}
-
-.key_raw_title {
-    font-size: larger;
-    font-weight: bold;
-    display: inline-block;
-    margin-bottom: 6px;
 }
 
 .key_raw {
