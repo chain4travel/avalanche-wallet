@@ -162,9 +162,13 @@ export default class ModalClaimDepositReward extends Vue {
                 })
         } else {
             this.confiremedClaimedAmount = this.formattedAmount(this.amount)
-            this.issueMultisigTx().then(() => {
+
+            try {
+                await this.issueMultisigTx()
+                this.claimed = true
+            } catch (err) {
                 this.claimed = false
-            })
+            }
         }
     }
 
@@ -189,6 +193,7 @@ export default class ModalClaimDepositReward extends Vue {
                 message: this.$t('notifications.execute_multisig_transaction_error'),
                 type: 'error',
             })
+            throw e
         }
     }
 }
