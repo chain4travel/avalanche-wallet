@@ -51,7 +51,7 @@
                 @click="confirmClaim"
                 :disabled="!canClaim"
             >
-                Confirm claim
+                {{ $t('earn.rewards.active_earning.confirm_claim') }}
             </v-btn>
             <v-btn
                 v-else-if="signatureStatus === 1"
@@ -59,7 +59,13 @@
                 @click="signMultisigTx"
                 :disabled="alreadySigned"
             >
-                Confirm claiming rewards {{ numberOfSignatures }}/{{ threshold }}
+                {{
+                    ($t('earn.rewards.active_earning.pending_claim'),
+                    {
+                        nbSigners: numberOfSignatures,
+                        threshold: threshold,
+                    })
+                }}
             </v-btn>
             <v-btn
                 v-else-if="signatureStatus === 2"
@@ -67,7 +73,7 @@
                 @click="openModal"
                 :disabled="!canClaim"
             >
-                Execute
+                {{ $t('earn.rewards.active_earning.execute_claim') }}
             </v-btn>
         </template>
         <ModalClaimDepositReward
@@ -79,7 +85,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
+import { Vue, Component, Prop } from 'vue-property-decorator'
 import { BN } from '@c4tplatform/caminojs'
 import Big from 'big.js'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
@@ -338,13 +344,13 @@ export default class UserRewardCard extends Vue {
         try {
             await wallet.addSignatures(this.pendingSendMultisigTX?.tx)
             this.helpers.dispatchNotification({
-                message: 'Your signature saved successfully!',
+                message: this.$t('notifications.multisig_transaction_saved'),
                 type: 'success',
             })
             this.$store.dispatch('Signavault/updateTransaction')
         } catch (e: any) {
             this.helpers.dispatchNotification({
-                message: 'Your signature is not saved.',
+                message: this.$t('multisig_transaction_not_saved'),
                 type: 'error',
             })
         }
@@ -358,7 +364,7 @@ export default class UserRewardCard extends Vue {
         try {
             await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
             this.helpers.dispatchNotification({
-                message: 'Your Transaction sent successfully.',
+                message: this.$t('notifications.transfer_success_msg'),
                 type: 'success',
             })
             this.$store.dispatch('Platform/updateActiveDepositOffer')

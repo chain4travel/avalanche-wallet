@@ -462,7 +462,10 @@
                 "locked_amount": "Locked Amount",
                 "pending_reward": "Pending Reward",
                 "already_claimed": "Already Claimed",
-                "claim": "Claim"
+                "claim": "Claim",
+                "confirm_claim": "Confirm claim",
+                "pending_claim": "Confirm claiming rewards {nbSigners}/{threshold}",
+                "execute_claim": "Execute claim"
             },
             "claim_modal": {
                 "are_you_sure": "Are you sure you want to claim {amount} {symbol} rewards?",
@@ -858,7 +861,9 @@
         "keys_remove_success": "Private key and assets removed from the wallet.",
         "transfer_success_msg": "You have succesfully sent your transaction.",
         "transfer_error_msg": "Failed to send transaction.",
-        "execute_multisig_transaction_error": "Transaction execution failed"
+        "execute_multisig_transaction_error": "Transaction execution failed",
+        "multisig_transaction_saved": "Your signature saved successfully!",
+        "multisig_transaction_not_saved": "Your signature saved successfully!"
     },
     "validator": {
         "pending": {
