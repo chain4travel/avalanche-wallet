@@ -16,8 +16,14 @@
                     </h3>
                     <br />
                     <p class="text-modal">
-                        {{ $t('validator.rewards.modal_claim.we_accepting') }}
+                        {{
+                            $t('validator.rewards.modal_claim.kindy_be_aware', {
+                                fee: feeTx,
+                                symbol: nativeAssetSymbol,
+                            })
+                        }}
                     </p>
+                    <br />
                 </div>
                 <div class="modal-claim-reward-div-options">
                     <v-btn depressed class="button_primary" @click="close()">
@@ -57,6 +63,8 @@ import Modal from '../../../modals/Modal.vue'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import { BN } from '@c4tplatform/caminojs'
 import { WalletHelper } from '../../../../helpers/wallet_helper'
+import * as SDK from '@c4tplatform/camino-wallet-sdk/dist'
+import { ava } from '@/AVA'
 
 @Component({
     components: {
@@ -119,6 +127,14 @@ export default class ModalClaimReward extends Vue {
             }
         }
     }
+
+    get feeTx() {
+        return SDK.bnToBigAvaxX(ava.PChain().getTxFee())
+    }
+
+    get nativeAssetSymbol(): string {
+        return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
+    }
 }
 </script>
 <style scoped lang="scss">
@@ -148,6 +164,7 @@ export default class ModalClaimReward extends Vue {
 
 .text-modal {
     text-align: justify;
+    color: rgb(187, 16, 16);
 }
 
 @media screen and (max-width: 720px) {
