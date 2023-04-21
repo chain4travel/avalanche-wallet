@@ -5,11 +5,11 @@ import { NetworkState } from '@/store/modules/network/types'
 import { ava, infoApi } from '@/AVA'
 import { AvaNetwork } from '@/js/AvaNetwork'
 import { explorer_api } from '@/explorer_api'
-import { BN } from '@c4tplatform/caminojs'
+import { BN } from '@c4tplatform/caminojs/dist'
 import { web3 } from '@/evm'
 import { setSocketNetwork } from '@/providers'
 import { setAvalanche } from '@c4tplatform/camino-wallet-sdk/dist'
-import { signavault_api } from '@/signavault_api'
+
 const network_module: Module<NetworkState, RootState> = {
     namespaced: true,
     state: {
@@ -24,6 +24,9 @@ const network_module: Module<NetworkState, RootState> = {
         addNetwork(state, net: AvaNetwork) {
             state.networks.push(net)
         },
+        selectNetwork(state, net: AvaNetwork) {
+            state.selectedNetwork = net
+        },
     },
     getters: {
         allNetworks(state) {
@@ -31,6 +34,9 @@ const network_module: Module<NetworkState, RootState> = {
         },
         depositAndBond(state) {
             return state.depositAndBond
+        },
+        selectedNetwork(state) {
+            return state.selectedNetwork
         },
     },
     actions: {
@@ -134,7 +140,7 @@ const network_module: Module<NetworkState, RootState> = {
             ava.PChain().getAVAXAssetID(true)
             ava.CChain().getAVAXAssetID(true)
 
-            state.selectedNetwork = net
+            commit('selectNetwork', net)
             dispatch('saveSelectedNetwork')
 
             state.depositAndBond =
@@ -142,9 +148,6 @@ const network_module: Module<NetworkState, RootState> = {
 
             // Update explorer api
             explorer_api.defaults.baseURL = net.explorerUrl
-
-            // Update signavault api
-            signavault_api.defaults.baseURL = net.signavaultUrl
 
             // Set web3 Network Settings
             let web3Provider = `${net.protocol}://${net.ip}:${net.port}/ext/bc/C/rpc`
@@ -158,25 +161,28 @@ const network_module: Module<NetworkState, RootState> = {
 
             // If authenticated
             if (rootState.isAuth) {
-                for (var i = 0; i < rootState.wallets.length; i++) {
-                    let w = rootState.wallets[i]
-                    w.onnetworkchange()
+                for (const w of rootState.wallets) {
+                    w.onNetworkChange()
+                }
+                if (rootState.activeWallet) {
+                    rootState.activeWallet.initialize()
                 }
             }
 
             await dispatch('Assets/onNetworkChange', net, { root: true })
             dispatch('Assets/updateUTXOs', null, { root: true })
             dispatch('Platform/update', null, { root: true })
-            dispatch('Platform/updateMinStakeAmount', null, { root: true })
             dispatch('updateTxFee')
             dispatch('Accounts/updateKycStatus', null, { root: true })
-            dispatch('Accounts/updateMultisigAliases', null, { root: true })
             // Update tx history
-            dispatch('History/updateTransactionHistory', null, { root: true })
+            this.dispatch('History/getAliasChains')
+            await dispatch('Signavault/updateTransaction', undefined, { root: true })
+            this.dispatch('History/updateTransactionHistory', null, { root: true })
 
             // Set the SDK Network
             setAvalanche(ava)
-            // state.isConnected = true;
+
+            commit('setNetwork', net, { root: true })
             state.status = 'connected'
             return true
         },
@@ -191,10 +197,10 @@ const network_module: Module<NetworkState, RootState> = {
             const columbusExplorerUrl = `${window.location.protocol}//${window.location.host}/explorer`
             let camino = new AvaNetwork(
                 'Camino',
-                'https://mainnet.camino.network',
+                'https://api.camino.network',
                 1000,
-                'https://magellan.mainnet.camino.network',
-                'https://explorer.camino.network/mainnet',
+                'https://magellan.camino.network',
+                'https://explorer.camino.network',
                 '',
                 true
             )

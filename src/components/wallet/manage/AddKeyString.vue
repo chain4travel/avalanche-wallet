@@ -53,11 +53,11 @@ export default class AddKeyString extends Vue {
 
         setTimeout(async () => {
             try {
-                await this.$store.dispatch('addWalletSingleton', this.privateKeyInput)
+                await this.$store.dispatch('addWalletSingleton', { key: this.privateKeyInput })
                 // @ts-ignore
                 this.$emit('success')
                 this.clear()
-            } catch (e) {
+            } catch (e: any) {
                 this.isLoading = false
 
                 if (e.message.includes('already')) {
@@ -65,6 +65,7 @@ export default class AddKeyString extends Vue {
                 } else {
                     this.error = this.$t('keys.import_key_err') as string
                 }
+                console.error(e)
             }
         }, 200)
     }
@@ -78,8 +79,6 @@ export default class AddKeyString extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
-
 label {
     color: #909090;
     font-size: 12px;

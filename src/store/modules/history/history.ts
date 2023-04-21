@@ -20,6 +20,7 @@ const history_module: Module<HistoryState, RootState> = {
         clear(state) {
             state.transactions = []
             state.allTransactions = []
+            state.chains = []
         },
     },
     actions: {
@@ -113,18 +114,19 @@ const history_module: Module<HistoryState, RootState> = {
             state.allTransactions = transactions
             state.isUpdatingAll = false
         },
-        async getAliasChains({ state }) {
-            try {
-                let res = await getAliasChains()
-                if (res.chains) {
-                    let chains = Object.entries(res.chains).map(([, value]) => {
-                        let v = value as Chain
-                        return { chainAlias: v.chainAlias, chainID: v.chainID }
-                    })
-                    state.chains = chains
-                }
-            } catch (e) {
-                state.chains = []
+        async getAliasChains({ state, rootState }) {
+            //@ts-ignore
+            let network = rootState.Network.selectedNetwork
+            if (!network.explorerUrl) {
+                return
+            }
+            let res = await getAliasChains()
+            if (res.chains) {
+                let chains = Object.entries(res.chains).map(([, value]) => {
+                    let v = value as Chain
+                    return { chainAlias: v.chainAlias, chainID: v.chainID }
+                })
+                state.chains = chains
             }
         },
     },

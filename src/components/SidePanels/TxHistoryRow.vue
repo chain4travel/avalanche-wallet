@@ -46,9 +46,8 @@ export default class TxHistoryRow extends Vue {
         let network: AvaNetwork = this.$store.state.Network.selectedNetwork
         let chains = this.$store.state.History.chains
         if (network.explorerUrl && chains.length > 0) {
-            let alias = chains?.find(
-                (elem: Chain) => elem.chainID === this.transaction.chainID
-            ).chainAlias
+            let alias = chains?.find((elem: Chain) => elem.chainID === this.transaction.chainID)
+                .chainAlias
             let url = `/explorer/${alias}-chain/tx/${this.transaction.id}`
             return url
         } else return ''
@@ -94,7 +93,8 @@ export default class TxHistoryRow extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/variables';
+@use '../../styles/abstracts/mixins';
 
 .icons {
     justify-self: center;
@@ -156,7 +156,7 @@ export default class TxHistoryRow extends Vue {
     overflow-wrap: break-word;
     word-break: break-word;
     font-size: 12px;
-    color: main.$primary-color-light;
+    color: variables.$primary-color-light;
     display: grid;
     grid-template-columns: max-content 1fr;
     column-gap: 12px;
@@ -186,7 +186,7 @@ export default class TxHistoryRow extends Vue {
     }
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .icons {
         justify-self: left;
         img {

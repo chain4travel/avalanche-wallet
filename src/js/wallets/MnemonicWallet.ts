@@ -8,7 +8,7 @@ import {
     UTXO as AVMUTXO,
 } from '@c4tplatform/caminojs/dist/apis/avm'
 
-import { privateToAddress } from 'ethereumjs-util'
+import { privateToAddress } from '@ethereumjs/util'
 
 import {
     KeyChain as PlatformVMKeyChain,
@@ -25,7 +25,7 @@ import {
 import { PayloadBase } from '@c4tplatform/caminojs/dist/utils'
 
 import * as bip39 from 'bip39'
-import { BN, Buffer as BufferAvalanche } from '@c4tplatform/caminojs'
+import { BN, Buffer as BufferAvalanche } from '@c4tplatform/caminojs/dist'
 import { ava, bintools } from '@/AVA'
 import { IAvaHdWallet } from '@/js/wallets/types'
 import HDKey from 'hdkey'
@@ -37,6 +37,7 @@ import Erc20Token from '@/js/Erc20Token'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import { Transaction } from '@ethereumjs/tx'
 import MnemonicPhrase from '@/js/wallets/MnemonicPhrase'
+import { ChainIdType } from '@/constants'
 
 // HD WALLET
 // Accounts are not used and the account index is fixed to 0
@@ -66,13 +67,11 @@ export default class MnemonicWallet extends HdWalletCore implements IAvaHdWallet
     ethAddress: string
     ethBalance: BN
 
-    // TODO : Move to hd core class
-    onnetworkchange() {
-        super.onnetworkchange()
-
+    onNetworkChange(): void {
+        super.onNetworkChange()
         // Update EVM values
         this.ethKeyChain = new EVMKeyChain(ava.getHRP(), 'C')
-        let cKeypair = this.ethKeyChain.importKey(this.ethKeyBech)
+        this.ethKeyChain.importKey(this.ethKeyBech)
         this.ethBalance = new BN(0)
     }
 
@@ -87,6 +86,7 @@ export default class MnemonicWallet extends HdWalletCore implements IAvaHdWallet
         let ethAccountKey = masterHdKey.derive(ETH_ACCOUNT_PATH + '/0/0')
 
         super(accountHdKey, ethAccountKey, false)
+        this.name = 'Mnemonic Wallet'
 
         // Derive EVM key and address
         let ethPrivateKey = ethAccountKey.privateKey
@@ -98,9 +98,8 @@ export default class MnemonicWallet extends HdWalletCore implements IAvaHdWallet
         this.ethKeyBech = cPrivKey
 
         let cKeyChain = new KeyChain(ava.getHRP(), 'C')
+        cKeyChain.importKey(cPrivKey)
         this.ethKeyChain = cKeyChain
-
-        let cKeypair = cKeyChain.importKey(cPrivKey)
 
         this.type = 'mnemonic'
         this.seed = seed.toString('hex')
@@ -214,11 +213,12 @@ export default class MnemonicWallet extends HdWalletCore implements IAvaHdWallet
     }
 
     async issueBatchTx(
+        chainId: ChainIdType,
         orders: (ITransaction | AVMUTXO)[],
         addr: string,
         memo: BufferAvalanche | undefined
     ): Promise<string> {
-        return await WalletHelper.issueBatchTx(this, orders, addr, memo)
+        return await WalletHelper.issueBatchTx(this, chainId, orders, addr, memo)
     }
 
     // returns a keychain that has all the derived private/public keys for X chain

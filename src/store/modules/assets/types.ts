@@ -1,7 +1,6 @@
-import { UTXO, UTXOSet } from '@c4tplatform/caminojs/dist/apis/avm'
+import { UTXO } from '@c4tplatform/caminojs/dist/apis/avm'
 
 import AvaAsset from '@/js/AvaAsset'
-import { BN } from '@c4tplatform/caminojs'
 import { AvaNftFamily } from '@/js/AvaNftFamily'
 import { IWalletBalanceDict, PlatformBalances } from '@/store/types'
 import { UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm/utxos'
@@ -12,7 +11,7 @@ export interface AssetsState {
     assets: AvaAsset[]
     assetsDict: AssetsDict
     platformBalances: PlatformBalances
-    AVA_ASSET_ID: string | null
+    AVA_ASSET_ID: string
     nftFams: AvaNftFamily[]
     nftFamsDict: NftFamilyDict
     balanceDict: IWalletBalanceDict

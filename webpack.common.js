@@ -33,7 +33,6 @@ module.exports = {
             },
         ],
     },
-    cache: false,
     resolve: {
         extensions: ['.tsx', '.ts', '.vue', '.jsx', '.js', '.json'],
         alias: {
@@ -60,14 +59,8 @@ module.exports = {
                 './mountLegal': './src/views/mountLegal.ts',
                 './mountAccountMenu': './src/components/wallet/sidebar/mountAccountMenu.ts',
                 './mountAccounts': './src/components/Access/mountAccounts.ts',
-            },
-            shared: {
-                ...deps,
-                vue: {
-                    singleton: true,
-                    eager: true,
-                    version: deps.vue,
-                },
+                './mountKyesComponent': './src/components/wallet/manage/mountKyesComponent.ts',
+                './mountsaveKyesButton': './src/views/wallet/mountSaveKeysButton.ts',
             },
         }),
         new HtmlWebPackPlugin({

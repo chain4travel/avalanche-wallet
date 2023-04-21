@@ -81,6 +81,9 @@ export type TransactionType =
     | 'pvm_export'
     | 'advance_time'
     | 'reward_validator'
+    | 'deposit'
+    | 'unlock_deposit'
+    | 'register_node'
 
 // CSV Staking Row
 export type CsvRowStakingTxType = 'add_validator' | 'add_delegator' | 'fee_received'
@@ -109,3 +112,15 @@ export interface CsvRowAvaxTransferData {
     memo?: string
     isGain: boolean
 }
+
+// Output Types defined in magellan (different to camino-node)
+const RegisterOutputTypeCustom = 8192
+
+export const OutputTypesLockedOutD = RegisterOutputTypeCustom + 0
+export const OutputTypesLockedOutB = RegisterOutputTypeCustom + 1
+export const OutputTypesLockedOutDB = RegisterOutputTypeCustom + 2
+
+export const IsOutputDeposited = (ot: number) =>
+    ot === OutputTypesLockedOutD || ot === OutputTypesLockedOutDB
+export const IsBonded = (ot: number) =>
+    ot === OutputTypesLockedOutB || ot === OutputTypesLockedOutDB

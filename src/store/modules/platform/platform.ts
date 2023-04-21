@@ -1,7 +1,7 @@
 import { Module } from 'vuex'
 import { RootState } from '@/store/types'
 
-import { BN } from '@c4tplatform/caminojs'
+import { BN } from '@c4tplatform/caminojs/dist'
 import { ava } from '@/AVA'
 
 import {
@@ -33,6 +33,8 @@ const platform_module: Module<PlatformState, RootState> = {
         minStake: new BN(0),
         minStakeDelegation: new BN(0),
         currentSupply: new BN(1),
+        depositOffers: [],
+        activeDepositOffer: [],
     },
     mutations: {
         setValidators(state, validators: ValidatorRaw[]) {
@@ -44,22 +46,25 @@ const platform_module: Module<PlatformState, RootState> = {
             state.currentSupply = await ava.PChain().getCurrentSupply()
         },
 
-        async updateMinStakeAmount({ state }) {
-            let res = await ava.PChain().getMinStake(true)
-            state.minStake = res.minValidatorStake
-            state.minStakeDelegation = res.minDelegatorStake
-
-            // console.log(state.minStake.toString())
-            // console.log(state.minStakeDelegation.toString())
+        updateMinStakeAmount({ state }) {
+            state.minStake = ava.getNetwork().P.minStake
+            state.minStakeDelegation = ava.getNetwork().P.minDelegationStake
         },
 
         async update({ dispatch }) {
             dispatch('updateValidators')
-            dispatch('updateValidatorsPending')
             dispatch('updateCurrentSupply')
+            dispatch('updateMinStakeAmount')
+            dispatch('updateAllDepositOffers')
+            dispatch('updateActiveDepositOffer')
         },
 
-        async updateValidators({ state, commit }) {
+        async updateValidators({ dispatch }) {
+            dispatch('updateValidatorsCurrent')
+            dispatch('updateValidatorsPending')
+        },
+
+        async updateValidatorsCurrent({ state, commit }) {
             let res = (await ava.PChain().getCurrentValidators()) as GetValidatorsResponse
             let validators = res.validators
 
@@ -74,6 +79,45 @@ const platform_module: Module<PlatformState, RootState> = {
             //@ts-ignore
             state.validatorsPending = validators
             state.delegatorsPending = delegators
+        },
+
+        async updateAllDepositOffers({ state, commit }) {
+            const promises = [
+                ava.PChain().getAllDepositOffers(true),
+                ava.PChain().getAllDepositOffers(false),
+            ]
+
+            const results = await Promise.all(promises)
+            const concatenatedResults = results[0].concat(results[1])
+            const res = concatenatedResults.filter((value, index, self) => {
+                return self.findIndex((t) => t.id === value.id) === index
+            })
+
+            state.depositOffers = res
+        },
+        async updateActiveDepositOffer({ state, commit, rootState }) {
+            const wallet = rootState.activeWallet
+            const pAddressStrings = wallet?.getAllAddressesP() as string[] | string
+            const utxos = await ava.PChain().getUTXOs(pAddressStrings)
+            const lockedTxIDs = await utxos.utxos.getLockedTxIDs()
+            const activeDepositOffers = await ava.PChain().getDeposits(lockedTxIDs.depositIDs)
+            const activeOffers = []
+
+            for (const depositOffer of activeDepositOffers.deposits) {
+                const matchingOffer = state.depositOffers.find(
+                    (o) => o.id === depositOffer.depositOfferID
+                )
+                if (matchingOffer) {
+                    const index = activeDepositOffers.deposits.indexOf(depositOffer)
+                    activeOffers.push({
+                        ...matchingOffer,
+                        ...depositOffer,
+                        pendingRewards: activeDepositOffers.availableRewards[index],
+                    })
+                }
+            }
+
+            state.activeDepositOffer = activeOffers
         },
     },
     getters: {
@@ -210,35 +254,13 @@ const platform_module: Module<PlatformState, RootState> = {
             }
         },
 
-        // Returns total active and pending delegation amount for the given node id
-        // validatorTotalDelegated: (state, getters) => (nodeId: string) => {
-        //     // let validator: ValidatorRaw = getters.validatorsDict[nodeId];
-        //
-        //     let delegators: DelegatorRaw[]|undefined = getters.nodeDelegatorMap[nodeId];
-        //     let delegatorsPending: DelegatorPendingRaw[]|undefined = getters.nodeDelegatorPendingMap[nodeId];
-        //
-        //     // let stakeTotal = new BN(validator.stakeAmount);
-        //
-        //     let activeTotal = new BN(0);
-        //     let pendingTotal = new BN(0);
-        //
-        //     if(delegators){
-        //         activeTotal = delegators.reduce((acc: BN, val: DelegatorRaw) => {
-        //             let valBn = new BN(val.stakeAmount);
-        //             return acc.add(valBn);
-        //         }, new BN(0));
-        //     }
-        //
-        //     if(delegatorsPending){
-        //         pendingTotal = delegatorsPending.reduce((acc: BN, val: DelegatorPendingRaw) => {
-        //             let valBn = new BN(val.stakeAmount);
-        //             return acc.add(valBn);
-        //         }, new BN(0));
-        //     }
-        //
-        //     let totDel = activeTotal.add(pendingTotal);
-        //     return totDel;
-        // },
+        // Return if a given nodeID is either current or pending validator
+        isValidator: (state) => (nodeID: string) => {
+            return (
+                state.validators.findIndex((v) => v.nodeID === nodeID) >= 0 ||
+                state.validatorsPending.findIndex((v) => v.nodeID === nodeID) >= 0
+            )
+        },
     },
 }
 

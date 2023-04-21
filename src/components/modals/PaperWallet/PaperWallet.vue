@@ -8,7 +8,6 @@
                     display: 'none',
                     height: `${height}px`,
                     width: `100%`,
-                    // width: '100%',
                     // paddingTop: `${100 / aspectRatio}%`,
                 }"
             />
@@ -18,7 +17,6 @@
                 :style="{
                     width: `100%`,
                     height: `${height}px`,
-                    // width: '100%',
                     // paddingTop: `${100 / aspectRatio}%`,
                 }"
             ></canvas>
@@ -168,7 +166,7 @@ export default class PaperWallet extends Vue {
         )
 
         // Mnemonic
-        let mnemonicWords: string[] = this.wallet.getMnemonic().split(' ')
+        let mnemonicWords: string[] = this.wallet?.getMnemonic()?.split(' ')
         let row1 = mnemonicWords.slice(0, 8).join(' ')
         let row2 = mnemonicWords.slice(8, 16).join(' ')
         let row3 = mnemonicWords.slice(16).join(' ')
@@ -184,8 +182,8 @@ export default class PaperWallet extends Vue {
         )
     }
 
-    @Watch('address')
-    @Watch('mnemonic')
+    @Watch('address', { immediate: true })
+    //@Watch('mnemonic')
     buildQr() {
         let parent = this
         QRCode.toDataURL(
@@ -201,7 +199,7 @@ export default class PaperWallet extends Vue {
         )
 
         QRCode.toDataURL(
-            this.wallet.getMnemonic(),
+            this.wallet?.getMnemonic() ?? '',
             {
                 width: this.designPxToReal(90),
             },
@@ -220,10 +218,6 @@ export default class PaperWallet extends Vue {
 
         this.width = contW
         this.height = contW / this.aspectRatio
-    }
-
-    mounted() {
-        this.buildQr()
     }
 
     designPxToReal(px: number) {

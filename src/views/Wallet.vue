@@ -1,9 +1,6 @@
 <template>
     <div class="wallet_view" ref="wallet_view">
         <UpdateKeystoreModal v-if="isManageWarning"></UpdateKeystoreModal>
-        <!-- <transition name="fade" mode="out-in">
-            <sidebar class="panel sidenav"></sidebar>
-        </transition> -->
         <div class="top-bar">
             <div class="container">
                 <div class="links">
@@ -89,7 +86,6 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import TopInfo from '@/components/wallet/TopInfo.vue'
-import Sidebar from '@/components/wallet/Sidebar.vue'
 import MainPanel from '@/components/SidePanels/MainPanel.vue'
 import UpdateKeystoreModal from '@/components/modals/UpdateKeystore/UpdateKeystoreModal.vue'
 
@@ -98,14 +94,13 @@ const TIMEOUT_DUR_MS = TIMEOUT_DURATION * 1000
 
 @Component({
     components: {
-        Sidebar,
         MainPanel,
         TopInfo,
         UpdateKeystoreModal,
     },
 })
 export default class Wallet extends Vue {
-    intervalId: NodeJS.Timeout | null = null
+    intervalId: number | null = null
     logoutTimestamp = Date.now() + TIMEOUT_DUR_MS
     isLogOut = false
     helper = this.globalHelper()
@@ -170,17 +165,8 @@ export default class Wallet extends Vue {
         // Logout if current time is passed the logout timestamp
         if (now >= this.logoutTimestamp && !this.isLogOut) {
             this.isLogOut = true
-            this.$store.dispatch('timeoutLogout')
             this.helper.updateSuiteStore(this.$store.state)
         }
-    }
-
-    created() {
-        this.resetTimer()
-        if (document.domain !== 'localhost')
-            this.intervalId = setInterval(() => {
-                this.checkLogout()
-            }, 1000)
     }
 
     unload(event: BeforeUnloadEvent) {
@@ -215,15 +201,8 @@ export default class Wallet extends Vue {
         clearInterval(this.intervalId!)
     }
 
-    get isManageWarning(): boolean {
-        if (this.$store.state.warnUpdateKeyfile) {
-            return true
-        }
-        return false
-    }
-
     get hasVolatileWallets() {
-        return this.$store.state.volatileWallets.length > 0
+        return this.$store.getters.accountChanged
     }
 }
 </script>
@@ -244,15 +223,16 @@ export default class Wallet extends Vue {
     position: fixed;
     width: 100%;
     height: 60px;
-    z-index: 999;
+    z-index: 9;
     display: flex;
     align-items: center;
-    background-color: var(--bg);
+    background-color: var(--bg-wallet-light);
     border-bottom: 1px solid rgba(145, 158, 171, 0.24);
     left: 0;
     justify-content: center;
     padding-left: 24px;
     padding-right: 24px;
+    min-width: 100vw;
     .links {
         display: flex;
         flex-direction: row;

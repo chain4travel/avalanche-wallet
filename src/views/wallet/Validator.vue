@@ -4,12 +4,12 @@
             <h1 :class="depositAndBond ? '' : 'wrong_network'" v-if="validatorIsSuspended">
                 {{ $t('validator.suspended.title') }}
             </h1>
-            <h1
-                v-else-if="(nodeInfo === undefined || nodeInfo === null) && !validatorIsSuspended"
-                :class="depositAndBond ? '' : 'wrong_network'"
-            >
-                {{ $t('earn.subtitle1') }}
-            </h1>
+            <div v-else-if="(nodeInfo === undefined || nodeInfo === null) && !validatorIsSuspended">
+                <h1 v-if="!!multisigPendingNodeTx && !isNodeRegistered">
+                    {{ $t('earn.subtitle5') }}
+                </h1>
+                <h1 v-else>{{ $t('earn.subtitle1') }}</h1>
+            </div>
             <h1 v-else :class="depositAndBond ? '' : 'wrong_network'">
                 {{ $t('validator.info.validator_running') }}
             </h1>
@@ -17,34 +17,73 @@
         <transition name="fade" mode="out-in">
             <div>
                 <p v-if="!depositAndBond" class="wrong_network">{{ $t('earn.warning_3') }}</p>
-                <p v-else-if="!canValidate" class="no_balance">
-                    {{ $t('earn.warning_1', [minStakeAmt.toLocaleString()]) }}
-                </p>
-                <p v-else-if="!isNodeRegistered" class="no_balance">
+                <div v-else-if="!isNodeRegistered" class="no_balance">
+                    <pending-multisig
+                        v-if="!!multisigPendingNodeTx"
+                        :multisigTx="multisigPendingNodeTx"
+                        @issued="onNodeRegistered"
+                        @refresh="handlePendingMultisigRefresh"
+                    ></pending-multisig>
                     <register-node
+                        v-else
                         :isKycVerified="isKycVerified"
                         :isConsortiumMember="isConsortiumMember"
                         :minPlatformUnlocked="minPlatformUnlocked"
-                        :hasEnoughUnlockedPlatformBalance="hasEnoughUnlockedPlatformBalance"
+                        :hasEnoughLockablePlatformBalance="hasEnoughLockablePlatformBalance"
                         :isNodeRegistered="isNodeRegistered"
                         @registered="onNodeRegistered"
+                        :loadingRefreshRegisterNode="loadingRefreshRegisterNode"
+                        @refresh="refresh()"
                     ></register-node>
-                </p>
+                </div>
+                <template v-else-if="!!pendingValidator">
+                    <validator-pending :startDate="pendingValidator.startTime"></validator-pending>
+                </template>
                 <template
                     v-else-if="
-                        (nodeInfo === undefined || nodeInfo === null) && !validatorIsSuspended
+                        (nodeInfo === undefined || nodeInfo === null) &&
+                        !validatorIsSuspended &&
+                        !pendingValidator
                     "
                 >
+                    <pending-multisig
+                        v-if="!!multisigPendingNodeTx"
+                        :nodeId="nodeId"
+                        :multisigTx="multisigPendingNodeTx"
+                        @issued="onAddValidatorIssued"
+                        @refresh="handlePendingMultisigRefresh"
+                    ></pending-multisig>
                     <add-validator
+                        v-else
                         :nodeId="nodeId"
                         @validatorReady="verifyValidatorIsReady"
+                        @initiated="onAddValidatorInitiated"
                     ></add-validator>
                 </template>
                 <div v-else-if="validatorIsSuspended">
                     <validator-suspended :nodeId="nodeId"></validator-suspended>
                 </div>
                 <div v-else>
-                    <validator-info :nodeId="nodeId" :nodeInfo="nodeInfo"></validator-info>
+                    <div class="tab-nav">
+                        <div>
+                            <button
+                                @click="tab = 'opt-validator'"
+                                :active="tab === `opt-validator`"
+                            >
+                                {{ $t('validator.rewards.tab.node') }}
+                            </button>
+                            <button @click="tab = 'opt-rewards'" :active="tab === `opt-rewards`">
+                                {{ $t('validator.rewards.tab.rewards') }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-if="tab == 'opt-validator'">
+                        <validator-info :nodeId="nodeId" :nodeInfo="nodeInfo"></validator-info>
+                    </div>
+                    <div v-if="tab == 'opt-rewards'">
+                        <ClaimRewards :nodeId="nodeId" :nodeInfo="nodeInfo" />
+                    </div>
                 </div>
             </div>
         </transition>
@@ -52,7 +91,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import AddValidator from '@/components/wallet/earn/Validate/AddValidator.vue'
 import { BN } from '@c4tplatform/caminojs/dist'
 import { bnToBig } from '@/helpers/helper'
@@ -67,7 +106,12 @@ import {
 } from '@c4tplatform/caminojs/dist/apis/platformvm/addressstatetx'
 import ValidatorInfo from '@/components/wallet/earn/Validate/ValidatorInfo.vue'
 import ValidatorSuspended from '@/components/wallet/earn/Validate/ValidatorSuspended.vue'
-import { NodeInfo } from '@/js/wallets/types'
+import ClaimRewards from '@/components/wallet/earn/Validate/ClaimRewards.vue'
+import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
+import { WalletCore } from '@/js/wallets/WalletCore'
+import PendingMultisig from '@/components/wallet/earn/Validate/PendingMultisig.vue'
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
+import ValidatorPending from '@/components/wallet/earn/Validate/ValidatorPending.vue'
 
 @Component({
     name: 'validator',
@@ -76,62 +120,120 @@ import { NodeInfo } from '@/js/wallets/types'
         AddValidator,
         ValidatorInfo,
         ValidatorSuspended,
+        ClaimRewards,
+        PendingMultisig,
+        ValidatorPending,
     },
 })
 export default class Validator extends Vue {
     isKycVerified = false
     isConsortiumMember = false
     isNodeRegistered = false
+    isSuspended = false
+    registeredNodeID = ''
     intervalID: any = null
     nodeId = ''
-    nodeInfo: NodeInfo | null = null
+    nodeInfo: ValidatorRaw | null = null
     validatorIsSuspended: boolean = false
+    loadingRefreshRegisterNode: boolean = false
+    tab: string = 'opt-validator'
+    pendingValidator: ValidatorRaw | null = null
 
-    verifyValidatorIsReady(val: NodeInfo) {
+    get multisigPendingNodeTx(): SignavaultTx | undefined {
+        return this.$store.getters['Signavault/transactions'].find(
+            (item: any) =>
+                item?.tx?.alias === this.addresses[0] &&
+                ['CaminoAddValidatorTx', 'RegisterNodeTx'].includes(
+                    WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx)
+                )
+        )
+    }
+
+    verifyValidatorIsReady(val: ValidatorRaw) {
         this.nodeInfo = val
     }
 
     updateValidators() {
-        this.$store.dispatch('Platform/update')
+        this.$store.dispatch('Platform/updateValidators')
     }
 
-    async created() {
-        await this.evaluateCanRegisterNode()
+    activated() {
+        this.evaluateCanRegisterNode()
         this.updateValidators()
         this.intervalID = setInterval(() => {
             this.updateValidators()
         }, 15000)
     }
 
-    destroyed() {
+    async handlePendingMultisigRefresh() {
+        await this.$store.dispatch('Signavault/updateTransaction')
+        this.evaluateCanRegisterNode()
+    }
+
+    deactivated() {
         clearInterval(this.intervalID)
     }
 
+    @Watch('$store.state.networkName')
+    @Watch('$store.state.activeWallet')
     async evaluateCanRegisterNode() {
         const BN_ONE = new BN(1)
         const result = await WalletHelper.getAddressState(this.addresses[0])
         this.isKycVerified = !result.and(BN_ONE.shln(ADDRESSSTATEKYCVERIFIED)).isZero()
         this.isConsortiumMember = !result.and(BN_ONE.shln(ADDRESSSTATECONSORTIUM)).isZero()
         this.validatorIsSuspended = !result.and(BN_ONE.shln(ADDRESSSTATEDEFERRED)).isZero()
+
         try {
-            this.nodeId = await WalletHelper.getRegisteredShortIDLink(this.addresses[0])
+            this.nodeId = await WalletHelper.getRegisteredNode(this.addresses[0])
             this.isNodeRegistered = !!this.nodeId
+
+            if (this.nodeId) {
+                // node is registered, check if is pending
+                const val = await WalletHelper.findPendingValidator(this.nodeId)
+                this.pendingValidator = val
+            }
         } catch (e) {
             this.isNodeRegistered = false
+            this.pendingValidator = null
         }
     }
 
-    async onNodeRegistered() {
-        try {
-            this.nodeId = await WalletHelper.getRegisteredShortIDLink(this.addresses[0])
-            this.isNodeRegistered = !!this.nodeId
-        } catch (e) {
-            this.isNodeRegistered = false
+    async onNodeRegistered(status: 'issued' | 'pending') {
+        if (status === 'issued') {
+            try {
+                this.nodeId = await WalletHelper.getRegisteredNode(this.addresses[0])
+                this.isNodeRegistered = !!this.nodeId
+            } catch (e) {
+                this.isNodeRegistered = false
+            }
+        } else {
+            await this.$store.dispatch('Signavault/updateTransaction')
+            this.evaluateCanRegisterNode()
         }
     }
 
-    get hasEnoughUnlockedPlatformBalance(): boolean {
-        return this.platformUnlocked.gte(this.minPlatformUnlocked)
+    async onAddValidatorInitiated() {
+        //  Multisig flow, tx is saved to signavault
+        await this.$store.dispatch('Signavault/updateTransaction')
+        this.evaluateCanRegisterNode()
+    }
+
+    async onAddValidatorIssued() {
+        //  Multisig flow, tx handled by signavault
+        await this.$store.dispatch('Signavault/updateTransaction')
+        this.evaluateCanRegisterNode()
+    }
+
+    get hasEnoughLockablePlatformBalance(): boolean {
+        return this.platformStakeable.gte(this.minPlatformUnlocked)
+    }
+
+    get platformStakeable(): BN {
+        return this.platformUnlocked.add(this.platformLockedStakeable)
+    }
+
+    get staticAddress() {
+        return (this.$store.state.activeWallet as WalletCore).getStaticAddress('P')
     }
 
     get addresses() {
@@ -153,7 +255,7 @@ export default class Validator extends Vue {
     }
 
     get platformLockedStakeable(): BN {
-        // return this.$store.getters.walletPlatformBalanceLockedStakeable
+        if (this.depositAndBond) return this.$store.getters['Assets/walletPlatformBalanceDeposited']
         return this.$store.getters['Assets/walletPlatformBalanceLockedStakeable']
     }
 
@@ -190,10 +292,20 @@ export default class Validator extends Vue {
         let bn = this.$store.state.Platform.minStakeDelegation
         return bnToBig(bn, 9)
     }
+
+    async refresh() {
+        this.loadingRefreshRegisterNode = true
+        await this.evaluateCanRegisterNode()
+        this.loadingRefreshRegisterNode = false
+    }
+
+    get hasValidator(): boolean {
+        return this.$store.getters['Platform/isValidator'](this.registeredNodeID)
+    }
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/main';
+@use '../../styles/abstracts/mixins';
 
 /* body {
     height: auto;
@@ -296,16 +408,69 @@ span {
     margin-top: 14px;
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .options {
         grid-template-columns: 1fr 1fr;
     }
+
+    .tab-nav {
+        button {
+            font-size: 13px;
+
+            &[active] {
+                border-bottom-width: 2px;
+            }
+        }
+    }
 }
 
-@include main.mobile-device {
+@include mixins.mobile-device {
     .options {
         grid-template-columns: none;
         grid-row-gap: 15px;
+    }
+
+    .tab-nav {
+        display: block;
+
+        > div {
+            overflow: hidden;
+            display: flex;
+        }
+        button {
+            flex-grow: 1;
+            border-radius: 0px;
+            margin: 0;
+            font-size: 12px;
+        }
+    }
+}
+
+.tab-nav {
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid transparent;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+
+    h1 {
+        font-weight: normal;
+        margin-right: 30px;
+    }
+
+    button {
+        padding: 8px 24px;
+        font-size: 14px;
+        font-weight: bold;
+        margin: 0px 5px;
+        text-transform: uppercase;
+        outline: none !important;
+        color: var(--primary-color-light);
+
+        &[active] {
+            color: var(--secondary-color);
+            border-bottom: 2px solid var(--secondary-color);
+        }
     }
 }
 </style>
