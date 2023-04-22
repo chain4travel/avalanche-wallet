@@ -1,5 +1,3 @@
-import { BN, bnToAvaxC } from '@c4tplatform/camino-wallet-sdk/dist'
-
 describe('Send: P to P transfer by already owned balance', () => {
     beforeEach(() => {
         cy.loginWalletWith('privateKey')
@@ -8,7 +6,19 @@ describe('Send: P to P transfer by already owned balance', () => {
             if (request.body.method == 'platform.getUTXOs') {
                 request.reply({
                     statusCode: 200,
-                    fixture: 'mocks/platform_getUTXOs.json',
+                    body: {
+                        id: request.body.id,
+                        jsonrpc: '2.0',
+                        result: {
+                            'encoding': 'hex',
+                            'endIndex': {
+                                'address': 'P-kopernikus1e0vfxvw5hvy00haua96zzdfgxwv6nq8ptng5h7',
+                                'utxo': '2ZNykY18bo4n4nFh8jeEtAvAvEzzrtA1jbDwzqtqCLWyJKxz8B'
+                            },
+                            'numFetched': '1',
+                            'utxos': ['0x0000359c288665af1d804bdecaad60c5b15410f61d77f424c81fc1ab42f0cffd0e1d000000005e21ded8a9e53a62f6c48ef045b37c938c5c5e9b25a14b4987db93682ca30f760000000700000102acc2a60000000000000000000000000100000001cbd89331d4bb08f7dfbce9742135283399a980e10935acbc']
+                        }
+                    },
                 })
             } else if (request.body.method == 'platform.issueTx') {
                 request.reply({
@@ -44,7 +54,7 @@ describe('Send: P to P transfer by already owned balance', () => {
         // Input More than Own Amount
         cy.get('.bigIn').eq(1).as('inputAmount')
         cy.get<string>('@ownChainBalance').then((balance) => {
-            const increaseBalance = parseFloat(balance) + 1
+            const increaseBalance = parseFloat('0.001')
             cy.get('@inputAmount').type(`${increaseBalance}{enter}`, { force: true })
             cy.contains('Token').click({ force: true })
             cy.get('@inputAmount').then((input) => {
