@@ -3,7 +3,11 @@ import {
     UTXO as PlatformUTXO,
     UTXOSet as PlatformUTXOSet,
 } from '@c4tplatform/caminojs/dist/apis/platformvm/utxos'
-import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import {
+    UnsignedTx,
+    ClaimAmountParams,
+    ClaimType,
+} from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm/utxos'
 import { AmountOutput } from '@c4tplatform/caminojs/dist/apis/avm'
 import { WalletType } from '@/js/wallets/types'
@@ -28,7 +32,7 @@ import { GetValidatorsResponse } from '@/store/modules/platform/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
-import { ChainIdType } from '@/constants'
+import { ChainIdType, ZeroBN } from '@/constants'
 import { bnToBig } from '@/helpers/helper'
 
 class WalletHelper {
@@ -472,12 +476,14 @@ class WalletHelper {
             undefined,
             new BN(0),
             1,
-            [],
-            [rewardsOwner],
-            [amount],
-            rewardsOwner,
-            [addressRewardOwnerBuffer],
-            new BN(1)
+            [
+                {
+                    amount: amount,
+                    claimType: ClaimType.VALIDATOR_REWARD,
+                    owners: new OutputOwners([addressRewardOwnerBuffer], ZeroBN, 1),
+                    sigIdxs: [0],
+                } as ClaimAmountParams,
+            ]
         )
 
         let tx = await activeWallet.signP(unsignedTx)
@@ -493,7 +499,12 @@ class WalletHelper {
         return validator
     }
 
-    static async buildDepositClaimTx(addresses: string[], wallet: WalletType, depositTxID: string) {
+    static async buildDepositClaimTx(
+        addresses: string[],
+        wallet: WalletType,
+        amount: BN,
+        depositTxID: string
+    ) {
         let utxoSet = wallet.utxoset
 
         const signerAddresses = wallet.getSignerAddresses('P')
@@ -502,10 +513,6 @@ class WalletHelper {
         const changeAddress = wallet.getChangeAddressPlatform()
 
         let addressBuffer = ava.PChain().parseAddress(addresses[0])
-
-        const claimableSigners: [number, Buffer][] = [[0, addressBuffer]]
-
-        let rewardsOwner = new OutputOwners([addressBuffer])
 
         const threshold =
             wallet.type === 'multisig' ? (wallet as MultisigWallet)?.keyData?.owner?.threshold : 1
@@ -518,12 +525,15 @@ class WalletHelper {
             undefined, // memo
             new BN(0), // asOf
             Number(threshold),
-            [depositTxID],
-            [],
-            [],
-            rewardsOwner,
-            [addressBuffer],
-            new BN(3)
+            [
+                {
+                    id: bintools.cb58Decode(depositTxID),
+                    amount: amount,
+                    claimType: ClaimType.ACTIVE_DEPOSIT_REWARD,
+                    owners: new OutputOwners([addressBuffer], ZeroBN, 1),
+                    sigIdxs: [0],
+                } as ClaimAmountParams,
+            ]
         )
 
         try {
