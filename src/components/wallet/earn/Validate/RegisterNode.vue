@@ -150,20 +150,19 @@ export default class RegisterNode extends Vue {
             )
             console.log(result)
             this.$emit('registered', nodeId)
-            this.$store.dispatch('Notifications/add', {
-                type: 'success',
-                title: 'Node Registered',
-                message: 'Your node registered successfully.',
+            this.$store.dispatch('updateTransaction', {
+                msgType: 'success',
+                msgTitle: 'Transaction',
+                msgText: 'Register Node Successful.',
             })
-            this.$store.dispatch('updateTransaction')
         } catch (error) {
             if (error instanceof SignatureError) {
-                this.$store.dispatch('Notifications/add', {
-                    type: 'info',
-                    title: 'Multisignature',
-                    message: error.message,
+                this.$store.dispatch('updateTransaction', {
+                    onlyMultisig: true,
+                    msgType: 'success',
+                    msgTitle: 'Multisignature',
+                    msgText: 'Transaction Recorded.',
                 })
-                this.$store.dispatch('updateTransaction', { onlyMultisig: true })
             } else {
                 console.error(error)
                 this.$store.dispatch('Notifications/add', {

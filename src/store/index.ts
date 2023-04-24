@@ -80,7 +80,7 @@ export default new Vuex.Store({
             return addresses
         },
         staticAddresses: (state: RootState) => (chain: ChainAlias): string[] => {
-            return state.wallets.map((w) => w.getStaticAddress('P')).filter((e) => e != '')
+            return state.wallets.map((w) => w.getStaticAddress(chain)).filter((e) => e != '')
         },
         accountChanged(state: RootState): boolean {
             return (
@@ -473,6 +473,7 @@ export default new Vuex.Store({
                 fullHistory: boolean
                 onlyMultisig: boolean
                 withMultisig: boolean
+                withDeposit: boolean
                 msgType: 'success'
                 msgTitle: 'Validator Added'
                 msgText: 'Your tokens are now locked to stake.'
@@ -486,7 +487,11 @@ export default new Vuex.Store({
                 }, 3000)
             } else if (options.withMultisig) {
                 setTimeout(() => {
-                    dispatch('Assets/updateUTXOs')
+                    dispatch('Assets/updateUTXOs').then(() => {
+                        if (options.withDeposit) {
+                            dispatch('Platform/updateActiveDepositOffer')
+                        }
+                    })
                     dispatch('Signavault/updateTransaction').then(() => {
                         dispatch(
                             options.fullHistory
@@ -497,7 +502,11 @@ export default new Vuex.Store({
                 }, 3000)
             } else {
                 setTimeout(() => {
-                    dispatch('Assets/updateUTXOs')
+                    dispatch('Assets/updateUTXOs').then(() => {
+                        if (options.withDeposit) {
+                            dispatch('Platform/updateActiveDepositOffer')
+                        }
+                    })
                     dispatch('History/updateTransactionHistory')
                 }, 3000)
             }
@@ -510,6 +519,7 @@ export default new Vuex.Store({
             }
         },
         updateBalances({ dispatch }) {
+            dispatch('Platform/updateActiveDepositOffer')
             dispatch('Assets/updateUTXOs').then(() =>
                 dispatch('Signavault/updateTransaction', undefined, { root: true }).then(() => {
                     dispatch('History/updateTransactionHistory')

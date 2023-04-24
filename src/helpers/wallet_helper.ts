@@ -1,12 +1,10 @@
-import { ava } from '@/AVA'
-import {
-    UTXO as PlatformUTXO,
-    UTXOSet as PlatformUTXOSet,
-} from '@c4tplatform/caminojs/dist/apis/platformvm/utxos'
-import { UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm/utxos'
-import { WalletType } from '@/js/wallets/types'
-
-import { BN, Buffer } from '@c4tplatform/caminojs/dist'
+import { ava, bintools } from '@/AVA'
+import { ChainIdType, ZeroBN } from '@/constants'
+import { web3 } from '@/evm'
+import { ITransaction } from '@/components/wallet/transfer/types'
+import Erc20Token from '@/js/Erc20Token'
+import ERCNftToken from '@/js/ERCNftToken'
+import { getStakeForAddresses } from '@/helpers/utxo_helper'
 import {
     buildCreateNftFamilyTx,
     buildEvmTransferErc20Tx,
@@ -14,14 +12,18 @@ import {
     buildEvmTransferNativeTx,
     buildMintNftTx,
 } from '@/js/TxHelper'
-import { PayloadBase } from '@c4tplatform/caminojs/dist/utils'
-import { ITransaction } from '@/components/wallet/transfer/types'
+import { WalletType } from '@/js/wallets/types'
 
-import { web3 } from '@/evm'
-import Erc20Token from '@/js/Erc20Token'
-import { getStakeForAddresses } from '@/helpers/utxo_helper'
-import ERCNftToken from '@/js/ERCNftToken'
-import { ChainIdType } from '@/constants'
+import { BN, Buffer } from '@c4tplatform/caminojs/dist'
+import {
+    ClaimAmountParams,
+    ClaimType,
+    UTXO as PlatformUTXO,
+    UTXOSet as PlatformUTXOSet,
+} from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm/utxos'
+import { PayloadBase } from '@c4tplatform/caminojs/dist/utils'
+import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
 
 class WalletHelper {
     static async getStake(wallet: WalletType): Promise<BN> {
@@ -362,6 +364,38 @@ class WalletHelper {
         })
         // Return 10% more
         return Math.round(estGas * 1.1)
+    }
+
+    static async buildDepositClaimTx(
+        wallet: WalletType,
+        depositTxID: string,
+        depositRewardOwner: OutputOwners,
+        claimAmount: BN
+    ) {
+        const pAddressStrings = wallet.getAllAddressesP()
+        const signerAddresses = wallet.getSignerAddresses('P')
+
+        const unsignedTx = await ava
+            .PChain()
+            .buildClaimTx(
+                wallet.platformUtxoset,
+                [pAddressStrings, signerAddresses],
+                pAddressStrings,
+                Buffer.alloc(0),
+                ZeroBN,
+                1,
+                [
+                    {
+                        id: bintools.cb58Decode(depositTxID),
+                        claimType: ClaimType.ACTIVE_DEPOSIT_REWARD,
+                        amount: claimAmount,
+                        owners: depositRewardOwner,
+                        sigIdxs: [0],
+                    } as ClaimAmountParams,
+                ]
+            )
+        let tx = await wallet.signP(unsignedTx)
+        return await ava.PChain().issueTx(tx)
     }
 }
 

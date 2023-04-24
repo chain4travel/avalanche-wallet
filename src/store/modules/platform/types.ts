@@ -3,6 +3,7 @@ import {
     DelegatorRaw,
     ValidatorPendingRaw,
     ValidatorRaw,
+    DepositOfferRaw,
 } from '@/components/misc/ValidatorList/types'
 import { BN } from '@c4tplatform/caminojs/dist'
 
@@ -13,6 +14,8 @@ export interface PlatformState {
     minStake: BN
     minStakeDelegation: BN
     currentSupply: BN
+    depositOffers: DepositOfferRaw[]
+    activeDepositOffer: DepositOfferRaw[]
 }
 
 export interface GetValidatorsResponse {
@@ -39,6 +42,10 @@ export interface ValidatorDelegatorPendingDict {
 
 export interface ValidatorDict {
     [nodeId: string]: ValidatorRaw
+}
+
+export interface GetAllDepositOffersResponse {
+    depositOffers: DepositOfferRaw[]
 }
 
 export interface ValidatorListItem {
