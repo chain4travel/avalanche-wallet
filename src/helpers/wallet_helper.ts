@@ -3,8 +3,13 @@ import {
     UTXO as PlatformUTXO,
     UTXOSet as PlatformUTXOSet,
 } from '@c4tplatform/caminojs/dist/apis/platformvm/utxos'
-import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import {
+    UnsignedTx,
+    ClaimAmountParams,
+    ClaimType,
+} from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm/utxos'
+import { AmountOutput } from '@c4tplatform/caminojs/dist/apis/avm'
 import { WalletType } from '@/js/wallets/types'
 
 import { BN, Buffer } from '@c4tplatform/caminojs/dist'
@@ -27,7 +32,8 @@ import { GetValidatorsResponse } from '@/store/modules/platform/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
-import { ChainIdType } from '@/constants'
+import { ChainIdType, ZeroBN } from '@/constants'
+import { bnToBig } from '@/helpers/helper'
 
 class WalletHelper {
     static async getStake(wallet: WalletType): Promise<BN> {
@@ -464,12 +470,14 @@ class WalletHelper {
             undefined,
             new BN(0),
             1,
-            [],
-            [rewardsOwner],
-            [amount],
-            rewardsOwner,
-            new BN(1),
-            claimableSigners
+            [
+                {
+                    amount: amount,
+                    claimType: ClaimType.ACTIVE_DEPOSIT_REWARD,
+                    owners: new OutputOwners([addressBufferTest], ZeroBN, 1),
+                    sigIdxs: [0],
+                } as ClaimAmountParams,
+            ]
         )
         let tx = await activeWallet.signP(unsignedTx)
         return await ava.PChain().issueTx(tx)
@@ -486,32 +494,53 @@ class WalletHelper {
 
     static async buildDepositClaimTx(
         addresses: string[],
-        activeWallet: WalletType,
+        wallet: WalletType,
+        amount: BN,
         depositTxID: string
     ) {
+        let utxoSet = wallet.utxoset
+
+        const signerAddresses = wallet.getSignerAddresses('P')
+
+        // For change address use first available on the platform chain
+        const changeAddress = wallet.getChangeAddressPlatform()
+
         let addressBuffer = ava.PChain().parseAddress(addresses[0])
-        const claimableSigners: [number, Buffer][] = [[0, addressBuffer]]
-        let rewardsOwner = new OutputOwners([addressBuffer])
-        let utxoSet = activeWallet.utxoset
+
+        const threshold =
+            wallet.type === 'multisig' ? (wallet as MultisigWallet)?.keyData?.owner?.threshold : 1
 
         const unsignedTx = await ava.PChain().buildClaimTx(
             // @ts-ignore
             utxoSet,
-            addresses,
-            addresses,
-            undefined,
-            new BN(0),
-            1,
-            [depositTxID],
-            [],
-            [],
-            rewardsOwner,
-            new BN(2),
-            claimableSigners
+            [addresses, signerAddresses],
+            [changeAddress],
+            undefined, // memo
+            new BN(0), // asOf
+            Number(threshold),
+            [
+                {
+                    id: bintools.cb58Decode(depositTxID),
+                    amount: amount,
+                    claimType: ClaimType.ACTIVE_DEPOSIT_REWARD,
+                    owners: new OutputOwners([addressBuffer], ZeroBN, 1),
+                    sigIdxs: [0],
+                } as ClaimAmountParams,
+            ]
         )
-        let tx = await activeWallet.signP(unsignedTx)
-        return await ava.PChain().issueTx(tx)
+
+        try {
+            const tx = await wallet.signP(unsignedTx)
+            return await ava.PChain().issueTx(tx)
+        } catch (err) {
+            if (err instanceof SignatureError) {
+                return undefined
+            } else {
+                throw err
+            }
+        }
     }
+
     static getUnsignedTxType(utx: string): string {
         let unsignedTx = new UnsignedTx()
         unsignedTx.fromBuffer(Buffer.from(utx, 'hex'))
@@ -533,15 +562,38 @@ class WalletHelper {
         })
 
         if (el) {
-            const toAddress =
-                'P' +
-                bintools.addressToString(
-                    ava.getHRP(),
-                    tx?.getBlockchainID().toString(),
-                    el?.getAddresses()?.[0]
-                )
+            const toAddress = bintools.addressToString(
+                ava.getHRP(),
+                tx?.getBlockchainID().toString(),
+                el?.getAddresses()?.[0]
+            )
+
             return toAddress
         }
+    }
+
+    static getTotalAmountFromUtx(utx: UnsignedTx, toAddress: string): number {
+        let amount = 0
+        const hrp = ava.getHRP()
+        const tx = utx.getTransaction()
+
+        for (const out of tx.getOuts()) {
+            const output = out?.getOutput() as AmountOutput
+
+            for (const addr of output?.getAddresses()) {
+                const hrAddress = bintools.addressToString(
+                    hrp,
+                    tx?.getBlockchainID().toString(),
+                    addr
+                )
+
+                if (hrAddress === toAddress) {
+                    amount += Number(bnToBig(output?.getAmount(), 9)?.toString())
+                }
+            }
+        }
+
+        return amount
     }
 }
 
