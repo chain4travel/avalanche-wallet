@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { sortBy, isEqual } from 'lodash'
+import { utils } from 'ethers'
 
 import { AbiItem, Contract, web3 } from '@/evm'
 import IERC721Abi from '@/abi/IERC721MetaData.json'
@@ -92,7 +94,17 @@ class ERCNftToken {
         for (let i = 0; i < 2; ++i) {
             if (addresses[i].length === 0) continue
 
-            const logs = await web3.eth.getPastLogs({
+            /*
+             * topics in `getPastLogs`
+             * the 2nd parameter is `fromAddress` while the 3rd+ is `toAddress` in `Transfer` event
+             * i.e.,
+             * - [topic, fromMyAddress]
+             * - [topic, null, toMyAddress]
+             *
+             * For more detail, please go to https://docs.ethers.org/v5/concepts/events/
+             * And searching for keyword: 'List all token transfers  *from*  myAddress'
+             */
+            const receivedLogs = await web3.eth.getPastLogs({
                 address: addresses[i],
                 fromBlock,
                 topics: [
@@ -102,6 +114,16 @@ class ERCNftToken {
                     i == 1 ? null : topicAddress,
                 ],
             })
+            const sendLogs = await web3.eth.getPastLogs({
+                address: addresses[i],
+                fromBlock,
+                topics: [
+                    topics0[i],
+                    topicAddress,
+                ],
+            })
+            // sort all related logs by blockNumber
+            const logs = sortBy([...receivedLogs, ...sendLogs], ['blockNumber'])
             for (const log of logs) {
                 let entry = collector.get(log.address)
                 if (entry) {
@@ -121,18 +143,33 @@ class ERCNftToken {
                         log.data,
                         log.topics.slice(1)
                     )
-                    if (parsed.tokenId) entry.add(parsed.tokenId)
-                    else if (parsed.id) entry.add(parsed.id)
-                    else for (const id of parsed.ids) entry.add(id)
+                    // append the `tokenId` if the address is in `to` field and remove it if the address is in `from` field
+                    const checksumAddress = utils.getAddress(address)
+                    if (parsed.to === checksumAddress) {
+                        if (parsed.tokenId) entry.add(parsed.tokenId)
+                        else if (parsed.id) entry.add(parsed.id)
+                        else for (const id of parsed.ids) entry.add(id)
+                    } else if (parsed.from === checksumAddress) {
+                        if (parsed.tokenId) entry.delete(parsed.tokenId)
+                        else if (parsed.id) entry.delete(parsed.id)
+                        else for (const id of parsed.ids) entry.delete(id)
+                    }
                 }
             }
         }
         let changed = false
         tokens.forEach((t) => {
             const entry = collector.get(t.data.address)
-            if (entry && entry.size != t.data.ercTokenIds.length) {
-                t.data.ercTokenIds = [...entry.values()]
-                changed = true
+            if (entry) {
+                changed = entry.size != t.data.ercTokenIds.length
+                // consider the situation
+                // ['0', '1'] -> ['0', '2']
+                if (!changed) {
+                    changed = !isEqual([...entry.values()], t.data.ercTokenIds)
+                }
+                if (changed) {
+                    t.data.ercTokenIds = [...entry.values()]
+                }
             }
         })
         return changed
