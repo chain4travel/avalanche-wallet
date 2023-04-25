@@ -158,7 +158,7 @@ import { ChainIdType } from '@/constants'
 
 import ChainInput from '@/components/wallet/transfer/ChainInput.vue'
 import AvaAsset from '../../js/AvaAsset'
-import { TxState } from '@/components/wallet/earn/ChainTransfer/types'
+import { TxState } from '@/components/wallet/ChainTransfer/types'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 @Component({
     components: {

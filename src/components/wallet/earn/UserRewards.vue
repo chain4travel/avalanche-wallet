@@ -35,7 +35,6 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import { AvaWalletCore } from '../../../js/wallets/types'
 import { ActiveDeposit, ValidatorRaw } from '@/components/misc/ValidatorList/types'
-import UserRewardRow from '@/components/wallet/earn/UserRewardRow.vue'
 import UserRewardCard from '@/components/wallet/earn/UserRewardCard.vue'
 import { bnToBig } from '@/helpers/helper'
 
@@ -43,7 +42,6 @@ import { BN } from '@c4tplatform/caminojs/dist'
 
 @Component({
     components: {
-        UserRewardRow,
         UserRewardCard,
     },
 })

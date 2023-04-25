@@ -118,7 +118,6 @@ export interface AvaWalletCore extends IAddressManager {
         rewardAddress?: string,
         utxos?: PlatformUTXO[]
     ): Promise<string>
-    // chainTransfer(amt: BN, sourceChain: ChainIdType, destinationChain: ChainIdType): Promise<string>
     exportFromXChain(amt: BN, destinationChain: ExportChainsX): Promise<string>
     exportFromPChain(amt: BN, destinationChain: ExportChainsP): Promise<string>
     exportFromCChain(amt: BN, destinationChain: ExportChainsC, baseFee: BN): Promise<string>

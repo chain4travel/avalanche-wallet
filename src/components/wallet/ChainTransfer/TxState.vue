@@ -33,7 +33,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import Spinner from '@/components/misc/Spinner.vue'
-import { TxState } from '@/components/wallet/earn/ChainTransfer/types'
+import { TxState } from '@/components/wallet/ChainTransfer/types'
 
 @Component({
     components: {

@@ -118,21 +118,21 @@
 <script lang="ts">
 import 'reflect-metadata'
 import { Component, Vue, Watch } from 'vue-property-decorator'
+
+import { ava } from '@/AVA'
+import { ChainIdType } from '@/constants'
 import Dropdown from '@/components/misc/Dropdown.vue'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
-import AvaAsset from '@/js/AvaAsset'
-import { BN } from '@c4tplatform/caminojs/dist'
-import { ava } from '@/AVA'
-import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import Spinner from '@/components/misc/Spinner.vue'
-import ChainCard from '@/components/wallet/earn/ChainTransfer/ChainCard.vue'
-import TxStateCard from '@/components/wallet/earn/ChainTransfer/TxState.vue'
-import { ChainSwapFormData, TxState } from '@/components/wallet/earn/ChainTransfer/types'
-import { ChainIdType } from '@/constants'
-
-import ChainSwapForm from '@/components/wallet/earn/ChainTransfer/Form.vue'
-
+import ChainCard from '@/components/wallet/ChainTransfer/ChainCard.vue'
+import TxStateCard from '@/components/wallet/ChainTransfer/TxState.vue'
+import ChainSwapForm from '@/components/wallet/ChainTransfer/Form.vue'
+import { ChainSwapFormData, TxState } from '@/components/wallet/ChainTransfer/types'
+import AvaAsset from '@/js/AvaAsset'
+import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { WalletType } from '@/js/wallets/types'
+
+import { BN } from '@c4tplatform/caminojs/dist'
 import * as SDK from '@c4tplatform/camino-wallet-sdk/dist'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
@@ -589,7 +589,7 @@ export default class ChainTransfer extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../../styles/abstracts/mixins';
+@use '../../../styles/abstracts/mixins';
 
 .cols {
     display: grid;

@@ -53,7 +53,7 @@ import { BN } from '@c4tplatform/caminojs/dist'
 import Big from 'big.js'
 import { bnToBig } from '@/helpers/helper'
 import { ChainIdType } from '@/constants'
-import { ChainSwapFormData } from '@/components/wallet/earn/ChainTransfer/types'
+import { ChainSwapFormData } from '@/components/wallet/ChainTransfer/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { AvaWalletCore } from '@/js/wallets/types'
 

@@ -141,7 +141,6 @@ import Tooltip from '@/components/misc/Tooltip.vue'
 import CurrencySelect from '@/components/misc/CurrencySelect/CurrencySelect.vue'
 import Spinner from '@/components/misc/Spinner.vue'
 import DateForm from '@/components/wallet/earn/DateForm.vue'
-import UtxoSelectForm from '@/components/wallet/earn/UtxoSelectForm.vue'
 import Expandable from '@/components/misc/Expandable.vue'
 import { AmountOutput, UTXO } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { WalletType } from '@/js/wallets/types'
@@ -167,7 +166,6 @@ const MAX_STAKE_DURATION = DAY_MS * 365
         Spinner,
         DateForm,
         Expandable,
-        UtxoSelectForm,
     },
 })
 export default class AddValidator extends Vue {
@@ -189,7 +187,6 @@ export default class AddValidator extends Vue {
     formEnd: Date = new Date()
     formFee: number = 0
     formRewardAddr = ''
-    formUtxos: UTXO[] = []
 
     txId = ''
     txStatus: string | null = null
@@ -264,13 +261,6 @@ export default class AddValidator extends Vue {
 
     get feeAmt(): BN {
         return ava.PChain().getTxFee()
-    }
-
-    get utxosBalance(): BN {
-        return this.formUtxos.reduce((acc, val: UTXO) => {
-            let out = val.getOutput() as AmountOutput
-            return acc.add(out.getAmount())
-        }, new BN(0))
     }
 
     get maxAmt(): BN {
