@@ -96,7 +96,7 @@ class ERCNftToken {
 
             /*
              * topics in `getPastLogs`
-             * the 2nd parameter is `fromAddress` while the 3rd+ is `toAddress` in `Transfer` event
+             * the 2nd parameter is `fromAddress` while the 3rd is `toAddress` in `Transfer` event
              * i.e.,
              * - [topic, fromMyAddress]
              * - [topic, null, toMyAddress]
