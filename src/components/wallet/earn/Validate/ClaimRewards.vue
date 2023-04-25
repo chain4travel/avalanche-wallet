@@ -38,8 +38,6 @@
                     </div>
                 </div>
                 <ModalClaimReward
-                    :nodeId="nodeId"
-                    :nodeInfo="nodeInfo"
                     ref="modal_claim_reward"
                     :amountText="pRewardAmountText"
                     :symbol="symbol"
@@ -129,11 +127,6 @@ export default class ClaimRewards extends Vue {
 
         if (responseClaimable != null && responseClaimable != undefined) {
             this.rewardAmount = responseClaimable.validatorRewards
-
-            let bnTest = new BN(2000)
-            console.log('responseClaimableBNTest', bnTest)
-            console.log('responseClaimableFromRequest', responseClaimable)
-            console.log('responseClaimable', this.rewardAmount.toString())
         }
     }
 
@@ -190,8 +183,6 @@ export default class ClaimRewards extends Vue {
         } else {
             this.pendingTx = undefined
         }
-
-        console.log('pendingTxData', this.pendingTx)
     }
 
     issued() {
@@ -204,7 +195,6 @@ export default class ClaimRewards extends Vue {
             this.$store.dispatch('History/updateTransactionHistory')
             this.pendingTx = undefined
             this.loading = false
-            console.log('pendingTxDataIssued', this.pendingTx)
         }, 100)
     }
 }

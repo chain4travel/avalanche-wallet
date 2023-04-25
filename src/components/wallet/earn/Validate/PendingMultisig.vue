@@ -125,6 +125,7 @@ export default class PendingMultisig extends Vue {
     @Prop() multisigTx!: SignavaultTx
     @Prop() nodeId!: string
     @Prop() nodeInfo!: ValidatorRaw
+    @Prop() successMessageForIssue!: string
 
     helpers = this.globalHelper()
     loading = false
@@ -236,10 +237,21 @@ export default class PendingMultisig extends Vue {
         this.loadingIssue = true
         try {
             await wallet.issueExternal(this.multisigTx?.tx)
-            this.helpers.dispatchNotification({
-                message: this.$t('notifications.register_node_success'),
-                type: 'success',
-            })
+
+            if (this.claimTxDetails) {
+                this.helpers.dispatchNotification({
+                    message: this.$t('validator.transaction_reward.claimed_tx_issued', {
+                        symbol: this.nativeAssetSymbol,
+                    }),
+                    type: 'success',
+                })
+            } else {
+                this.helpers.dispatchNotification({
+                    message: this.$t('notifications.register_node_success'),
+                    type: 'success',
+                })
+            }
+
             this.$store.dispatch('Signavault/updateTransaction')
             this.$emit('issued', 'issued')
         } catch (e: any) {

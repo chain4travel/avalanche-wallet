@@ -36,11 +36,7 @@
             </div>
             <div class="confirmed-claimed" v-else>
                 <br />
-
-                <div v-if="isMultisignTx">
-                    <h2>Tx Pending for approve</h2>
-                </div>
-                <div v-else>
+                <div v-if="!isMultisignTx">
                     <h2>
                         {{
                             $t('validator.rewards.modal_claim.confirmed_claimed', {
@@ -50,7 +46,6 @@
                         }}
                     </h2>
                 </div>
-
                 <br />
             </div>
         </div>
@@ -60,7 +55,6 @@
 import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import Modal from '../../../modals/Modal.vue'
-import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import { BN } from '@c4tplatform/caminojs'
 import { WalletHelper } from '../../../../helpers/wallet_helper'
 import * as SDK from '@c4tplatform/camino-wallet-sdk/dist'
@@ -72,8 +66,6 @@ import { ava } from '@/AVA'
     },
 })
 export default class ModalClaimReward extends Vue {
-    @Prop() nodeId!: string
-    @Prop() nodeInfo!: ValidatorRaw
     @Prop() amountText!: string
     @Prop() symbol!: string
     @Prop() amount!: BN
@@ -102,12 +94,19 @@ export default class ModalClaimReward extends Vue {
 
     async confirmClaim() {
         try {
+            let txClaim = this.$store.getters['Signavault/transactions'].find(
+                (item: any) =>
+                    item?.tx?.alias === this.pChainddress &&
+                    WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
+            )
+
+            console.log('txClaim', txClaim)
+
             await WalletHelper.buildClaimTx(
                 this.pChainddress,
                 new BN(this.amount),
                 this.$store.state.activeWallet,
-                this.rewardOwner,
-                this.isMultisignTx
+                this.rewardOwner
             )
 
             if (this.isMultisignTx) {
@@ -164,8 +163,8 @@ export default class ModalClaimReward extends Vue {
 }
 
 .text-modal {
-    text-align: justify;
-    color: rgb(187, 16, 16);
+    text-align: center;
+    color: rgb(117, 117, 117);
 }
 
 @media screen and (max-width: 720px) {

@@ -468,20 +468,29 @@ class WalletHelper {
         address: string,
         amount: BN,
         activeWallet: WalletType,
-        rewardOwnerAddress: string,
-        isMultisignTx: boolean
+        rewardOwnerAddress: string
     ) {
         let addressRewardOwnerBuffer = ava.PChain().parseAddress(rewardOwnerAddress)
-        const claimableSigners: [number, Buffer][] = [[0, addressRewardOwnerBuffer]]
-        let rewardsOwner = new OutputOwners([addressRewardOwnerBuffer])
+
+        let signerAddresses = activeWallet.getSignerAddresses('P')
+
+        signerAddresses = signerAddresses.concat([rewardOwnerAddress])
+
+        console.log('signerAddresses', signerAddresses)
+
+        const threshold =
+            activeWallet.type === 'multisig'
+                ? (activeWallet as MultisigWallet)?.keyData?.owner?.threshold
+                : 1
+
         const unsignedTx = await ava.PChain().buildClaimTx(
             //@ts-ignore
             undefined,
-            [rewardOwnerAddress],
+            signerAddresses,
             [address],
             undefined,
             new BN(0),
-            1,
+            Number(threshold),
             [
                 {
                     amount: amount,
@@ -492,8 +501,16 @@ class WalletHelper {
             ]
         )
 
-        let tx = await activeWallet.signP(unsignedTx)
-        return await ava.PChain().issueTx(tx)
+        try {
+            let tx = await activeWallet.signP(unsignedTx)
+            return await ava.PChain().issueTx(tx)
+        } catch (err) {
+            if (err instanceof SignatureError) {
+                return undefined
+            } else {
+                throw err
+            }
+        }
     }
 
     static async findPendingValidator(nodeID: string): Promise<ValidatorRaw> {
