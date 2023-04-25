@@ -51,11 +51,11 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import Big from 'big.js'
 
 import { ava, bintools } from '@/AVA'
-import { ZeroBN } from '@/constants'
+import { RewardOwner } from '@/components/misc/ValidatorList/types'
 import AvaAsset from '@/js/AvaAsset'
+import { WalletType } from '@/js/wallets/types'
 import Modal from './Modal.vue'
 import { WalletHelper } from '@/helpers/wallet_helper'
-import { WalletType } from '@/js/wallets/types'
 
 import { BN } from '@c4tplatform/caminojs/dist'
 import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
@@ -76,6 +76,8 @@ import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 export default class ModalClaimReward extends Vue {
     @Prop() depositTxID!: string
     @Prop() amount!: BN
+    @Prop() rewardOwner!: RewardOwner
+
     claimed: boolean = false
     confiremedClaimedAmount: string = ''
 
@@ -119,11 +121,11 @@ export default class ModalClaimReward extends Vue {
 
     async confirmClaim() {
         const wallet: WalletType = this.$store.state.activeWallet
-        // TODO: RewardOwner must be passed (inside Deposit)
+        const hrp = ava.getHRP()
         const rewardOwner = new OutputOwners(
-            [bintools.parseAddress(wallet.getStaticAddress('P'), 'P')],
-            ZeroBN,
-            1
+            this.rewardOwner.addresses.map((a) => bintools.stringToAddress(a, hrp)),
+            this.rewardOwner.locktime,
+            this.rewardOwner.threshold
         )
 
         try {

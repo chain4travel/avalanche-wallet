@@ -46,6 +46,7 @@
             ref="modal_claim_reward"
             :depositTxID="depositTxID"
             :amount="pendingRewards"
+            :rewardOwner="rewardOwner"
         />
     </div>
 </template>
@@ -56,6 +57,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import Big from 'big.js'
 import ModalClaimReward from '@/components/modals/ClaimRewardModal.vue'
 import AvaAsset from '@/js/AvaAsset'
+import { RewardOwner } from '@/components/misc/ValidatorList/types'
 
 import { BN } from '@c4tplatform/caminojs/dist'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
@@ -82,6 +84,7 @@ export default class UserRewardCard extends Vue {
     @Prop() end!: BN
     @Prop() minLock!: BN
     @Prop() rewards!: string
+    @Prop() rewardOwner!: RewardOwner
     @Prop() lockedAmount!: BN
     @Prop() pendingRewards!: BN
     @Prop() alreadyClaimed!: BN

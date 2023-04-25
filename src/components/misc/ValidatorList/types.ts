@@ -1,4 +1,5 @@
 import { BN } from '@c4tplatform/caminojs/dist'
+import { Owner } from '@c4tplatform/caminojs/dist/apis/platformvm'
 
 export interface ValidatorRaw {
     connection: boolean
@@ -60,6 +61,12 @@ export interface DepositOfferRaw {
     flags: BN
 }
 
+export interface RewardOwner {
+    locktime: BN
+    threshold: number
+    addresses: string[]
+}
+
 export interface Deposit {
     depositTxID: string
     depositOfferID: string
@@ -68,6 +75,7 @@ export interface Deposit {
     start: BN
     duration: number
     amount: BN
+    rewardOwwner: RewardOwner
 }
 
 export interface GetDepositsRaw {
@@ -78,6 +86,7 @@ export interface GetDepositsRaw {
 
 export interface ActiveDeposit {
     id: string
+    depositTxID: string
     interestRateNominator: BN
     start: BN
     end: BN
@@ -91,6 +100,7 @@ export interface ActiveDeposit {
     amount: BN
     claimedRewardAmount: BN
     pendingRewards: BN
+    rewardOwner: RewardOwner
 }
 
 export interface ValidatorDict {

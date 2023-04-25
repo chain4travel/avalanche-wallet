@@ -18,6 +18,7 @@
                 :end="v.end"
                 :minLock="v.minAmount"
                 :rewards="v.interestRateNominator"
+                :rewardOwner="v.rewardOwner"
                 :lockedAmount="v.amount"
                 :alreadyClaimed="v.claimedRewardAmount"
                 :pendingRewards="v.pendingRewards"
@@ -29,13 +30,15 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
+import Big from 'big.js'
 import { Component, Prop, Vue } from 'vue-property-decorator'
+
 import { AvaWalletCore } from '../../../js/wallets/types'
-import { DelegatorRaw, ValidatorRaw } from '@/components/misc/ValidatorList/types'
+import { ActiveDeposit, ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import UserRewardRow from '@/components/wallet/earn/UserRewardRow.vue'
 import UserRewardCard from '@/components/wallet/earn/UserRewardCard.vue'
 import { bnToBig } from '@/helpers/helper'
-import Big from 'big.js'
+
 import { BN } from '@c4tplatform/caminojs/dist'
 
 @Component({
@@ -46,7 +49,7 @@ import { BN } from '@c4tplatform/caminojs/dist'
 })
 export default class UserRewards extends Vue {
     @Prop() loadingRefreshDepositRewards!: boolean
-    get activeOffers() {
+    get activeOffers(): ActiveDeposit[] {
         return this.$store.state.Platform.activeDepositOffer
     }
 
@@ -83,7 +86,7 @@ export default class UserRewards extends Vue {
         return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
     }
 
-    cleanList(list: ValidatorRaw[] | DelegatorRaw[]) {
+    cleanList(list: ValidatorRaw[]) {
         let res = list?.filter((val) => {
             let rewardAddrs = val.rewardOwner.addresses
             let filtered = rewardAddrs.filter((addr) => {

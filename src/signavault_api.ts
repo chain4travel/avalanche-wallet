@@ -17,8 +17,10 @@ function SignaVault(): MultisigApi {
     let config = defaultConfig
     const api_host = ava.getHost()
     if (api_host.indexOf('.camino.') >= 0) {
+        let stripPos = 0
+        if (api_host.substring(0, 4) === 'api.') stripPos = 4
         config = new Configuration({
-            basePath: 'https://signavault.' + api_host + ':443/v1',
+            basePath: 'https://signavault.' + api_host.substring(stripPos) + ':443/v1',
         })
     }
     return new MultisigApi(config)

@@ -1,7 +1,7 @@
 import { ava, bintools } from '@/AVA'
 import { AxiosError } from 'axios'
 import { AvaWalletCore, ChainAlias, WalletNameType } from './types'
-import { ChainIdType } from '../../constants'
+import { ChainIdType, ZeroBN } from '../../constants'
 import { WalletCore } from './WalletCore'
 import { WalletHelper } from '@/helpers/wallet_helper'
 
@@ -102,7 +102,7 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         this.keyData = {
             alias: alias ?? Buffer.alloc(0),
             memo: parsedMemo,
-            owner: owner ?? ({ addresses: [], threshold: 0, locktime: '0' } as Owner),
+            owner: owner ?? ({ addresses: [], threshold: 0, locktime: ZeroBN } as Owner),
         }
         this.ethAddress = this.keyData.alias.toString('hex')
         this.isInit = true
