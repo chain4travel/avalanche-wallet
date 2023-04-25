@@ -50,6 +50,9 @@ import { ChainIdType } from '@/constants'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { WalletType } from '@/js/wallets/types'
+import { ITransactionData } from '@/store/modules/history/types'
+import { parse } from '@/store/modules/history/history_utils'
+import { getTransactionSummary } from '@/helpers/history_helper'
 
 @Component({
     components: {
@@ -65,8 +68,6 @@ export default class CurrencyInputDropdown extends Vue {
     @Prop({ default: '' }) initial!: string
     @Prop({ default: false }) disabled!: boolean
     @Prop() chainId!: ChainIdType
-    @Prop() totalAmount?: number
-
     $refs!: {
         bigIn: BigNumInput
     }
@@ -79,8 +80,30 @@ export default class CurrencyInputDropdown extends Vue {
         } else {
             this.drop_change(this.walletAssetsArray[0])
         }
+        if (this.pendingSendMultisigTX && this.chainId === 'P')
+            this.$refs.bigIn.val = this.pendingAmt
     }
 
+    get pendingSendMultisigTX(): SignavaultTx | undefined {
+        return this.$store.getters['Signavault/transactions'].find(
+            (item: any) =>
+                item?.tx?.alias === this.wallet.getStaticAddress('P') &&
+                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'BaseTx'
+        )
+    }
+    get pendingAmt(): string {
+        let big = ''
+        if (this.pendingSendMultisigTX) {
+            let t: ITransactionData = parse([this.pendingSendMultisigTX])[0]
+            let summary = getTransactionSummary(t, this.wallet)
+            let tokens = summary.tokens
+            for (var assetId in tokens) {
+                let asset = tokens[assetId]
+                big = bnToBig(asset.amount.add(new BN(t.txFee)).abs(), 9).toLocaleString()
+            }
+        }
+        return big
+    }
     get wallet(): WalletType {
         return this.$store.state.activeWallet
     }
@@ -121,14 +144,6 @@ export default class CurrencyInputDropdown extends Vue {
         }
     }
 
-    get pendingSendMultisigTX(): SignavaultTx | undefined {
-        return this.$store.getters['Signavault/transactions'].find(
-            (item: any) =>
-                item?.tx?.alias === this.wallet.getStaticAddress('P') &&
-                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'BaseTx'
-        )
-    }
-
     onfocus() {
         console.log('focus')
     }
@@ -151,7 +166,6 @@ export default class CurrencyInputDropdown extends Vue {
     }
 
     get placeholder(): string {
-        if (this.chainId === 'P' && this.totalAmount) return this.totalAmount?.toString()
         if (this.isEmpty || !this.asset_now) return '0.00'
         let deno = this.asset_now.denomination
         let res = '0'

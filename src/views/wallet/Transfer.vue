@@ -21,7 +21,6 @@
                             ref="txList"
                             @change="updateTxList"
                             :disabled="isConfirm"
-                            :totalAmount="totalAmount"
                             :chainId="formType"
                         ></tx-list>
                         <template v-if="hasNFT">
@@ -197,6 +196,11 @@ import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+
+import { parse } from '@/store/modules/history/history_utils'
+import { ITransactionData } from '@/store/modules/history/types'
+import { getTransactionSummary } from '@/helpers/history_helper'
+
 @Component({
     components: {
         FaucetLink,
@@ -218,7 +222,6 @@ export default class Transfer extends Vue {
     nftOrders: UTXO[] = []
     formErrors: string[] = []
     err = ''
-    totalAmount? = 0
 
     formAddress: string = ''
     formOrders: ITransaction[] = []
@@ -497,15 +500,11 @@ export default class Transfer extends Vue {
             unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
             const utx = unsignedTx.getTransaction()
             this.memo = utx.getMemo().toString()
-            const toAddress = WalletHelper.getToAddressFromUtx(
-                unsignedTx,
-                this.wallet.getStaticAddress('P')
-            )
-            // eslint-disable-next-line no-control-regex
-            if (toAddress) this.addressIn = 'P' + toAddress?.replace(/\x00/g, '')
-            this.totalAmount = toAddress
-                ? WalletHelper.getTotalAmountFromUtx(unsignedTx, toAddress)
-                : undefined
+            let t: ITransactionData = parse([this.pendingSendMultisigTX])[0]
+            let { tokens } = getTransactionSummary(t, this.activeWallet)
+            for (var assetId in tokens) {
+                this.addressIn = `P-${tokens[assetId].addresses[0]}`
+            }
         } else {
             this.canSendAgain = true
         }
