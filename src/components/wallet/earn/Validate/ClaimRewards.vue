@@ -113,6 +113,7 @@ export default class ClaimRewards extends Vue {
 
     get rewardOwner() {
         if (this.nodeInfo != null && this.nodeInfo != undefined) {
+            console.log('rewardOwnersData', this.nodeInfo.rewardOwner.addresses)
             return this.nodeInfo.rewardOwner.addresses[0].toString()
         } else {
             return null

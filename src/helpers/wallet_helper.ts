@@ -472,9 +472,14 @@ class WalletHelper {
     ) {
         let addressRewardOwnerBuffer = ava.PChain().parseAddress(rewardOwnerAddress)
 
+        //let arrSigner = [rewardOwnerAddress]
         let signerAddresses = activeWallet.getSignerAddresses('P')
 
-        signerAddresses = signerAddresses.concat([rewardOwnerAddress])
+        //signerAddresses = arrSigner.concat(signerAddresses)
+
+        const changeAddress = activeWallet.getChangeAddressPlatform()
+
+        console.log('changeAddress', changeAddress)
 
         console.log('signerAddresses', signerAddresses)
 
@@ -483,13 +488,15 @@ class WalletHelper {
                 ? (activeWallet as MultisigWallet)?.keyData?.owner?.threshold
                 : 1
 
+        let utxoSet = activeWallet.utxoset
+
         const unsignedTx = await ava.PChain().buildClaimTx(
             //@ts-ignore
-            undefined,
-            signerAddresses,
-            [address],
-            undefined,
-            new BN(0),
+            utxoSet,
+            [[rewardOwnerAddress], signerAddresses],
+            [changeAddress],
+            undefined, // memo
+            new BN(0), //as Of
             Number(threshold),
             [
                 {
@@ -500,6 +507,8 @@ class WalletHelper {
                 } as ClaimAmountParams,
             ]
         )
+
+        console.log('unsignedTx', unsignedTx)
 
         try {
             let tx = await activeWallet.signP(unsignedTx)
