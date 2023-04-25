@@ -112,6 +112,7 @@ export default class ModalClaimReward extends Vue {
 
             if (this.isMultisignTx) {
                 this.claimed = true
+                this.close()
                 this.$emit('beforeCloseModal', false)
             } else {
                 this.confirmedClaimedAmountText = new BN(this.amount).toString()
