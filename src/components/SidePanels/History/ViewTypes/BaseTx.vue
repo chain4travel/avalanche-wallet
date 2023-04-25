@@ -2,7 +2,7 @@
     <div>
         <div class="utxos">
             <div v-if="hasReceived">
-                <label>Receive</label>
+                <label>{{ receiveText }}</label>
                 <BaseTxOutput
                     v-for="(asset, assetId) in tokensReceived"
                     :key="assetId"
@@ -130,6 +130,10 @@ export default class BaseTx extends Vue {
 
     get type() {
         return this.transaction.type
+    }
+
+    get receiveText(): string {
+        return this.type === 'claim' ? 'Claim' : 'Receive'
     }
 
     get chainPrefix() {

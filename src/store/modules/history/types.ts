@@ -91,6 +91,7 @@ export type TransactionType =
     | 'deposit'
     | 'unlock_deposit'
     | 'register_node'
+    | 'claim'
 
 // CSV Staking Row
 export type CsvRowStakingTxType = 'add_validator' | 'add_delegator' | 'fee_received'
