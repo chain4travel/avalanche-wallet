@@ -100,8 +100,6 @@ export default class ModalClaimReward extends Vue {
                     WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
             )
 
-            console.log('txClaim', txClaim)
-
             await WalletHelper.buildClaimTx(
                 this.pChainddress,
                 new BN(this.amount),

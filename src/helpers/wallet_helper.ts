@@ -479,10 +479,6 @@ class WalletHelper {
 
         const changeAddress = activeWallet.getChangeAddressPlatform()
 
-        console.log('changeAddress', changeAddress)
-
-        console.log('signerAddresses', signerAddresses)
-
         const threshold =
             activeWallet.type === 'multisig'
                 ? (activeWallet as MultisigWallet)?.keyData?.owner?.threshold
@@ -507,8 +503,6 @@ class WalletHelper {
                 } as ClaimAmountParams,
             ]
         )
-
-        console.log('unsignedTx', unsignedTx)
 
         try {
             let tx = await activeWallet.signP(unsignedTx)
