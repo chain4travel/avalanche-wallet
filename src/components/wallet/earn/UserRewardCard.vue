@@ -169,7 +169,7 @@ export default class UserRewardCard extends Vue {
     }
 
     get isClaimDisabled() {
-        return !(parseInt(this.pendingRewards.toString()) > 0)
+        return !this.pendingRewards.isZero()
     }
 
     openModal() {
