@@ -379,12 +379,15 @@ class WalletHelper {
         const pAddressStrings = wallet.getAllAddressesP()
         const signerAddresses = wallet.getSignerAddresses('P')
 
+        // For change address use first available on the platform chain
+        const changeAddress = wallet.getChangeAddressPlatform()
+
         const unsignedTx = await ava
             .PChain()
             .buildClaimTx(
                 wallet.platformUtxoset,
                 [pAddressStrings, signerAddresses],
-                pAddressStrings,
+                [changeAddress],
                 Buffer.alloc(0),
                 ZeroBN,
                 1,

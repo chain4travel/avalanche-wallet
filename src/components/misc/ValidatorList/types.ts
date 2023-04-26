@@ -75,7 +75,7 @@ export interface Deposit {
     start: BN
     duration: number
     amount: BN
-    rewardOwwner: RewardOwner
+    rewardOwner: RewardOwner
 }
 
 export interface GetDepositsRaw {
