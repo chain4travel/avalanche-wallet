@@ -21,6 +21,7 @@
                 :lockedAmount="v.amount"
                 :alreadyClaimed="v.claimedRewardAmount"
                 :pendingRewards="v.pendingRewards"
+                :rewardOwner="v.rewardOwner"
                 class="reward_card"
             ></UserRewardCard>
         </div>

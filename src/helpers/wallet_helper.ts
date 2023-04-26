@@ -493,37 +493,30 @@ class WalletHelper {
     }
 
     static async buildDepositClaimTx(
-        addresses: string[],
         wallet: WalletType,
-        amount: BN,
-        depositTxID: string
+        depositTxID: string,
+        depositRewardOwner: OutputOwners,
+        claimAmount: BN
     ) {
-        let utxoSet = wallet.utxoset
-
+        const pAddressStrings = wallet.getAllAddressesP()
         const signerAddresses = wallet.getSignerAddresses('P')
-
-        // For change address use first available on the platform chain
-        const changeAddress = wallet.getChangeAddressPlatform()
-
-        let addressBuffer = ava.PChain().parseAddress(addresses[0])
 
         const threshold =
             wallet.type === 'multisig' ? (wallet as MultisigWallet)?.keyData?.owner?.threshold : 1
 
         const unsignedTx = await ava.PChain().buildClaimTx(
-            // @ts-ignore
-            utxoSet,
-            [addresses, signerAddresses],
-            [changeAddress],
-            undefined, // memo
-            new BN(0), // asOf
+            wallet.platformUtxoset,
+            [pAddressStrings, signerAddresses],
+            pAddressStrings,
+            Buffer.alloc(0), // memo
+            ZeroBN, // asOf
             Number(threshold),
             [
                 {
                     id: bintools.cb58Decode(depositTxID),
-                    amount: amount,
                     claimType: ClaimType.ACTIVE_DEPOSIT_REWARD,
-                    owners: new OutputOwners([addressBuffer], ZeroBN, 1),
+                    amount: claimAmount,
+                    owners: depositRewardOwner,
                     sigIdxs: [0],
                 } as ClaimAmountParams,
             ]
