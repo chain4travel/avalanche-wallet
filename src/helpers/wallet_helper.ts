@@ -139,6 +139,7 @@ class WalletHelper {
         // Convert dates to unix time
         let startTime = new BN(Math.round(start.getTime() / 1000))
         let endTime = new BN(Math.round(end.getTime() / 1000))
+        console.log('startTime', startTime)
 
         const unsignedTx = await ava.PChain().buildAddValidatorTx(
             utxoSet,
