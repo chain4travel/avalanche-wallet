@@ -451,12 +451,12 @@
             "total": "Total Rewards",
             "validation": "Validation",
             "delegation": "Delegation",
-            "empty": "You do not have any pending rewards.",
+            "empty": "No pending rewards found.",
             "earn_now": {
-                "title": "Earn Now"
+                "title": "Saving Pools"
             },
             "active_earning": {
-                "title": "Active Earning",
+                "title": "My Rewards",
                 "lock_start": "Lock Start",
                 "lock_end": "Lock End",
                 "min_lock": "Minimum Lock",
@@ -481,7 +481,7 @@
                 "confirm": "Confirm",
                 "cancel": "Cancel"
             },
-            "no_saving_pool": "At the moment, there are no rewards available in the saving pools.",
+            "no_saving_pool": "No saving pools available",
             "row": {
                 "start": "Start",
                 "end": "End",

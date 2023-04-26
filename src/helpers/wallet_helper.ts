@@ -132,7 +132,9 @@ class WalletHelper {
             utxoSet.addArray(utxos)
         }
 
-        let pAddressStrings = wallet.getAllAddressesP()
+        const pAddressStrings = wallet.getAllAddressesP()
+        const signerAddresses = wallet.getSignerAddresses('P')
+        const nodeOwner = wallet.getStaticAddress('P')
 
         let stakeAmount = amt
 
@@ -150,17 +152,20 @@ class WalletHelper {
         let startTime = new BN(Math.round(start.getTime() / 1000))
         let endTime = new BN(Math.round(end.getTime() / 1000))
 
-        const unsignedTx = await ava.PChain().buildAddValidatorTx(
+        const unsignedTx = await ava.PChain().buildCaminoAddValidatorTx(
             utxoSet,
             [stakeReturnAddr],
-            pAddressStrings, // from
+            [pAddressStrings, signerAddresses], // from
             [changeAddress], // change
             nodeID,
+            {
+                address: nodeOwner,
+                auth: [[0, nodeOwner]],
+            },
             startTime,
             endTime,
             stakeAmount,
-            [rewardAddress],
-            delegationFee
+            [rewardAddress]
         )
 
         let tx = await wallet.signP(unsignedTx)
