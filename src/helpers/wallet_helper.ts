@@ -452,6 +452,7 @@ class WalletHelper {
 
     static async getClaimables(address: string, txID?: string) {
         try {
+            //Claimables Params
             let responseClaimable = await ava.PChain().getClaimables([
                 {
                     locktime: '0',
