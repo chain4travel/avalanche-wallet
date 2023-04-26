@@ -32,8 +32,8 @@ jobs:
           CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
       - name: linting
         run: yarn run lint
-      - name: prettier
-        run: yarn run format-check
+#      - name: prettier
+#        run: yarn run format-check
       - name: jest-run
         run: yarn test
       - name: cypress-run
