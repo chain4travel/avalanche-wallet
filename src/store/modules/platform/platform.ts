@@ -122,6 +122,7 @@ const platform_module: Module<PlatformState, RootState> = {
                             claimedRewardAmount:
                                 activeDepositOffers.deposits[index].claimedRewardAmount,
                             pendingRewards: activeDepositOffers.availableRewards[index],
+                            rewardOwner: activeDepositOffers.deposits[index].rewardOwner,
                         })
                     }
                 }
