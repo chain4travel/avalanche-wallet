@@ -501,26 +501,28 @@ class WalletHelper {
         const pAddressStrings = wallet.getAllAddressesP()
         const signerAddresses = wallet.getSignerAddresses('P')
 
-        const threshold =
-            wallet.type === 'multisig' ? (wallet as MultisigWallet)?.keyData?.owner?.threshold : 1
+        // For change address use first available on the platform chain
+        const changeAddress = wallet.getChangeAddressPlatform()
 
-        const unsignedTx = await ava.PChain().buildClaimTx(
-            wallet.platformUtxoset,
-            [pAddressStrings, signerAddresses],
-            pAddressStrings,
-            Buffer.alloc(0), // memo
-            ZeroBN, // asOf
-            Number(threshold),
-            [
-                {
-                    id: bintools.cb58Decode(depositTxID),
-                    claimType: ClaimType.ACTIVE_DEPOSIT_REWARD,
-                    amount: claimAmount,
-                    owners: depositRewardOwner,
-                    sigIdxs: [0],
-                } as ClaimAmountParams,
-            ]
-        )
+        const unsignedTx = await ava
+            .PChain()
+            .buildClaimTx(
+                wallet.platformUtxoset,
+                [pAddressStrings, signerAddresses],
+                [changeAddress],
+                Buffer.alloc(0),
+                ZeroBN,
+                1,
+                [
+                    {
+                        id: bintools.cb58Decode(depositTxID),
+                        claimType: ClaimType.ACTIVE_DEPOSIT_REWARD,
+                        amount: claimAmount,
+                        owners: depositRewardOwner,
+                        sigIdxs: [0],
+                    } as ClaimAmountParams,
+                ]
+            )
 
         try {
             const tx = await wallet.signP(unsignedTx)
