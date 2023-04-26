@@ -120,7 +120,7 @@ export default class Modal extends Vue {
     max-width: 90%;
     min-height: 30px;
     background-color: var(--bg);
-    box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0px 0px 4px var(--box-shadow);
     margin: auto;
     z-index: 2;
     position: absolute;
