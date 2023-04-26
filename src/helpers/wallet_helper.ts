@@ -299,29 +299,25 @@ class WalletHelper {
         const pAddressStrings = wallet.getAllAddressesP()
         const utxoSet = wallet.getPlatformUTXOSet()
         const signerAddresses = wallet.getSignerAddresses('P')
-        const threshold =
-            wallet.type === 'multisig' ? (wallet as MultisigWallet)?.keyData?.owner?.threshold : 1
+        const nodeOwner = wallet.getStaticAddress('P')
 
-        const unsignedTx = await ava
-            .PChain()
-            .buildAddValidatorTx(
-                utxoSet,
-                pAddressStrings,
-                [pAddressStrings, signerAddresses],
-                pAddressStrings,
-                nodeID,
-                startTime,
-                endTime,
-                stakeAmount,
-                pAddressStrings,
-                0,
-                undefined,
-                1,
-                undefined,
-                undefined,
-                threshold,
-                threshold
-            )
+        let rewardAddress = wallet.getPlatformRewardAddress()
+
+        const unsignedTx = await ava.PChain().buildCaminoAddValidatorTx(
+            utxoSet,
+            pAddressStrings,
+            [pAddressStrings, signerAddresses],
+            pAddressStrings,
+            nodeID,
+            {
+                address: nodeOwner,
+                auth: [[0, nodeOwner]],
+            },
+            startTime,
+            endTime,
+            stakeAmount,
+            [rewardAddress]
+        )
 
         try {
             const tx = await wallet.signP(unsignedTx, undefined, endTxTime)
