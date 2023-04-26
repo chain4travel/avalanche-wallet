@@ -219,6 +219,14 @@ export default class PendingMultisig extends Vue {
                 type: 'success',
             })
             this.$store.dispatch('Signavault/updateTransaction')
+
+            try {
+                if (this.claimTxDetails) {
+                    this.refresh()
+                }
+            } catch (e) {
+                console.error(e)
+            }
         } catch (e: any) {
             this.helpers.dispatchNotification({
                 message: 'Your signature is not saved.',

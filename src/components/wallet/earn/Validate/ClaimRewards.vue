@@ -8,7 +8,7 @@
                 v-if="pendingTx !== undefined && pendingTx !== null"
                 :multisigTx="pendingTx"
                 @issued="issued"
-                @refresh="getPendingTransaction"
+                @refresh="refreshMultisignTx"
                 :nodeId="nodeId"
                 :nodeInfo="nodeInfo"
             ></pending-multisig>
@@ -53,7 +53,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import ModalClaimReward from './ModalClaimReward.vue'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import { WalletHelper } from '../../../../helpers/wallet_helper'
@@ -183,6 +183,15 @@ export default class ClaimRewards extends Vue {
         } else {
             this.pendingTx = undefined
         }
+    }
+
+    async refreshMultisignTx() {
+        await this.$store.dispatch('Signavault/updateTransaction')
+        this.loading = true
+        setTimeout(async () => {
+            await this.getPendingTransaction()
+            this.loading = false
+        }, 100)
     }
 
     issued() {
