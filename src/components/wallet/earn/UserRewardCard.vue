@@ -364,6 +364,7 @@ export default class UserRewardCard extends Vue {
                 })
         } else {
             this.issueMultisigTx()
+            this.updateBalance()
         }
     }
 

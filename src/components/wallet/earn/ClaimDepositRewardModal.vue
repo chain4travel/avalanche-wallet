@@ -173,6 +173,7 @@ export default class ModalClaimDepositReward extends Vue {
 
             try {
                 await this.issueMultisigTx()
+                this.updateBalance()
                 this.claimed = true
             } catch (err) {
                 this.claimed = false
