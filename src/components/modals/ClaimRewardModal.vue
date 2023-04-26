@@ -3,14 +3,7 @@
         <div class="claim-reward-modal">
             <div v-if="!claimed">
                 <div>
-                    <h3>
-                        {{
-                            $t('earn.rewards.claim_modal.are_you_sure', {
-                                amount: claimableAmount,
-                                symbol: nativeAssetSymbol,
-                            })
-                        }}
-                    </h3>
+                    <AvaxInput :max="amount" :initial="amount" v-model="amt"></AvaxInput>
                     <br />
                     <p class="text-modal">
                         {{
@@ -35,7 +28,7 @@
                 <h2>
                     {{
                         $t('earn.rewards.claim_modal.confirmation_message', {
-                            amount: confiremedClaimedAmount,
+                            amount: confirmedClaimedAmount,
                             symbol: nativeAssetSymbol,
                         })
                     }}
@@ -52,6 +45,7 @@ import Big from 'big.js'
 
 import { ava, bintools } from '@/AVA'
 import { RewardOwner } from '@/components/misc/ValidatorList/types'
+import AvaxInput from '@/components/misc/AvaxInput.vue'
 import AvaAsset from '@/js/AvaAsset'
 import { WalletType } from '@/js/wallets/types'
 import Modal from './Modal.vue'
@@ -70,6 +64,7 @@ import { SignatureError } from '@c4tplatform/caminojs/dist/common'
         },
     },
     components: {
+        AvaxInput,
         Modal,
     },
 })
@@ -79,7 +74,8 @@ export default class ModalClaimReward extends Vue {
     @Prop() rewardOwner!: RewardOwner
 
     claimed: boolean = false
-    confiremedClaimedAmount: string = ''
+    confirmedClaimedAmount: string = ''
+    amt: BN = this.amount
 
     $refs!: {
         modal: Modal
@@ -92,7 +88,7 @@ export default class ModalClaimReward extends Vue {
     }
 
     beforeClose() {
-        this.confiremedClaimedAmount = ''
+        this.confirmedClaimedAmount = ''
         this.$emit('beforeCloseModal', this.claimed)
         this.claimed = false
     }
@@ -133,7 +129,7 @@ export default class ModalClaimReward extends Vue {
                 wallet,
                 this.depositTxID,
                 rewardOwner,
-                this.amount
+                this.amt
             )
             this.$store.dispatch('updateTransaction', {
                 withDeposit: true,
@@ -160,6 +156,7 @@ export default class ModalClaimReward extends Vue {
                 return
             }
         }
+        this.confirmedClaimedAmount = this.formattedAmount(this.amt)
         this.claimed = true
     }
 }
