@@ -450,7 +450,7 @@
                 "locked_amount": "Locked Amount",
                 "pending_reward": "Pending Reward",
                 "already_claimed": "Already Claimed",
-                "claim": "Claim"
+                "claim": "Claim Reward"
             },
             "claim_modal": {
                 "are_you_sure": "Are you sure you want to claim {amount} {symbol} rewards?",

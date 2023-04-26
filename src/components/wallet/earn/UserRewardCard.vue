@@ -39,7 +39,7 @@
                 </div>
             </div>
         </div>
-        <button class="claim_button button_primary" @click="openModal" :disabled="!claimDisabled">
+        <button class="claim_button button_primary" @click="openModal" :disabled="!isClaimDisabled">
             {{ $t('earn.rewards.active_earning.claim') }}
         </button>
         <ModalClaimReward
@@ -261,7 +261,6 @@ label {
 
 .claim_button {
     border-radius: var(--border-radius-sm);
-    width: min-content;
     padding: 8px 30px;
     margin-left: auto;
     &[disabled] {

@@ -15,11 +15,11 @@
                     </p>
                 </div>
                 <div class="modal-buttons">
-                    <v-btn depressed class="button_primary" @click="close()">
-                        {{ $t('earn.rewards.claim_modal.cancel') }}
-                    </v-btn>
                     <v-btn depressed class="button_secondary btn-claim" @click="confirmClaim()">
                         {{ $t('earn.rewards.claim_modal.confirm') }}
+                    </v-btn>
+                    <v-btn depressed class="button_primary" @click="close()">
+                        {{ $t('earn.rewards.claim_modal.cancel') }}
                     </v-btn>
                 </div>
             </div>
