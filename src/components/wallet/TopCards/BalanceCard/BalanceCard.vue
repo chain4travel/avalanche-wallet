@@ -13,7 +13,7 @@
                 <template v-if="!isBreakdown">
                     <button class="breakdown_toggle" @click="toggleBreakdown">
                         <v-icon>mdi-eye-outline</v-icon>
-                        {{ $t('top.balance.show') }}
+                        <span class="ml-1">{{ $t('top.balance.show') }}</span>
                     </button>
                 </template>
                 <template v-else>
@@ -360,13 +360,12 @@ export default class BalanceCard extends Vue {
     grid-row: 2;
     grid-column: 1/3;
     margin-top: 8px;
-    /*max-width: 460px;*/
 }
 .header {
     display: flex;
 
     h4 {
-        margin-left: 12px;
+        margin-left: 8px;
         flex-grow: 1;
     }
 }
@@ -389,7 +388,6 @@ h4 {
 
     span.smaller {
         font-size: 0.8em;
-        /*color: var(--primary-color-light);*/
     }
 }
 
@@ -404,8 +402,8 @@ h4 {
 }
 
 .refresh {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     .v-icon {
         color: var(--primary-color);
     }
@@ -481,6 +479,8 @@ h4 {
 }
 
 .breakdown_toggle {
+    display: flex;
+    align-items: center;
     font-size: 13px;
     outline: none !important;
     margin-left: 12px;

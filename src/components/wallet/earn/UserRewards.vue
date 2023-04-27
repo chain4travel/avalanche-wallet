@@ -1,17 +1,18 @@
 <template>
     <div>
-        <div class="refresh_div">
-            <div class="refresh">
-                <Spinner v-if="loadingRefreshDepositRewards" class="spinner"></Spinner>
-                <button v-else @click="refresh">
-                    <v-icon>mdi-refresh</v-icon>
-                </button>
-            </div>
+        <div class="claimables">
+            <ClaimableRewardCard
+                v-for="(v, i) in claimables()"
+                :key="'c' + i"
+                :title="v.title"
+                :pendingRewards="v.pendingRewards"
+                :rewardOwner="v.rewardOwner"
+            ></ClaimableRewardCard>
         </div>
         <div class="user_offers" v-if="activeOffers.length > 0">
             <UserRewardCard
                 v-for="(v, i) in activeOffers"
-                :key="i"
+                :key="'u' + i"
                 :depositTxID="v.depositTxID"
                 :title="v.memo"
                 :start="v.start"
@@ -31,22 +32,25 @@
 <script lang="ts">
 import 'reflect-metadata'
 import Big from 'big.js'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 
 import { AvaWalletCore } from '../../../js/wallets/types'
-import { ActiveDeposit, ValidatorRaw } from '@/components/misc/ValidatorList/types'
+import { ActiveDeposit, Claimable, ValidatorRaw } from '@/components/misc/ValidatorList/types'
+import ClaimableRewardCard from '@/components/wallet/earn/ClaimableRewardCard.vue'
 import UserRewardCard from '@/components/wallet/earn/UserRewardCard.vue'
 import { bnToBig } from '@/helpers/helper'
 
 import { BN } from '@c4tplatform/caminojs/dist'
+import { ZeroBN } from '@/constants'
+import { RewardOwner } from '@/components/misc/ValidatorList/types'
 
 @Component({
     components: {
+        ClaimableRewardCard,
         UserRewardCard,
     },
 })
 export default class UserRewards extends Vue {
-    @Prop() loadingRefreshDepositRewards!: boolean
     get activeOffers(): ActiveDeposit[] {
         return this.$store.state.Platform.activeDepositOffer
     }
@@ -101,13 +105,23 @@ export default class UserRewards extends Vue {
         return res
     }
 
-    refresh() {
-        this.$store.dispatch('Platform/updateActiveDepositOffer')
+    claimables(): Claimable[] {
+        return this.validators.map((v) => {
+            return {
+                title: 'Validator Rewards',
+                pendingRewards: ZeroBN,
+                rewardOwner: {
+                    addresses: v.rewardOwner.addresses,
+                    threshold: parseInt(v.rewardOwner.threshold),
+                    locktime: new BN(v.rewardOwner.locktime),
+                } as RewardOwner,
+            } as Claimable
+        })
     }
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
 .user_offers {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -141,32 +155,11 @@ label {
     font-size: 2em;
 }
 
-.refresh {
-    width: 20px;
-    height: 20px;
-    margin-left: auto;
-    .v-icon {
-        color: var(--primary-color);
-    }
-
-    button {
-        outline: none !important;
-    }
-    img {
-        object-fit: contain;
-        width: 100%;
-    }
-
-    .spinner {
-        color: var(--primary-color) !important;
-    }
-}
-
-.refresh_div {
+.claimables {
     margin-bottom: 10px;
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .user_offers {
         display: grid;
         grid-template-rows: repeat(1, 1fr);
@@ -174,7 +167,7 @@ label {
         grid-gap: 1rem;
     }
 }
-@include main.mobile-device {
+@include mixins.mobile-device {
     .user_offers {
         display: grid;
         grid-template-rows: repeat(1, 1fr);

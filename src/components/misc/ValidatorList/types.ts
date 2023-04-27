@@ -103,6 +103,12 @@ export interface ActiveDeposit {
     rewardOwner: RewardOwner
 }
 
+export interface Claimable {
+    title: string
+    pendingRewards: BN
+    rewardOwner: RewardOwner
+}
+
 export interface ValidatorDict {
     [nodeId: string]: ValidatorRaw
 }

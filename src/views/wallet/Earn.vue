@@ -2,13 +2,23 @@
     <div class="earn_page">
         <div class="header">
             <h1>{{ $t('earn.title') }}</h1>
-            <div>
-                <button @click="tab = 'earn_now'" :active="tab === `earn_now`">
+            <div class="tab">
+                <button class="tab_btn" @click="tab = 'earn_now'" :active="tab === `earn_now`">
                     {{ $t('earn.rewards.earn_now.title') }}
                 </button>
-                <button @click="tab = 'actine_earning'" :active="tab === `actine_earning`">
+                <button
+                    class="tab_btn"
+                    @click="tab = 'actine_earning'"
+                    :active="tab === `actine_earning`"
+                >
                     {{ $t('earn.rewards.active_earning.title') }}
                 </button>
+                <span v-show="tab === `actine_earning`" class="refresh">
+                    <Spinner v-if="loadingRefreshDepositRewards" class="spinner"></Spinner>
+                    <button v-else @click="refresh">
+                        <v-icon>mdi-refresh</v-icon>
+                    </button>
+                </span>
             </div>
         </div>
         <div class="pages">
@@ -24,19 +34,23 @@
 <script lang="ts">
 import 'reflect-metadata'
 import { Vue, Component } from 'vue-property-decorator'
+import Big from 'big.js'
 
-import { BN } from '@c4tplatform/caminojs/dist'
+import Spinner from '@/components/misc/Spinner.vue'
 import UserRewards from '@/components/wallet/earn/UserRewards.vue'
 import { bnToBig } from '@/helpers/helper'
-import Big from 'big.js'
+
+import { BN } from '@c4tplatform/caminojs/dist'
 
 @Component({
     name: 'earn',
     components: {
+        Spinner,
         UserRewards,
     },
 })
 export default class Earn extends Vue {
+    loadingRefreshDepositRewards = false
     pageNow: any = null
     subtitle: string = ''
     intervalID: any = null
@@ -61,6 +75,18 @@ export default class Earn extends Vue {
 
     destroyed() {
         clearInterval(this.intervalID)
+    }
+
+    refresh() {
+        this.loadingRefreshDepositRewards = true
+        this.$store.dispatch('Platform/updateActiveDepositOffer').then(
+            () => {
+                this.loadingRefreshDepositRewards = false
+            },
+            () => {
+                this.loadingRefreshDepositRewards = false
+            }
+        )
     }
 
     get platformUnlocked(): BN {
@@ -106,7 +132,12 @@ export default class Earn extends Vue {
         margin-right: 30px;
     }
 
-    button {
+    .tab {
+        display: flex;
+        width: 100%;
+    }
+
+    .tab_btn {
         padding: 8px 24px;
         font-size: 14px;
         font-weight: bold;
@@ -118,6 +149,22 @@ export default class Earn extends Vue {
         &[active] {
             color: var(--secondary-color);
             border-bottom: 2px solid var(--secondary-color);
+        }
+    }
+
+    .refresh {
+        margin: auto 0px auto auto;
+        .v-icon {
+            color: var(--primary-color);
+        }
+
+        img {
+            object-fit: contain;
+            width: 100%;
+        }
+
+        .spinner {
+            color: var(--primary-color) !important;
         }
     }
 }
@@ -135,7 +182,6 @@ export default class Earn extends Vue {
             display: flex;
         }
         button {
-            flex-grow: 1;
             border-radius: 0px;
             margin: 0;
             font-size: 12px;

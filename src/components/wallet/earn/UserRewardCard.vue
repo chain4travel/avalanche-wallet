@@ -180,58 +180,6 @@ export default class UserRewardCard extends Vue {
     }
 }
 
-.node_id {
-    word-break: break-all;
-}
-
-.top_bar {
-    height: max-content;
-    position: relative;
-    padding: 2px 8px;
-    border-bottom: 2px solid var(--bg-wallet-light);
-}
-.reward_row {
-    border-radius: var(--border-radius-sm);
-    overflow: hidden;
-    font-size: 14px;
-    //border: 2px solid var(--bg-light);
-    background-color: var(--bg-light);
-}
-
-.data_row {
-    grid-column: 1/3;
-    display: grid;
-    grid-template-columns: 1fr 280px;
-    align-items: center;
-}
-
-.date {
-    z-index: 1;
-}
-.reward_bar {
-    background-color: var(--success);
-    position: absolute;
-    opacity: 0.5;
-    height: 100%;
-    left: 0;
-    top: 0;
-    z-index: 0;
-}
-
-.stake_info {
-    padding: 6px 12px;
-    display: grid;
-    column-gap: 14px;
-    grid-template-columns: 2fr 1fr 1fr;
-    /*justify-content: space-between;*/
-    /*text-align: right;*/
-    text-align: left;
-
-    > div {
-        align-self: baseline;
-    }
-}
-
 label {
     color: var(--primary-color-light) !important;
 }
@@ -251,18 +199,6 @@ label {
         grid-gap: 0.5rem;
         .offer_detail_left {
             border-right: none;
-        }
-    }
-}
-
-@include mixins.mobile-device {
-    .stake_info {
-        grid-column: 1/3;
-        border-left: none;
-        border-top: 3px solid var(--bg);
-
-        > div:first-of-type {
-            text-align: left;
         }
     }
 }

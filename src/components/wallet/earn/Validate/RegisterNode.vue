@@ -106,10 +106,7 @@ import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 
 import { BN } from '@c4tplatform/caminojs/dist'
 import { KeyPair } from '@c4tplatform/caminojs/dist/apis/avm'
-import {
-    bufferToNodeIDString,
-    privateKeyStringToBuffer,
-} from '@c4tplatform/caminojs/dist/utils'
+import { bufferToNodeIDString, privateKeyStringToBuffer } from '@c4tplatform/caminojs/dist/utils'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 @Component
