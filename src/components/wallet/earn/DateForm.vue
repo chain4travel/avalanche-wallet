@@ -90,22 +90,31 @@ export default class DateForm extends Vue {
 
     // now + 15 minutes + 2 weeks (Min Staking Duration)
     get endDateMin() {
-        let now = new Date()
-        now.setMonth(now.getMonth() + 6)
+        if (this.typeDateForm == 'transactionDateForm') {
+            let start = this.localStart
+            let startDate = new Date(start)
 
-        const year = now.getFullYear()
-        const month = String(now.getMonth() + 1).padStart(2, '0')
-        const day = String(now.getDate()).padStart(2, '0')
-        const hour = String(now.getHours()).padStart(2, '0')
-        const minute = String(now.getMinutes()).padStart(2, '0')
-        const second = String(now.getSeconds()).padStart(2, '0')
+            let end = startDate.getTime()
+            let endDate = new Date(end)
+            return endDate.toISOString()
+        } else {
+            let now = new Date()
+            now.setMonth(now.getMonth() + 6)
 
-        const formattedDate = `${year}-${month}-${day}T${hour}:${minute}:${second}`
+            const year = now.getFullYear()
+            const month = String(now.getMonth() + 1).padStart(2, '0')
+            const day = String(now.getDate()).padStart(2, '0')
+            const hour = String(now.getHours()).padStart(2, '0')
+            const minute = String(now.getMinutes()).padStart(2, '0')
+            const second = String(now.getSeconds()).padStart(2, '0')
 
-        let minDate = new Date(`${formattedDate}`)
-        let minDateParsed = new Date(minDate).toISOString()
-        let endDate = new Date(minDateParsed)
-        return endDate.toISOString()
+            const formattedDate = `${year}-${month}-${day}T${hour}:${minute}:${second}`
+
+            let minDate = new Date(`${formattedDate}`)
+            let minDateParsed = new Date(minDate).toISOString()
+            let endDate = new Date(minDateParsed)
+            return endDate.toISOString()
+        }
     }
 
     // Start date + 1 year, or the prop

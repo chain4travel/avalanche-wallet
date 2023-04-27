@@ -192,8 +192,11 @@ export default class AddValidator extends Vue {
     @Prop() nodeId!: string
     startDate: string = new Date(Date.now() + MIN_MS * 15).toISOString()
     endDate: string = new Date().toISOString()
-    transactionEndDate: string = new Date().toISOString()
+    transactionEndDate: string = new Date(
+        new Date().setMinutes(new Date().getMinutes() + 15)
+    ).toISOString()
     rewardIn: string = ''
+
     rewardDestination = 'local' // local || custom
     isLoading = false
     isConfirm = false
@@ -239,7 +242,7 @@ export default class AddValidator extends Vue {
         this.endDate = val
     }
     setTransactionEnd(val: string) {
-        this.transactionEndDate = val
+        // this.transactionEndDate = val
     }
 
     get rewardAddressLocal() {
