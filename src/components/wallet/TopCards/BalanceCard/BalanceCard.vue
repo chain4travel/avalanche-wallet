@@ -52,27 +52,27 @@
                 <div class="alt_breakdown" v-else>
                     <div>
                         <label>{{ $t('top.balance.available') }} (X)</label>
-                        <p>{{ avmUnlocked | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                        <p>{{ cleanAvaxBN(avmUnlocked) }} {{ nativeAssetSymbol }}</p>
                         <label>{{ $t('top.balance.available') }} (P)</label>
-                        <p>{{ platformUnlocked | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                        <p>{{ cleanAvaxBN(platformUnlocked) }} {{ nativeAssetSymbol }}</p>
                         <label>{{ $t('top.balance.available') }} (C)</label>
-                        <p>{{ evmUnlocked | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                        <p>{{ cleanAvaxBN(evmUnlocked) }} {{ nativeAssetSymbol }}</p>
                     </div>
                     <div v-if="depositAndBond">
                         <label>{{ $t('top.balance.deposited') }} (P)</label>
-                        <p>{{ platformDeposited | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                        <p>{{ cleanAvaxBN(platformDeposited) }} {{ nativeAssetSymbol }}</p>
                         <label>{{ $t('top.balance.bonded') }} (P)</label>
-                        <p>{{ platformBonded | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                        <p>{{ cleanAvaxBN(platformBonded) }} {{ nativeAssetSymbol }}</p>
                         <label>{{ $t('top.balance.bonded_deposited') }} (P)</label>
-                        <p>{{ platformBondedDeposited | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                        <p>{{ cleanAvaxBN(platformBondedDeposited) }} {{ nativeAssetSymbol }}</p>
                     </div>
                     <div v-else>
                         <label>{{ $t('top.balance.locked') }} (X)</label>
-                        <p>{{ avmLocked | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                        <p>{{ cleanAvaxBN(avmLocked) }} {{ nativeAssetSymbol }}</p>
                         <label>{{ $t('top.balance.locked') }} (P)</label>
-                        <p>{{ platformLocked | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                        <p>{{ cleanAvaxBN(platformLocked) }} {{ nativeAssetSymbol }}</p>
                         <label>{{ $t('top.balance.locked_stake') }} (P)</label>
-                        <p>{{ platformLockedStakeable | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                        <p>{{ cleanAvaxBN(platformLockedStakeable) }} {{ nativeAssetSymbol }}</p>
                     </div>
                     <div v-if="!depositAndBond">
                         <label>{{ $t('top.balance.stake') }}</label>
@@ -87,18 +87,18 @@
 <script lang="ts">
 import 'reflect-metadata'
 import { Vue, Component } from 'vue-property-decorator'
-import AvaAsset from '@/js/AvaAsset'
+import Big from 'big.js'
+
 import Spinner from '@/components/misc/Spinner.vue'
 import NftCol from './NftCol.vue'
 import Tooltip from '@/components/misc/Tooltip.vue'
-
-import Big from 'big.js'
-import { BN } from '@c4tplatform/caminojs/dist'
-import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
-import { bnToBig } from '@/helpers/helper'
-import { priceDict } from '@/store/types'
-import { WalletType } from '@/js/wallets/types'
 import UtxosBreakdownModal from '@/components/modals/UtxosBreakdown/UtxosBreakdownModal.vue'
+import { bnToBig, cleanAvaxBN } from '@/helpers/helper'
+import AvaAsset from '@/js/AvaAsset'
+import { WalletType } from '@/js/wallets/types'
+import { priceDict } from '@/store/types'
+
+import { BN } from '@c4tplatform/caminojs/dist'
 
 @Component({
     components: {
@@ -106,12 +106,6 @@ import UtxosBreakdownModal from '@/components/modals/UtxosBreakdown/UtxosBreakdo
         Spinner,
         NftCol,
         Tooltip,
-    },
-    filters: {
-        cleanAvaxBN(val: BN) {
-            let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
-            return big.toLocaleString()
-        },
     },
 })
 export default class BalanceCard extends Vue {
@@ -344,6 +338,10 @@ export default class BalanceCard extends Vue {
 
     get priceDict(): priceDict {
         return this.$store.state.prices
+    }
+
+    cleanAvaxBN(val: BN): string {
+        return cleanAvaxBN(val)
     }
 }
 </script>

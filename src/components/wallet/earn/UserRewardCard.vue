@@ -13,7 +13,7 @@
                 </div>
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.min_lock') }}:</label>
-                    <p class="reward">{{ minLockAmount.toLocaleString() }} CAM</p>
+                    <p class="reward">{{ cleanAvaxBN(minLock) }} CAM</p>
                 </div>
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.reward') }}:</label>
@@ -23,19 +23,15 @@
             <div class="offer_detail_right">
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.locked_amount') }}:</label>
-                    <p class="reward">{{ depositAmount | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                    <p class="reward">{{ cleanAvaxBN(lockedAmount) }} {{ nativeAssetSymbol }}</p>
                 </div>
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.pending_reward') }}:</label>
-                    <p class="reward">
-                        {{ pendingRewardsAmount | cleanAvaxBN }} {{ nativeAssetSymbol }}
-                    </p>
+                    <p class="reward">{{ cleanAvaxBN(pendingRewards) }} {{ nativeAssetSymbol }}</p>
                 </div>
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.already_claimed') }}:</label>
-                    <p class="reward">
-                        {{ alreadyClaimedAmount | cleanAvaxBN }} {{ nativeAssetSymbol }}
-                    </p>
+                    <p class="reward">{{ cleanAvaxBN(alreadyClaimed) }} {{ nativeAssetSymbol }}</p>
                 </div>
             </div>
         </div>
@@ -54,21 +50,14 @@
 import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
-import Big from 'big.js'
+import { cleanAvaxBN } from '@/helpers/helper'
 import ModalClaimReward from '@/components/modals/ClaimRewardModal.vue'
 import AvaAsset from '@/js/AvaAsset'
 import { RewardOwner } from '@/components/misc/ValidatorList/types'
 
 import { BN } from '@c4tplatform/caminojs/dist'
-import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 
 @Component({
-    filters: {
-        cleanAvaxBN(val: BN) {
-            let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
-            return big.toLocaleString()
-        },
-    },
     components: {
         ModalClaimReward,
     },
@@ -136,22 +125,6 @@ export default class UserRewardCard extends Vue {
         })
     }
 
-    get minLockAmount() {
-        return new Big(this.minLock.toString())
-    }
-
-    get depositAmount() {
-        return new Big(this.lockedAmount.toString())
-    }
-
-    get pendingRewardsAmount() {
-        return new Big(this.pendingRewards.toString())
-    }
-
-    get alreadyClaimedAmount() {
-        return new Big(this.alreadyClaimed.toString())
-    }
-
     get rewardPercent() {
         const interestRateBase = 365 * 24 * 60 * 60
         const interestRateDenominator = 1000000 * interestRateBase
@@ -170,6 +143,10 @@ export default class UserRewardCard extends Vue {
 
     get isClaimDisabled() {
         return !this.pendingRewards.isZero()
+    }
+
+    cleanAvaxBN(val: BN): string {
+        return cleanAvaxBN(val)
     }
 
     openModal() {

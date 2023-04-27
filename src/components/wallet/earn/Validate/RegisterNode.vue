@@ -98,17 +98,18 @@
 <script lang="ts">
 import 'reflect-metadata'
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { BN } from '@c4tplatform/caminojs/dist'
+
+import { ava } from '@/AVA'
+import { cleanAvaxBN } from '@/helpers/helper'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
-import { ava } from '@/AVA'
+
+import { BN } from '@c4tplatform/caminojs/dist'
 import { KeyPair } from '@c4tplatform/caminojs/dist/apis/avm'
 import {
     bufferToNodeIDString,
-    ONEAVAX,
     privateKeyStringToBuffer,
 } from '@c4tplatform/caminojs/dist/utils'
-import Big from 'big.js'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 @Component
@@ -121,8 +122,7 @@ export default class RegisterNode extends Vue {
     nodePrivateKey = ''
 
     cleanAvaxBN(val: BN) {
-        let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
-        return big.toLocaleString()
+        return cleanAvaxBN(val)
     }
 
     get wallet() {

@@ -57,12 +57,6 @@ import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 @Component({
-    filters: {
-        cleanAvaxBN(val: BN) {
-            let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
-            return big.toLocaleString()
-        },
-    },
     components: {
         AvaxInput,
         Modal,

@@ -71,4 +71,17 @@ function getPayloadFromUTXO(utxo: UTXO): PayloadBase {
     return payloadbase
 }
 
-export { keyToKeypair, calculateStakingReward, Big, bnToBig, digestMessage, getPayloadFromUTXO }
+function cleanAvaxBN(val: BN): string {
+    let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
+    return big.toLocaleString()
+}
+
+export {
+    Big,
+    bnToBig,
+    calculateStakingReward,
+    cleanAvaxBN,
+    digestMessage,
+    getPayloadFromUTXO,
+    keyToKeypair,
+}
