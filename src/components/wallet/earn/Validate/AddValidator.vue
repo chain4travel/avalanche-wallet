@@ -176,6 +176,7 @@ import ValidatorPending from './ValidatorPending.vue'
 const MIN_MS = 60000
 const HOUR_MS = MIN_MS * 60
 const DAY_MS = HOUR_MS * 24
+const DEFAULT_VALIDATION_START_TIME = 10
 
 @Component({
     name: 'add_validator',
@@ -196,7 +197,7 @@ export default class AddValidator extends Vue {
     startDate: string = new Date(Date.now() + MIN_MS * 15).toISOString()
     endDate: string = new Date().toISOString()
     transactionEndDate: string = new Date(
-        new Date().setMinutes(new Date().getMinutes() + 10)
+        new Date().setMinutes(new Date().getMinutes() + DEFAULT_VALIDATION_START_TIME)
     ).toISOString() // 10 minutes after as default
     rewardIn: string = ''
 
@@ -500,7 +501,9 @@ export default class AddValidator extends Vue {
 
     get minValidationStartDate(): string {
         // 10 minutes after
-        return new Date(new Date().setMinutes(new Date().getMinutes() + 10)).toISOString()
+        return new Date(
+            new Date().setMinutes(new Date().getMinutes() + DEFAULT_VALIDATION_START_TIME)
+        ).toISOString()
     }
 
     get minValidationEndDate(): string {
