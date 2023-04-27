@@ -67,11 +67,18 @@ export default class CurrencyInputDropdown extends Vue {
     @Prop({ default: () => [] }) disabled_assets!: AvaAsset[]
     @Prop({ default: '' }) initial!: string
     @Prop({ default: false }) disabled!: boolean
+    @Prop() pendingTxAmount?: string
     @Prop() chainId!: ChainIdType
     $refs!: {
         bigIn: BigNumInput
     }
 
+    @Watch('pendingTxAmount', { immediate: true })
+    updateAmount() {
+        if (this.chainId === 'P' && !!this.pendingTxAmount) {
+            this.$refs.bigIn.val = new BN(this.pendingTxAmount)
+        }
+    }
     mounted() {
         if (this.isEmpty) return
         if (this.initial) {
@@ -80,8 +87,6 @@ export default class CurrencyInputDropdown extends Vue {
         } else {
             this.drop_change(this.walletAssetsArray[0])
         }
-        if (this.pendingSendMultisigTX && this.chainId === 'P')
-            this.$refs.bigIn.val = this.pendingAmt
     }
 
     get pendingSendMultisigTX(): SignavaultTx | undefined {
@@ -91,19 +96,7 @@ export default class CurrencyInputDropdown extends Vue {
                 WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'BaseTx'
         )
     }
-    get pendingAmt(): string {
-        let big = ''
-        if (this.pendingSendMultisigTX) {
-            let t: ITransactionData = parse([this.pendingSendMultisigTX])[0]
-            let summary = getTransactionSummary(t, this.wallet)
-            let tokens = summary.tokens
-            for (var assetId in tokens) {
-                let asset = tokens[assetId]
-                big = bnToBig(asset.amount.add(new BN(t.txFee)).abs(), 9).toLocaleString()
-            }
-        }
-        return big
-    }
+
     get wallet(): WalletType {
         return this.$store.state.activeWallet
     }

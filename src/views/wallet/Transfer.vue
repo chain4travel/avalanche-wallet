@@ -22,6 +22,7 @@
                             @change="updateTxList"
                             :disabled="isConfirm"
                             :chainId="formType"
+                            :pendingTxAmount="pendingTxAmount"
                         ></tx-list>
                         <template v-if="hasNFT">
                             <NftList
@@ -222,6 +223,7 @@ export default class Transfer extends Vue {
     nftOrders: UTXO[] = []
     formErrors: string[] = []
     err = ''
+    pendingTxAmount? = ''
 
     formAddress: string = ''
     formOrders: ITransaction[] = []
@@ -397,7 +399,7 @@ export default class Transfer extends Vue {
     }
     get pendingSendMultisigTX(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
-            (item: any) =>
+            (item: SignavaultTx) =>
                 item?.tx?.alias === this.wallet.getStaticAddress('P') &&
                 WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'BaseTx'
         )
@@ -494,6 +496,7 @@ export default class Transfer extends Vue {
         return false
     }
     async updateMultisigTxDetails() {
+        await this.$store.dispatch('Assets/updateUTXOs')
         await this.$store.dispatch('Signavault/updateTransaction')
         if (this.pendingSendMultisigTX) {
             let unsignedTx = new UnsignedTx()
@@ -501,11 +504,18 @@ export default class Transfer extends Vue {
             const utx = unsignedTx.getTransaction()
             this.memo = utx.getMemo().toString()
             let t: ITransactionData = parse([this.pendingSendMultisigTX])[0]
-            let { tokens } = getTransactionSummary(t, this.activeWallet)
+            let { tokens } = getTransactionSummary(t, this.$store.state.activeWallet as WalletType)
             for (var assetId in tokens) {
-                this.addressIn = `P-${tokens[assetId].addresses[0]}`
+                if (tokens[assetId].addresses[0])
+                    this.addressIn = `P-${tokens[assetId].addresses[0]}`
+                else this.addressIn = this.wallet.getStaticAddress('P')
+                this.pendingTxAmount = bnToBig(
+                    tokens[assetId].amount.add(new BN(t.txFee)).abs(),
+                    9
+                ).toLocaleString()
             }
         } else {
+            this.pendingTxAmount = ''
             this.canSendAgain = true
         }
     }
