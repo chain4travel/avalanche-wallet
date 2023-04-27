@@ -7,6 +7,7 @@ import {
     UnsignedTx,
     ClaimAmountParams,
     ClaimType,
+    ClaimTx,
 } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm/utxos'
 import { AmountOutput } from '@c4tplatform/caminojs/dist/apis/avm'

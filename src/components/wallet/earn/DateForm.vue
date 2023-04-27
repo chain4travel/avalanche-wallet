@@ -16,7 +16,6 @@
 import { DAY_MS, MINUTE_MS } from '../../../constants'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Datetime } from 'vue-datetime'
-import { ava } from '@/AVA'
 
 const MIN_STAKE_DURATION = DAY_MS * 183
 
@@ -28,20 +27,13 @@ const MIN_STAKE_DURATION = DAY_MS * 183
 export default class DateForm extends Vue {
     // timeNow = 0
     @Prop() tx?: boolean
-    localStart = this.startDateMin
-    localEnd = this.endDateMin
-
+    @Prop() initialDate?: string
+    @Prop() minEndDate?: string
     @Prop() maxEndDate?: string
     @Prop() typeDateForm?: string
 
-    // @Watch('localStart')
-    // startChange(val: string) {
-    //     this.setStartDate(val)
-    //
-    //     if (this.stakeDuration < MIN_STAKE_DURATION) {
-    //         this.localEnd = this.endDateMin
-    //     }
-    // }
+    localStart = this.startDateMin
+    localEnd = this.endDateMin
 
     @Watch('localEnd')
     endChange(val: string) {
@@ -59,7 +51,7 @@ export default class DateForm extends Vue {
         this.localStart = this.startDateMin
 
         // default end date is 3 weeks
-        this.localEnd = this.defaultEndDate
+        this.localEnd = this.minEndDate ?? this.defaultEndDate
 
         // this.setStartDate(this.localStart)
         this.setEndDate(this.localEnd)
@@ -90,9 +82,15 @@ export default class DateForm extends Vue {
 
     // now + 15 minutes + 2 weeks (Min Staking Duration)
     get endDateMin() {
+        if (this.minEndDate) {
+            return this.minEndDate
+        }
         if (this.typeDateForm == 'transactionDateForm') {
             let start = this.localStart
             let startDate = new Date(start)
+
+            let now = new Date()
+            now.setMonth(now.getMonth() + 6)
 
             let end = startDate.getTime()
             let endDate = new Date(end)
