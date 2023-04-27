@@ -519,8 +519,8 @@
                 "end": "End Date & Time"
             },
             "transaction_duration": {
-                "label": "Transaction End Date",
-                "desc": "If your transaction reaches this date, it will be considered expired."
+                "label": "Validation Start Date",
+                "desc": "If your transaction reaches this date and is not executed, it will be considered expired."
             },
             "amount": {
                 "label": "Bonded Amount",

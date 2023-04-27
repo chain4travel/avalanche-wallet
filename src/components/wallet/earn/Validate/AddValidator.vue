@@ -10,16 +10,6 @@
                                 {{ nodeId }}
                             </span>
                         </div>
-                        <div style="margin: 30px 0">
-                            <h4>{{ $t('earn.validate.duration.label') }}</h4>
-                            <p class="desc">
-                                {{ $t('earn.validate.duration.desc') }}
-                            </p>
-                            <DateForm
-                                @change_end="setEnd"
-                                :typeDateForm="'validatorDateForm'"
-                            ></DateForm>
-                        </div>
                         <div v-if="isMultiSig" style="margin: 30px 0">
                             <h4>{{ $t('earn.validate.transaction_duration.label') }}</h4>
                             <p class="desc">
@@ -29,6 +19,19 @@
                                 @change_end="setTransactionEnd"
                                 :typeDateForm="'transactionDateForm'"
                                 tx="true"
+                                :minEndDate="minValidationStartDate"
+                            ></DateForm>
+                        </div>
+                        <div style="margin: 30px 0">
+                            <h4>{{ $t('earn.validate.duration.label') }}</h4>
+                            <p class="desc">
+                                {{ $t('earn.validate.duration.desc') }}
+                            </p>
+                            <DateForm
+                                @change_end="setEnd"
+                                :typeDateForm="'validatorDateForm'"
+                                :minEndDate="minValidationEndDate"
+                                :maxEndDate="maxValidationEndDate"
                             ></DateForm>
                         </div>
                         <div style="margin: 30px 0">
@@ -173,6 +176,7 @@ import ValidatorPending from './ValidatorPending.vue'
 const MIN_MS = 60000
 const HOUR_MS = MIN_MS * 60
 const DAY_MS = HOUR_MS * 24
+const DEFAULT_VALIDATION_START_TIME = 10
 
 @Component({
     name: 'add_validator',
@@ -193,8 +197,8 @@ export default class AddValidator extends Vue {
     startDate: string = new Date(Date.now() + MIN_MS * 15).toISOString()
     endDate: string = new Date().toISOString()
     transactionEndDate: string = new Date(
-        new Date().setMinutes(new Date().getMinutes() + 15)
-    ).toISOString()
+        new Date().setMinutes(new Date().getMinutes() + DEFAULT_VALIDATION_START_TIME)
+    ).toISOString() // 10 minutes after as default
     rewardIn: string = ''
 
     rewardDestination = 'local' // local || custom
@@ -242,7 +246,7 @@ export default class AddValidator extends Vue {
         this.endDate = val
     }
     setTransactionEnd(val: string) {
-        // this.transactionEndDate = val
+        this.transactionEndDate = val
     }
 
     get rewardAddressLocal() {
@@ -493,6 +497,29 @@ export default class AddValidator extends Vue {
     get displayMinStakeAmt(): Big {
         let bn = this.$store.state.Platform.minStake
         return bnToBig(bn, 9)
+    }
+
+    get minValidationStartDate(): string {
+        // 10 minutes after
+        return new Date(
+            new Date().setMinutes(new Date().getMinutes() + DEFAULT_VALIDATION_START_TIME)
+        ).toISOString()
+    }
+
+    get minValidationEndDate(): string {
+        const date = new Date(this.transactionEndDate)
+        const milisMinStakeDuration = ava.getNetwork().P.minStakeDuration * 10000
+        const end = date.getTime() + milisMinStakeDuration
+        const endDate = new Date(end)
+        return endDate.toISOString()
+    }
+
+    get maxValidationEndDate(): string {
+        const date = new Date(this.transactionEndDate)
+        const milisMinStakeDuration = ava.getNetwork().P.maxStakeDuration * 10000
+        const end = date.getTime() + milisMinStakeDuration
+        const endDate = new Date(end)
+        return endDate.toISOString()
     }
 
     onerror(err: any) {
