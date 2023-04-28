@@ -127,13 +127,13 @@ abstract class HdWalletCore extends WalletCore {
     }
 
     getAllAddressesX() {
-        let internal = this.internalHelper.getAllAddresses()
-        let external = this.externalHelper.getAllDerivedAddresses()
+        let internal = this.internalHelper.getAllDerivedAddresses()
+        let external = this.externalHelper.getAllAddresses()
         return internal.concat(external)
     }
 
     getAllAddressesP() {
-        return this.platformHelper.getAllDerivedAddresses()
+        return this.platformHelper.getAllAddresses()
     }
 
     // Returns addresses to check for history
