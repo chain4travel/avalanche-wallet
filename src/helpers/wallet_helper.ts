@@ -37,7 +37,7 @@ class WalletHelper {
         symbol: string,
         groupNum: number
     ) {
-        const fromAddresses = wallet.getDerivedAddresses()
+        const fromAddresses = wallet.getAllAddressesX()
         const changeAddress = wallet.getChangeAddressAvm()
         const minterAddress = wallet.getCurrentAddressAvm()
 
@@ -65,8 +65,7 @@ class WalletHelper {
     ) {
         let ownerAddress = wallet.getCurrentAddressAvm()
         let changeAddress = wallet.getChangeAddressAvm()
-
-        let sourceAddresses = wallet.getDerivedAddresses()
+        let sourceAddresses = wallet.getAllAddressesX()
 
         let utxoSet = wallet.utxoset
         let tx = await buildMintNftTx(

@@ -76,7 +76,7 @@ export default new Vuex.Store({
         addresses(state: RootState): string[] {
             let wallet = state.activeWallet
             if (!wallet) return []
-            let addresses = wallet.getDerivedAddresses()
+            let addresses = wallet.getAllAddressesX()
             return addresses
         },
         staticAddresses: (state: RootState) => (chain: ChainAlias): string[] => {
