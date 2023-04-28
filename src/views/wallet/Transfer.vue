@@ -139,14 +139,22 @@
                             </v-btn>
                         </template>
                         <template v-else-if="isSuccess">
-                            <p style="color: var(--success)">
-                                <fa icon="check-circle"></fa>
-                                Transaction Sent
-                            </p>
-                            <label v-if="pendingSendMultisigTX" style="word-break: break-all">
-                                <b>ID:</b>
-                                {{ txId }}
-                            </label>
+                            <div v-if="formType === 'P' && isMultiSig">
+                                <p style="color: var(--success)">
+                                    <fa icon="check-circle"></fa>
+                                    Pending transaction created
+                                </p>
+                            </div>
+                            <div v-else>
+                                <p style="color: var(--success)">
+                                    <fa icon="check-circle"></fa>
+                                    Transaction Sent
+                                </p>
+                                <label v-if="formType !== 'P'" style="word-break: break-all">
+                                    <b>ID:</b>
+                                    {{ txId }}
+                                </label>
+                            </div>
                             <v-btn
                                 depressed
                                 style="margin-top: 14px"
@@ -393,6 +401,9 @@ export default class Transfer extends Vue {
         await this.$store.dispatch('Signavault/updateTransaction')
         this.updateMultisigTxDetails()
         if (!this.pendingSendMultisigTX) {
+            this.$refs.txList.reset()
+            this.err = ''
+            this.isConfirm = false
             this.memo = ''
             this.addressIn = ''
         }
@@ -432,7 +443,9 @@ export default class Transfer extends Vue {
             })
         }
     }
-
+    get isMultiSig(): boolean {
+        return this.wallet instanceof MultisigWallet
+    }
     async issueMultisigTx() {
         const wallet = this.activeWallet
         if (!wallet || !(wallet instanceof MultisigWallet))
@@ -549,12 +562,12 @@ export default class Transfer extends Vue {
                     setTimeout(() => {
                         this.$store.dispatch('Assets/updateUTXOs')
                         this.$store.dispatch('Signavault/updateTransaction').then(() => {
-                            this.$store.dispatch('History/updateMultisigTransactionHistory')
+                            this.$store.dispatch('updateBalances')
                         })
                     }, 1000)
+                    this.isSuccess = true
                     this.canSendAgain = false
                     this.isAjax = false
-                    this.isSuccess = true
                     this.txState = TxState.success
                 }
                 this.onError(err)
