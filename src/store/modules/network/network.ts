@@ -72,7 +72,6 @@ const network_module: Module<NetworkState, RootState> = {
             }
         },
         saveSelectedNetwork({ state }) {
-            console.log(state)
             let data = JSON.stringify(state.selectedNetwork?.url)
             localStorage.setItem('network_selected', data)
         },
