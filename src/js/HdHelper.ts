@@ -158,7 +158,7 @@ class HdHelper {
             console.error('HD Index not found yet.')
         }
 
-        let addrs: string[] = this.getAllDerivedAddresses()
+        let addrs: string[] = this.getAllAddresses()
         let result: AVMUTXOSet | PlatformUTXOSet
 
         if (this.chainId === 'X') {
@@ -222,7 +222,7 @@ class HdHelper {
     }
 
     // Returns all key pairs up to hd index
-    getAllDerivedKeys(upTo = this.hdIndex): AVMKeyPair[] | PlatformVMKeyPair[] {
+    getAllKeys(upTo = this.hdIndex): AVMKeyPair[] | PlatformVMKeyPair[] {
         let set: AVMKeyPair[] | PlatformVMKeyPair[] = this.ethKeyPair ? [this.ethKeyPair] : []
         for (var i = 0; i <= upTo; i++) {
             if (this.chainId === 'X') {
@@ -243,11 +243,17 @@ class HdHelper {
     }
 
     getAllDerivedAddresses(upTo = this.hdIndex, start = 0): string[] {
-        let res = this.ethKeyPair ? [this.getStaticAddress()] : []
+        const res = []
         for (var i = start; i <= upTo; i++) {
             let addr = this.getAddressForIndex(i)
             res.push(addr)
         }
+        return res
+    }
+
+    getAllAddresses(upTo = this.hdIndex, start = 0): string[] {
+        const res = this.getAllDerivedAddresses(upTo, start)
+        if (start === 0 && this.ethKeyPair) res.unshift(this.getStaticAddress())
         return res
     }
 
