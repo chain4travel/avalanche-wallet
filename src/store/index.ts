@@ -214,7 +214,10 @@ export default new Vuex.Store({
         },
 
         // Add a HD wallet from mnemonic string
-        async addWalletMnemonic({ state }, { key, file }): Promise<MnemonicWallet | null> {
+        async addWalletMnemonic(
+            { state },
+            { key, file }
+        ): Promise<MnemonicWallet | SingletonWallet | null> {
             // Cannot add mnemonic wallets on ledger mode
             if (state.activeWallet?.type === 'ledger') return null
 
@@ -232,7 +235,8 @@ export default new Vuex.Store({
                 }
             }
 
-            let wallet = new MnemonicWallet(mParts[0], mParts[1])
+            // let wallet = new MnemonicWallet(mParts[0], mParts[1])
+            let wallet = new SingletonWallet('', mParts[0], mParts[1])
             if (file?.name) wallet.name = file.name
             wallet.accountHash = accountHash
             state.wallets.push(wallet)

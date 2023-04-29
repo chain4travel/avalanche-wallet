@@ -22,6 +22,7 @@ module.exports = {
                 config.devtool = 'source-map'
             }
         } else if (process.env.NODE_ENV === 'production') {
+            this.parallel = require("os").cpus().length > 1
             config.optimization = {
                 minimize: true,
                 minimizer: [new TerserPlugin()],
