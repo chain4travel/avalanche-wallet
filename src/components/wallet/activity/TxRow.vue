@@ -62,9 +62,10 @@ export default class TxRow extends Vue {
         let network: AvaNetwork = this.$store.state.Network.selectedNetwork
         if (network.explorerSiteUrl) {
             let chains = this.$store.state.History.chains
-            let alias = chains.find((elem: Chain) => elem.chainID === this.source.chainID)
-                .chainAlias
-            let url = `${network.explorerSiteUrl}/${alias}-chain/transactions/${this.source.id}`
+            let alias = chains
+                .find((elem: Chain) => elem.chainID === this.source.chainID)
+                .chainAlias.toLowerCase()
+            let url = `${network.explorerSiteUrl}/${alias}-chain/tx/${this.source.id}`
             return url
         }
         return null
