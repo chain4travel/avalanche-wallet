@@ -59,6 +59,8 @@ import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { SignatureError, OutputOwners } from '@c4tplatform/caminojs/dist/common'
 import { RewardOwner } from '@/components/misc/ValidatorList/types'
+import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { bnToBig } from '@/helpers/helper'
 
 @Component({
     components: {
@@ -66,9 +68,9 @@ import { RewardOwner } from '@/components/misc/ValidatorList/types'
     },
 })
 export default class ModalClaimDepositReward extends Vue {
-    @Prop() depositTxID!: string
-    @Prop() amount!: BN
-    @Prop() rewardOwner!: RewardOwner
+    @Prop({ required: true }) depositTxID!: string
+    @Prop({ required: true }) amount!: BN
+    @Prop({ required: true }) rewardOwner!: RewardOwner
     claimed: boolean = false
     confiremedClaimedAmount: string = ''
 
@@ -79,8 +81,14 @@ export default class ModalClaimDepositReward extends Vue {
         modal: Modal
     }
 
+    mounted() {
+        console.log('mounted')
+        this.updateMultisigTxDetails()
+    }
+
     open() {
         this.$refs.modal.open()
+        this.updateMultisigTxDetails()
     }
 
     close() {
@@ -107,17 +115,22 @@ export default class ModalClaimDepositReward extends Vue {
         return this.$store.state.activeWallet
     }
 
+    get isMultiSig(): boolean {
+        return this.activeWallet.type === 'multisig'
+    }
+
     get feeAmt(): string {
         return this.formattedAmount(ava.PChain().getTxFee())
     }
 
     get claimableAmount(): string {
-        return this.formattedAmount(this.amount)
+        if (!this.isMultiSig) this.formattedAmount(this.amount)
+
+        return this.confiremedClaimedAmount.toLocaleString()
     }
 
     get ava_asset(): AvaAsset | null {
-        let ava = this.$store.getters['Assets/AssetAVA']
-        return ava
+        return this.$store.getters['Assets/AssetAVA']
     }
 
     get nativeAssetSymbol(): string {
@@ -148,7 +161,7 @@ export default class ModalClaimDepositReward extends Vue {
             WalletHelper.buildDepositClaimTx(wallet, this.depositTxID, rewardOwner, this.amount)
                 .then(() => {
                     this.confiremedClaimedAmount = this.formattedAmount(this.amount)
-                    setTimeout(() => this.updateBalance(), 500)
+                    this.updateBalance()
                     this.$store.dispatch('Platform/updateActiveDepositOffer')
                     this.claimed = true
                 })
@@ -169,13 +182,12 @@ export default class ModalClaimDepositReward extends Vue {
                     this.claimed = false
                 })
         } else {
-            this.confiremedClaimedAmount = this.formattedAmount(this.amount)
-
             try {
                 await this.issueMultisigTx()
                 this.updateBalance()
                 this.claimed = true
             } catch (err) {
+                console.error('Error confirming claim:', err)
                 this.claimed = false
             }
         }
@@ -189,6 +201,7 @@ export default class ModalClaimDepositReward extends Vue {
         try {
             console.log('MultiSigTx::sign: Issuing tx')
 
+            await this.updateMultisigTxDetails()
             await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
             this.helpers.dispatchNotification({
                 message: 'Your Transaction sent successfully.',
@@ -204,6 +217,26 @@ export default class ModalClaimDepositReward extends Vue {
             })
             throw e
         }
+    }
+
+    async updateMultisigTxDetails() {
+        await this.$store.dispatch('Assets/updateUTXOs')
+        await this.$store.dispatch('Signavault/updateTransaction')
+        console.log(this.formattedAmount(this.amount))
+
+        if (!this.isMultiSig)
+            return (this.confiremedClaimedAmount = this.formattedAmount(this.amount))
+        if (this.pendingSendMultisigTX) {
+            let unsignedTx = new UnsignedTx()
+            unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
+            const utx = unsignedTx.getTransaction()
+            const claimAmounts = utx.getClaimAmounts()
+
+            const amount = claimAmounts[0].getAmount()
+            this.confiremedClaimedAmount = bnToBig(new BN(amount), 9)?.toString()
+
+            console.log('this.confiremedClaimedAmount', this.confiremedClaimedAmount)
+        } else this.confiremedClaimedAmount = ''
     }
 }
 </script>
