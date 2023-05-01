@@ -90,7 +90,7 @@
                 v-else
                 class="claim_button button_primary"
                 @click="disclamer = true"
-                :disabled="!canClaim"
+                :disabled="!canClaim || noClaimInProgress"
             >
                 {{ $t('earn.rewards.active_earning.claim') }}
             </v-btn>
@@ -203,7 +203,7 @@ export default class UserRewardCard extends Vue {
         return isSigned
     }
 
-    private get isTheClaimedDepositReward(): boolean {
+    get isTheClaimedDepositReward(): boolean {
         return this.signedDepositID === this.depositTxID
     }
 
@@ -230,7 +230,7 @@ export default class UserRewardCard extends Vue {
         return this.pendingSendMultisigTX?.tx?.threshold ?? 0
     }
 
-    private get canExecuteMultisigTx(): boolean {
+    get canExecuteMultisigTx(): boolean {
         let signers = 0
         let threshold = this.pendingSendMultisigTX?.tx?.threshold
         this.txOwners.forEach((owner) => {
@@ -308,6 +308,19 @@ export default class UserRewardCard extends Vue {
         this.$store.dispatch('History/updateTransactionHistory')
     }
 
+    get noClaimInProgress(): boolean {
+        if (!this.pendingSendMultisigTX) {
+            this.disclamer = false
+            return false
+        } else {
+            if (this.signedDepositID === this.depositTxID) {
+                this.disclamer = false
+                return false
+            }
+            return true
+        }
+    }
+
     openModal() {
         this.updateMultisigTxDetails()
         this.$refs.modal_claim_reward.open()
@@ -379,7 +392,7 @@ export default class UserRewardCard extends Vue {
                             })
                         }, 1000)
                     }
-                    console.log(err)
+                    console.error(err)
                     this.claimed = false
                 })
         } else {
@@ -412,8 +425,8 @@ export default class UserRewardCard extends Vue {
     private async issueMultisigTx() {
         const wallet = this.activeWallet
         if (!wallet || !(wallet instanceof MultisigWallet))
-            return console.log('MultiSigTx::sign: Invalid wallet')
-        if (!this.pendingSendMultisigTX) return console.log('MultiSigTx::sign: Invalid Tx')
+            return console.error('MultiSigTx::sign: Invalid wallet')
+        if (!this.pendingSendMultisigTX) return console.error('MultiSigTx::sign: Invalid Tx')
         try {
             await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
             this.helpers.dispatchNotification({

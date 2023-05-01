@@ -82,7 +82,6 @@ export default class ModalClaimDepositReward extends Vue {
     }
 
     mounted() {
-        console.log('mounted')
         this.updateMultisigTxDetails()
     }
 
@@ -178,7 +177,7 @@ export default class ModalClaimDepositReward extends Vue {
                             })
                         }, 1000)
                     }
-                    console.log(err)
+                    console.error(err)
                     this.claimed = false
                 })
         } else {
@@ -196,11 +195,9 @@ export default class ModalClaimDepositReward extends Vue {
     async issueMultisigTx() {
         const wallet = this.activeWallet
         if (!wallet || !(wallet instanceof MultisigWallet))
-            return console.log('MultiSigTx::sign: Invalid wallet')
-        if (!this.pendingSendMultisigTX) return console.log('MultiSigTx::sign: Invalid Tx')
+            return console.error('MultiSigTx::sign: Invalid wallet')
+        if (!this.pendingSendMultisigTX) return console.error('MultiSigTx::sign: Invalid Tx')
         try {
-            console.log('MultiSigTx::sign: Issuing tx')
-
             await this.updateMultisigTxDetails()
             await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
             this.helpers.dispatchNotification({
@@ -210,7 +207,7 @@ export default class ModalClaimDepositReward extends Vue {
             this.$store.dispatch('Platform/updateActiveDepositOffer')
             this.$store.dispatch('Signavault/updateTransaction')
         } catch (e: any) {
-            console.log('MultiSigTx::sign: Error', e)
+            console.error('MultiSigTx::sign: Error', e)
             this.helpers.dispatchNotification({
                 message: this.$t('notifications.execute_multisig_transaction_error'),
                 type: 'error',
@@ -222,7 +219,6 @@ export default class ModalClaimDepositReward extends Vue {
     async updateMultisigTxDetails() {
         await this.$store.dispatch('Assets/updateUTXOs')
         await this.$store.dispatch('Signavault/updateTransaction')
-        console.log(this.formattedAmount(this.amount))
 
         if (!this.isMultiSig)
             return (this.confiremedClaimedAmount = this.formattedAmount(this.amount))
@@ -234,8 +230,6 @@ export default class ModalClaimDepositReward extends Vue {
 
             const amount = claimAmounts[0].getAmount()
             this.confiremedClaimedAmount = bnToBig(new BN(amount), 9)?.toString()
-
-            console.log('this.confiremedClaimedAmount', this.confiremedClaimedAmount)
         } else this.confiremedClaimedAmount = ''
     }
 }
