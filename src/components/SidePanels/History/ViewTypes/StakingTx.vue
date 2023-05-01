@@ -85,18 +85,20 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import Big from 'big.js'
+
+import { bnToBig } from '@/helpers/helper'
+import { getPriceAtUnixTime } from '@/helpers/price_helper'
+import { WalletType } from '@/js/wallets/types'
 import {
     ITransactionData,
     OutputTypesLockedOutB,
     OutputTypesLockedOutDB,
 } from '@/store/modules/history/types'
+import { ValidatorRaw } from '@/store/modules/platform/types'
+
 import { BN } from '@c4tplatform/caminojs/dist'
-import { bnToBig } from '@/helpers/helper'
 import { UnixNow } from '@c4tplatform/caminojs/dist/utils'
-import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
-import { WalletType } from '@/js/wallets/types'
-import { getPriceAtUnixTime } from '@/helpers/price_helper'
-import Big from 'big.js'
 
 @Component
 export default class StakingTx extends Vue {
@@ -338,7 +340,7 @@ export default class StakingTx extends Vue {
         left: 0;
         top: 0;
         height: 100%;
-        background-color: rgba(var(--info-1), 0.6);
+        background-color: rgba(var(--bg-1), 0.6);
     }
 
     p {

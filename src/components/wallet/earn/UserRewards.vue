@@ -1,122 +1,51 @@
 <template>
-    <div>
+    <div v-if="hasRewards">
         <div class="claimables">
             <ClaimableRewardCard
-                v-for="(v, i) in claimables()"
+                v-for="(v, i) in platformRewards.treasuryRewards"
                 :key="'c' + i"
-                :title="v.title"
-                :pendingRewards="v.pendingRewards"
-                :rewardOwner="v.rewardOwner"
+                :reward="v"
             ></ClaimableRewardCard>
         </div>
-        <div class="user_offers" v-if="activeOffers.length > 0">
-            <UserRewardCard
-                v-for="(v, i) in activeOffers"
+        <div class="user_offers">
+            <DepositRewardCard
+                v-for="(v, i) in platformRewards.depositRewards"
                 :key="'u' + i"
-                :depositTxID="v.depositTxID"
-                :title="v.memo"
-                :start="v.start"
-                :end="v.end"
-                :minLock="v.minAmount"
-                :rewards="v.interestRateNominator"
-                :rewardOwner="v.rewardOwner"
-                :lockedAmount="v.amount"
-                :alreadyClaimed="v.claimedRewardAmount"
-                :pendingRewards="v.pendingRewards"
+                :reward="v"
                 class="reward_card"
-            ></UserRewardCard>
+            ></DepositRewardCard>
         </div>
-        <div v-else class="empty">No Active Earning</div>
     </div>
+    <div v-else class="empty">No Active Earning</div>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import Big from 'big.js'
 import { Component, Vue } from 'vue-property-decorator'
 
-import { AvaWalletCore } from '../../../js/wallets/types'
-import { ActiveDeposit, Claimable, ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import ClaimableRewardCard from '@/components/wallet/earn/ClaimableRewardCard.vue'
-import UserRewardCard from '@/components/wallet/earn/UserRewardCard.vue'
-import { bnToBig } from '@/helpers/helper'
-
-import { BN } from '@c4tplatform/caminojs/dist'
-import { ZeroBN } from '@/constants'
-import { RewardOwner } from '@/components/misc/ValidatorList/types'
+import DepositRewardCard from '@/components/wallet/earn/DepositRewardCard.vue'
+import { PlatformRewards } from '@/store/modules/platform/types'
 
 @Component({
     components: {
         ClaimableRewardCard,
-        UserRewardCard,
+        DepositRewardCard,
     },
 })
 export default class UserRewards extends Vue {
-    get activeOffers(): ActiveDeposit[] {
-        return this.$store.state.Platform.activeDepositOffer
+    get platformRewards(): PlatformRewards {
+        return this.$store.state.Platform.rewards
     }
 
-    get userAddresses() {
-        let wallet: AvaWalletCore = this.$store.state.activeWallet
-        if (!wallet) return []
-
-        return wallet.getAllAddressesP()
-    }
-
-    get validators(): ValidatorRaw[] {
-        let validators: ValidatorRaw[] = this.$store.state.Platform.validators
-
-        return this.cleanList(validators) as ValidatorRaw[]
-    }
-
-    get totLength() {
-        return this.validators?.length
-    }
-
-    get totalReward() {
-        let vals = this.validators?.reduce((acc, val: ValidatorRaw) => {
-            return acc.add(new BN(val.potentialReward))
-        }, new BN(0))
-
-        return vals
-    }
-
-    get totalRewardBig(): Big {
-        return bnToBig(this.totalReward, 9)
+    get hasRewards(): boolean {
+        return (
+            this.platformRewards.depositRewards.length > 0 ||
+            this.platformRewards.treasuryRewards.length > 0
+        )
     }
 
     get nativeAssetSymbol(): string {
         return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
-    }
-
-    cleanList(list: ValidatorRaw[]) {
-        let res = list?.filter((val) => {
-            let rewardAddrs = val.rewardOwner.addresses
-            let filtered = rewardAddrs.filter((addr) => {
-                return this.userAddresses.includes(addr)
-            })
-            return filtered.length > 0
-        })
-
-        res?.sort((a, b) => {
-            let startA = parseInt(a.startTime)
-            let startB = parseInt(b.startTime)
-            return startA - startB
-        })
-        return res
-    }
-
-    claimables(): Claimable[] {
-        return this.validators.map((v) => {
-            return {
-                title: 'Validator Rewards',
-                pendingRewards: ZeroBN,
-                rewardOwner: {
-                    addresses: v.rewardOwner.addresses,
-                    threshold: parseInt(v.rewardOwner.threshold),
-                    locktime: new BN(v.rewardOwner.locktime),
-                } as RewardOwner,
-            } as Claimable
-        })
     }
 }
 </script>
@@ -127,32 +56,6 @@ export default class UserRewards extends Vue {
     grid-template-columns: repeat(2, 1fr);
     grid-auto-rows: auto;
     grid-gap: 1rem;
-}
-.user_rewards {
-    padding-bottom: 5vh;
-}
-
-.reward_row {
-    margin-bottom: 12px;
-}
-
-h3 {
-    margin: 12px 0;
-    margin-top: 32px;
-    font-size: 2em;
-    color: var(--primary-color-light);
-    font-weight: lighter;
-}
-
-label {
-    margin-top: 6px;
-    color: var(--primary-color-light);
-    font-size: 14px;
-    margin-bottom: 3px;
-}
-
-.amt {
-    font-size: 2em;
 }
 
 .claimables {

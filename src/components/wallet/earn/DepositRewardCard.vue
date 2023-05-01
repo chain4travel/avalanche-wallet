@@ -23,26 +23,33 @@
             <div class="offer_detail_right">
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.locked_amount') }}:</label>
-                    <p class="reward">{{ cleanAvaxBN(lockedAmount) }} {{ nativeAssetSymbol }}</p>
+                    <p class="reward">
+                        {{ cleanAvaxBN(reward.deposit.amount) }} {{ nativeAssetSymbol }}
+                    </p>
                 </div>
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.pending_reward') }}:</label>
-                    <p class="reward">{{ cleanAvaxBN(pendingRewards) }} {{ nativeAssetSymbol }}</p>
+                    <p class="reward">
+                        {{ cleanAvaxBN(reward.amountToClaim) }} {{ nativeAssetSymbol }}
+                    </p>
                 </div>
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.already_claimed') }}:</label>
-                    <p class="reward">{{ cleanAvaxBN(alreadyClaimed) }} {{ nativeAssetSymbol }}</p>
+                    <p class="reward">
+                        {{ cleanAvaxBN(reward.deposit.claimedRewardAmount) }}
+                        {{ nativeAssetSymbol }}
+                    </p>
                 </div>
             </div>
         </div>
-        <button class="claim_button button_primary" @click="openModal" :disabled="!isClaimDisabled">
+        <button class="claim_button button_primary" @click="openModal" :disabled="isClaimDisabled">
             {{ $t('earn.rewards.active_earning.claim') }}
         </button>
         <ModalClaimReward
             ref="modal_claim_reward"
-            :depositTxID="depositTxID"
-            :amount="pendingRewards"
-            :rewardOwner="rewardOwner"
+            :depositTxID="reward.deposit.depositTxID"
+            :amount="reward.amountToClaim"
+            :rewardOwner="reward.deposit.rewardOwner"
         />
     </div>
 </template>
@@ -53,30 +60,23 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import { cleanAvaxBN } from '@/helpers/helper'
 import ModalClaimReward from '@/components/modals/ClaimRewardModal.vue'
 import AvaAsset from '@/js/AvaAsset'
-import { RewardOwner } from '@/components/misc/ValidatorList/types'
+import { PlatformRewardDeposit } from '@/store/modules/platform/types'
 
 import { BN } from '@c4tplatform/caminojs/dist'
+import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
+import { ZeroBN } from '@/constants'
 
 @Component({
     components: {
         ModalClaimReward,
     },
 })
-export default class UserRewardCard extends Vue {
+export default class DepositRewardCard extends Vue {
     now: number = Date.now()
     intervalID: any = null
     claimDisabled: boolean = true
 
-    @Prop() depositTxID!: string
-    @Prop() title!: string
-    @Prop() start!: BN
-    @Prop() end!: BN
-    @Prop() minLock!: BN
-    @Prop() rewards!: string
-    @Prop() rewardOwner!: RewardOwner
-    @Prop() lockedAmount!: BN
-    @Prop() pendingRewards!: BN
-    @Prop() alreadyClaimed!: BN
+    @Prop() reward!: PlatformRewardDeposit
 
     $refs!: {
         modal_claim_reward: ModalClaimReward
@@ -95,12 +95,18 @@ export default class UserRewardCard extends Vue {
         clearInterval(this.intervalID)
     }
 
+    get depositOffer(): DepositOffer | undefined {
+        return this.$store.getters['Platform/depositOffer'](this.reward.deposit.depositOfferID)
+    }
+
     get rewardTitle() {
-        return Buffer.from(this.title.replace('0x', ''), 'hex').toString()
+        return this.depositOffer
+            ? Buffer.from(this.depositOffer.memo.replace('0x', ''), 'hex').toString()
+            : 'Unknown'
     }
 
     get startDate() {
-        const startDate = new Date(parseInt(this.start.toString()) * 1000)
+        const startDate = new Date(parseInt(this.reward.deposit.start.toString()) * 1000)
 
         return startDate.toLocaleString('en-US', {
             year: 'numeric',
@@ -113,7 +119,9 @@ export default class UserRewardCard extends Vue {
     }
 
     get endDate() {
-        const endDate = new Date(parseInt(this.end.toString()) * 1000)
+        const endDate = new Date(
+            (this.reward.deposit.start.toNumber() + this.reward.deposit.duration) * 1000
+        )
 
         return endDate.toLocaleString('en-US', {
             year: 'numeric',
@@ -126,10 +134,19 @@ export default class UserRewardCard extends Vue {
     }
 
     get rewardPercent() {
+        if (!this.depositOffer) return 0
+
         const interestRateBase = 365 * 24 * 60 * 60
         const interestRateDenominator = 1000000 * interestRateBase
 
-        return (parseInt(this.rewards) / interestRateDenominator) * interestRateBase * 100
+        return (
+            (this.depositOffer.interestRateNominator.toNumber() * interestRateBase * 100) /
+            interestRateDenominator
+        )
+    }
+
+    get minLock() {
+        return this.depositOffer?.minAmount ?? ZeroBN
     }
 
     get ava_asset(): AvaAsset | null {
@@ -142,7 +159,7 @@ export default class UserRewardCard extends Vue {
     }
 
     get isClaimDisabled() {
-        return !this.pendingRewards.isZero()
+        return this.reward.amountToClaim.isZero()
     }
 
     cleanAvaxBN(val: BN): string {

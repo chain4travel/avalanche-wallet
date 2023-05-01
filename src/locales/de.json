@@ -107,9 +107,8 @@
             "title_x": "Abgeleitete Wallet-Addresse",
             "title_p": "Abgeleitete Platform Wallet Address",
             "title_c": "Abgeleitete EVM Wallet Addresse",
-            "desc_x_1": "Dies ist deine Adresse um Gelder zu erhalten.",
-            "desc_x_2": "Deine Adresse wird sich nach jeder Einzahlung ändern, du kannst die vorherige aber weiter verwenden",
-            "desc_p": "Dies ist deine P-Chain Addresse, welche Staking Verdienste und Cross-Chain Gebühren verwaltet.",
+            "desc_x": "Dies ist deine Adresse um Gelder und Cross-Chain Überweisungen zu erhalten.",
+            "desc_p": "Dies ist deine P-Chain Addresse, welche Staking Verdienste und Cross-Chain Überweisungen verwaltet.",
             "desc_c": "Dies ist deine C-Chain Addresse. Benutze sie, um mit Smart-Contracts auf der C-Chain zu interagieren."
         }
     },

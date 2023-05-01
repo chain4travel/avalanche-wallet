@@ -1,23 +1,22 @@
 import { Module } from 'vuex'
 import { RootState } from '@/store/types'
 
-import { BN } from '@c4tplatform/caminojs/dist'
 import { ava } from '@/AVA'
 
 import {
+    DelegatorPendingRaw,
+    DelegatorRaw,
+    ValidatorRaw,
     GetPendingValidatorsResponse,
     GetValidatorsResponse,
     PlatformState,
     ValidatorDelegatorDict,
     ValidatorDelegatorPendingDict,
     ValidatorListItem,
-} from '@/store/modules/platform/types'
-import {
-    ActiveDeposit,
-    DelegatorPendingRaw,
-    DelegatorRaw,
-    ValidatorRaw,
-} from '@/components/misc/ValidatorList/types'
+    PlatformRewards,
+} from './types'
+
+import { BN } from '@c4tplatform/caminojs/dist'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 
 const MINUTE_MS = 60000
@@ -35,7 +34,10 @@ const platform_module: Module<PlatformState, RootState> = {
         minStakeDelegation: new BN(0),
         currentSupply: new BN(1),
         depositOffers: [],
-        activeDepositOffer: [],
+        rewards: {
+            treasuryRewards: [],
+            depositRewards: [],
+        },
     },
     mutations: {
         setValidators(state, validators: ValidatorRaw[]) {
@@ -56,8 +58,7 @@ const platform_module: Module<PlatformState, RootState> = {
             dispatch('updateValidators')
             dispatch('updateCurrentSupply')
             dispatch('updateMinStakeAmount')
-            dispatch('updateAllDepositOffers')
-            dispatch('updateActiveDepositOffer')
+            dispatch('updateAllDepositOffers').then(() => dispatch('updateRewards'))
         },
 
         async updateValidators({ dispatch }) {
@@ -96,35 +97,27 @@ const platform_module: Module<PlatformState, RootState> = {
 
             state.depositOffers = res
         },
-        async updateActiveDepositOffer({ state, commit, rootState }) {
-            const activeOffers: ActiveDeposit[] = []
+        async updateRewards({ state, commit, rootState }) {
+            const newRewards: PlatformRewards = { treasuryRewards: [], depositRewards: [] }
             const wallet = rootState.activeWallet
-            if (wallet)
-                try {
-                    const pAddressStrings = wallet?.getAllAddressesP() as string[] | string
-                    const utxos = await ava.PChain().getUTXOs(pAddressStrings)
-                    const lockedTxIDs = await utxos.utxos.getLockedTxIDs()
-                    const activeDepositOffers = await ava
-                        .PChain()
-                        .getDeposits(lockedTxIDs.depositIDs)
-
-                    for (const depositOffer of activeDepositOffers.deposits) {
-                        const matchingOffer = state.depositOffers.find(
-                            (o) => o.id === depositOffer.depositOfferID
-                        )
-                        if (matchingOffer) {
-                            const index = activeDepositOffers.deposits.indexOf(depositOffer)
-                            activeOffers.push({
-                                ...matchingOffer,
-                                ...depositOffer,
-                                pendingRewards: activeDepositOffers.availableRewards[index],
+            if (wallet) {
+                const lockedTxIDs = wallet.getPlatformUTXOSet().getLockedTxIDs()
+                if (lockedTxIDs.depositIDs.length > 0)
+                    try {
+                        const activeDepositOffers = await ava
+                            .PChain()
+                            .getDeposits(lockedTxIDs.depositIDs)
+                        activeDepositOffers.deposits.forEach((deposit, idx) =>
+                            newRewards.depositRewards.push({
+                                amountToClaim: activeDepositOffers.availableRewards[idx],
+                                deposit: deposit,
                             })
-                        }
+                        )
+                    } catch (e: unknown) {
+                        console.log(e)
                     }
-                } catch (e: unknown) {
-                    console.log(e)
-                }
-            state.activeDepositOffer = activeOffers
+            }
+            state.rewards = newRewards
         },
     },
     getters: {
@@ -267,6 +260,10 @@ const platform_module: Module<PlatformState, RootState> = {
                 state.validators.findIndex((v) => v.nodeID === nodeID) >= 0 ||
                 state.validatorsPending.findIndex((v) => v.nodeID === nodeID) >= 0
             )
+        },
+
+        depositOffer: (state) => (depositOfferID: string) => {
+            return state.depositOffers.find((v) => v.id === depositOfferID)
         },
     },
 }

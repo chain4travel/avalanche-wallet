@@ -493,7 +493,7 @@ export default new Vuex.Store({
                 setTimeout(() => {
                     dispatch('Assets/updateUTXOs').then(() => {
                         if (options.withDeposit) {
-                            dispatch('Platform/updateActiveDepositOffer')
+                            dispatch('Platform/updateRewards')
                         }
                     })
                     dispatch('Signavault/updateTransaction').then(() => {
@@ -508,7 +508,7 @@ export default new Vuex.Store({
                 setTimeout(() => {
                     dispatch('Assets/updateUTXOs').then(() => {
                         if (options.withDeposit) {
-                            dispatch('Platform/updateActiveDepositOffer')
+                            dispatch('Platform/updateRewards')
                         }
                     })
                     dispatch('History/updateTransactionHistory')
@@ -523,12 +523,12 @@ export default new Vuex.Store({
             }
         },
         updateBalances({ dispatch }) {
-            dispatch('Platform/updateActiveDepositOffer')
-            dispatch('Assets/updateUTXOs').then(() =>
+            dispatch('Assets/updateUTXOs').then(() => {
+                dispatch('Platform/updateRewards')
                 dispatch('Signavault/updateTransaction', undefined, { root: true }).then(() => {
                     dispatch('History/updateTransactionHistory')
                 })
-            )
+            })
         },
     },
 })

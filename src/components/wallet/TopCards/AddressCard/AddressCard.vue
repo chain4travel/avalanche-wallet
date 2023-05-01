@@ -129,11 +129,7 @@ export default class AddressCard extends Vue {
     }
 
     getAddressMsgX() {
-        if (this.activeWallet?.type === 'singleton') {
-            return this.$t('top.address.desc_x_1') as string
-        } else {
-            return `${this.$t('top.address.desc_x_1')} ${this.$t('top.address.desc_x_2')}` as string
-        }
+        return this.$t('top.address.desc_x') as string
     }
 
     get isDayTheme(): boolean {

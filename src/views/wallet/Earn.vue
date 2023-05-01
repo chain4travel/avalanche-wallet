@@ -79,7 +79,7 @@ export default class Earn extends Vue {
 
     refresh() {
         this.loadingRefreshDepositRewards = true
-        this.$store.dispatch('Platform/updateActiveDepositOffer').then(
+        this.$store.dispatch('Platform/updateRewards').then(
             () => {
                 this.loadingRefreshDepositRewards = false
             },

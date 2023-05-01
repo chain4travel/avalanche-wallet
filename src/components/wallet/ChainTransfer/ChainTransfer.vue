@@ -604,9 +604,7 @@ export default class ChainTransfer extends Vue {
     row-gap: 2px;
     padding-top: 14px;
     height: max-content;
-    //height: 100%;
     > div {
-        //height: max-content;
         background-color: var(--bg-light);
         border-radius: var(--border-radius-sm);
         padding: 12px 18px;
@@ -617,8 +615,6 @@ export default class ChainTransfer extends Vue {
 .form {
     max-width: 100%;
     width: 360px;
-    padding-bottom: 14px;
-    //justify-self: center;
     > div {
         margin: 14px 0;
     }
@@ -716,12 +712,6 @@ h2 {
         font-weight: bold;
         font-size: 12px;
     }
-
-    /*.status_icon{*/
-    /*    position: absolute;*/
-    /*    top: 8px;*/
-    /*    right: 12px;*/
-    /*}*/
 
     .loading_header {
         display: flex;

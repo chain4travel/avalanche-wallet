@@ -3,7 +3,7 @@
         <h2>{{ title }}</h2>
         <div class="claim_amount">
             <label>{{ $t('earn.rewards.active_earning.pending_reward') }}:</label>
-            <p class="reward">{{ cleanAvaxBN(pendingRewards) }} {{ nativeAssetSymbol }}</p>
+            <p class="reward">{{ cleanAvaxBN(reward.amountToClaim) }} {{ nativeAssetSymbol }}</p>
         </div>
         <div class="claim_button_container">
             <button
@@ -16,8 +16,8 @@
         </div>
         <ModalClaimReward
             ref="modal_claim_reward"
-            :amount="pendingRewards"
-            :rewardOwner="rewardOwner"
+            :amount="reward.amountToClaim"
+            :rewardOwner="reward.rewardOwner"
         />
     </div>
 </template>
@@ -27,7 +27,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import { cleanAvaxBN } from '@/helpers/helper'
 import ModalClaimReward from '@/components/modals/ClaimRewardModal.vue'
-import { RewardOwner } from '@/components/misc/ValidatorList/types'
+import { PlatformRewardTreasury } from '@/store/modules/platform/types'
 
 import { BN } from '@c4tplatform/caminojs/dist'
 
@@ -41,9 +41,7 @@ export default class ClaimableRewardCard extends Vue {
     intervalID: any = null
     claimDisabled: boolean = true
 
-    @Prop() title!: string
-    @Prop() pendingRewards!: BN
-    @Prop() rewardOwner!: RewardOwner
+    @Prop() reward!: PlatformRewardTreasury
 
     $refs!: {
         modal_claim_reward: ModalClaimReward
@@ -55,7 +53,11 @@ export default class ClaimableRewardCard extends Vue {
     }
 
     get isClaimDisabled() {
-        return !this.pendingRewards.isZero()
+        return !this.reward.amountToClaim.isZero()
+    }
+
+    get title() {
+        return this.reward.type === 'validator' ? 'Validator Rewards' : 'Deposit Rewards'
     }
 
     cleanAvaxBN(val: BN): string {
