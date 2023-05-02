@@ -21,8 +21,8 @@
                             ref="txList"
                             @change="updateTxList"
                             :disabled="isConfirm"
-                            :totalAmount="totalAmount"
                             :chainId="formType"
+                            :pendingTxAmount="pendingTxAmount"
                         ></tx-list>
                         <template v-if="hasNFT">
                             <NftList
@@ -197,6 +197,11 @@ import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+
+import { parse } from '@/store/modules/history/history_utils'
+import { ITransactionData } from '@/store/modules/history/types'
+import { getTransactionSummary } from '@/helpers/history_helper'
+
 @Component({
     components: {
         FaucetLink,
@@ -218,7 +223,7 @@ export default class Transfer extends Vue {
     nftOrders: UTXO[] = []
     formErrors: string[] = []
     err = ''
-    totalAmount? = 0
+    pendingTxAmount? = ''
 
     formAddress: string = ''
     formOrders: ITransaction[] = []
@@ -394,7 +399,7 @@ export default class Transfer extends Vue {
     }
     get pendingSendMultisigTX(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
-            (item: any) =>
+            (item: SignavaultTx) =>
                 item?.tx?.alias === this.wallet.getStaticAddress('P') &&
                 WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'BaseTx'
         )
@@ -491,22 +496,26 @@ export default class Transfer extends Vue {
         return false
     }
     async updateMultisigTxDetails() {
+        await this.$store.dispatch('Assets/updateUTXOs')
         await this.$store.dispatch('Signavault/updateTransaction')
         if (this.pendingSendMultisigTX) {
             let unsignedTx = new UnsignedTx()
             unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
             const utx = unsignedTx.getTransaction()
             this.memo = utx.getMemo().toString()
-            const toAddress = WalletHelper.getToAddressFromUtx(
-                unsignedTx,
-                this.wallet.getStaticAddress('P')
-            )
-            // eslint-disable-next-line no-control-regex
-            if (toAddress) this.addressIn = 'P' + toAddress?.replace(/\x00/g, '')
-            this.totalAmount = toAddress
-                ? WalletHelper.getTotalAmountFromUtx(unsignedTx, toAddress)
-                : undefined
+            let t: ITransactionData = parse([this.pendingSendMultisigTX])[0]
+            let { tokens } = getTransactionSummary(t, this.$store.state.activeWallet as WalletType)
+            for (var assetId in tokens) {
+                if (tokens[assetId].addresses[0])
+                    this.addressIn = `P-${tokens[assetId].addresses[0]}`
+                else this.addressIn = this.wallet.getStaticAddress('P')
+                this.pendingTxAmount = bnToBig(
+                    tokens[assetId].amount.add(new BN(t.txFee)).abs(),
+                    9
+                ).toLocaleString()
+            }
         } else {
+            this.pendingTxAmount = ''
             this.canSendAgain = true
         }
     }

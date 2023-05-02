@@ -96,6 +96,7 @@
             ref="modal_claim_reward"
             :depositTxID="depositTxID"
             :amount="pendingRewards"
+            :rewardOwner="rewardOwner"
         />
     </div>
 </template>
@@ -112,8 +113,12 @@ import { WalletHelper } from '@/helpers/wallet_helper'
 import { WalletType } from '@/js/wallets/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
-import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
+import { SignatureError, OutputOwners } from '@c4tplatform/caminojs/dist/common'
+import { RewardOwner } from '@/components/misc/ValidatorList/types'
+import { ava, bintools } from '@/AVA'
+
+import { Buffer } from '@c4tplatform/caminojs/dist'
 
 @Component({
     filters: {
@@ -147,6 +152,7 @@ export default class UserRewardCard extends Vue {
     @Prop() lockedAmount!: BN
     @Prop() pendingRewards!: BN
     @Prop() alreadyClaimed!: BN
+    @Prop() rewardOwner!: RewardOwner
 
     $refs!: {
         modal_claim_reward: ModalClaimDepositReward
@@ -178,10 +184,10 @@ export default class UserRewardCard extends Vue {
         return Buffer.from(this.title.replace('0x', ''), 'hex').toString()
     }
 
-    get startDate(): string {
-        const startDate = new Date(parseInt(this.start.toString()) * 1000)
+    getFormattedDate(timestamp: number): string {
+        const date = new Date(timestamp * 1000)
 
-        return startDate.toLocaleString('en-US', {
+        return date.toLocaleString('en-US', {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
@@ -189,37 +195,35 @@ export default class UserRewardCard extends Vue {
             minute: 'numeric',
             second: 'numeric',
         })
+    }
+
+    get startDate(): string {
+        return this.getFormattedDate(parseInt(this.start.toString()))
     }
 
     get endDate(): string {
-        const endDate = new Date(
-            parseInt(this.start.toString()) * 1000 + parseInt(this.duration.toString()) * 1000
-        )
-
-        return endDate.toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric',
-        })
+        const endTimestamp = parseInt(this.start.toString()) + parseInt(this.duration.toString())
+        return this.getFormattedDate(endTimestamp)
     }
 
-    get minLockAmount(): Big {
-        return new Big(this.minLock.toString())
+    get lockedAmountBig(): Big {
+        return new Big(this.lockedAmount.toString())
     }
 
     get depositAmount(): Big {
-        return new Big(this.lockedAmount.toString())
+        return this.lockedAmountBig
     }
 
     get pendingRewardsAmount(): Big {
         return new Big(this.pendingRewards.toString())
     }
 
-    get alreadyClaimedAmount() {
+    get alreadyClaimedAmount(): Big {
         return new Big(this.alreadyClaimed.toString())
+    }
+
+    get minLockAmount(): Big {
+        return new Big(this.minLock.toString())
     }
 
     get rewardPercent(): number {
@@ -314,16 +318,21 @@ export default class UserRewardCard extends Vue {
 
     async confirmClaim() {
         const wallet = this.$store.state.activeWallet
-        const addresses = wallet.getAllAddressesP()
         // @ts-ignore
         let { dispatchNotification } = this.globalHelper()
+        const hrp = ava.getHRP()
+        const rewardOwner = new OutputOwners(
+            this.rewardOwner.addresses.map((a) => bintools.stringToAddress(a, hrp)),
+            this.rewardOwner.locktime,
+            this.rewardOwner.threshold
+        )
 
         if (!this.pendingSendMultisigTX) {
             WalletHelper.buildDepositClaimTx(
-                addresses,
                 wallet,
-                this.pendingRewards,
-                this.depositTxID
+                this.depositTxID,
+                rewardOwner,
+                this.pendingRewards
             )
                 .then(() => {
                     this.confiremedClaimedAmount = this.formattedAmount(this.pendingRewards)
@@ -335,6 +344,7 @@ export default class UserRewardCard extends Vue {
                         type: 'success',
                     })
                     this.claimed = true
+                    this.disclamer = false
                 })
                 .catch((err) => {
                     if (err instanceof SignatureError) {
@@ -354,6 +364,7 @@ export default class UserRewardCard extends Vue {
                 })
         } else {
             this.issueMultisigTx()
+            this.updateBalance()
         }
     }
 

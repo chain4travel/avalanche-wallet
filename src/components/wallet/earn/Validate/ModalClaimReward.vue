@@ -3,7 +3,10 @@
         <div class="modal-claim-reward-div">
             <div v-if="!claimed">
                 <div>
-                    <h3>
+                    <h3 v-if="isMultisignTx">
+                        {{ $t('validator.transaction_reward.are_you_want') }}
+                    </h3>
+                    <h3 v-else>
                         {{
                             $t('validator.rewards.modal_claim.are_you_sure', {
                                 amountClaim: amountText,
@@ -33,14 +36,16 @@
             </div>
             <div class="confirmed-claimed" v-else>
                 <br />
-                <h2>
-                    {{
-                        $t('validator.rewards.modal_claim.confirmed_claimed', {
-                            amount: confirmedClaimedAmountText,
-                            symbol: symbol,
-                        })
-                    }}
-                </h2>
+                <div v-if="!isMultisignTx">
+                    <h2>
+                        {{
+                            $t('validator.rewards.modal_claim.confirmed_claimed', {
+                                amount: confirmedClaimedAmountText,
+                                symbol: symbol,
+                            })
+                        }}
+                    </h2>
+                </div>
                 <br />
             </div>
         </div>
@@ -50,7 +55,6 @@
 import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import Modal from '../../../modals/Modal.vue'
-import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import { BN } from '@c4tplatform/caminojs'
 import { WalletHelper } from '../../../../helpers/wallet_helper'
 import * as SDK from '@c4tplatform/camino-wallet-sdk/dist'
@@ -62,11 +66,12 @@ import { ava } from '@/AVA'
     },
 })
 export default class ModalClaimReward extends Vue {
-    @Prop() nodeId!: string
-    @Prop() nodeInfo!: ValidatorRaw
     @Prop() amountText!: string
     @Prop() symbol!: string
     @Prop() amount!: BN
+    @Prop() rewardOwner!: string
+    @Prop() pChainddress!: string
+    @Prop() isMultisignTx!: boolean
 
     claimed: boolean = false
     confirmedClaimedAmountText: string = ''
@@ -89,16 +94,35 @@ export default class ModalClaimReward extends Vue {
 
     async confirmClaim() {
         try {
-            await WalletHelper.buildClaimTx(
-                this.nodeInfo.rewardOwner.addresses[0],
-                new BN(this.amount),
-                this.$store.state.activeWallet
+            let txClaim = this.$store.getters['Signavault/transactions'].find(
+                (item: any) =>
+                    item?.tx?.alias === this.pChainddress &&
+                    WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
             )
-            this.confirmedClaimedAmountText = new BN(this.amount).toString()
-            this.claimed = true
+
+            await WalletHelper.buildClaimTx(
+                this.pChainddress,
+                new BN(this.amount),
+                this.$store.state.activeWallet,
+                this.rewardOwner
+            )
+
+            if (this.isMultisignTx) {
+                this.claimed = true
+                this.close()
+                this.$emit('beforeCloseModal', false)
+            } else {
+                this.confirmedClaimedAmountText = new BN(this.amount).toString()
+                this.claimed = true
+            }
         } catch (e) {
             console.error(e)
-            this.claimed = false
+            if (this.isMultisignTx) {
+                this.close()
+                this.$emit('beforeCloseModal', false)
+            } else {
+                this.claimed = false
+            }
         }
     }
 
@@ -137,8 +161,8 @@ export default class ModalClaimReward extends Vue {
 }
 
 .text-modal {
-    text-align: justify;
-    color: rgb(187, 16, 16);
+    text-align: center;
+    color: rgb(117, 117, 117);
 }
 
 @media screen and (max-width: 720px) {

@@ -53,11 +53,12 @@ import { BN } from '@c4tplatform/caminojs'
 import Big from 'big.js'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import { WalletHelper } from '@/helpers/wallet_helper'
-import { ava } from '@/AVA'
+import { ava, bintools } from '@/AVA'
 import AvaAsset from '@/js/AvaAsset'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import { SignatureError } from '@c4tplatform/caminojs/dist/common'
+import { SignatureError, OutputOwners } from '@c4tplatform/caminojs/dist/common'
+import { RewardOwner } from '@/components/misc/ValidatorList/types'
 
 @Component({
     components: {
@@ -67,6 +68,7 @@ import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 export default class ModalClaimDepositReward extends Vue {
     @Prop() depositTxID!: string
     @Prop() amount!: BN
+    @Prop() rewardOwner!: RewardOwner
     claimed: boolean = false
     confiremedClaimedAmount: string = ''
 
@@ -131,18 +133,19 @@ export default class ModalClaimDepositReward extends Vue {
     }
 
     async confirmClaim() {
-        const addresses = this.activeWallet.getAllAddressesP()
+        const wallet = this.$store.state.activeWallet
         // @ts-ignore
         let { dispatchNotification } = this.globalHelper()
+        const hrp = ava.getHRP()
+        const rewardOwner = new OutputOwners(
+            this.rewardOwner.addresses.map((a) => bintools.stringToAddress(a, hrp)),
+            this.rewardOwner.locktime,
+            this.rewardOwner.threshold
+        )
 
         if (!this.pendingSendMultisigTX) {
             // Initiate multisig transaction
-            WalletHelper.buildDepositClaimTx(
-                addresses,
-                this.activeWallet,
-                this.amount,
-                this.depositTxID
-            )
+            WalletHelper.buildDepositClaimTx(wallet, this.depositTxID, rewardOwner, this.amount)
                 .then(() => {
                     this.confiremedClaimedAmount = this.formattedAmount(this.amount)
                     setTimeout(() => this.updateBalance(), 500)
@@ -170,6 +173,7 @@ export default class ModalClaimDepositReward extends Vue {
 
             try {
                 await this.issueMultisigTx()
+                this.updateBalance()
                 this.claimed = true
             } catch (err) {
                 this.claimed = false
