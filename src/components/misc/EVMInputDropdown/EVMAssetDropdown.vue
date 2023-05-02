@@ -65,87 +65,13 @@ export default class EVMAssetDropdown extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/abstracts/mixins';
-
 .evm_dropdown {
-    position: relative;
-}
-
-button {
-    text-align: center;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-.list {
-    position: absolute;
-    top: 0;
-    left: 100%;
-    width: 260px;
-    max-height: 0px;
-    z-index: 2;
-    border-radius: var(--border-radius-sm);
-    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
-    background-color: var(--bg);
-}
-
-.token_row {
-    font-size: 13px;
-    padding: 8px 18px;
-    display: grid;
-    grid-template-columns: max-content max-content 1fr;
-    column-gap: 12px;
-    cursor: pointer;
-    user-select: none;
-
-    > * {
-        align-self: center;
-    }
-
-    img {
-        height: 24px;
-        object-fit: contain;
-    }
-
-    &:hover {
-        //background-color: rgba(var(--bg-1), 0.5);
-        background-color: var(--bg-light);
-    }
-}
-
-.evm_dropdown[active] {
-    .list {
-        max-height: 240px;
-    }
-}
-
-.col_bal {
-    text-align: right;
-}
-
-@include mixins.mobile-device {
-    .list {
-        border-top-right-radius: 14px;
-        border-top-left-radius: 14px;
-        position: fixed;
+    button {
+        text-align: center;
         width: 100%;
-        bottom: 0;
+        height: 100%;
+        top: 0;
         left: 0;
-        top: unset;
-        height: 40vh;
-    }
-
-    .token_row {
-        font-size: 16px;
-        border-bottom: 1px solid var(--bg-light);
-        padding-top: 14px;
-        padding-bottom: 14px;
-        img {
-            height: 30px;
-        }
     }
 }
 </style>

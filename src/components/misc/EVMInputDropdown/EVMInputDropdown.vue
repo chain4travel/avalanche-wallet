@@ -1,7 +1,7 @@
 <template>
     <div class="evm_input_dropdown">
         <div class="col_in hover_border" :disabled="disabled">
-            <template v-if="!isCollectible">
+            <template v-if="!collectible">
                 <button class="max_but" @click="maxOut" :disabled="disabled">MAX</button>
                 <div class="col_big_in">
                     <BigNumInput
@@ -36,7 +36,7 @@
             :disabled="disabled"
             ref="dropdown"
         ></EVMAssetDropdown>
-        <div class="bal_col" v-if="!isCollectible">
+        <div class="bal_col" v-if="!collectible">
             <p class="bal">Balance: {{ balance.toLocaleString() }}</p>
         </div>
         <div class="bal_col" v-else>
@@ -69,7 +69,6 @@ import { ERCNftBalance } from '@/store/modules/assets/modules/types'
 })
 export default class EVMInputDropdown extends Vue {
     token: Erc20Token | 'native' = 'native'
-    isCollectible = false
     collectible: iERCNftSelectInput | null = null
     @Prop({ default: false }) disabled!: boolean
     @Prop() gasPrice!: BN // in wei
@@ -184,7 +183,7 @@ export default class EVMInputDropdown extends Vue {
     }
 
     onAssetChange(token: Erc20Token | 'native') {
-        this.isCollectible = false
+        this.collectible = null
         this.token = token
         this.$nextTick(() => {
             this.$refs.bigIn.clear()
@@ -193,7 +192,6 @@ export default class EVMInputDropdown extends Vue {
     }
 
     onCollectibleChange(val: iERCNftSelectInput) {
-        this.isCollectible = true
         this.collectible = val
         this.$emit('collectibleChange', val)
     }
@@ -212,9 +210,8 @@ export default class EVMInputDropdown extends Vue {
     font-size: 15px;
 
     > div {
-        border-radius: 3px;
+        border-radius: var(--border-radius-sm);
         background-color: var(--bg-light);
-        padding: 8px 14px;
     }
 }
 
@@ -222,6 +219,7 @@ export default class EVMInputDropdown extends Vue {
     position: relative;
     display: grid;
     grid-template-columns: max-content 1fr;
+    padding: 8px 14px;
 }
 
 .col_big_in {
@@ -238,7 +236,7 @@ export default class EVMInputDropdown extends Vue {
 
 .bal_col {
     background-color: transparent !important;
-    padding-top: 2px !important;
+    padding: 2px 14px 8px 14px;
 }
 
 .bal {
