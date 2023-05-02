@@ -1,7 +1,13 @@
 <template>
     <tr class="utxo_row">
         <td class="col_explorer">
-            <a :href="explorerLink" v-if="explorerLink" target="_blank" rel="noopener noreferrer">
+            <a
+                v-if="explorerLink"
+                @click="redirect()"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
                 <fa icon="globe"></fa>
             </a>
         </td>
@@ -78,6 +84,10 @@ export default class UTXORow extends Vue {
         let explorer = net.explorerSiteUrl
         if (!explorer) return null
         return explorer + '/x-chain/transactions/' + bintools.cb58Encode(this.utxo.getTxID())
+    }
+
+    redirect() {
+        if (this.explorerLink) window.open(this.explorerLink, '_blank')
     }
 
     get locktime() {

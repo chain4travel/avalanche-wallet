@@ -13,7 +13,13 @@
                     })
                 }}
             </span>
-            <a class="link-color" :href="link" target="_blank">
+            <a
+                class="link-color"
+                @click="redirect()"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
                 <fa icon="external-link-alt"></fa>
             </a>
         </p>
@@ -34,6 +40,9 @@ export default class ValidatorPending extends Vue {
     @Prop() startDate!: number
     link = 'https://docs.camino.network/to/wallet-validate-pending'
 
+    redirect() {
+        window.open(this.link, '_blank')
+    }
     get startDateFormatted() {
         return new Date(this.startDate * 1000).toLocaleString()
     }
