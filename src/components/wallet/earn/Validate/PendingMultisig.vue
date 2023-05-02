@@ -10,8 +10,35 @@
         </div>
 
         <div class="container">
+            <div v-if="!!claimTxDetails" class="transaction_details">
+                <h4>{{ $t('validator.transaction_reward.title') }}</h4>
+                <div v-if="claimTxDetails?.nodeId">
+                    <label>{{ $t('earn.validate.confirmation.id') }}</label>
+                    <p style="word-break: break-all">{{ claimTxDetails?.nodeId }}</p>
+                </div>
+                <div v-if="claimTxDetails?.from">
+                    <label>{{ $t('validator.transaction_reward.from') }}</label>
+                    <p style="word-break: break-all">{{ claimTxDetails?.from }}</p>
+                </div>
+                <div v-if="claimTxDetails?.rewardAddress">
+                    <label>{{ $t('validator.transaction_reward.reward_address') }}</label>
+                    <p style="word-break: break-all">{{ claimTxDetails?.rewardAddress }}</p>
+                </div>
+                <div v-if="claimTxDetails?.startDate">
+                    <label>{{ $t('validator.transaction_reward.start_date') }}</label>
+                    <p style="word-break: break-all">{{ claimTxDetails?.startDate }}</p>
+                </div>
+                <div v-if="claimTxDetails?.endDate">
+                    <label>{{ $t('validator.transaction_reward.end_date') }}</label>
+                    <p style="word-break: break-all">{{ claimTxDetails?.endDate }}</p>
+                </div>
+                <div v-if="claimTxDetails?.stakeAmount">
+                    <label>{{ $t('validator.transaction_reward.stake_amount') }}</label>
+                    <p style="word-break: break-all">{{ claimTxDetails?.stakeAmount }}</p>
+                </div>
+            </div>
             <div v-if="!!txDetails" class="transaction_details">
-                <h4>Transaction details</h4>
+                <h4>{{ $t('validator.transaction_reward.title') }}</h4>
                 <div v-if="txDetails?.nodeId">
                     <label>{{ $t('earn.validate.confirmation.id') }}</label>
                     <p style="word-break: break-all">{{ txDetails?.nodeId }}</p>
@@ -86,6 +113,8 @@ import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { Buffer } from '@c4tplatform/caminojs/dist'
 import { UnsignedTx, AddValidatorTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import Big from 'big.js'
+import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
+import moment from 'moment'
 
 @Component({
     components: {
@@ -95,6 +124,8 @@ import Big from 'big.js'
 export default class PendingMultisig extends Vue {
     @Prop() multisigTx!: SignavaultTx
     @Prop() nodeId!: string
+    @Prop() nodeInfo!: ValidatorRaw
+    @Prop() successMessageForIssue!: string
 
     helpers = this.globalHelper()
     loading = false
@@ -135,6 +166,42 @@ export default class PendingMultisig extends Vue {
         return undefined
     }
 
+    get claimTxDetails() {
+        let unsignedTx = new UnsignedTx()
+        unsignedTx.fromBuffer(Buffer.from(this.multisigTx?.tx?.unsignedTx, 'hex'))
+        const utx = unsignedTx.getTransaction()
+        if (
+            utx?.getTypeName() === 'ClaimTx' &&
+            this.nodeInfo !== undefined &&
+            this.nodeInfo !== null
+        ) {
+            let startDate =
+                this.multisigTx.tx.timestamp != undefined ? this.multisigTx.tx.timestamp : ''
+            let endDate: string =
+                this.multisigTx.tx.expiration != undefined ? this.multisigTx.tx.expiration : ''
+
+            let dateTimeStart =
+                startDate != ''
+                    ? moment(new Date(this.multisigTx.tx.timestamp)).format('DD/MM/YYYY')
+                    : ''
+            let dateTimeEnd =
+                endDate != ''
+                    ? moment(new Date(this.multisigTx.tx.timestamp)).format('DD/MM/YYYY')
+                    : ''
+
+            return {
+                nodeId: this.nodeId,
+                from: this.nodeInfo.rewardOwner.addresses[0],
+                rewardAddress: this.multisigTx.tx.alias,
+                startDate: dateTimeStart,
+                endDate: dateTimeEnd,
+                stakeAmount: parseFloat(this.nodeInfo.stakeAmount) / 1000000000,
+            }
+        }
+
+        return undefined
+    }
+
     get nativeAssetSymbol(): string {
         return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
     }
@@ -152,6 +219,14 @@ export default class PendingMultisig extends Vue {
                 type: 'success',
             })
             this.$store.dispatch('Signavault/updateTransaction')
+
+            try {
+                if (this.claimTxDetails) {
+                    this.refresh()
+                }
+            } catch (e) {
+                console.error(e)
+            }
         } catch (e: any) {
             this.helpers.dispatchNotification({
                 message: 'Your signature is not saved.',
@@ -170,10 +245,21 @@ export default class PendingMultisig extends Vue {
         this.loadingIssue = true
         try {
             await wallet.issueExternal(this.multisigTx?.tx)
-            this.helpers.dispatchNotification({
-                message: this.$t('notifications.register_node_success'),
-                type: 'success',
-            })
+
+            if (this.claimTxDetails) {
+                this.helpers.dispatchNotification({
+                    message: this.$t('validator.transaction_reward.claimed_tx_issued', {
+                        symbol: this.nativeAssetSymbol,
+                    }),
+                    type: 'success',
+                })
+            } else {
+                this.helpers.dispatchNotification({
+                    message: this.$t('notifications.register_node_success'),
+                    type: 'success',
+                })
+            }
+
             this.$store.dispatch('Signavault/updateTransaction')
             this.$emit('issued', 'issued')
         } catch (e: any) {

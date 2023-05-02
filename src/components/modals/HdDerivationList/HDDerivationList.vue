@@ -7,6 +7,7 @@
             <v-tab-item>
                 <HdChainTable
                     :addresses="addrsInternal"
+                    :hasStatic="false"
                     :balance-dict="keyBalancesInternal"
                     :wallet="wallet"
                     :path="1"
@@ -16,6 +17,7 @@
             <v-tab-item>
                 <HdChainTable
                     :addresses="addrsExternal"
+                    :hasStatic="true"
                     :balance-dict="keyBalancesExternal"
                     :wallet="wallet"
                     :path="0"
@@ -25,6 +27,7 @@
             <v-tab-item>
                 <HdChainTable
                     :addresses="addrsPlatform"
+                    :hasStatic="true"
                     :balance-dict="keyBalancesPlatform"
                     :wallet="wallet"
                     :path="0"
@@ -63,17 +66,17 @@ export default class HDDerivationList extends Vue {
 
     @Watch('wallet.internalHelper.utxoSet', { immediate: true })
     onInternalUtxoChange() {
-        this.addrsInternal = this.wallet.internalHelper.getAllDerivedAddresses()
+        this.addrsInternal = this.wallet.internalHelper.getAllAddresses()
     }
 
     @Watch('wallet.externalHelper.utxoSet', { immediate: true })
     onExternalUtxoChange() {
-        this.addrsExternal = this.wallet.externalHelper.getAllDerivedAddresses()
+        this.addrsExternal = this.wallet.externalHelper.getAllAddresses()
     }
 
     @Watch('wallet.platformHelper.utxoSet', { immediate: true })
     onPlatformUtxoChange() {
-        this.addrsPlatform = this.wallet.platformHelper.getAllDerivedAddresses()
+        this.addrsPlatform = this.wallet.platformHelper.getAllAddresses()
     }
 
     get internalHelper() {

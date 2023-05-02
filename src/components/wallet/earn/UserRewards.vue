@@ -15,12 +15,13 @@
                 :depositTxID="v.depositTxID"
                 :title="v.memo"
                 :start="v.start"
-                :end="v.end"
+                :duration="v.lockDuration"
                 :minLock="v.minAmount"
                 :rewards="v.interestRateNominator"
                 :lockedAmount="v.amount"
                 :alreadyClaimed="v.claimedRewardAmount"
                 :pendingRewards="v.pendingRewards"
+                :rewardOwner="v.rewardOwner"
                 class="reward_card"
             ></UserRewardCard>
         </div>
@@ -38,6 +39,11 @@ import { bnToBig } from '@/helpers/helper'
 import Big from 'big.js'
 import { BN } from '@c4tplatform/caminojs/dist'
 
+import { WalletType } from '@/js/wallets/types'
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
+import { WalletHelper } from '@/helpers/wallet_helper'
+import { SignaVault } from '@/signavault_api'
+
 @Component({
     components: {
         UserRewardRow,
@@ -46,6 +52,7 @@ import { BN } from '@c4tplatform/caminojs/dist'
 })
 export default class UserRewards extends Vue {
     @Prop() loadingRefreshDepositRewards!: boolean
+
     get activeOffers() {
         return this.$store.state.Platform.activeDepositOffer
     }
@@ -100,8 +107,21 @@ export default class UserRewards extends Vue {
         return res
     }
 
+    get activeWallet(): WalletType {
+        return this.$store.state.activeWallet
+    }
+
+    get pendingSendMultisigTX(): SignavaultTx | undefined {
+        return this.$store.getters['Signavault/transactions'].find(
+            (item: any) =>
+                item?.tx?.alias === this.activeWallet.getAllAddressesP()[0] &&
+                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
+        )
+    }
+
     refresh() {
         this.$store.dispatch('Platform/updateActiveDepositOffer')
+        this.$store.dispatch('Signavault/updateTransaction')
     }
 }
 </script>

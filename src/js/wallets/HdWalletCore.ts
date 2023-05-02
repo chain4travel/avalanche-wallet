@@ -127,12 +127,15 @@ abstract class HdWalletCore extends WalletCore {
     }
 
     getAllAddressesX() {
-        return this.getDerivedAddresses()
+        let internal = this.internalHelper.getAllDerivedAddresses()
+        let external = this.externalHelper.getAllAddresses()
+        return internal.concat(external)
     }
 
     getAllAddressesP() {
-        return this.getDerivedAddressesP()
+        return this.platformHelper.getAllAddresses()
     }
+
     // Returns addresses to check for history
     getHistoryAddresses(): string[] {
         let internalIndex = this.internalHelper.hdIndex
@@ -140,7 +143,7 @@ abstract class HdWalletCore extends WalletCore {
         let externalIndex = Math.max(this.externalHelper.hdIndex, this.platformHelper.hdIndex)
 
         let internal = this.internalHelper.getAllDerivedAddresses(internalIndex)
-        let external = this.externalHelper.getAllDerivedAddresses(externalIndex)
+        let external = this.externalHelper.getAllAddresses(externalIndex)
         return internal.concat(external)
     }
 

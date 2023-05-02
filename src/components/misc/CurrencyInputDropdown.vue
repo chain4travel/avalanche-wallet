@@ -13,7 +13,7 @@
                         :denomination="denomination"
                         :step="stepSize"
                         :placeholder="placeholder"
-                        :disabled="disabled"
+                        :disabled="disabled || pendingSendMultisigTX"
                     ></big-num-input>
                 </div>
             </div>
@@ -47,6 +47,12 @@ import { ava } from '@/AVA'
 import Big from 'big.js'
 import { bnToBig } from '@/helpers/helper'
 import { ChainIdType } from '@/constants'
+import { WalletHelper } from '@/helpers/wallet_helper'
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
+import { WalletType } from '@/js/wallets/types'
+import { ITransactionData } from '@/store/modules/history/types'
+import { parse } from '@/store/modules/history/history_utils'
+import { getTransactionSummary } from '@/helpers/history_helper'
 
 @Component({
     components: {
@@ -61,12 +67,18 @@ export default class CurrencyInputDropdown extends Vue {
     @Prop({ default: () => [] }) disabled_assets!: AvaAsset[]
     @Prop({ default: '' }) initial!: string
     @Prop({ default: false }) disabled!: boolean
+    @Prop() pendingTxAmount?: string
     @Prop() chainId!: ChainIdType
-
     $refs!: {
         bigIn: BigNumInput
     }
 
+    @Watch('pendingTxAmount', { immediate: true })
+    updateAmount() {
+        if (this.chainId === 'P' && !!this.pendingTxAmount) {
+            this.$refs.bigIn.val = new BN(this.pendingTxAmount)
+        }
+    }
     mounted() {
         if (this.isEmpty) return
         if (this.initial) {
@@ -75,6 +87,18 @@ export default class CurrencyInputDropdown extends Vue {
         } else {
             this.drop_change(this.walletAssetsArray[0])
         }
+    }
+
+    get pendingSendMultisigTX(): SignavaultTx | undefined {
+        return this.$store.getters['Signavault/transactions'].find(
+            (item: any) =>
+                item?.tx?.alias === this.wallet.getStaticAddress('P') &&
+                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'BaseTx'
+        )
+    }
+
+    get wallet(): WalletType {
+        return this.$store.state.activeWallet
     }
 
     @Watch('asset_now')
@@ -161,13 +185,16 @@ export default class CurrencyInputDropdown extends Vue {
         return this.$store.getters['Assets/AssetAVA']
     }
 
+    get platformUnlocked(): BN {
+        return this.$store.getters['Assets/walletPlatformBalanceUnlocked']
+    }
     get max_amount(): null | BN {
         if (!this.asset_now) return null
         if (!this.avaxAsset) return null
 
         let assetId = this.asset_now.id
         let balance = this.walletAssetsDict[assetId]
-        const amount = this.chainId === 'P' ? balance.amountExtra : balance.amount
+        const amount = this.chainId === 'P' ? this.platformUnlocked : balance.amount
 
         let avaxId = this.avaxAsset.id
 

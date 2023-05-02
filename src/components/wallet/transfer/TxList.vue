@@ -12,6 +12,7 @@
                 :initial="tx.asset.id"
                 :disabled="disabled"
                 :chainId="chainId"
+                :pendingTxAmount="pendingTxAmount"
             ></currency-input-dropdown>
             <button
                 @click="removeTx(i)"
@@ -53,6 +54,7 @@ export default class TxList extends Vue {
 
     @Prop({ default: false }) disabled!: boolean
     @Prop() chainId!: ChainIdType
+    @Prop() pendingTxAmount?: string
 
     deactivated() {
         this.reset()

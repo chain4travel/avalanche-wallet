@@ -356,6 +356,8 @@
         "view_static_keys": "View Static Keys",
         "view_priv_key_c": "View C Chain Private Key",
         "view_public_key": "View Public Key",
+        "keys_info": "Key Info",
+        "static_keys_info": "Static Key Info",
         "view_key": "View Key Phrase",
         "export_key": "Export Key",
         "hd_addresses": "HD Addresses",
@@ -449,12 +451,12 @@
             "total": "Total Rewards",
             "validation": "Validation",
             "delegation": "Delegation",
-            "empty": "You do not have any pending rewards.",
+            "empty": "No pending rewards found.",
             "earn_now": {
-                "title": "Earn Now"
+                "title": "Saving Pools"
             },
             "active_earning": {
-                "title": "Active Earning",
+                "title": "My Rewards",
                 "lock_start": "Lock Start",
                 "lock_end": "Lock End",
                 "min_lock": "Minimum Lock",
@@ -462,7 +464,15 @@
                 "locked_amount": "Locked Amount",
                 "pending_reward": "Pending Reward",
                 "already_claimed": "Already Claimed",
-                "claim": "Claim"
+                "claim": "Claim Rewards",
+                "initiate_transaction": "Initiate Transaction",
+                "cancel": "Cancel",
+                "are_you_sure": "Are you sure you want to initiate the transaction? this requires signatures from other wallets in the multisignature wallet and cannot be undone for 2-weeks?",
+                "sign": "Sign",
+                "signed": "Signed {nbSigners}/{threshold}",
+                "confirm_claim": "Confirm claim",
+                "pending_claim": "Confirm claiming rewards {nbSigners}/{threshold}",
+                "execute_claim": "Execute claim"
             },
             "claim_modal": {
                 "are_you_sure": "Are you sure you want to claim {amount} {symbol} rewards?",
@@ -471,7 +481,7 @@
                 "confirm": "Confirm",
                 "cancel": "Cancel"
             },
-            "no_saving_pool": "At the moment, there are no rewards available in the saving pools.",
+            "no_saving_pool": "No saving pools available",
             "row": {
                 "start": "Start",
                 "end": "End",
@@ -509,8 +519,8 @@
                 "end": "End Date & Time"
             },
             "transaction_duration": {
-                "label": "Transaction End Date",
-                "desc": "If your transaction reaches this date, it will be considered expired."
+                "label": "Validation Start Date",
+                "desc": "If your transaction reaches this date and is not executed, it will be considered expired."
             },
             "amount": {
                 "label": "Bonded Amount",
@@ -535,7 +545,7 @@
             },
             "confirmation": {
                 "id": "Node ID",
-                "amount": "Staking Amount",
+                "amount": "Bonded Amount",
                 "start": "Start Date",
                 "start_desc": "Your validation will start at least 5 minutes after you submit this form.",
                 "end": "End Date",
@@ -784,6 +794,7 @@
             "subtitle": "{n}, Threshold: {t}"
         },
         "priv_key": {
+            "info": "Key Info",
             "title": "Private Key"
         },
         "pub_key": {
@@ -858,7 +869,9 @@
         "keys_remove_success": "Private key and assets removed from the wallet.",
         "transfer_success_msg": "You have succesfully sent your transaction.",
         "transfer_error_msg": "Failed to send transaction.",
-        "execute_multisig_transaction_error": "Transaction execution failed"
+        "execute_multisig_transaction_error": "Transaction execution failed",
+        "multisig_transaction_saved": "Your signature saved successfully!",
+        "multisig_transaction_not_saved": "Your signature saved successfully!"
     },
     "validator": {
         "pending": {
@@ -893,11 +906,21 @@
             },
             "modal_claim": {
                 "are_you_sure": "Are you sure you want to claim {amountClaim} {symbol} rewards?",
-                "we_accepting": "When claiming the rewards, please be aware that the proposal of claiming the rewards will be forwarded to the wallets connected to your multisig and have to be accepted from treshold. Only when the treshold has signed the proposal to claime the CAM, the rewards will be paid to the reward owner.",
+                "kindy_be_aware": "Kindy be aware that confirming this reward claim will require you to pay a transaction fee of {fee} {symbol}.",
                 "cancel": "Cancel",
                 "claim": "Claim",
                 "confirmed_claimed": "{amount} {symbol} have been claimed."
             }
+        },
+        "transaction_reward" : {
+            "title" : "Transaction details",
+            "from" : "From",
+            "reward_address": "Reward Address",
+            "start_date": "Start Date",
+            "end_date": "End Date",
+            "stake_amount": "Stake Amount",
+            "are_you_want": "Are you sure you want to initiate the transaction? This requires signatures from other wallets in the multisignature wallet and cannot be undone for 2-weeks!",
+            "claimed_tx_issued": "Successful Claim Transaction"
         }
     }
 }

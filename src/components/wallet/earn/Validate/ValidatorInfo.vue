@@ -51,9 +51,9 @@
             <div>
                 <h4 class="input_label">{{ $t('validator.info.bonded_amount') }}</h4>
                 <AvaxInput
-                    v-model="depositAmount"
+                    v-model="bondedAmount"
                     :max="maxAmt"
-                    ref="avaxinput"
+                    ref="avax_input_bonded_amount"
                     :readonly="true"
                     class="amt_in"
                 ></AvaxInput>
@@ -94,13 +94,18 @@ export default class ValidatorInfo extends Vue {
     endTime: string = ''
     upTime: number = 0
     reaminingValidation: string = ''
-    depositAmount: number = 0
+    bondedAmount: BN = new BN(0)
     txID: string = ''
 
     loading: boolean = true
 
     mounted() {
         this.getInformationValidator()
+
+        this.$nextTick(() => {
+            //@ts-ignore
+            this.$refs.avax_input_bonded_amount.maxOut()
+        })
     }
 
     get maxAmt(): BN {
@@ -153,7 +158,7 @@ export default class ValidatorInfo extends Vue {
             }
 
             this.reaminingValidation = strRemainingValidation
-            this.depositAmount = parseFloat(this.nodeInfo.stakeAmount) / 1000000000
+            this.bondedAmount = new BN(parseFloat(this.nodeInfo.stakeAmount) / 1000000000)
             this.txID = this.nodeInfo.txID
         } catch (e) {
             console.error(e)

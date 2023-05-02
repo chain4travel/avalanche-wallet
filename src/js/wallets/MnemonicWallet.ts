@@ -223,8 +223,8 @@ export default class MnemonicWallet extends HdWalletCore implements IAvaHdWallet
 
     // returns a keychain that has all the derived private/public keys for X chain
     getKeyChain(): AVMKeyChain {
-        let internal = this.internalHelper.getAllDerivedKeys() as AVMKeyPair[]
-        let external = this.externalHelper.getAllDerivedKeys() as AVMKeyPair[]
+        let internal = this.internalHelper.getAllKeys() as AVMKeyPair[]
+        let external = this.externalHelper.getAllKeys() as AVMKeyPair[]
 
         let allKeys = internal.concat(external)
         let keychain: AVMKeyChain = new AVMKeyChain(ava.getHRP(), this.chainId)
