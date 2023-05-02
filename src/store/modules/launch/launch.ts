@@ -33,14 +33,18 @@ const launch_module: Module<LaunchState, RootState> = {
         },
         async initialize({ state, dispatch }) {
             await dispatch('onLogout')
+            /*
             state.eventFunc = (event) => {
                 dispatch('handleEvent', event)
             }
             window.addEventListener('message', state.eventFunc, false)
+            */
         },
         async onLogout({ state }) {
             if (state.eventFunc) window.removeEventListener('message', state.eventFunc)
         },
+        // Deactivated, it is meant for cross tab inter-communication
+        /*
         async handleEvent({ state, rootState }, event: MessageEvent) {
             const item = state.items.find((item) => item.url.startsWith(event.origin))
             if (!item) {
@@ -61,6 +65,7 @@ const launch_module: Module<LaunchState, RootState> = {
                 )
             }
         },
+        */
     },
 }
 
