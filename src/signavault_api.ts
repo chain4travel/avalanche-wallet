@@ -14,13 +14,21 @@ const defaultConfig: Configuration = new Configuration({
     basePath: 'http://127.0.0.1:8081/v1',
 })
 
+const defaultVersion = '/v1'
+
 function SignaVault(): MultisigApi {
     let config = defaultConfig
     const activeNetwork = store.state.network
 
+    const versioRegex = /\/v\d+$/
+    const signavaultUrl =
+        activeNetwork?.signavaultUrl && versioRegex.test(activeNetwork.signavaultUrl)
+            ? activeNetwork.signavaultUrl
+            : activeNetwork.signavaultUrl + defaultVersion
+
     if (activeNetwork.signavaultUrl) {
         config = new Configuration({
-            basePath: activeNetwork.signavaultUrl,
+            basePath: signavaultUrl,
         })
     }
     return new MultisigApi(config)
