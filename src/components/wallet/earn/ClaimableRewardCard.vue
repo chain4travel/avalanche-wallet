@@ -1,6 +1,6 @@
 <template>
     <div class="claim_row">
-        <h2>{{ title }}</h2>
+        <h3>{{ title }}</h3>
         <div class="claim_amount">
             <label>{{ $t('earn.rewards.active_earning.pending_reward') }}:</label>
             <p class="reward">{{ cleanAvaxBN(reward.amountToClaim) }} {{ nativeAssetSymbol }}</p>
@@ -80,7 +80,7 @@ export default class ClaimableRewardCard extends Vue {
     font-size: 14px;
     background-color: var(--bg-light);
     padding: 1rem;
-    > h2 {
+    > h3 {
         margin-bottom: 1em;
     }
     > div {

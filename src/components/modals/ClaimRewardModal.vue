@@ -63,9 +63,10 @@ import { SignatureError } from '@c4tplatform/caminojs/dist/common'
     },
 })
 export default class ModalClaimReward extends Vue {
-    @Prop() depositTxID!: string
+    @Prop() depositTxID?: string
     @Prop() amount!: BN
     @Prop() rewardOwner!: RewardOwner
+    @Prop() validatorClaim!: boolean
 
     claimed: boolean = false
     confirmedClaimedAmount: string = ''
@@ -123,7 +124,8 @@ export default class ModalClaimReward extends Vue {
                 wallet,
                 this.depositTxID,
                 rewardOwner,
-                this.amt
+                this.amt,
+                this.validatorClaim
             )
             this.$store.dispatch('updateTransaction', {
                 withDeposit: true,

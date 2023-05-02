@@ -371,15 +371,30 @@ class WalletHelper {
 
     static async buildDepositClaimTx(
         wallet: WalletType,
-        depositTxID: string,
-        depositRewardOwner: OutputOwners,
-        claimAmount: BN
+        depositTxID: string | undefined,
+        rewardOwner: OutputOwners,
+        claimAmount: BN,
+        claimValidator: boolean
     ) {
         const pAddressStrings = wallet.getAllAddressesP()
         const signerAddresses = wallet.getSignerAddresses('P')
 
         // For change address use first available on the platform chain
         const changeAddress = wallet.getChangeAddressPlatform()
+
+        const claimAmountParam = {
+            claimType: claimValidator
+                ? ClaimType.VALIDATOR_REWARD
+                : ClaimType.EXPIRED_DEPOSIT_REWARD,
+            amount: claimAmount,
+            owners: rewardOwner,
+            sigIdxs: [0],
+        } as ClaimAmountParams
+
+        if (depositTxID) {
+            claimAmountParam.id = bintools.cb58Decode(depositTxID)
+            claimAmountParam.claimType = ClaimType.ACTIVE_DEPOSIT_REWARD
+        }
 
         const unsignedTx = await ava
             .PChain()
@@ -390,15 +405,7 @@ class WalletHelper {
                 Buffer.alloc(0),
                 ZeroBN,
                 1,
-                [
-                    {
-                        id: bintools.cb58Decode(depositTxID),
-                        claimType: ClaimType.ACTIVE_DEPOSIT_REWARD,
-                        amount: claimAmount,
-                        owners: depositRewardOwner,
-                        sigIdxs: [0],
-                    } as ClaimAmountParams,
-                ]
+                [claimAmountParam]
             )
         let tx = await wallet.signP(unsignedTx)
         return await ava.PChain().issueTx(tx)

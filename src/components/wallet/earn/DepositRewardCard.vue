@@ -1,6 +1,6 @@
 <template>
     <div class="offer_row">
-        <h2 class="offer_title">{{ rewardTitle }}</h2>
+        <h3 class="offer_title">{{ rewardTitle }}</h3>
         <div class="offer_detail">
             <div class="offer_detail_left">
                 <div>
