@@ -38,7 +38,11 @@
                         <h4>{{ $t('transfer.to') }}</h4>
                         <qr-input
                             v-model="addressIn"
-                            class="qrIn hover_border"
+                            :class="[
+                                'qrIn',
+                                'hover_border',
+                                { pending: !!pendingSendMultisigTX && formType === 'P' },
+                            ]"
                             placeholder="xxx"
                             :disabled="isConfirm || (!!pendingSendMultisigTX && formType === 'P')"
                         ></qr-input>
@@ -50,7 +54,10 @@
                         </template> -->
                         <h4 v-if="memo || !isConfirm">{{ $t('transfer.memo') }}</h4>
                         <textarea
-                            class="memo"
+                            :class="[
+                                'memo',
+                                { pending: !!pendingSendMultisigTX && formType === 'P' },
+                            ]"
                             maxlength="256"
                             placeholder="Memo"
                             v-model="memo"
@@ -142,7 +149,7 @@
                             <div v-if="formType === 'P' && isMultiSig">
                                 <p style="color: var(--success)">
                                     <fa icon="check-circle"></fa>
-                                    Pending transaction created
+                                    {{ $t('transfer.multisig.pending_transaction_created') }}
                                 </p>
                             </div>
                             <div v-else>
@@ -224,6 +231,7 @@ import { getTransactionSummary } from '@/helpers/history_helper'
 export default class Transfer extends Vue {
     formType: ChainIdType = 'P'
     showAdvanced: boolean = false
+    intervalID: any = null
     isAjax: boolean = false
     addressIn: string = ''
     memo: string = ''
@@ -509,6 +517,7 @@ export default class Transfer extends Vue {
         return false
     }
     async updateMultisigTxDetails() {
+        if (this.formType !== 'P') return
         await this.$store.dispatch('Assets/updateUTXOs')
         await this.$store.dispatch('Signavault/updateTransaction')
         if (this.pendingSendMultisigTX) {
@@ -532,6 +541,14 @@ export default class Transfer extends Vue {
             this.canSendAgain = true
         }
     }
+    // created() {
+    //     this.intervalID = setInterval(() => {
+    //         this.updateMultisigTxDetails()
+    //     }, 5000)
+    // }
+    // destroyed() {
+    //     clearInterval(this.intervalID)
+    // }
     submit() {
         this.isAjax = true
         this.err = ''
@@ -744,6 +761,10 @@ export default class Transfer extends Vue {
 
 $padLeft: 24px;
 $padTop: 8px;
+
+.pending {
+    color: var(--primary-color-light) !important;
+}
 
 .disconnected {
     padding: 30px;

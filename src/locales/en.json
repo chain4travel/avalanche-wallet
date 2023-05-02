@@ -170,7 +170,8 @@
         "multisig": {
             "execute_transaction": "Execute transaction",
             "sign_transaction": "Sign transaction",
-            "abort_transaction": "Abort transaction"
+            "abort_transaction": "Abort transaction",
+            "pending_transaction_created": "Pending transaction created"
         },
         "source_chain": {
             "title": "Source Chain"
@@ -912,9 +913,9 @@
                 "confirmed_claimed": "{amount} {symbol} have been claimed."
             }
         },
-        "transaction_reward" : {
-            "title" : "Transaction details",
-            "from" : "From",
+        "transaction_reward": {
+            "title": "Transaction details",
+            "from": "From",
             "reward_address": "Reward Address",
             "start_date": "Start Date",
             "end_date": "End Date",
