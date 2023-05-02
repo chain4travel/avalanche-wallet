@@ -146,7 +146,7 @@
                                 </p>
                             </div>
                             <div v-else>
-                                <p style="color: var(--success)">
+                                <p data-cy="transfer-tx-status" style="color: var(--success)">
                                     <fa icon="check-circle"></fa>
                                     Transaction Sent
                                 </p>
