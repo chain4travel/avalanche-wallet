@@ -607,14 +607,23 @@
         <p style="padding-left: 5pt; text-indent: 0pt; text-align: justify">
             We care about data privacy and security. Please review our Privacy Policy:
             <a
-                href="https://camino.network/privacy-policy"
+                @click="redirect('privacy-policy')"
+                href="#"
                 class="s7"
                 target="_blank"
                 rel="noopener noreferrer"
             >
                 https://camino.network/privacy-policy
             </a>
-            <a href="https://camino.network/privacy-policy" class="a" target="_blank">.</a>
+            <a
+                @click="redirect('privacy-policy')"
+                href="#"
+                class="a"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                .
+            </a>
             By using the Site, you agree to be bound by our Privacy Policy, which is incorporated
             into these Terms of Use. Please be advised the Site is hosted in EU-West. If you access
             the Site from any other region of the world with laws or other requirements governing
@@ -736,12 +745,7 @@
         <p style="padding-top: 12pt; padding-left: 5pt; text-indent: 0pt; text-align: justify">
             You may opt out of the binding arbitration described in this section by sending us
             written notice of your desire to do so by email at
-            <a
-                href="mailto:support@chain4travel.com"
-                class="a"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
+            <a @click="redirect('c4t')" class="a" target="_blank" rel="noopener noreferrer">
                 support@chain4travel.com
             </a>
             (such notice, an “Arbitration Opt-out Notice”) within thirty (30) days following the
@@ -775,7 +779,13 @@
             only to the extent necessary to provide relief warranted by the claimant’s individual
             claim. The JAMS Rules and instructions for how to initiate an arbitration are available
             from JAMS at
-            <a href="http://www.jamsadr.com/" class="a" target="_blank" rel="noopener noreferrer">
+            <a
+                @click="redirect('jamsadr')"
+                href="#"
+                class="a"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
                 http://www.jamsadr.com
             </a>
             or 1-800-352-5267.
@@ -1013,7 +1023,7 @@
             <br />
             Switzerland
             <br />
-            <a href="mailto:support@chain4travel.com" target="_blank" rel="noopener noreferrer">
+            <a @click="redirect('c4t')" href="#" target="_blank" rel="noopener noreferrer">
                 support@chain4travel.com
             </a>
         </p>
@@ -1023,7 +1033,21 @@
 import { Vue, Component } from 'vue-property-decorator'
 
 @Component
-export default class ToSContent extends Vue {}
+export default class ToSContent extends Vue {
+    redirect(type: string) {
+        switch (type) {
+            case 'c4t':
+                window.open('mailto:support@chain4travel.com', '_blank')
+                break
+            case 'privacy-policy':
+                window.open('https://camino.network/privacy-policy', '_blank')
+                break
+            case 'jamsadr':
+                window.open('http://www.jamsadr.com/', '_blank')
+                break
+        }
+    }
+}
 </script>
 <style scoped lang="scss">
 .content {
