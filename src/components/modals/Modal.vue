@@ -63,7 +63,8 @@ export default class Modal extends Vue {
     color: var(--primary-color);
     border-bottom: 2px solid var(--bg-light);
     position: relative;
-    padding: 10px 22px;
+    margin: 0px 8px;
+    padding: 10px 12px;
     display: flex;
 }
 
@@ -120,13 +121,13 @@ export default class Modal extends Vue {
     max-width: 90%;
     min-height: 30px;
     background-color: var(--bg);
-    box-shadow: 0px 0px 4px var(--box-shadow);
     margin: auto;
     z-index: 2;
     position: absolute;
     inset: 50% auto auto 50%;
     transform: translate(-50%, -50%);
     border-radius: var(--border-radius-lg);
+    border: var(--primary-border-2);
     overflow: hidden;
     max-height: 90%;
 }
