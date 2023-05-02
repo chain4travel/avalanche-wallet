@@ -10,7 +10,6 @@ export type RewardOwner = Owner
 export interface PlatformState {
     validators: ValidatorRaw[]
     validatorsPending: ValidatorPendingRaw[]
-    delegatorsPending: DelegatorPendingRaw[]
     minStake: BN
     minStakeDelegation: BN
     currentSupply: BN

@@ -57,7 +57,7 @@ const assets_module: Module<AssetsState, RootState> = {
     },
     state: {
         AVA_ASSET_ID: '',
-        // isUpdateBalance: false,
+        balanceLoading: false,
         assets: [],
         assetsDict: {}, // holds meta data of assets
         nftFams: [],
@@ -147,6 +147,7 @@ const assets_module: Module<AssetsState, RootState> = {
         async onNetworkChange({ state, rootState, dispatch }, network: AvaNetwork) {
             let id = await web3.eth.getChainId()
             state.evmChainId = id
+            state.balanceLoading = true
 
             let wallet: WalletType | null = rootState.activeWallet
             if (wallet) dispatch('updateWallet')
@@ -178,6 +179,8 @@ const assets_module: Module<AssetsState, RootState> = {
             await dispatch('updateBalanceDict')
             await dispatch('updateUtxoArrays')
             await dispatch('addUnknownAssets')
+
+            state.balanceLoading = false
         },
 
         updateUtxoArrays({ state, rootState, getters }) {

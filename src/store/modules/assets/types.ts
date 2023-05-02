@@ -7,7 +7,7 @@ import { UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm/utxos'
 import Erc20Token from '@/js/Erc20Token'
 
 export interface AssetsState {
-    // isUpdateBalance: boolean
+    balanceLoading: boolean
     assets: AvaAsset[]
     assetsDict: AssetsDict
     platformBalances: PlatformBalances

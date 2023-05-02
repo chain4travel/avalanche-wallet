@@ -5,11 +5,12 @@
         </div>
         <transition name="fade" mode="out-in">
             <div>
-                <p v-if="!depositAndBond" class="wrong_network">{{ $t('earn.warning_3') }}</p>
-                <p v-else-if="!canValidate" class="no_balance">
+                <p v-if="loading !== 0">Loading...</p>
+                <p v-else-if="!depositAndBond" class="wrong_network">{{ $t('earn.warning_3') }}</p>
+                <p v-else-if="!hasValidator && !canValidate" class="no_balance">
                     {{ $t('earn.warning_1', [minStakeAmt.toLocaleString()]) }}
                 </p>
-                <p v-else-if="registeredNodeID === ''" class="no_balance">
+                <p v-else-if="!hasRegisteredNodeID" class="no_balance">
                     <register-node
                         :isKycVerified="isKycVerified"
                         :isConsortiumMember="isConsortiumMember"
@@ -46,6 +47,8 @@ import {
     ADDRESSSTATEKYCVERIFIED,
 } from '@c4tplatform/caminojs/dist/apis/platformvm/addressstatetx'
 import { WalletCore } from '@/js/wallets/WalletCore'
+import { ava } from '@/AVA'
+import { AvaNetwork } from '@/js/AvaNetwork'
 
 @Component({
     name: 'validator',
@@ -60,17 +63,15 @@ export default class Validator extends Vue {
     isSuspended = false
     registeredNodeID = ''
     intervalID: any = null
+    loading = 0
 
-    updateValidators() {
-        this.$store.dispatch('Platform/updateValidators')
+    async updateValidators() {
+        await this.$store.dispatch('Platform/updateValidators')
     }
 
     activated() {
-        this.evaluateCanRegisterNode()
-        this.updateValidators()
-        this.intervalID = setInterval(() => {
-            this.updateValidators()
-        }, 15000)
+        this.loading = 1
+        this.updateValidators().then(() => this.evaluateCanRegisterNode())
     }
 
     deactivated() {
@@ -81,19 +82,33 @@ export default class Validator extends Vue {
         this.registeredNodeID = nodeId
     }
 
-    @Watch('$store.state.networkName')
+    @Watch('$store.state.network')
     @Watch('$store.state.activeWallet')
     evaluateCanRegisterNode() {
         const BN_ONE = new BN(1)
-        WalletHelper.getAddressState(this.staticAddress).then((result) => {
+        const p1 = WalletHelper.getAddressState(this.staticAddress).then((result) => {
             this.isKycVerified = !result.and(BN_ONE.shln(ADDRESSSTATEKYCVERIFIED)).isZero()
             this.isConsortiumMember = !result.and(BN_ONE.shln(ADDRESSSTATECONSORTIUM)).isZero()
             this.isSuspended = !result.and(BN_ONE.shln(ADDRESSSTATEDEFERRED)).isZero()
         })
-        WalletHelper.getRegisteredNode(this.staticAddress).then(
+        const p2 = WalletHelper.getRegisteredNode(this.staticAddress).then(
             (nodeID) => (this.registeredNodeID = nodeID),
             () => (this.registeredNodeID = '')
         )
+        Promise.all([p1, p2]).then(
+            () => (this.loading &= ~1),
+            () => (this.loading &= ~1)
+        )
+    }
+
+    @Watch('network')
+    onInitNetworkChange() {
+        this.loading = 3
+    }
+
+    @Watch('assetLoading')
+    onAssetLoading(current: boolean) {
+        if (!current) setTimeout(() => (this.loading &= ~2), 500)
     }
 
     get hasEnoughLockablePlatformBalance(): boolean {
@@ -110,7 +125,7 @@ export default class Validator extends Vue {
     }
 
     get minPlatformUnlocked(): BN {
-        return this.$store.state.Platform.minStake
+        return ava.getNetwork().P.minStake
     }
 
     get depositAndBond(): boolean {
@@ -131,35 +146,33 @@ export default class Validator extends Vue {
     }
 
     get canValidate(): boolean {
-        let bn = this.$store.state.Platform.minStake
-        if (this.totBal.lt(bn)) {
-            return false
-        }
-        return true
+        return this.totBal.gte(ava.getNetwork().P.minStake)
     }
 
     get minStakeAmt(): Big {
-        let bn = this.$store.state.Platform.minStake
-        return bnToBig(bn, 9)
-    }
-
-    get minDelegationAmt(): Big {
-        let bn = this.$store.state.Platform.minStakeDelegation
-        return bnToBig(bn, 9)
+        return bnToBig(ava.getNetwork().P.minStake, 9)
     }
 
     get hasValidator(): boolean {
-        return this.$store.getters['Platform/isValidator'](this.registeredNodeID)
+        return this.registeredNodeID === ''
+            ? false
+            : this.$store.getters['Platform/isValidator'](this.registeredNodeID)
+    }
+
+    get hasRegisteredNodeID(): boolean {
+        return this.registeredNodeID !== ''
+    }
+
+    get network(): AvaNetwork {
+        return this.$store.state.Network.selectedNetwork
+    }
+
+    get assetLoading(): boolean {
+        return this.$store.state.Assets.balanceLoading
     }
 }
 </script>
 <style scoped lang="scss">
-@use '../../styles/abstracts/mixins';
-
-/* body {
-    height: auto;
-    overflow: auto !important;
-} */
 .earn_page {
     display: grid;
     grid-template-rows: max-content 1fr;
@@ -173,100 +186,10 @@ export default class Validator extends Vue {
     }
 
     display: flex;
-    /*justify-content: space-between;*/
-    /*align-items: center;*/
     align-items: center;
-
-    .subtitle {
-        margin-left: 0.5em;
-        /*font-size: 20px;*/
-        color: var(--primary-color-light);
-        font-weight: lighter;
-    }
-
-    span {
-        margin-left: 1em;
-
-        &:hover {
-            color: var(--primary-color);
-            cursor: pointer;
-        }
-    }
 }
 
 .wrong_network {
     color: var(--primary-color-light);
-}
-
-.options {
-    margin: 30px 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-gap: 14px;
-    //display: flex;
-    //justify-content: space-evenly;
-    //padding: 60px;
-
-    > div {
-        width: 100%;
-        justify-self: center;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
-        //max-width: 260px;
-        padding: 30px;
-        border-radius: var(--border-radius-sm);
-        background-color: var(--bg-light);
-    }
-
-    h4 {
-        font-size: 32px !important;
-        font-weight: lighter;
-        color: var(--primary-color-light);
-    }
-
-    p {
-        /*color: var(--primary-color-light);*/
-        margin: 14px 0 !important;
-    }
-
-    .no_balance {
-        color: var(--secondary-color);
-    }
-
-    .v-btn {
-        margin-top: 14px;
-    }
-}
-
-span {
-    color: var(--primary-color-light);
-    opacity: 0.5;
-    float: right;
-    font-weight: lighter;
-}
-
-.cancel {
-    font-size: 13px;
-    color: var(--secondary-color);
-    justify-self: flex-end;
-}
-
-.comp {
-    margin-top: 14px;
-}
-
-@include mixins.medium-device {
-    .options {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@include mixins.mobile-device {
-    .options {
-        grid-template-columns: none;
-        grid-row-gap: 15px;
-    }
 }
 </style>

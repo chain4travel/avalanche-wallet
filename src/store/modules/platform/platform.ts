@@ -4,20 +4,18 @@ import { RootState } from '@/store/types'
 import { ava } from '@/AVA'
 
 import {
-    DelegatorPendingRaw,
-    DelegatorRaw,
     ValidatorRaw,
     GetPendingValidatorsResponse,
     GetValidatorsResponse,
     PlatformState,
     ValidatorDelegatorDict,
-    ValidatorDelegatorPendingDict,
     ValidatorListItem,
     PlatformRewards,
 } from './types'
 
 import { BN } from '@c4tplatform/caminojs/dist'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
+import { ZeroBN } from '@/constants'
 
 const MINUTE_MS = 60000
 const HOUR_MS = MINUTE_MS * 60
@@ -28,8 +26,6 @@ const platform_module: Module<PlatformState, RootState> = {
     state: {
         validators: [],
         validatorsPending: [],
-        // delegators: [],
-        delegatorsPending: [],
         minStake: new BN(0),
         minStakeDelegation: new BN(0),
         currentSupply: new BN(1),
@@ -55,15 +51,17 @@ const platform_module: Module<PlatformState, RootState> = {
         },
 
         async update({ dispatch }) {
-            dispatch('updateValidators')
             dispatch('updateCurrentSupply')
             dispatch('updateMinStakeAmount')
-            dispatch('updateAllDepositOffers').then(() => dispatch('updateRewards'))
+            dispatch('updateValidators').then(() =>
+                dispatch('updateAllDepositOffers').then(() => dispatch('updateRewards'))
+            )
         },
 
         async updateValidators({ dispatch }) {
-            dispatch('updateValidatorsCurrent')
-            dispatch('updateValidatorsPending')
+            const p1 = dispatch('updateValidatorsCurrent')
+            const p2 = dispatch('updateValidatorsPending')
+            await Promise.all([p1, p2])
         },
 
         async updateValidatorsCurrent({ state, commit }) {
@@ -76,11 +74,9 @@ const platform_module: Module<PlatformState, RootState> = {
         async updateValidatorsPending({ state, commit }) {
             let res = (await ava.PChain().getPendingValidators()) as GetPendingValidatorsResponse
             let validators = res.validators
-            let delegators = res.delegators
 
             //@ts-ignore
             state.validatorsPending = validators
-            state.delegatorsPending = delegators
         },
 
         async updateAllDepositOffers({ state, commit }) {
@@ -97,6 +93,7 @@ const platform_module: Module<PlatformState, RootState> = {
 
             state.depositOffers = res
         },
+
         async updateRewards({ state, commit, rootState }) {
             const newRewards: PlatformRewards = { treasuryRewards: [], depositRewards: [] }
             const wallet = rootState.activeWallet
@@ -139,55 +136,28 @@ const platform_module: Module<PlatformState, RootState> = {
                 return true
             })
 
-            let delegatorMap: ValidatorDelegatorDict = getters.nodeDelegatorMap
-            let delegatorPendingMap: ValidatorDelegatorPendingDict = getters.nodeDelegatorPendingMap
-
             let res: ValidatorListItem[] = []
 
             for (var i = 0; i < validators.length; i++) {
                 let v = validators[i]
 
-                let nodeID = v.nodeID
-
-                let delegators: DelegatorRaw[] = delegatorMap[nodeID] || []
-                let delegatorsPending: DelegatorPendingRaw[] = delegatorPendingMap[nodeID] || []
-
-                let delegatedAmt = new BN(0)
-                let delegatedPendingAmt = new BN(0)
-
-                if (delegators) {
-                    delegatedAmt = delegators.reduce((acc: BN, val: DelegatorRaw) => {
-                        return acc.add(new BN(val.stakeAmount))
-                    }, new BN(0))
-                }
-
-                if (delegatorsPending) {
-                    delegatedPendingAmt = delegatorsPending.reduce(
-                        (acc: BN, val: DelegatorPendingRaw) => {
-                            return acc.add(new BN(val.stakeAmount))
-                        },
-                        new BN(0)
-                    )
-                }
-
                 let startTime = new Date(parseInt(v.startTime) * 1000)
                 let endTime = new Date(parseInt(v.endTime) * 1000)
 
-                let delegatedStake = delegatedAmt.add(delegatedPendingAmt)
                 let validatorStake = new BN(v.stakeAmount)
                 // Calculate remaining stake
                 let absMaxStake = ONEAVAX.mul(new BN(3000000))
                 let relativeMaxStake = validatorStake.mul(new BN(5))
                 let stakeLimit = BN.min(absMaxStake, relativeMaxStake)
 
-                let remainingStake = stakeLimit.sub(validatorStake).sub(delegatedStake)
+                let remainingStake = stakeLimit.sub(validatorStake)
 
                 let listItem: ValidatorListItem = {
                     nodeID: v.nodeID,
                     validatorStake: validatorStake,
-                    delegatedStake: delegatedStake,
+                    delegatedStake: ZeroBN,
                     remainingStake: remainingStake,
-                    numDelegators: delegators.length + delegatorsPending.length,
+                    numDelegators: 0,
                     startTime: startTime,
                     endTime,
                     uptime: parseFloat(v.uptime),
@@ -215,23 +185,6 @@ const platform_module: Module<PlatformState, RootState> = {
                 let validator = validators[i]
                 let nodeID = validator.nodeID
                 res[nodeID] = validator.delegators || []
-            }
-            return res
-        },
-
-        nodeDelegatorPendingMap(state): ValidatorDelegatorPendingDict {
-            let res: ValidatorDelegatorPendingDict = {}
-            let delegators = state.delegatorsPending
-            for (var i = 0; i < delegators.length; i++) {
-                let delegator = delegators[i]
-                let nodeID = delegator.nodeID
-                let target = res[nodeID]
-
-                if (target) {
-                    res[nodeID].push(delegator)
-                } else {
-                    res[nodeID] = [delegator]
-                }
             }
             return res
         },
