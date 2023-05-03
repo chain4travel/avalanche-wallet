@@ -31,7 +31,7 @@
                                 @change_end="setEnd"
                                 :typeDateForm="'validatorDateForm'"
                                 :minEndDate="minValidationEndDate"
-                                :maxEndDate="maxValidationEndDateValidationPeriod"
+                                :maxEndDate="maxValidationEndDate"
                             ></DateForm>
                         </div>
                         <div style="margin: 30px 0">
@@ -514,9 +514,12 @@ export default class AddValidator extends Vue {
         return endDate.toISOString()
     }
 
-    get maxValidationEndDateValidationPeriod(): string {
-        const date = moment().add(5, 'years').toDate().toISOString()
-        return date
+    get maxValidationEndDate(): string {
+        const date = new Date(this.transactionEndDate)
+        const milisMinStakeDuration = ava.getNetwork().P.maxStakeDuration * 10000
+        const end = date.getTime() + milisMinStakeDuration
+        const endDate = new Date(end)
+        return endDate.toISOString()
     }
 
     onerror(err: any) {
