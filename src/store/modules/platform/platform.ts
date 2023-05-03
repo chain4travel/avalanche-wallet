@@ -87,7 +87,7 @@ const platform_module: Module<PlatformState, RootState> = {
             state.depositOffers = res
         },
 
-        async updateRewards({ state, rootState }) {
+        async updateRewards({ state, rootState, getters }) {
             const newRewards: PlatformRewards = { treasuryRewards: [], depositRewards: [] }
             const wallet = rootState.activeWallet
             if (wallet) {
@@ -114,15 +114,19 @@ const platform_module: Module<PlatformState, RootState> = {
                     (a) => ({ locktime: '0', threshold: 1, addresses: [a] } as OwnerParam)
                 )
 
+                let validatorFound = false
                 const pushReward = (c: Claimable, idx: number, v: boolean) => {
+                    if (v) validatorFound = true
                     newRewards.treasuryRewards.push({
                         type: v ? 'validator' : 'deposit',
                         amountToClaim: c.expiredDepositRewards,
-                        rewardOwner: {
-                            addresses: owners[idx].addresses,
-                            threshold: owners[idx].threshold,
-                            locktime: new BN(owners[idx].locktime),
-                        },
+                        rewardOwner: c.rewardOwner
+                            ? c.rewardOwner
+                            : {
+                                  addresses: owners[idx].addresses,
+                                  threshold: owners[idx].threshold,
+                                  locktime: new BN(owners[idx].locktime),
+                              },
                     })
                 }
 
@@ -132,6 +136,23 @@ const platform_module: Module<PlatformState, RootState> = {
                         if (!c.expiredDepositRewards.isZero()) pushReward(c, idx, false)
                         if (!c.validatorRewards.isZero()) pushReward(c, idx, true)
                     })
+                    if (!validatorFound) {
+                        const v = getters.getValidatorByRewardOwner(addresses) as ValidatorRaw
+                        if (v)
+                            pushReward(
+                                {
+                                    rewardOwner: {
+                                        addresses: v.rewardOwner.addresses,
+                                        threshold: parseInt(v.rewardOwner.threshold),
+                                        locktime: new BN(v.rewardOwner.locktime),
+                                    },
+                                    validatorRewards: ZeroBN,
+                                    expiredDepositRewards: ZeroBN,
+                                },
+                                -1,
+                                true
+                            )
+                    }
                 } catch (e: unknown) {
                     console.log(e)
                 }
@@ -147,7 +168,11 @@ const platform_module: Module<PlatformState, RootState> = {
                 state.validatorsPending.findIndex((v) => v.nodeID === nodeID) >= 0
             )
         },
-
+        getValidatorByRewardOwner: (state) => (addresses: string[]): ValidatorRaw | undefined => {
+            return state.validators.find(
+                (v) => v.rewardOwner.addresses.findIndex((a) => addresses.includes(a)) >= 0
+            )
+        },
         depositOffer: (state) => (depositOfferID: string) => {
             return state.depositOffers.find((v) => v.id === depositOfferID)
         },
