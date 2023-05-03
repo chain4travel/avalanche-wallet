@@ -327,11 +327,23 @@ export default class UserRewardCard extends Vue {
                 rewardOwner,
                 this.pendingRewards
             )
-                .then(() => {
+                .then((value) => {
+                    if (!value) {
+                        // multisg flow
+                        dispatchNotification({
+                            message: this.$t('notifications.transfer_success_msg'),
+                            type: 'success',
+                        })
+                        this.$store.dispatch('Platform/updateActiveDepositOffer')
+                        this.$store.dispatch('Assets/updateUTXOs')
+                        this.$store.dispatch('Signavault/updateTransaction')
+                        this.$store.dispatch('History/updateMultisigTransactionHistory')
+                        return this.updateMultisigTxDetails()
+                    }
+
                     this.confiremedClaimedAmount = this.formattedAmount(this.pendingRewards)
                     setTimeout(() => this.updateBalance(), 500)
                     this.$store.dispatch('Platform/updateActiveDepositOffer')
-                    // this.$store.dispatch('Signavault/updateTransaction')
                     this.updateMultisigTxDetails()
                     dispatchNotification({
                         message: this.$t('notifications.transfer_success_msg'),
@@ -341,18 +353,10 @@ export default class UserRewardCard extends Vue {
                     this.disclamer = false
                 })
                 .catch((err) => {
-                    if (err instanceof SignatureError) {
-                        dispatchNotification({
-                            message: this.$t('notifications.transfer_success_msg'),
-                            type: 'success',
-                        })
-                        this.$store.dispatch('Platform/updateActiveDepositOffer')
-                        this.$store.dispatch('Assets/updateUTXOs')
-                        this.$store.dispatch('Signavault/updateTransaction')
-                        this.$store.dispatch('History/updateMultisigTransactionHistory')
-                        this.updateMultisigTxDetails()
-                    }
-                    console.error(err)
+                    dispatchNotification({
+                        message: 'Something went wrong', // TODO @Ayoub please add your message man :)
+                        type: 'error',
+                    })
                     this.claimed = false
                 })
         } else {
