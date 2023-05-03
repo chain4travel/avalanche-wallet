@@ -77,7 +77,19 @@
                                 {{ err }}
                             </li>
                         </ul>
-                        <template v-if="!!pendingSendMultisigTX && formType === 'P'">
+                        <template v-if="!isConfirm && !pendingSendMultisigTX">
+                            <v-btn
+                                depressed
+                                class="button_primary"
+                                :ripple="false"
+                                @click="confirm"
+                                :disabled="!canSend"
+                                block
+                            >
+                                {{ $t('transfer.c_chain.confirm') }}
+                            </v-btn>
+                        </template>
+                        <template v-else-if="pendingSendMultisigTX && formType === 'P'">
                             <div class="multi-sig__container">
                                 <v-btn
                                     v-if="canExecuteMultisigTx"
@@ -110,58 +122,49 @@
                                 </v-btn>
                             </div>
                         </template>
-                        <template v-else-if="!isConfirm">
-                            <v-btn
-                                depressed
-                                class="button_primary"
-                                :ripple="false"
-                                @click="confirm"
-                                :disabled="!canSend"
-                                block
-                            >
-                                Confirm
-                            </v-btn>
+                        <template v-else-if="isConfirm && !isSuccess && !pendingSendMultisigTX">
+                            <p v-if="isMultiSigErr" style="color: var(--success)">
+                                <fa icon="check-circle"></fa>
+                                {{ $t('transfer.multisig.pending_transaction_created') }}
+                            </p>
+                            <template v-else>
+                                <p class="err">{{ err }}</p>
+                                <v-btn
+                                    depressed
+                                    class="button_primary"
+                                    :loading="isAjax"
+                                    :ripple="false"
+                                    @click="submit"
+                                    :disabled="!canSend"
+                                    block
+                                >
+                                    {{ $t('transfer.send') }}
+                                </v-btn>
+                                <v-btn
+                                    text
+                                    block
+                                    small
+                                    style="margin-top: 20px !important; color: var(--primary-color)"
+                                    @click="cancelConfirm"
+                                >
+                                    {{ $t('misc.cancel') }}
+                                </v-btn>
+                            </template>
                         </template>
-                        <template v-else-if="isConfirm && !isSuccess">
-                            <p class="err">{{ err }}</p>
-                            <v-btn
-                                depressed
-                                class="button_primary"
-                                :loading="isAjax"
-                                :ripple="false"
-                                @click="submit"
-                                :disabled="!canSend"
-                                block
-                            >
-                                {{ $t('transfer.send') }}
-                            </v-btn>
-                            <v-btn
-                                text
-                                block
-                                small
-                                style="margin-top: 20px !important; color: var(--primary-color)"
-                                @click="cancelConfirm"
-                            >
-                                {{ $t('misc.cancel') }}
-                            </v-btn>
-                        </template>
-                        <template v-else-if="isSuccess">
-                            <div v-if="formType === 'P' && isMultiSig">
+                        <template v-else-if="isSuccess || isAborted">
+                            <template v-if="!isAborted">
                                 <p style="color: var(--success)">
                                     <fa icon="check-circle"></fa>
-                                    {{ $t('transfer.multisig.pending_transaction_created') }}
+                                    {{ $t('transfer.success_title') }}
                                 </p>
-                            </div>
-                            <div v-else>
-                                <p data-cy="transfer-tx-status" style="color: var(--success)">
-                                    <fa icon="check-circle"></fa>
-                                    Transaction Sent
-                                </p>
-                                <label v-if="formType !== 'P'" style="word-break: break-all">
+                                <label style="word-break: break-all">
                                     <b>ID:</b>
                                     {{ txId }}
                                 </label>
-                            </div>
+                            </template>
+                            <template v-else>
+                                <p>{{ $t('transfer.multisig.transaction_aborted') }}</p>
+                            </template>
                             <v-btn
                                 depressed
                                 style="margin-top: 14px"
@@ -231,7 +234,6 @@ import { getTransactionSummary } from '@/helpers/history_helper'
 export default class Transfer extends Vue {
     formType: ChainIdType = 'P'
     showAdvanced: boolean = false
-    intervalID: any = null
     isAjax: boolean = false
     addressIn: string = ''
     memo: string = ''
@@ -239,6 +241,7 @@ export default class Transfer extends Vue {
     nftOrders: UTXO[] = []
     formErrors: string[] = []
     err = ''
+    isMultiSigErr = false
     pendingTxAmount? = ''
 
     formAddress: string = ''
@@ -248,6 +251,7 @@ export default class Transfer extends Vue {
 
     isConfirm = false
     isSuccess = false
+    isAborted = false
     txId = ''
 
     canSendAgain = false
@@ -340,6 +344,7 @@ export default class Transfer extends Vue {
 
         this.txId = ''
         this.isSuccess = false
+        this.isAborted = false
         this.cancelConfirm()
 
         this.orders = []
@@ -375,7 +380,7 @@ export default class Transfer extends Vue {
         this.$store.dispatch('Assets/updateUTXOs').then(() => {
             this.updateSendAgainLock()
         })
-        setTimeout(() => this.$store.dispatch('History/updateTransactionHistory'), 3000)
+        if (tx) setTimeout(() => this.$store.dispatch('History/updateTransactionHistory'), 3000)
     }
 
     updateSendAgainLock() {
@@ -465,8 +470,9 @@ export default class Transfer extends Vue {
                 message: 'Your Transaction sent successfully.',
                 type: 'success',
             })
+            this.isConfirm = true
             this.updateMultisigTxDetails()
-            this.clearForm()
+            await this.onSuccess(this.pendingSendMultisigTX.tx.id)
         } catch (e: any) {
             this.helpers.dispatchNotification({
                 message: this.$t('notifications.execute_multisig_transaction_error'),
@@ -486,6 +492,8 @@ export default class Transfer extends Vue {
                     message: 'Transaction has been cancelled',
                     type: 'success',
                 })
+                this.isAborted = true
+                this.onSuccess('')
             }
         } catch (err) {
             console.log(err)
@@ -517,6 +525,7 @@ export default class Transfer extends Vue {
         return false
     }
     async updateMultisigTxDetails() {
+        this.isMultiSigErr = false
         if (this.formType !== 'P') return
         await this.$store.dispatch('Assets/updateUTXOs')
         await this.$store.dispatch('Signavault/updateTransaction')
@@ -538,17 +547,9 @@ export default class Transfer extends Vue {
             }
         } else {
             this.pendingTxAmount = ''
-            this.canSendAgain = true
         }
     }
-    // created() {
-    //     this.intervalID = setInterval(() => {
-    //         this.updateMultisigTxDetails()
-    //     }, 5000)
-    // }
-    // destroyed() {
-    //     clearInterval(this.intervalID)
-    // }
+
     submit() {
         this.isAjax = true
         this.err = ''
@@ -581,12 +582,10 @@ export default class Transfer extends Vue {
                         this.$store.dispatch('Signavault/updateTransaction').then(() => {
                             this.$store.dispatch('updateBalances')
                         })
-                    }, 1000)
-                    this.isSuccess = true
-                    this.canSendAgain = false
-                    this.isAjax = false
+                    }, 2000)
                     this.txState = TxState.success
                 }
+                this.isMultiSigErr = true
                 this.onError(err)
             })
     }
