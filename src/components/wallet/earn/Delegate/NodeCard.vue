@@ -11,9 +11,23 @@
             <!--            <p>{{ uptimeText }}</p>-->
             <p style="font-size: 0.8rem">
                 Please refer to
-                <a :href="vscoutURL" target="_blank" rel="noopener noreferrer">VScout</a>
+                <a
+                    @click="redirect('vscoutURL')"
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    VScout
+                </a>
                 or
-                <a :href="avascanURL" target="_blank" rel="noopener noreferrer">Avascan</a>
+                <a
+                    @click="redirect('avascanURL')"
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Avascan
+                </a>
                 to get more information about a node's uptime.
             </p>
         </div>
@@ -93,6 +107,16 @@ export default class NodeCard extends Vue {
 
     get nativeAssetSymbol(): string {
         return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
+    }
+    redirect(type: string) {
+        switch (type) {
+            case 'vscoutURL':
+                window.open(this.vscoutURL, '_blank')
+                break
+            case 'avascanURL':
+                window.open(this.avascanURL, '_blank')
+                break
+        }
     }
 }
 </script>
