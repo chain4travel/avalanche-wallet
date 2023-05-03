@@ -66,8 +66,6 @@
             </div>
             <div class="requirement_title">
                 <fa class="info_status_icon" icon="info-circle"></fa>
-                <!-- <fa v-if="isNodeRegistered" class="success_status_icon" icon="check-circle"></fa>
-                <fa v-else class="error_status_icon" icon="times-circle"></fa> -->
                 <h4>
                     {{ $t('earn.validate.warns.consortium_member_address_linked_to_node') }}
                     <a
