@@ -16,10 +16,14 @@
 
         <template v-slot:deck>
             <div v-if="fileType === 'pdf'" class="pdf">
-                <a :href="url" target="_blank" class="" rel="noopener noreferrer">Open Document</a>
+                <a @click="redirect()" href="#" target="_blank" rel="noopener noreferrer">
+                    Open Document
+                </a>
             </div>
             <div v-else-if="fileType == null" class="unknown">
-                <a :href="url" target="_blank" class="" rel="noopener noreferrer">Open URL</a>
+                <a @click="redirect()" href="#" target="_blank" rel="noopener noreferrer">
+                    Open URL
+                </a>
             </div>
         </template>
 
@@ -52,6 +56,9 @@ export default class URL_NFT extends Vue {
 
     get url(): string {
         return this.payload.getContent().toString('utf-8')
+    }
+    redirect() {
+        window.open(this.url, '_blank')
     }
     get fileType(): string | null {
         let url = this.url
