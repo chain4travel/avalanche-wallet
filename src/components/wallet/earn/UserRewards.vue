@@ -24,6 +24,7 @@
                 :rewardOwner="v.rewardOwner"
                 :signatureStatus="signatureStatus(v.depositTxID)"
                 :alreadySigned="alreadySigned(v.depositTxID)"
+                :disallowedClaim="disallowedClaim(v.depositTxID)"
                 class="reward_card"
             />
         </div>
@@ -131,7 +132,7 @@ export default class UserRewards extends Vue {
         return isSigned
     }
 
-    getPendingMultisigTx(depositTxID: string): SignavaultTx | undefined {
+    pendingSendMultisigTX(): SignavaultTx | undefined {
         const tx: SignavaultTx = this.$store.getters['Signavault/transactions'].find(
             (item: any) =>
                 item?.tx?.alias === this.activeWallet.getStaticAddress('P') &&
@@ -139,14 +140,28 @@ export default class UserRewards extends Vue {
         )
 
         if (!tx) return undefined
+        return tx
+    }
+
+    signedDepositID() {
+        const tx = this.pendingSendMultisigTX()
+
+        if (!tx) return undefined
 
         const unsignedTx = new UnsignedTx()
         unsignedTx.fromBuffer(Buffer.from(tx.tx?.unsignedTx, 'hex'))
         const utx = unsignedTx.getTransaction()
+        // @ts-ignore
         const claimAmounts = utx.getClaimAmounts()
 
-        const depositId = bintools.cb58Encode(claimAmounts[0].getID())
+        return bintools.cb58Encode(claimAmounts[0].getID())
+    }
 
+    getPendingMultisigTx(depositTxID: string): SignavaultTx | undefined {
+        const tx = this.pendingSendMultisigTX()
+        if (!tx) return undefined
+
+        const depositId = this.signedDepositID()
         if (depositId === depositTxID) return tx
         else return undefined
     }
@@ -173,6 +188,14 @@ export default class UserRewards extends Vue {
         else if (this.canExecuteMultisigTx(depositTxID)) return 2
 
         return -1
+    }
+
+    disallowedClaim(depositTxID: string): boolean {
+        if (!this.pendingSendMultisigTX) return false
+        else {
+            if (!this.signedDepositID() || this.signedDepositID() === depositTxID) return false
+            else return true
+        }
     }
 
     refresh() {

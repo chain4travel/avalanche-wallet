@@ -54,15 +54,15 @@
                 {{ $t('earn.rewards.active_earning.execute_claim') }}
             </v-btn>
             <div v-else-if="signatureStatus === -1 && disclamer" class="initiate_button_group">
-                <v-btn class="claim_button button_primary" @click="disclamer = false">
-                    {{ $t('earn.rewards.active_earning.cancel') }}
-                </v-btn>
                 <v-btn
                     class="claim_button initiate_button"
                     @click="confirmClaim"
                     :disabled="!canClaim"
                 >
                     {{ $t('earn.rewards.active_earning.initiate_transaction') }}
+                </v-btn>
+                <v-btn class="claim_button button_primary" @click="disclamer = false">
+                    {{ $t('earn.rewards.active_earning.cancel') }}
                 </v-btn>
             </div>
             <v-btn
@@ -90,7 +90,7 @@
                 v-else
                 class="claim_button button_primary"
                 @click="disclamer = true"
-                :disabled="!canClaim || noClaimInProgress"
+                :disabled="!canClaim || disallowedClaim"
             >
                 {{ $t('earn.rewards.active_earning.claim') }}
             </v-btn>
@@ -161,6 +161,7 @@ export default class UserRewardCard extends Vue {
     @Prop() rewardOwner!: RewardOwner
     @Prop() signatureStatus!: number
     @Prop() alreadySigned!: boolean
+    @Prop() disallowedClaim!: boolean
 
     get activeWallet(): MultisigWallet {
         return this.$store.state.activeWallet
@@ -270,30 +271,12 @@ export default class UserRewardCard extends Vue {
         this.$store.dispatch('History/updateTransactionHistory')
     }
 
-    get noClaimInProgress(): boolean {
-        if (!this.pendingSendMultisigTX) {
-            this.disclamer = false
-            return false
-        } else {
-            if (this.signedDepositID === this.depositTxID) {
-                this.disclamer = false
-                return false
-            }
-            return true
-        }
-    }
-
     openModal() {
-        this.updateMultisigTxDetails()
         this.$refs.modal_claim_reward.open()
     }
 
     $refs!: {
         modal_claim_reward: ModalClaimDepositReward
-    }
-
-    mounted() {
-        this.updateMultisigTxDetails()
     }
 
     updateNow() {
@@ -338,6 +321,7 @@ export default class UserRewardCard extends Vue {
                         this.$store.dispatch('Assets/updateUTXOs')
                         this.$store.dispatch('Signavault/updateTransaction')
                         this.$store.dispatch('History/updateMultisigTransactionHistory')
+                        this.disclamer = false
                         return this.updateMultisigTxDetails()
                     }
 

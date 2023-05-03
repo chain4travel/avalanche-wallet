@@ -22,11 +22,11 @@
                     </p>
                 </div>
                 <div class="modal-buttons">
-                    <v-btn depressed class="button_primary" @click="close()">
-                        {{ $t('earn.rewards.claim_modal.cancel') }}
-                    </v-btn>
                     <v-btn depressed class="button_secondary btn-claim" @click="confirmClaim()">
                         {{ $t('earn.rewards.claim_modal.confirm') }}
+                    </v-btn>
+                    <v-btn depressed class="button_primary" @click="close()">
+                        {{ $t('earn.rewards.claim_modal.cancel') }}
                     </v-btn>
                 </div>
             </div>
@@ -49,7 +49,7 @@
 import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import Modal from '../../modals/Modal.vue'
-import { BN } from '@c4tplatform/caminojs'
+import { Buffer, BN } from '@c4tplatform/caminojs'
 import Big from 'big.js'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import { WalletHelper } from '@/helpers/wallet_helper'
@@ -226,16 +226,16 @@ export default class ModalClaimDepositReward extends Vue {
             let unsignedTx = new UnsignedTx()
             unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
             const utx = unsignedTx.getTransaction()
+            // @ts-ignore
             const claimAmounts = utx.getClaimAmounts()
 
             const amount = claimAmounts[0].getAmount()
-            this.confiremedClaimedAmount = bnToBig(new BN(amount), 9)?.toString()
+            this.confiremedClaimedAmount = bnToBig(new BN(amount), 9)?.toLocaleString()
         } else this.confiremedClaimedAmount = ''
     }
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
 .claim-reward-modal {
     padding: 30px 22px;
     text-align: center;
@@ -251,8 +251,7 @@ export default class ModalClaimDepositReward extends Vue {
 }
 
 .text-modal {
-    text-align: left;
-    color: var(--error);
+    color: var(--warning);
 }
 
 @media screen and (max-width: 720px) {

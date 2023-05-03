@@ -476,8 +476,8 @@
             },
             "claim_modal": {
                 "are_you_sure": "Are you sure you want to claim {amount} {symbol} rewards?",
-                "note_message": "Kindly be aware that confirming this reward claim will require you to pay a transaction fee of {fee} {symbol}. Do you wish to proceed with the claim?",
-                "confirmation_message": "{amount} {symbol} have been claimed.",
+                "note_message": "Transaction fee:  {fee} {symbol}.",
+                "confirmation_message": "{amount} {symbol} has been claimed.",
                 "confirm": "Confirm",
                 "cancel": "Cancel"
             },
@@ -912,9 +912,9 @@
                 "confirmed_claimed": "{amount} {symbol} have been claimed."
             }
         },
-        "transaction_reward" : {
-            "title" : "Transaction details",
-            "from" : "From",
+        "transaction_reward": {
+            "title": "Transaction details",
+            "from": "From",
             "reward_address": "Reward Address",
             "start_date": "Start Date",
             "end_date": "End Date",
