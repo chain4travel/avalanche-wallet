@@ -16,6 +16,7 @@ import {
     DelegatorPendingRaw,
     DelegatorRaw,
     ValidatorRaw,
+    ActiveDeposit,
 } from '@/components/misc/ValidatorList/types'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 
@@ -103,7 +104,7 @@ const platform_module: Module<PlatformState, RootState> = {
                 const lockedTxIDs = await utxos.utxos.getLockedTxIDs()
                 const activeDepositOffers = await ava.PChain().getDeposits(lockedTxIDs.depositIDs)
 
-                const activeOffers = []
+                const activeOffers = [] as ActiveDeposit[]
 
                 for (const depositOffer of activeDepositOffers.deposits) {
                     const matchingOffer = state.depositOffers.find(

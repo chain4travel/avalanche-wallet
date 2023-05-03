@@ -159,6 +159,8 @@ export default class UserRewardCard extends Vue {
     @Prop() pendingRewards!: BN
     @Prop() alreadyClaimed!: BN
     @Prop() rewardOwner!: RewardOwner
+    @Prop() signatureStatus!: number
+    @Prop() alreadySigned!: boolean
 
     get activeWallet(): MultisigWallet {
         return this.$store.state.activeWallet
@@ -188,36 +190,6 @@ export default class UserRewardCard extends Vue {
         return this.pendingSendMultisigTX?.tx?.owners ?? []
     }
 
-    get alreadySigned(): boolean {
-        let isSigned = false
-        this.txOwners.forEach((owner) => {
-            if (
-                (this.activeWallet as MultisigWallet).wallets.find(
-                    (w) => w?.getAllAddressesP()?.[0] === owner.address
-                )
-            ) {
-                if (owner.signature) isSigned = true
-            }
-        })
-
-        return isSigned
-    }
-
-    get isTheClaimedDepositReward(): boolean {
-        return this.signedDepositID === this.depositTxID
-    }
-
-    get signatureStatus(): number {
-        // first claim
-        if (!this.pendingSendMultisigTX?.tx && this.isTheClaimedDepositReward) return -1
-        // has signed and cannot execute
-        else if (!this.canExecuteMultisigTx && this.isTheClaimedDepositReward) return 1
-        // has signed and can execute
-        else if (this.canExecuteMultisigTx && this.isTheClaimedDepositReward) return 2
-
-        return -1
-    }
-
     get numberOfSignatures(): number {
         let signers = 0
         this.txOwners.forEach((owner) => {
@@ -228,16 +200,6 @@ export default class UserRewardCard extends Vue {
 
     get threshold(): number {
         return this.pendingSendMultisigTX?.tx?.threshold ?? 0
-    }
-
-    get canExecuteMultisigTx(): boolean {
-        let signers = 0
-        let threshold = this.pendingSendMultisigTX?.tx?.threshold
-        this.txOwners.forEach((owner) => {
-            if (owner.signature) signers++
-        })
-        if (threshold) return signers >= threshold
-        return false
     }
 
     get rewardTitle(): string {
@@ -369,7 +331,7 @@ export default class UserRewardCard extends Vue {
                     this.confiremedClaimedAmount = this.formattedAmount(this.pendingRewards)
                     setTimeout(() => this.updateBalance(), 500)
                     this.$store.dispatch('Platform/updateActiveDepositOffer')
-                    this.$store.dispatch('Signavault/updateTransaction')
+                    // this.$store.dispatch('Signavault/updateTransaction')
                     this.updateMultisigTxDetails()
                     dispatchNotification({
                         message: this.$t('notifications.transfer_success_msg'),
@@ -384,13 +346,11 @@ export default class UserRewardCard extends Vue {
                             message: this.$t('notifications.transfer_success_msg'),
                             type: 'success',
                         })
+                        this.$store.dispatch('Platform/updateActiveDepositOffer')
+                        this.$store.dispatch('Assets/updateUTXOs')
+                        this.$store.dispatch('Signavault/updateTransaction')
+                        this.$store.dispatch('History/updateMultisigTransactionHistory')
                         this.updateMultisigTxDetails()
-                        setTimeout(() => {
-                            this.$store.dispatch('Assets/updateUTXOs')
-                            this.$store.dispatch('Signavault/updateTransaction').then(() => {
-                                this.$store.dispatch('History/updateMultisigTransactionHistory')
-                            })
-                        }, 1000)
                     }
                     console.error(err)
                     this.claimed = false
@@ -445,7 +405,6 @@ export default class UserRewardCard extends Vue {
     }
 
     private async updateMultisigTxDetails() {
-        await this.$store.dispatch('Signavault/updateTransaction')
         if (this.pendingSendMultisigTX) {
             let unsignedTx = new UnsignedTx()
             unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
