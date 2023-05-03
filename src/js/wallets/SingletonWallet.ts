@@ -1,14 +1,22 @@
+import * as bip39 from 'bip39'
+import HDKey from 'hdkey'
+import { privateToAddress } from '@ethereumjs/util'
+import { Transaction } from '@ethereumjs/tx'
+
 import { ava, bintools } from '@/AVA'
+import { ChainIdType } from '@/constants'
 import { ITransaction } from '@/components/wallet/transfer/types'
 import { digestMessage } from '@/helpers/helper'
 import { WalletNameType } from '@/js/wallets/types'
+import { buildUnsignedTransaction } from '../TxHelper'
+import { AvaWalletCore, UnsafeWallet } from './types'
+import Erc20Token from '@/js/Erc20Token'
+import { WalletCore } from '@/js/wallets/WalletCore'
+import { WalletHelper } from '@/helpers/wallet_helper'
+import { avmGetAllUTXOs, platformGetAllUTXOs } from '@/helpers/utxo_helper'
 
 import { Buffer as BufferAvalanche, BN } from '@c4tplatform/caminojs/dist'
 import { PayloadBase } from '@c4tplatform/caminojs/dist/utils'
-import { buildUnsignedTransaction } from '../TxHelper'
-import { AvaWalletCore, UnsafeWallet } from './types'
-import { privateToAddress } from '@ethereumjs/util'
-
 import {
     Tx as AVMTx,
     UnsignedTx as AVMUnsignedTx,
@@ -32,13 +40,6 @@ import {
 } from '@c4tplatform/caminojs/dist/apis/evm'
 import { SECP256k1KeyPair } from '@c4tplatform/caminojs/dist/common'
 
-import Erc20Token from '@/js/Erc20Token'
-import { WalletCore } from '@/js/wallets/WalletCore'
-import { WalletHelper } from '@/helpers/wallet_helper'
-import { avmGetAllUTXOs, platformGetAllUTXOs } from '@/helpers/utxo_helper'
-import { Transaction } from '@ethereumjs/tx'
-import { ChainIdType } from '@/constants'
-
 class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet {
     keyChain: AVMKeyChain
     keyPair: AVMKeyPair
@@ -50,6 +51,7 @@ class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet 
     chainIdP: string
 
     key: string
+    seed: string = ''
 
     stakeAmount: BN
 
@@ -62,12 +64,22 @@ class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet 
     ethAddressBech: string
     ethBalance: BN
 
-    constructor(pk: string) {
+    constructor(pk: string, mnemonic?: string, seedStr?: string) {
         super()
         this.name = 'Singleton Wallet'
 
-        this.key = pk
+        if (mnemonic) {
+            const seed: globalThis.Buffer = seedStr
+                ? Buffer.from(seedStr, 'hex')
+                : bip39.mnemonicToSeedSync(mnemonic)
+            this.seed = seed.toString('hex')
 
+            const masterHdKey: HDKey = HDKey.fromMasterSeed(seed)
+            const pkBuf = masterHdKey.derive("m/44'/60'/0'/0/0").privateKey
+            pk = `PrivateKey-` + bintools.cb58Encode(BufferAvalanche.from(pkBuf))
+        }
+
+        this.key = pk
         this.chainId = ava.XChain().getBlockchainAlias() || ava.XChain().getBlockchainID()
         this.chainIdP = ava.PChain().getBlockchainAlias() || ava.PChain().getBlockchainID()
 
@@ -100,6 +112,10 @@ class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet 
 
         this.type = 'singleton'
         this.isInit = true
+    }
+
+    getSeed(): string {
+        return this.seed
     }
 
     getStaticKeyPair(): SECP256k1KeyPair | undefined {
