@@ -60,7 +60,7 @@
                         <router-link to="/wallet/transfer">
                             {{ $t('wallet.sidebar.send') }}
                         </router-link>
-                        <router-link to="/wallet/cross_chain">
+                        <router-link v-if="walletType !== 'multisig'" to="/wallet/cross_chain">
                             {{ $t('wallet.sidebar.export') }}
                         </router-link>
                         <router-link to="/wallet/earn">{{ $t('wallet.sidebar.earn') }}</router-link>
@@ -109,6 +109,7 @@ import DayNightToggle from '@/components/misc/DayNightToggle.vue'
 import NetworkMenu from './NetworkSettings/NetworkMenu.vue'
 import ConfirmLogout from '@/components/modals/ConfirmLogout.vue'
 import AccountMenu from '@/components/wallet/sidebar/AccountMenu.vue'
+import { WalletNameType } from '@/js/wallets/types'
 @Component({
     components: {
         AccountMenu,
@@ -123,6 +124,10 @@ export default class Navbar extends Vue {
 
     get isAuth(): boolean {
         return this.$store.state.isAuth
+    }
+
+    get walletType(): WalletNameType {
+        return this.$store.state.activeWallet.type
     }
 
     logout(): void {

@@ -1,14 +1,22 @@
 <template>
     <div class="chain_select">
         <button @click="setChain('X')" :active="chain === 'X'">X</button>
-        <button @click="setChain('P')" :active="chain === 'P'">P</button>
-        <button @click="setChain('C')" :active="chain === 'C'" v-if="isEVMSupported">C</button>
+        <button @click="setChain('P')" :active="chain === 'P'" v-if="walletType !== 'multisig'">
+            P
+        </button>
+        <button
+            @click="setChain('C')"
+            :active="chain === 'C'"
+            v-if="isEVMSupported && walletType !== 'multisig'"
+        >
+            C
+        </button>
     </div>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
 import { Vue, Component, Model } from 'vue-property-decorator'
-import { ChainAlias, WalletType } from '@/js/wallets/types'
+import { ChainAlias, WalletType, WalletNameType } from '@/js/wallets/types'
 
 @Component
 export default class ChainSelect extends Vue {
@@ -18,6 +26,10 @@ export default class ChainSelect extends Vue {
         let wallet: WalletType | null = this.$store.state.activeWallet
         if (!wallet) return false
         return wallet.ethAddress
+    }
+
+    get walletType(): WalletNameType {
+        return this.$store.state.activeWallet.type
     }
 
     setChain(val: ChainAlias) {

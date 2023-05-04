@@ -15,6 +15,7 @@
                         {{ $t('wallet.sidebar.send') }}
                     </router-link>
                     <router-link
+                        v-if="walletType !== 'multisig'"
                         to="/wallet/home/cross_chain"
                         data-cy="wallet_export"
                         class="wallet_export wallet_link"
@@ -88,6 +89,7 @@ import { Vue, Component } from 'vue-property-decorator'
 import TopInfo from '@/components/wallet/TopInfo.vue'
 import MainPanel from '@/components/SidePanels/MainPanel.vue'
 import UpdateKeystoreModal from '@/components/modals/UpdateKeystore/UpdateKeystoreModal.vue'
+import { WalletNameType } from '@/js/wallets/types'
 
 const TIMEOUT_DURATION = 60 * 7 // in seconds
 const TIMEOUT_DUR_MS = TIMEOUT_DURATION * 1000
@@ -153,6 +155,10 @@ export default class Wallet extends Vue {
             path: '/wallet/home/advanced',
         },
     ]
+
+    get walletType(): WalletNameType {
+        return this.$store.state.activeWallet.type
+    }
 
     // Set the logout timestamp to now + TIMEOUT_DUR_MS
     resetTimer() {
