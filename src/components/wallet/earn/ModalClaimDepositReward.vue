@@ -22,7 +22,7 @@
                     </p>
                 </div>
                 <div class="modal-buttons">
-                    <v-btn depressed class="button_secondary btn-claim" @click="confirmClaim()">
+                    <v-btn depressed class="button_secondary" @click="confirmClaim()">
                         {{ $t('earn.rewards.claim_modal.confirm') }}
                     </v-btn>
                     <v-btn depressed class="button_primary" @click="close()">
@@ -188,6 +188,10 @@ export default class ModalClaimDepositReward extends Vue {
                 this.claimed = true
             } catch (err) {
                 console.error('Error confirming claim:', err)
+                dispatchNotification({
+                    message: this.$t('notifications.claim_reward_failed'),
+                    type: 'error',
+                })
                 this.claimed = false
             }
         }
