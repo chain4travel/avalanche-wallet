@@ -266,8 +266,6 @@ class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet 
         let cKeypair = this.ethKeyChain.importKey(this.ethKeyBech)
         this.ethAddressBech = cKeypair.getAddressString()
         this.ethBalance = new BN(0)
-
-        this.getUTXOs()
     }
 
     async signX(unsignedTx: AVMUnsignedTx): Promise<AVMTx> {
