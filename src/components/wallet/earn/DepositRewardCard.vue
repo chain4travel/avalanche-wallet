@@ -4,25 +4,25 @@
         <div class="offer_detail">
             <div class="offer_detail_left">
                 <div>
-                    <label>{{ $t('earn.rewards.active_earning.lock_start') }}:</label>
+                    <label>{{ $t('earn.rewards.active_earning.deposit_start') }}:</label>
                     <p class="reward">{{ startDate }}</p>
                 </div>
                 <div>
-                    <label>{{ $t('earn.rewards.active_earning.lock_end') }}:</label>
+                    <label>{{ $t('earn.rewards.active_earning.deposit_end') }}:</label>
                     <p class="reward">{{ endDate }}</p>
                 </div>
                 <div>
-                    <label>{{ $t('earn.rewards.active_earning.min_lock') }}:</label>
+                    <label>{{ $t('earn.rewards.offer.min_deposit') }}:</label>
                     <p class="reward">{{ cleanAvaxBN(minLock) }} CAM</p>
                 </div>
                 <div>
-                    <label>{{ $t('earn.rewards.active_earning.reward') }}:</label>
+                    <label>{{ $t('earn.rewards.offer.reward') }}:</label>
                     <p class="reward">{{ rewardPercent }} %</p>
                 </div>
             </div>
             <div class="offer_detail_right">
                 <div>
-                    <label>{{ $t('earn.rewards.active_earning.locked_amount') }}:</label>
+                    <label>{{ $t('earn.rewards.active_earning.deposited_amount') }}:</label>
                     <p class="reward">
                         {{ cleanAvaxBN(reward.deposit.amount) }} {{ nativeAssetSymbol }}
                     </p>

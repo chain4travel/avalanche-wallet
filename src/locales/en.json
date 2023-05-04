@@ -440,13 +440,24 @@
             "earn_now": {
                 "title": "Saving Pools"
             },
+            "offer": {
+                "title": "Active Saving Pools",
+                "reward": "Reward",
+                "pool_start": "Pool Start",
+                "pool_end": "Pool End",
+                "min_deposit": "Minimum Deposit",
+                "min_duration": "Minimum Duration",
+                "max_duration": "Maximum Duration",
+                "unlock_duration": "Unlock Duration",
+                "no_reward_duration": "NoReward Duration",
+                "available": "Amount Available",
+                "deposit": "Deposit Now"
+            },
             "active_earning": {
                 "title": "My Rewards",
-                "lock_start": "Lock Start",
-                "lock_end": "Lock End",
-                "min_lock": "Minimum Lock",
-                "reward": "Reward",
-                "locked_amount": "Locked Amount",
+                "deposit_start": "Deposit Start",
+                "deposit_end": "Deposit End",
+                "deposited_amount": "Deposited Amount",
                 "pending_reward": "Pending Reward",
                 "already_claimed": "Already Claimed",
                 "claim": "Claim Reward"

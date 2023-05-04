@@ -23,10 +23,11 @@
         </div>
         <div class="pages">
             <transition name="fade" mode="out-in">
-                <div v-if="tab === `earn_now`" key="earn_now">
-                    {{ $t('earn.rewards.no_saving_pool') }}
-                </div>
-                <UserRewards v-if="tab === `actine_earning`" key="actine_earning"></UserRewards>
+                <DepositOffers v-if="tab === `earn_now`" key="actine_earning"></DepositOffers>
+                <UserRewards
+                    v-else-if="tab === `actine_earning`"
+                    key="actine_earning"
+                ></UserRewards>
             </transition>
         </div>
     </div>
@@ -37,6 +38,7 @@ import { Vue, Component } from 'vue-property-decorator'
 import Big from 'big.js'
 
 import Spinner from '@/components/misc/Spinner.vue'
+import DepositOffers from '@/components/wallet/earn/DepositOffers.vue'
 import UserRewards from '@/components/wallet/earn/UserRewards.vue'
 import { bnToBig } from '@/helpers/helper'
 
@@ -45,6 +47,7 @@ import { BN } from '@c4tplatform/caminojs/dist'
 @Component({
     name: 'earn',
     components: {
+        DepositOffers,
         Spinner,
         UserRewards,
     },

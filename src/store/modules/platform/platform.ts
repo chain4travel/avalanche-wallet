@@ -73,17 +73,11 @@ const platform_module: Module<PlatformState, RootState> = {
         },
 
         async updateAllDepositOffers({ state }) {
-            const promises = [
-                ava.PChain().getAllDepositOffers(true),
-                ava.PChain().getAllDepositOffers(false),
-            ]
-
-            const results = await Promise.all(promises)
-            const concatenatedResults = results[0].concat(results[1])
-            const res = concatenatedResults.filter((value, index, self) => {
-                return self.findIndex((t) => t.id === value.id) === index
+            const res = await ava.PChain().getAllDepositOffers()
+            res.sort((a, b) => {
+                if (!a.start.eq(b.start)) return a.start.lt(b.start) ? -1 : 1
+                return a.id < b.id ? -1 : 1
             })
-
             state.depositOffers = res
         },
 
@@ -172,6 +166,11 @@ const platform_module: Module<PlatformState, RootState> = {
             return state.validators.find(
                 (v) => v.rewardOwner.addresses.findIndex((a) => addresses.includes(a)) >= 0
             )
+        },
+        depositOffers: (state) => (active: boolean) => {
+            const lockedFlag = new BN(1)
+            const expected = active ? ZeroBN : lockedFlag
+            return state.depositOffers.filter((v) => v.flags.and(lockedFlag).eq(expected))
         },
         depositOffer: (state) => (depositOfferID: string) => {
             return state.depositOffers.find((v) => v.id === depositOfferID)
