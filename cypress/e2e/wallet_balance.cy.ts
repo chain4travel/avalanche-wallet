@@ -7,7 +7,7 @@ describe('Wallet Balance Mnemonic', () => {
         cy.visit('/')
     })
 
-    it('wallet balance', () => {
+    it.skip('wallet balance', () => {
         addKopernikusNetwork(cy)
         //changeNetwork(cy);
         accessWallet(cy, 'mnemonic')

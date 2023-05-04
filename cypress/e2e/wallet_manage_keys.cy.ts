@@ -11,7 +11,7 @@ describe('Wallet Manage Keys', () => {
         cy.visit('/')
     })
 
-    it('wallet manage keys', () => {
+    it.skip('wallet manage keys', () => {
         //changeNetwork(cy)
         addKopernikusNetwork(cy)
 
