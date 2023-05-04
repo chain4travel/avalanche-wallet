@@ -50,6 +50,7 @@ import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { ActiveDeposit } from '@/components/misc/ValidatorList/types'
+import { ClaimTx } from '@c4tplatform/caminojs/dist/apis/platformvm/claimtx'
 
 @Component({
     components: {
@@ -120,11 +121,15 @@ export default class UserRewards extends Vue {
 
     alreadySigned(depositTxID: string): boolean {
         const txOwners = this.txOwners(depositTxID)
-        const walletAddresses = (this.activeWallet as MultisigWallet).wallets.map(
+        if (!txOwners) return false
+
+        const walletAddresses = (this.activeWallet as MultisigWallet)?.wallets?.map(
             (w) => w?.getAllAddressesP()?.[0]
         )
+        if (!walletAddresses) return false
 
         const isSigned = txOwners.some((owner) => {
+            if (!owner) return false
             const isOwnerSigned = owner.signature && walletAddresses.includes(owner.address)
             return isOwnerSigned
         })
@@ -150,8 +155,7 @@ export default class UserRewards extends Vue {
 
         const unsignedTx = new UnsignedTx()
         unsignedTx.fromBuffer(Buffer.from(tx.tx?.unsignedTx, 'hex'))
-        const utx = unsignedTx.getTransaction()
-        // @ts-ignore
+        const utx = unsignedTx.getTransaction() as ClaimTx
         const claimAmounts = utx.getClaimAmounts()
 
         return bintools.cb58Encode(claimAmounts[0].getID())

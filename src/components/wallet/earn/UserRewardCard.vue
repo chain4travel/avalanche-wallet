@@ -120,12 +120,13 @@ import { WalletType } from '@/js/wallets/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
-import { SignatureError, OutputOwners } from '@c4tplatform/caminojs/dist/common'
+import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
 import { RewardOwner } from '@/components/misc/ValidatorList/types'
 import { ava, bintools } from '@/AVA'
 
 import { Buffer } from '@c4tplatform/caminojs/dist'
 import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { ClaimTx } from '@c4tplatform/caminojs/dist/apis/platformvm/claimtx'
 
 @Component({
     filters: {
@@ -396,7 +397,7 @@ export default class UserRewardCard extends Vue {
         if (this.pendingSendMultisigTX) {
             let unsignedTx = new UnsignedTx()
             unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
-            const utx = unsignedTx.getTransaction()
+            const utx = unsignedTx.getTransaction() as ClaimTx
             const claimAmounts = utx.getClaimAmounts()
 
             this.signedDepositID = bintools.cb58Encode(claimAmounts[0].getID())

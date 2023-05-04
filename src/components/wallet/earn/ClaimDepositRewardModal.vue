@@ -61,6 +61,7 @@ import { SignatureError, OutputOwners } from '@c4tplatform/caminojs/dist/common'
 import { RewardOwner } from '@/components/misc/ValidatorList/types'
 import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { bnToBig } from '@/helpers/helper'
+import { ClaimTx } from '@c4tplatform/caminojs/dist/apis/platformvm/claimtx'
 
 @Component({
     components: {
@@ -225,8 +226,7 @@ export default class ModalClaimDepositReward extends Vue {
         if (this.pendingSendMultisigTX) {
             let unsignedTx = new UnsignedTx()
             unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
-            const utx = unsignedTx.getTransaction()
-            // @ts-ignore
+            const utx = unsignedTx.getTransaction() as ClaimTx
             const claimAmounts = utx.getClaimAmounts()
 
             const amount = claimAmounts[0].getAmount()
