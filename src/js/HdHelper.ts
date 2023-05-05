@@ -158,7 +158,7 @@ class HdHelper {
             console.error('HD Index not found yet.')
         }
 
-        let addrs: string[] = this.getAllDerivedAddresses()
+        let addrs: string[] = this.getAllAddresses()
         let result: AVMUTXOSet | PlatformUTXOSet
 
         if (this.chainId === 'X') {
@@ -222,7 +222,7 @@ class HdHelper {
     }
 
     // Returns all key pairs up to hd index
-    getAllDerivedKeys(upTo = this.hdIndex): AVMKeyPair[] | PlatformVMKeyPair[] {
+    getAllKeys(upTo = this.hdIndex): AVMKeyPair[] | PlatformVMKeyPair[] {
         let set: AVMKeyPair[] | PlatformVMKeyPair[] = this.ethKeyPair ? [this.ethKeyPair] : []
         for (var i = 0; i <= upTo; i++) {
             if (this.chainId === 'X') {
@@ -243,11 +243,17 @@ class HdHelper {
     }
 
     getAllDerivedAddresses(upTo = this.hdIndex, start = 0): string[] {
-        let res = this.ethKeyPair ? [this.getStaticAddress()] : []
+        const res = []
         for (var i = start; i <= upTo; i++) {
             let addr = this.getAddressForIndex(i)
             res.push(addr)
         }
+        return res
+    }
+
+    getAllAddresses(upTo = this.hdIndex, start = 0): string[] {
+        const res = this.getAllDerivedAddresses(upTo, start)
+        if (start === 0 && this.ethKeyPair) res.unshift(this.getStaticAddress())
         return res
     }
 
@@ -271,31 +277,22 @@ class HdHelper {
             chainID = ava.PChain().getBlockchainID()
         }
 
-        for (var i = 0; i < addrs.length - INDEX_RANGE; i++) {
-            let gapSize: number = 0
-
-            for (var n = 0; n < INDEX_RANGE; n++) {
-                let scanIndex = i + n
-                let scanAddr = addrs[scanIndex]
-
-                let rawAddr = scanAddr.split('-')[1]
-                let chains: string[] = addrChains[rawAddr]
-                if (!chains) {
-                    // If doesnt exist on any chain
-                    gapSize++
-                } else if (!chains.includes(chainID)) {
-                    // If doesnt exist on this chain
-                    gapSize++
-                } else {
-                    i = i + n
-                    break
-                }
+        let gapSize = 0,
+            i = 0
+        for (; i < addrs.length && gapSize < INDEX_RANGE; i++) {
+            let rawAddr = addrs[i].split('-')[1]
+            let chains: string[] = addrChains[rawAddr]
+            if (!chains || !chains.includes(chainID)) {
+                gapSize++
+            } else {
+                gapSize = 0
+                // No chance to find gap in this chunk
+                if (addrs.length - i < INDEX_RANGE) break
             }
-
-            // If the gap is reached return the index
-            if (gapSize === INDEX_RANGE) {
-                return startIndex + i
-            }
+        }
+        // If the gap is reached return the index
+        if (gapSize === INDEX_RANGE) {
+            return i - INDEX_RANGE
         }
 
         return await this.findAvailableIndexExplorer(startIndex + (upTo - INDEX_RANGE))
@@ -321,29 +318,25 @@ class HdHelper {
         }
 
         // Scan UTXOs of these indexes and try to find a gap of INDEX_RANGE
-        for (let i: number = 0; i < addrs.length - INDEX_RANGE; i++) {
-            let gapSize: number = 0
-            // console.log(`Scan index: ${this.chainId} ${this.changePath}/${i+start}`);
-            for (let n: number = 0; n < INDEX_RANGE; n++) {
-                let scanIndex: number = i + n
-                let addr: string = addrs[scanIndex]
-                let addrBuf = bintools.parseAddress(addr, this.chainId)
-                let addrUTXOs: string[] = utxoSet.getUTXOIDs([addrBuf])
-                if (addrUTXOs.length === 0) {
-                    gapSize++
-                } else {
-                    // Potential improvement
-                    i = i + n
-                    break
-                }
-            }
-
-            // If we found a gap of 20, we can return the last fullIndex+1
-            if (gapSize === INDEX_RANGE) {
-                let targetIndex = start + i
-                return targetIndex
+        let gapSize = 0,
+            i = 0
+        for (; i < addrs.length && gapSize < INDEX_RANGE; i++) {
+            let addrBuf = bintools.parseAddress(addrs[i], this.chainId)
+            let addrUTXOs: string[] = utxoSet.getUTXOIDs([addrBuf])
+            if (addrUTXOs.length === 0) {
+                gapSize++
+            } else {
+                gapSize = 0
+                // No chance to find gap in this chunk
+                if (addrs.length - i < INDEX_RANGE) break
             }
         }
+
+        // If we found a gap of 20, we can return the last fullIndex+1
+        if (gapSize === INDEX_RANGE) {
+            return i - INDEX_RANGE
+        }
+
         return await this.findAvailableIndexNode(start + SCAN_RANGE)
     }
 

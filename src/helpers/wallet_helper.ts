@@ -47,10 +47,9 @@ class WalletHelper {
         symbol: string,
         groupNum: number
     ) {
-        let fromAddresses = wallet.getDerivedAddresses()
-        let changeAddress = wallet.getChangeAddressAvm()
-
-        let minterAddress = wallet.getCurrentAddressAvm()
+        const fromAddresses = wallet.getAllAddressesX()
+        const changeAddress = wallet.getChangeAddressAvm()
+        const minterAddress = wallet.getCurrentAddressAvm()
 
         let utxoSet = wallet.utxoset
 
@@ -76,8 +75,7 @@ class WalletHelper {
     ) {
         let ownerAddress = wallet.getCurrentAddressAvm()
         let changeAddress = wallet.getChangeAddressAvm()
-
-        let sourceAddresses = wallet.getDerivedAddresses()
+        let sourceAddresses = wallet.getAllAddressesX()
 
         let utxoSet = wallet.utxoset
         let tx = await buildMintNftTx(
@@ -132,7 +130,9 @@ class WalletHelper {
             utxoSet.addArray(utxos)
         }
 
-        let pAddressStrings = wallet.getAllAddressesP()
+        const pAddressStrings = wallet.getAllAddressesP()
+        const signerAddresses = wallet.getSignerAddresses('P')
+        const nodeOwner = wallet.getStaticAddress('P')
 
         let stakeAmount = amt
 
@@ -150,17 +150,20 @@ class WalletHelper {
         let startTime = new BN(Math.round(start.getTime() / 1000))
         let endTime = new BN(Math.round(end.getTime() / 1000))
 
-        const unsignedTx = await ava.PChain().buildAddValidatorTx(
+        const unsignedTx = await ava.PChain().buildCaminoAddValidatorTx(
             utxoSet,
             [stakeReturnAddr],
-            pAddressStrings, // from
+            [pAddressStrings, signerAddresses], // from
             [changeAddress], // change
             nodeID,
+            {
+                address: nodeOwner,
+                auth: [[0, nodeOwner]],
+            },
             startTime,
             endTime,
             stakeAmount,
-            [rewardAddress],
-            delegationFee
+            [rewardAddress]
         )
 
         let tx = await wallet.signP(unsignedTx)
@@ -294,29 +297,25 @@ class WalletHelper {
         const pAddressStrings = wallet.getAllAddressesP()
         const utxoSet = wallet.getPlatformUTXOSet()
         const signerAddresses = wallet.getSignerAddresses('P')
-        const threshold =
-            wallet.type === 'multisig' ? (wallet as MultisigWallet)?.keyData?.owner?.threshold : 1
+        const nodeOwner = wallet.getStaticAddress('P')
 
-        const unsignedTx = await ava
-            .PChain()
-            .buildAddValidatorTx(
-                utxoSet,
-                pAddressStrings,
-                [pAddressStrings, signerAddresses],
-                pAddressStrings,
-                nodeID,
-                startTime,
-                endTime,
-                stakeAmount,
-                pAddressStrings,
-                0,
-                undefined,
-                1,
-                undefined,
-                undefined,
-                threshold,
-                threshold
-            )
+        let rewardAddress = wallet.getPlatformRewardAddress()
+
+        const unsignedTx = await ava.PChain().buildCaminoAddValidatorTx(
+            utxoSet,
+            pAddressStrings,
+            [pAddressStrings, signerAddresses],
+            pAddressStrings,
+            nodeID,
+            {
+                address: nodeOwner,
+                auth: [[0, nodeOwner]],
+            },
+            startTime,
+            endTime,
+            stakeAmount,
+            [rewardAddress]
+        )
 
         try {
             const tx = await wallet.signP(unsignedTx, undefined, endTxTime)
@@ -451,36 +450,70 @@ class WalletHelper {
 
     static async getClaimables(address: string, txID?: string) {
         try {
-            let responseClaimable = await ava.PChain().getClaimables([address])
-            return responseClaimable
+            //Claimables Params
+            let responseClaimable = await ava.PChain().getClaimables([
+                {
+                    locktime: '0',
+                    threshold: 1,
+                    addresses: [address],
+                },
+            ])
+            return responseClaimable.claimables[0]
         } catch (e) {
             console.error(e)
         }
     }
 
-    static async buildClaimTx(address: string, amount: BN, activeWallet: WalletType) {
-        let addressBufferTest = ava.PChain().parseAddress(address)
-        const claimableSigners: [number, Buffer][] = [[0, addressBufferTest]]
-        let rewardsOwner = new OutputOwners([addressBufferTest])
+    static async buildClaimTx(
+        address: string,
+        amount: BN,
+        activeWallet: WalletType,
+        rewardOwnerAddress: string
+    ) {
+        let addressRewardOwnerBuffer = ava.PChain().parseAddress(rewardOwnerAddress)
+
+        //let arrSigner = [rewardOwnerAddress]
+        let signerAddresses = activeWallet.getSignerAddresses('P')
+
+        //signerAddresses = arrSigner.concat(signerAddresses)
+
+        const changeAddress = activeWallet.getChangeAddressPlatform()
+
+        const threshold =
+            activeWallet.type === 'multisig'
+                ? (activeWallet as MultisigWallet)?.keyData?.owner?.threshold
+                : 1
+
+        let utxoSet = activeWallet.utxoset
+
         const unsignedTx = await ava.PChain().buildClaimTx(
             //@ts-ignore
-            undefined,
-            [address],
-            [address],
-            undefined,
-            new BN(0),
-            1,
+            utxoSet,
+            [[rewardOwnerAddress], signerAddresses],
+            [changeAddress],
+            undefined, // memo
+            new BN(0), //as Of
+            Number(threshold),
             [
                 {
                     amount: amount,
-                    claimType: ClaimType.ACTIVE_DEPOSIT_REWARD,
-                    owners: new OutputOwners([addressBufferTest], ZeroBN, 1),
+                    claimType: ClaimType.VALIDATOR_REWARD,
+                    owners: new OutputOwners([addressRewardOwnerBuffer], ZeroBN, 1),
                     sigIdxs: [0],
                 } as ClaimAmountParams,
             ]
         )
-        let tx = await activeWallet.signP(unsignedTx)
-        return await ava.PChain().issueTx(tx)
+
+        try {
+            let tx = await activeWallet.signP(unsignedTx)
+            return await ava.PChain().issueTx(tx)
+        } catch (err) {
+            if (err instanceof SignatureError) {
+                return undefined
+            } else {
+                throw err
+            }
+        }
     }
 
     static async findPendingValidator(nodeID: string): Promise<ValidatorRaw> {
@@ -493,41 +526,36 @@ class WalletHelper {
     }
 
     static async buildDepositClaimTx(
-        addresses: string[],
         wallet: WalletType,
-        amount: BN,
-        depositTxID: string
+        depositTxID: string,
+        depositRewardOwner: OutputOwners,
+        claimAmount: BN
     ) {
-        let utxoSet = wallet.utxoset
-
+        const pAddressStrings = wallet.getAllAddressesP()
         const signerAddresses = wallet.getSignerAddresses('P')
 
         // For change address use first available on the platform chain
         const changeAddress = wallet.getChangeAddressPlatform()
 
-        let addressBuffer = ava.PChain().parseAddress(addresses[0])
-
-        const threshold =
-            wallet.type === 'multisig' ? (wallet as MultisigWallet)?.keyData?.owner?.threshold : 1
-
-        const unsignedTx = await ava.PChain().buildClaimTx(
-            // @ts-ignore
-            utxoSet,
-            [addresses, signerAddresses],
-            [changeAddress],
-            undefined, // memo
-            new BN(0), // asOf
-            Number(threshold),
-            [
-                {
-                    id: bintools.cb58Decode(depositTxID),
-                    amount: amount,
-                    claimType: ClaimType.ACTIVE_DEPOSIT_REWARD,
-                    owners: new OutputOwners([addressBuffer], ZeroBN, 1),
-                    sigIdxs: [0],
-                } as ClaimAmountParams,
-            ]
-        )
+        const unsignedTx = await ava
+            .PChain()
+            .buildClaimTx(
+                wallet.platformUtxoset,
+                [pAddressStrings, signerAddresses],
+                [changeAddress],
+                Buffer.alloc(0),
+                ZeroBN,
+                1,
+                [
+                    {
+                        id: bintools.cb58Decode(depositTxID),
+                        claimType: ClaimType.ACTIVE_DEPOSIT_REWARD,
+                        amount: claimAmount,
+                        owners: depositRewardOwner,
+                        sigIdxs: [0],
+                    } as ClaimAmountParams,
+                ]
+            )
 
         try {
             const tx = await wallet.signP(unsignedTx)

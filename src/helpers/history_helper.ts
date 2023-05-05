@@ -140,7 +140,7 @@ function getLossNFT(tx: ITransactionData, wallet: WalletType): NFTSummaryResultD
 
 function getGainNFT(tx: ITransactionData, wallet: WalletType): NFTSummaryResultDict {
     let walletAddrs = wallet.getHistoryAddresses()
-    let addrsStripped = walletAddrs.map((addr) => addr.split('-')[1])
+    let addrsStripped = new Set<string>(walletAddrs.map((addr) => addr.split('-')[1]))
 
     let inputs = tx.inputs || []
     let outputs = tx.outputs
@@ -167,7 +167,7 @@ function getGainNFT(tx: ITransactionData, wallet: WalletType): NFTSummaryResultD
         let owners = utxo.addresses
         let assetID = utxo.assetID
 
-        let intersect = owners.filter((addr) => addrsStripped.includes(addr))
+        let intersect = owners.filter((addr) => addrsStripped.has(addr))
 
         // Did we gain it?
         if (intersect.length > 0) {
@@ -197,7 +197,7 @@ function getLoss(tx: ITransactionData, wallet: WalletType): TokenSummaryResult {
     let outs = tx.outputs
 
     let walletAddrs = wallet.getHistoryAddresses()
-    let addrsStripped = walletAddrs.map((addr) => addr.split('-')[1])
+    let addrsStripped = new Set<string>(walletAddrs.map((addr) => addr.split('-')[1]))
 
     let loss: TokenSummaryResult = {}
 
@@ -212,7 +212,7 @@ function getLoss(tx: ITransactionData, wallet: WalletType): TokenSummaryResult {
 
             let addrs = utxo.addresses
 
-            let intersect = addrs.filter((addr) => addrsStripped.includes(addr))
+            let intersect = addrs.filter((addr) => addrsStripped.has(addr))
 
             if (intersect.length === 0) continue
 
@@ -228,7 +228,7 @@ function getLoss(tx: ITransactionData, wallet: WalletType): TokenSummaryResult {
                     let outAddrs = utxo.addresses
                     // If not a wallet address and not added to receivers
                     let targets = outAddrs.filter(
-                        (addr: string) => !addrsStripped.includes(addr) && !receivers.includes(addr)
+                        (addr: string) => !addrsStripped.has(addr) && !receivers.includes(addr)
                     )
                     receivers.push(...targets)
                 }
@@ -248,7 +248,7 @@ function getRawLoss(tx: ITransactionData, wallet: WalletType): TokenSummaryResul
     let outs = ((tx.rawTx as unknown) as RawAvaxTx).getOuts()
 
     let walletAddrs = wallet.getHistoryAddresses()
-    let addrsStripped = walletAddrs.map((addr) => addr.split('-')[1])
+    let addrsStripped = new Set<string>(walletAddrs.map((addr) => addr.split('-')[1]))
 
     let loss: TokenSummaryResult = {}
 
@@ -264,7 +264,7 @@ function getRawLoss(tx: ITransactionData, wallet: WalletType): TokenSummaryResul
             if (outputType === AVMConstants.NFTXFEROUTPUTID) continue
 
             let addrs = strippedAddresses(utxo.getOutput().getAddresses())
-            let intersect = addrs.filter((addr) => addrsStripped.includes(addr))
+            let intersect = addrs.filter((addr) => addrsStripped.has(addr))
             if (intersect.length === 0) continue
 
             const assetId = utxo.getAssetID()
@@ -278,7 +278,7 @@ function getRawLoss(tx: ITransactionData, wallet: WalletType): TokenSummaryResul
                     let outAddrs = strippedAddresses(out.getAddresses())
                     // If not a wallet address and not added to receivers
                     let targets = outAddrs.filter(
-                        (addr: string) => !addrsStripped.includes(addr) && !receivers.includes(addr)
+                        (addr: string) => !addrsStripped.has(addr) && !receivers.includes(addr)
                     )
                     receivers.push(...targets)
                 }
@@ -304,7 +304,7 @@ function getProfit(tx: ITransactionData, wallet: WalletType): TokenSummaryResult
     let ins = tx.inputs || []
 
     let walletAddrs = wallet.getHistoryAddresses()
-    let addrsStripped = walletAddrs.map((addr) => addr.split('-')[1])
+    let addrsStripped = new Set<string>(walletAddrs.map((addr) => addr.split('-')[1]))
 
     let profit: TokenSummaryResult = {}
 
@@ -317,7 +317,7 @@ function getProfit(tx: ITransactionData, wallet: WalletType): TokenSummaryResult
 
             let addrs = utxo.addresses
 
-            let intersect = addrs.filter((addr) => addrsStripped.includes(addr))
+            let intersect = addrs.filter((addr) => addrsStripped.has(addr))
 
             if (intersect.length === 0) continue
 
@@ -334,7 +334,7 @@ function getProfit(tx: ITransactionData, wallet: WalletType): TokenSummaryResult
                     let outAddrs = utxo.addresses
                     // If not a wallet address and not added to senders
                     let targets = outAddrs.filter(
-                        (addr: string) => !addrsStripped.includes(addr) && !senders.includes(addr)
+                        (addr: string) => !addrsStripped.has(addr) && !senders.includes(addr)
                     )
                     senders.push(...targets)
                 }
@@ -354,7 +354,7 @@ function getRawProfit(tx: ITransactionData, wallet: WalletType): TokenSummaryRes
     let outs = ((tx.rawTx as unknown) as RawAvaxTx).getOuts()
 
     let walletAddrs = wallet.getHistoryAddresses()
-    let addrsStripped = walletAddrs.map((addr) => addr.split('-')[1])
+    let addrsStripped = new Set<string>(walletAddrs.map((addr) => addr.split('-')[1]))
 
     let profit: TokenSummaryResult = {}
 
@@ -365,7 +365,7 @@ function getRawProfit(tx: ITransactionData, wallet: WalletType): TokenSummaryRes
             const outIndex = out.getOutput().getOutputID()
 
             const addrs = strippedAddresses(out.getAddresses())
-            const intersect = addrs.filter((addr) => addrsStripped.includes(addr))
+            const intersect = addrs.filter((addr) => addrsStripped.has(addr))
             if (intersect.length === 0) continue
 
             let assetId = out.getAssetID()
@@ -380,7 +380,7 @@ function getRawProfit(tx: ITransactionData, wallet: WalletType): TokenSummaryRes
                     let outAddrs = strippedAddresses(utxo.getOutput().getAddresses())
                     // If not a wallet address and not added to senders
                     let targets = outAddrs.filter(
-                        (addr: string) => !addrsStripped.includes(addr) && !senders.includes(addr)
+                        (addr: string) => !addrsStripped.has(addr) && !senders.includes(addr)
                     )
                     senders.push(...targets)
                 }

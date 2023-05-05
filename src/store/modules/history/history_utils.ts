@@ -12,7 +12,7 @@ import {
     UnsignedTx as PlatformUnsignedTx,
 } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { EVMConstants, UnsignedTx as EVMUnsignedTx } from '@c4tplatform/caminojs/dist/apis/evm'
-
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { bufferToNodeIDString } from '@c4tplatform/caminojs/dist/utils'
 import moment from 'moment'
 
@@ -185,16 +185,15 @@ export function parseMemo(memoRaw: string): string {
     return memoText
 }
 
-export function parse(uptxs: UnparsedTx[]): ITransactionData[] {
+export function parse(uptxs: SignavaultTx[]): ITransactionData[] {
     const result: ITransactionData[] = []
     const asset = ava.getNetwork().X.avaxAssetID
     const assetBuf = bintools.cb58Decode(asset)
 
     uptxs.forEach((uptx) => {
         const itd: ITransactionData = {
-            multisigStatus: uptx.multisigStatus,
-            chainID: uptx.chainID,
-            id: uptx.txID,
+            chainID: uptx.tx.chainId,
+            id: uptx.tx.id,
             inputTotals: {},
             inputs: null,
             memo: '',
@@ -203,23 +202,22 @@ export function parse(uptxs: UnparsedTx[]): ITransactionData[] {
             reusedAddressTotals: null,
             rewarded: false,
             rewardedTime: '',
-            timestamp: uptx.timestamp,
+            timestamp: uptx.tx.timestamp,
             txFee: 0,
             type: 'base',
             validatorStart: 0,
             validatorEnd: 0,
             validatorNodeID: '',
         }
-        if (uptx.chainID === ava.PChain().getBlockchainID()) {
+        if (itd.chainID === ava.PChain().getBlockchainID()) {
             const utx = new PlatformUnsignedTx()
-            utx.fromBuffer(Buffer.from(uptx.txBytes, 'hex'))
+            utx.fromBuffer(Buffer.from(uptx.tx.unsignedTx, 'hex'))
             const tx = utx.getTransaction()
 
             itd.inputTotals = { [asset]: utx.getInputTotal(assetBuf).toString('hex') }
-            ;(itd.memo = tx.getMemo().toString()),
-                (itd.outputTotals = { [asset]: utx.getOutputTotal(assetBuf).toString('hex') }),
-                (itd.txFee = utx.getBurn(assetBuf).toNumber())
-
+            itd.memo = tx.getMemo().toString()
+            itd.outputTotals = { [asset]: utx.getOutputTotal(assetBuf).toString('hex') }
+            itd.txFee = utx.getBurn(assetBuf).toNumber()
             switch (tx.getTypeID()) {
                 case PlatformVMConstants.ADDVALIDATORTX:
                 case PlatformVMConstants.CAMINOADDVALIDATORTX: {
@@ -248,9 +246,9 @@ export function parse(uptxs: UnparsedTx[]): ITransactionData[] {
                 default:
                     break
             }
-        } else if (uptx.chainID === ava.CChain().getBlockchainID()) {
+        } else if (itd.chainID === ava.CChain().getBlockchainID()) {
             const utx = new EVMUnsignedTx()
-            utx.fromBuffer(Buffer.from(uptx.txBytes, 'hex'))
+            utx.fromBuffer(Buffer.from(uptx.tx.unsignedTx, 'hex'))
             const tx = utx.getTransaction()
 
             itd.inputTotals = { [asset]: utx.getInputTotal(assetBuf).toString('hex') }
