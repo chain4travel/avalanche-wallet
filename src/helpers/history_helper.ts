@@ -60,6 +60,7 @@ function addToDict(
 ) {
     if (dict[assetId]) {
         dict[assetId].amount = dict[assetId].amount.add(amount)
+        dict[assetId].deposited = dict[assetId].deposited.add(deposited)
 
         let addrDiff = addresses.filter((addr) => !dict[assetId].addresses.includes(addr))
         dict[assetId].addresses.push(...addrDiff)
