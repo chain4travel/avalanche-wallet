@@ -22,8 +22,11 @@
                 :alreadyClaimed="v.claimedRewardAmount"
                 :pendingRewards="v.pendingRewards"
                 :rewardOwner="v.rewardOwner"
+                :signatureStatus="signatureStatus(v.depositTxID)"
+                :alreadySigned="alreadySigned(v.depositTxID)"
+                :disallowedClaim="disallowedClaim(v.depositTxID)"
                 class="reward_card"
-            ></UserRewardCard>
+            />
         </div>
         <div v-else class="empty">No Active Earning</div>
     </div>
@@ -38,11 +41,16 @@ import UserRewardCard from '@/components/wallet/earn/UserRewardCard.vue'
 import { bnToBig } from '@/helpers/helper'
 import Big from 'big.js'
 import { BN } from '@c4tplatform/caminojs/dist'
-
+import { bintools } from '@/AVA'
 import { WalletType } from '@/js/wallets/types'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { WalletHelper } from '@/helpers/wallet_helper'
-import { SignaVault } from '@/signavault_api'
+import { Buffer } from '@c4tplatform/caminojs/dist'
+import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { ActiveDeposit } from '@/components/misc/ValidatorList/types'
+import { ClaimTx } from '@c4tplatform/caminojs/dist/apis/platformvm/claimtx'
 
 @Component({
     components: {
@@ -53,7 +61,7 @@ import { SignaVault } from '@/signavault_api'
 export default class UserRewards extends Vue {
     @Prop() loadingRefreshDepositRewards!: boolean
 
-    get activeOffers() {
+    get activeOffers(): ActiveDeposit[] {
         return this.$store.state.Platform.activeDepositOffer
     }
 
@@ -111,12 +119,87 @@ export default class UserRewards extends Vue {
         return this.$store.state.activeWallet
     }
 
-    get pendingSendMultisigTX(): SignavaultTx | undefined {
-        return this.$store.getters['Signavault/transactions'].find(
+    alreadySigned(depositTxID: string): boolean {
+        const txOwners = this.txOwners(depositTxID)
+        if (!txOwners) return false
+
+        const walletAddresses = (this.activeWallet as MultisigWallet)?.wallets?.map(
+            (w) => w?.getAllAddressesP()?.[0]
+        )
+        if (!walletAddresses) return false
+
+        const isSigned = txOwners.some((owner) => {
+            if (!owner) return false
+            const isOwnerSigned = owner.signature && walletAddresses.includes(owner.address)
+            return isOwnerSigned
+        })
+
+        return isSigned
+    }
+
+    pendingSendMultisigTX(): SignavaultTx | undefined {
+        const tx: SignavaultTx = this.$store.getters['Signavault/transactions'].find(
             (item: any) =>
-                item?.tx?.alias === this.activeWallet.getAllAddressesP()[0] &&
+                item?.tx?.alias === this.activeWallet.getStaticAddress('P') &&
                 WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
         )
+
+        if (!tx) return undefined
+        return tx
+    }
+
+    signedDepositID() {
+        const tx = this.pendingSendMultisigTX()
+
+        if (!tx) return undefined
+
+        const unsignedTx = new UnsignedTx()
+        unsignedTx.fromBuffer(Buffer.from(tx.tx?.unsignedTx, 'hex'))
+        const utx = unsignedTx.getTransaction() as ClaimTx
+        const claimAmounts = utx.getClaimAmounts()
+
+        return bintools.cb58Encode(claimAmounts[0].getID())
+    }
+
+    getPendingMultisigTx(depositTxID: string): SignavaultTx | undefined {
+        const tx = this.pendingSendMultisigTX()
+        if (!tx) return undefined
+
+        const depositId = this.signedDepositID()
+        if (depositId === depositTxID) return tx
+        else return undefined
+    }
+
+    txOwners(depositTxID: string): ModelMultisigTxOwner[] | [] {
+        return this.getPendingMultisigTx(depositTxID)?.tx?.owners ?? []
+    }
+
+    canExecuteMultisigTx(depositTxID: string): boolean {
+        let signers = 0
+        let threshold = this.getPendingMultisigTx(depositTxID)?.tx?.threshold
+        const txOwners = this.txOwners(depositTxID)
+
+        txOwners.forEach((owner) => {
+            if (owner.signature) signers++
+        })
+        if (threshold) return signers >= threshold
+        return false
+    }
+
+    signatureStatus(depositTxID: string): number {
+        if (!this.getPendingMultisigTx(depositTxID)?.tx) return -1
+        else if (!this.canExecuteMultisigTx(depositTxID)) return 1
+        else if (this.canExecuteMultisigTx(depositTxID)) return 2
+
+        return -1
+    }
+
+    disallowedClaim(depositTxID: string): boolean {
+        if (!this.pendingSendMultisigTX) return false
+        else {
+            if (!this.signedDepositID() || this.signedDepositID() === depositTxID) return false
+            else return true
+        }
     }
 
     refresh() {
