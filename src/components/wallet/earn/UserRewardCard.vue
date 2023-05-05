@@ -304,6 +304,7 @@ export default class UserRewardCard extends Vue {
     }
 
     openModal() {
+        this.disclamer = false
         this.$refs.modal_claim_reward.open()
     }
 
