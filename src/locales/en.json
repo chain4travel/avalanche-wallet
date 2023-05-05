@@ -514,7 +514,7 @@
             "label_5": "Tx Details",
             "duration": {
                 "label": "Validation End Date",
-                "desc": "Your @.native:(0) tokens will be locked until this date.",
+                "desc": "Your @.native:(0) tokens will be bonded until this date.",
                 "start": "Start Date & Time",
                 "end": "End Date & Time"
             },
@@ -546,9 +546,9 @@
             "confirmation": {
                 "id": "Node ID",
                 "amount": "Bonded Amount",
-                "start": "Start Date",
+                "start": "Validation Period Start",
                 "start_desc": "Your validation will start at least 5 minutes after you submit this form.",
-                "end": "End Date",
+                "end": "Validation Period End",
                 "fee": "Delegation Fee",
                 "reward": "Reward Address",
                 "type_local": "This wallet",
@@ -574,6 +574,8 @@
             },
             "errs": {
                 "duration_warn": "WARNING: You must have at least 14 days remaining on your validation period to accept delegations.",
+                "duration_warn_multisig": "WARNING: This transaction must be signed by at least {threshold} additional co-owners of your Multisignature wallet before the validation start date.",
+                "duration_warn_multisig_sumit": "WARNING: This transaction must be signed by at least {threshold} additional co-owners of your Multisignature wallet before the validation start date. Otherwise, this transaction will expire and you need to repeat the process.",
                 "date": "Start date must be in the future and end date must be after start date.",
                 "amount": "Stake amount must be at least {0} @.native:(0)",
                 "id": "Invalid Node ID.",
@@ -585,9 +587,11 @@
             "pending_multisig": {
                 "signed": "Signed",
                 "pending": "Pending",
-                "threshold": "{value}  out of  {threshold}  co-owners in your Multisig must sign the transaction that your validator node can be succesfully registered.",
+                "threshold": "{value} of your Multisignature’s co-owners have already signed this transaction. In total, {threshold} signatures are needed to enable executing the transaction.",
                 "execute_transaction": "Execute transaction",
-                "sign": "Sign"
+                "sign": "Sign",
+                "already_signed": "You already signed this transaction.",
+                "sign_transaction": "Please sign this transaction by using the Sign button above"
             }
         },
         "delegate": {
@@ -912,9 +916,9 @@
                 "confirmed_claimed": "{amount} {symbol} have been claimed."
             }
         },
-        "transaction_reward" : {
-            "title" : "Transaction details",
-            "from" : "From",
+        "transaction_reward": {
+            "title": "Transaction details",
+            "from": "From",
             "reward_address": "Reward Address",
             "start_date": "Start Date",
             "end_date": "End Date",
