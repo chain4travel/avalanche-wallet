@@ -32,7 +32,8 @@ export default class ERCNftFamilyRow extends Vue {
     @Prop() family!: ERCNftToken
 
     get walletBalance(): ERCNftBalance[] {
-        return this.$store.state.Assets.ERCNft.walletBalance[this.family.data.address] || []
+        const ownedTokens = (this.$store.state.Assets.ERCNft.walletBalance[this.family.data.address] || []).filter((token: ERCNftBalance) => token.quantity > 0)
+        return ownedTokens
     }
 
     get hasBalance() {

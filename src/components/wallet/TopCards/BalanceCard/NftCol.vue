@@ -99,7 +99,7 @@ export default class NftCol extends Vue {
         for (var tokenAddr in this.ercNftBalance) {
             let ercNftToken = this.$store.getters['Assets/ERCNft/find'](tokenAddr)
             let tokenIds = this.ercNftBalance[tokenAddr]
-            let tokens = tokenIds.map((id) => {
+            let tokens = tokenIds.filter(id => id.quantity > 0).map((id) => {
                 return {
                     token: ercNftToken,
                     id,
