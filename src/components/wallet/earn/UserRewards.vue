@@ -25,6 +25,7 @@
                 :signatureStatus="signatureStatus(v.depositTxID)"
                 :alreadySigned="alreadySigned(v.depositTxID)"
                 :disallowedClaim="disallowedClaim(v.depositTxID)"
+                :canExecuteMultisigTx="canExecuteMultisigTx(v.depositTxID)"
                 class="reward_card"
             />
         </div>
