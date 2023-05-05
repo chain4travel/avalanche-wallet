@@ -18,7 +18,12 @@
                             <p class="desc">
                                 {{ $t('earn.validate.duration.desc') }}
                             </p>
-                            <DateForm @change_end="setEnd"></DateForm>
+                            <DateForm
+                                @change_end="setEnd"
+                                :minDurationMs="minStakeDuration"
+                                :maxDurationMs="maxStakeDuration"
+                                :defaultDurationMs="defaultStakeDuration"
+                            ></DateForm>
                         </div>
                         <div style="margin: 30px 0">
                             <h4>{{ $t('earn.validate.amount.label') }}</h4>
@@ -142,7 +147,6 @@ import CurrencySelect from '@/components/misc/CurrencySelect/CurrencySelect.vue'
 import Spinner from '@/components/misc/Spinner.vue'
 import DateForm from '@/components/wallet/earn/DateForm.vue'
 import Expandable from '@/components/misc/Expandable.vue'
-import { AmountOutput, UTXO } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { WalletType } from '@/js/wallets/types'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import { bnToBig } from '@/helpers/helper'
@@ -151,9 +155,6 @@ import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 const MIN_MS = 60000
 const HOUR_MS = MIN_MS * 60
 const DAY_MS = HOUR_MS * 24
-
-const MIN_STAKE_DURATION = DAY_MS * 14
-const MAX_STAKE_DURATION = DAY_MS * 365
 
 @Component({
     name: 'add_validator',
@@ -216,6 +217,18 @@ export default class AddValidator extends Vue {
             this.rewardIn = ''
         }
         this.rewardDestination = val
+    }
+
+    get minStakeDuration() {
+        return ava.getNetwork().P.minStakeDuration
+    }
+
+    get maxStakeDuration() {
+        return ava.getNetwork().P.maxStakeDuration
+    }
+
+    get defaultStakeDuration() {
+        return 21 * DAY_MS
     }
 
     // Returns true to show a warning about short validation periods that can not take any delegators
@@ -352,12 +365,12 @@ export default class AddValidator extends Vue {
         let startMs = startDate.getTime()
         let endMs = endDate.getTime()
 
-        if (endMs - startMs < MIN_STAKE_DURATION) {
-            endDate = new Date(startMs + MIN_STAKE_DURATION)
+        if (endMs - startMs < this.minStakeDuration) {
+            endDate = new Date(startMs + this.minStakeDuration)
         }
         // If End date - start date is greater than max stake duration, adjust start date
-        if (endMs - startMs > MAX_STAKE_DURATION) {
-            startDate = new Date(endMs - MAX_STAKE_DURATION)
+        if (endMs - startMs > this.maxStakeDuration) {
+            startDate = new Date(endMs - this.maxStakeDuration)
         }
         try {
             this.isLoading = true

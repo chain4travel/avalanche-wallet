@@ -443,6 +443,7 @@
             "offer": {
                 "title": "Active Saving Pools",
                 "reward": "Reward",
+                "pool_size": "Pool Size",
                 "pool_start": "Pool Start",
                 "pool_end": "Pool End",
                 "min_deposit": "Minimum Deposit",
@@ -450,13 +451,14 @@
                 "max_duration": "Maximum Duration",
                 "unlock_duration": "Unlock Duration",
                 "no_reward_duration": "NoReward Duration",
-                "available": "Amount Available",
+                "balance": "Available for Deposit",
                 "deposit": "Deposit Now"
             },
             "active_earning": {
                 "title": "My Rewards",
                 "deposit_start": "Deposit Start",
                 "deposit_end": "Deposit End",
+                "deposit_amount": "Deposit Amount",
                 "deposited_amount": "Deposited Amount",
                 "pending_reward": "Pending Reward",
                 "already_claimed": "Already Claimed",

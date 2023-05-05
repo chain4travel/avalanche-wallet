@@ -145,22 +145,12 @@ export default class AvaxInput extends Vue {
 .col1 {
     border-radius: var(--border-radius-sm);
     background-color: var(--bg-light);
-    border: 1px solid transparent;
-    //display: flex;
     display: grid;
     grid-template-columns: max-content 1fr;
     width: 100%;
     box-sizing: border-box;
-    //overflow: auto;
     padding: 8px 14px;
     position: relative;
-
-    //&:hover {
-    //    border-color: var(--primary-color-light);
-    //}
-    //&:focus-within {
-    //    border-color: var(--secondary-color);
-    //}
 }
 
 .ticker {

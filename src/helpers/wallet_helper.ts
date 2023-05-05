@@ -410,6 +410,34 @@ class WalletHelper {
         let tx = await wallet.signP(unsignedTx)
         return await ava.PChain().issueTx(tx)
     }
+
+    static async buildDepositTx(
+        wallet: WalletType,
+        depositID: string,
+        depositDuration: number,
+        depositAmount: BN
+    ) {
+        const pAddressStrings = wallet.getAllAddressesP()
+        const signerAddresses = wallet.getSignerAddresses('P')
+        const rewardAddress = bintools.parseAddress(wallet.getPlatformRewardAddress(), 'P')
+        const changeAddress = wallet.getChangeAddressPlatform()
+
+        const unsignedTx = await ava
+            .PChain()
+            .buildDepositTx(
+                wallet.platformUtxoset,
+                [pAddressStrings, signerAddresses],
+                [changeAddress],
+                depositID,
+                depositDuration,
+                new OutputOwners([rewardAddress], ZeroBN, 1),
+                Buffer.alloc(0),
+                ZeroBN,
+                depositAmount
+            )
+        let tx = await wallet.signP(unsignedTx)
+        return await ava.PChain().issueTx(tx)
+    }
 }
 
 export { WalletHelper }

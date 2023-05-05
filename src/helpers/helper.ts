@@ -76,12 +76,35 @@ function cleanAvaxBN(val: BN): string {
     return big.toLocaleString()
 }
 
+function formatDuration(dur: number): string {
+    let result = ''
+    const addPart = (val: number, label: string) => {
+        if (val === 0) return
+        if (result !== '') result += ' '
+        result += val.toString() + label + (val === 1 ? '' : 's')
+    }
+
+    addPart(Math.floor(dur / 86400), ' Day')
+    dur = dur % 86400
+
+    addPart(Math.floor(dur / 3600), ' Hour')
+    dur = dur % 3600
+
+    addPart(Math.floor(dur / 60), ' Min')
+    dur = dur % 60
+
+    addPart(dur, ' Sec')
+
+    return result === '' ? 'No' : result
+}
+
 export {
     Big,
     bnToBig,
     calculateStakingReward,
     cleanAvaxBN,
     digestMessage,
+    formatDuration,
     getPayloadFromUTXO,
     keyToKeypair,
 }

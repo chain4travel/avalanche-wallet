@@ -2,6 +2,13 @@
     <div class="offer_row">
         <h3 class="offer_title">{{ rewardTitle }}</h3>
         <div class="offer_detail">
+            <div class="progress">
+                <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
+                <span>
+                    <span class="success" :style="'width:' + progress"></span>
+                </span>
+                {{ progressText }}
+            </div>
             <div class="offer_detail_left">
                 <div>
                     <label>{{ $t('earn.rewards.offer.pool_start') }}:</label>
@@ -18,13 +25,6 @@
                 <div>
                     <label>{{ $t('earn.rewards.offer.reward') }}:</label>
                     <p class="reward">{{ rewardPercent }} %</p>
-                </div>
-                <div>
-                    <label>{{ $t('earn.rewards.offer.available') }}:</label>
-                    <p class="reward">
-                        {{ cleanAvaxBN(maxDepositAmount) }}
-                        {{ nativeAssetSymbol }}
-                    </p>
                 </div>
             </div>
             <div class="offer_detail_right">
@@ -55,39 +55,29 @@
             </div>
         </div>
         <button
+            v-if="$listeners['selectOffer']"
             class="claim_button button_primary"
-            @click="openModal"
+            @click="emitOffer"
             :disabled="isDepositDisabled"
         >
             {{ $t('earn.rewards.offer.deposit') }}
         </button>
-        <ModalClaimReward ref="modal_deposit_reward" :amount="maxDepositAmount" />
     </div>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
-import { cleanAvaxBN } from '@/helpers/helper'
-import ModalClaimReward from '@/components/modals/ClaimRewardModal.vue'
+import { cleanAvaxBN, formatDuration } from '@/helpers/helper'
 import AvaAsset from '@/js/AvaAsset'
 
 import { BN } from '@c4tplatform/caminojs/dist'
 import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
-import { FormTagsPlugin } from 'bootstrap-vue'
 
-@Component({
-    components: {
-        ModalClaimReward,
-    },
-})
+@Component
 export default class DepositOfferCard extends Vue {
     @Prop() offer!: DepositOffer
     @Prop() maxDepositAmount!: BN
-
-    $refs!: {
-        modal_deposit_reward: ModalClaimReward
-    }
 
     get rewardTitle() {
         return Buffer.from(this.offer.memo.replace('0x', ''), 'hex').toString()
@@ -112,16 +102,35 @@ export default class DepositOfferCard extends Vue {
         return this.ava_asset?.symbol ?? ''
     }
 
-    get isDepositDisabled() {
+    get isDepositDisabled(): boolean {
         return this.maxDepositAmount.isZero()
+    }
+
+    get progress(): string {
+        return this.offer.totalMaxAmount.isZero()
+            ? '0px'
+            : this.offer.depositedAmount
+                  .div(this.offer.totalMaxAmount)
+                  .mul(new BN(100))
+                  .toString() + '%'
+    }
+
+    get progressText(): string {
+        return this.offer.totalMaxAmount.isZero()
+            ? 'No Limit'
+            : this.progress +
+                  '(' +
+                  cleanAvaxBN(this.offer.totalMaxAmount) +
+                  this.nativeAssetSymbol +
+                  ')'
+    }
+
+    emitOffer(): void {
+        this.$emit('selectOffer', this.offer)
     }
 
     cleanAvaxBN(val: BN): string {
         return cleanAvaxBN(val)
-    }
-
-    openModal() {
-        this.$refs.modal_deposit_reward.open()
     }
 
     formatDate(date: BN): string {
@@ -137,25 +146,7 @@ export default class DepositOfferCard extends Vue {
     }
 
     formatDuration(dur: number): string {
-        let result = ''
-        const addPart = (val: number, label: string) => {
-            if (val === 0) return
-            if (result !== '') result += ' '
-            result += val.toString() + label + (val === 1 ? '' : 's')
-        }
-
-        addPart(Math.floor(dur / 86400), ' Day')
-        dur = dur % 86400
-
-        addPart(Math.floor(dur / 3600), ' Hour')
-        dur = dur % 3600
-
-        addPart(Math.floor(dur / 60), ' Min')
-        dur = dur % 60
-
-        addPart(dur, ' Sec')
-
-        return result === '' ? 'None' : result
+        return formatDuration(dur)
     }
 }
 </script>
@@ -176,10 +167,29 @@ export default class DepositOfferCard extends Vue {
     margin-bottom: 1rem;
 }
 
+.progress {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-gap: 1.25rem;
+    > span {
+        margin-top: auto;
+        margin-bottom: auto;
+        height: 4px;
+        background-color: var(--bg);
+        display: inline-block;
+    }
+    .success {
+        height: 100%;
+        background-color: var(--color-success);
+        display: block;
+    }
+}
+
 .offer_detail {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-gap: 1.25rem;
+    grid-gap: 4px 1.25rem;
     .offer_detail_left {
         border-right: 2px solid var(--bg-wallet-light);
     }
@@ -187,6 +197,7 @@ export default class DepositOfferCard extends Vue {
 
 label {
     color: var(--primary-color-light) !important;
+    font-size: 13px;
 }
 
 .claim_button {
