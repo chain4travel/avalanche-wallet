@@ -3,6 +3,14 @@
         <Spinner v-if="loading" class="spinner-color"></Spinner>
 
         <div v-if="!loading" class="validator_child_card">
+            <div class="refresh_div">
+                <div class="refresh">
+                    <Spinner v-if="loading" class="spinner"></Spinner>
+                    <button v-else @click="refresh">
+                        <v-icon>mdi-refresh</v-icon>
+                    </button>
+                </div>
+            </div>
             <div class="validator_info">
                 <div class="alt_validator_info">
                     <div class="space-div"></div>
@@ -166,6 +174,15 @@ export default class ValidatorInfo extends Vue {
             this.loading = false
         }
     }
+
+    refresh() {
+        this.getInformationValidator()
+
+        this.$nextTick(() => {
+            //@ts-ignore
+            this.$refs.avax_input_bonded_amount.maxOut()
+        })
+    }
 }
 </script>
 <style scoped lang="scss">
@@ -297,5 +314,29 @@ h4 {
 
 .spinner-color {
     color: var(--primary-color);
+}
+
+.refresh_div {
+    position: relative;
+    float: right;
+    margin-top: -5%;
+
+    width: 20px;
+    height: 20px;
+    .v-icon {
+        color: var(--primary-color);
+    }
+
+    button {
+        outline: none !important;
+    }
+    img {
+        object-fit: contain;
+        width: 100%;
+    }
+
+    .spinner {
+        color: var(--primary-color) !important;
+    }
 }
 </style>
