@@ -94,12 +94,24 @@
                     }}
                 </h4>
 
-                <v-btn @click="issue" class="button_secondary mt2" depressed block>
+                <v-btn
+                    @click="issue"
+                    class="button_secondary mt2"
+                    depressed
+                    block
+                    :disabled="!canExecuteMultisigTx"
+                >
                     <Spinner v-if="loadingIssue" class="spinner"></Spinner>
                     <span v-else>
                         {{ $t('earn.validate.pending_multisig.execute_transaction') }}
                     </span>
                 </v-btn>
+                <p v-if="SignStatus">
+                    {{ $t('earn.validate.pending_multisig.already_signed') }}
+                </p>
+                <p v-else>
+                    {{ $t('earn.validate.pending_multisig.sign_transaction') }}
+                </p>
             </div>
         </div>
     </div>
@@ -148,6 +160,26 @@ export default class PendingMultisig extends Vue {
         return this.multisigTx?.state ?? -1
     }
 
+    get SignStatus(): boolean {
+        let isSigned = false
+        this.txOwners.forEach((owner) => {
+            if (
+                this.activeWallet.wallets.find((w) => w?.getAllAddressesP()?.[0] === owner.address)
+            ) {
+                if (owner.signature) isSigned = true
+            }
+        })
+        return isSigned
+    }
+    get canExecuteMultisigTx(): boolean {
+        let signers = 0
+        let threshold = this.multisigTx?.tx?.threshold
+        this.txOwners.forEach((owner) => {
+            if (owner.signature) signers++
+        })
+        if (threshold) return signers >= threshold
+        return false
+    }
     get txDetails() {
         let unsignedTx = new UnsignedTx()
         unsignedTx.fromBuffer(Buffer.from(this.multisigTx?.tx?.unsignedTx, 'hex'))
@@ -363,6 +395,6 @@ export default class PendingMultisig extends Vue {
     word-break: break-all;
 }
 .mt2 {
-    margin-top: 2rem;
+    margin: 2rem 0 1rem 0;
 }
 </style>
