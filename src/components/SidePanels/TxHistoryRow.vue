@@ -4,7 +4,7 @@
             <p class="time">
                 {{ timeText }}
                 <a
-                    v-if="explorerUrl"
+                    v-if="explorerUrl && !multisigTx"
                     :href="explorerUrl"
                     target="_blank"
                     tooltip="View in Explorer"
@@ -13,7 +13,7 @@
                     <fa icon="search"></fa>
                 </a>
             </p>
-            <div v-if="multisigTx === undefined" class="txid">
+            <div v-if="!multisigTx" class="txid">
                 <span class="mr-1">Tx:</span>
                 <ellipsis :text="transaction.id" copy="true"></ellipsis>
             </div>

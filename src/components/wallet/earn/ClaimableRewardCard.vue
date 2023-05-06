@@ -57,7 +57,7 @@ export default class ClaimableRewardCard extends Vue {
     }
 
     get title() {
-        return this.reward.type === 'validator' ? 'Validator Rewards' : 'Deposit Rewards'
+        return this.reward.type === 'validator' ? 'Validator Reward' : 'Deposit Reward'
     }
 
     cleanAvaxBN(val: BN): string {
