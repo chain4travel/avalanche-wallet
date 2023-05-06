@@ -39,7 +39,7 @@
                 </div>
             </div>
         </div>
-        <template v-if="!isMultiSig">
+        <div v-if="!isMultiSig" class="button_group">
             <v-btn
                 class="claim_button button_primary ava_button"
                 @click="openModal"
@@ -47,7 +47,7 @@
             >
                 {{ $t('earn.rewards.active_earning.claim') }}
             </v-btn>
-        </template>
+        </div>
         <template v-else>
             <div v-if="signatureStatus === 2" class="button_group">
                 <v-btn
