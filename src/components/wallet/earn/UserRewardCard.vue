@@ -51,43 +51,43 @@
         <template v-else>
             <div v-if="signatureStatus === 2" class="button_group">
                 <v-btn
-                    class="claim_button button_secondary ava_button"
+                    class="claim_button button_secondary"
                     @click="openModal"
                     :disabled="!canClaim"
                 >
                     {{ $t('earn.rewards.active_earning.execute_claim') }}
                 </v-btn>
-                <v-btn class="claim_button button_primary ava_button" @click="openAbortModal">
+                <v-btn class="claim_button button_primary" @click="openAbortModal">
                     {{ $t('earn.rewards.active_earning.abort') }}
                 </v-btn>
             </div>
             <div v-else-if="signatureStatus === -1 && disclamer" class="button_group">
                 <v-btn
-                    class="claim_button initiate_button ava_button"
-                    @click="confirmClaim"
+                    class="claim_button bordered_button"
+                    @click="openModal"
                     :disabled="!canClaim"
                 >
                     {{ $t('earn.rewards.active_earning.initiate_transaction') }}
                 </v-btn>
-                <v-btn class="claim_button button_primary ava_button" @click="disclamer = false">
+                <v-btn class="claim_button button_primary" @click="disclamer = false">
                     {{ $t('earn.rewards.active_earning.cancel') }}
                 </v-btn>
             </div>
             <div v-else-if="signatureStatus === 1 && !alreadySigned" class="button_group">
                 <v-btn
-                    class="claim_button button_primary ava_button"
+                    class="claim_button bordered_button"
                     @click="signMultisigTx"
                     :disabled="alreadySigned"
                 >
                     {{ $t('earn.rewards.active_earning.sign') }}
                 </v-btn>
-                <v-btn class="claim_button button_primary ava_button" @click="openAbortModal">
+                <v-btn class="claim_button button_primary" @click="openAbortModal">
                     {{ $t('earn.rewards.active_earning.abort') }}
                 </v-btn>
             </div>
             <div v-else-if="signatureStatus === 1 && alreadySigned" class="button_group">
                 <v-btn
-                    class="claim_button button_primary ava_button"
+                    class="claim_button bordered_button"
                     @click="signMultisigTx"
                     :disabled="alreadySigned"
                 >
@@ -98,13 +98,13 @@
                         })
                     }}
                 </v-btn>
-                <v-btn class="claim_button button_primary ava_button" @click="openAbortModal">
+                <v-btn class="claim_button button_primary" @click="openAbortModal">
                     {{ $t('earn.rewards.active_earning.abort') }}
                 </v-btn>
             </div>
             <div v-else class="button_group">
                 <v-btn
-                    class="claim_button button_primary ava_button"
+                    class="claim_button button_primary"
                     @click="disclamer = true"
                     :disabled="!canClaim || disallowedClaim"
                 >
@@ -120,6 +120,12 @@
             :depositTxID="depositTxID"
             :amount="pendingRewards"
             :rewardOwner="rewardOwner"
+            :canExecuteMultisigTx="canExecuteMultisigTx"
+        />
+        <ModalAbortSigning
+            ref="modal_abort_signing"
+            :title="$t('earn.rewards.abort_modal.title')"
+            :modalText="$t('earn.rewards.abort_modal.message')"
         />
         <ModalAbortSigning
             ref="modal_abort_signing"
@@ -187,6 +193,7 @@ export default class UserRewardCard extends Vue {
     @Prop() signatureStatus!: number
     @Prop() alreadySigned!: boolean
     @Prop() disallowedClaim!: boolean
+    @Prop() canExecuteMultisigTx!: boolean
 
     get activeWallet(): MultisigWallet {
         return this.$store.state.activeWallet
@@ -297,6 +304,7 @@ export default class UserRewardCard extends Vue {
     }
 
     openModal() {
+        this.disclamer = false
         this.$refs.modal_claim_reward.open()
     }
 
@@ -537,7 +545,7 @@ export default class UserRewardCard extends Vue {
     margin-top: 0.5rem;
 }
 
-.initiate_button {
+.bordered_button {
     border-width: 1px;
     border-style: solid;
     border-radius: var(--border-radius-lg);
@@ -547,6 +555,14 @@ export default class UserRewardCard extends Vue {
     background-color: transparent !important;
     &:hover {
         opacity: 0.6;
+    }
+    &[disabled] {
+        background: var(--bg-light);
+        border: var(--primary-border);
+        color: var(--primary-color-light);
+        border: var(--primary-border);
+        opacity: 0.3;
+        cursor: not-allowed;
     }
 }
 
