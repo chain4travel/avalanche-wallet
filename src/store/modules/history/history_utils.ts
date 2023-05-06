@@ -241,6 +241,10 @@ export function parse(uptxs: UnparsedTx[]): ITransactionData[] {
                     itd.type = 'export'
                     itd.rawTx = tx
                     break
+                case PlatformVMConstants.DEPOSITTX:
+                    itd.type = 'deposit'
+                    itd.rawTx = tx
+                    break
                 case PlatformVMConstants.CLAIMTX:
                     itd.type = 'claim'
                     itd.rawTx = tx

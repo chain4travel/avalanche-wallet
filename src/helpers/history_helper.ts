@@ -1,11 +1,14 @@
 import { ava, bintools } from '@/AVA'
 import { ZeroBN } from '@/constants'
 import { IsOutputDeposited, ITransactionData, RawTx, UTXO } from '@/store/modules/history/types'
+
 import { WalletType } from '@/js/wallets/types'
 
 import { BN, Buffer } from '@c4tplatform/caminojs/dist'
 import { AVMConstants } from '@c4tplatform/caminojs/dist/apis/avm'
+import { PlatformVMConstants, LockedOut } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import {
+    BaseOutput,
     StandardAmountOutput,
     StandardTransferableInput,
     StandardTransferableOutput,
@@ -254,14 +257,11 @@ function getRawLoss(tx: ITransactionData, wallet: WalletType): TokenSummaryResul
     let loss: TokenSummaryResult = {}
 
     if (ins) {
-        const utxoIds = ins.map((i) => i.getUTXOID())
-        const utxos = wallet.getPlatformUTXOSet().getAllUTXOs(utxoIds)
-
         for (const input of ins) {
             const utxo = wallet.getPlatformUTXOSet().getUTXO(input.getUTXOID())
             const utxoIndex = input.getOutputIdx().readUInt32BE(0)
 
-            let outputType = input.getTypeID()
+            let outputType = utxo.getOutput().getTypeID()
             if (outputType === AVMConstants.NFTXFEROUTPUTID) continue
 
             let addrs = strippedAddresses(utxo.getOutput().getAddresses())
@@ -270,7 +270,7 @@ function getRawLoss(tx: ITransactionData, wallet: WalletType): TokenSummaryResul
 
             const assetId = utxo.getAssetID()
             let amountBN = (utxo.getOutput() as StandardAmountOutput).getAmount()
-            const depositBN = IsOutputDeposited(outputType) ? amountBN : ZeroBN
+            const depositBN = IsRawOutputDeposited(utxo.getOutput()) ? amountBN : ZeroBN
 
             // Get who received this asset
             let receivers: string[] = []
@@ -361,8 +361,9 @@ function getRawProfit(tx: ITransactionData, wallet: WalletType): TokenSummaryRes
 
     if (outs) {
         for (const out of outs) {
+            const outputType = out.getOutput().getTypeID()
             // Skip NFTs
-            if (out.getTypeID() === AVMConstants.NFTXFEROUTPUTID) continue
+            if (outputType === AVMConstants.NFTXFEROUTPUTID) continue
             const outIndex = out.getOutput().getOutputID()
 
             const addrs = strippedAddresses(out.getAddresses())
@@ -371,7 +372,7 @@ function getRawProfit(tx: ITransactionData, wallet: WalletType): TokenSummaryRes
 
             let assetId = out.getAssetID()
             let amountBN = (out.getOutput() as StandardAmountOutput).getAmount()
-            const depositBN = IsOutputDeposited(out.getTypeID()) ? amountBN : ZeroBN
+            const depositBN = IsRawOutputDeposited(out.getOutput()) ? amountBN : ZeroBN
 
             // Get who sent this to you
             let senders: string[] = []
@@ -479,6 +480,13 @@ export function filterDuplicateTransactions(txs: ITransactionData[]) {
 
 function strippedAddresses(addrs: Buffer[]): string[] {
     return addrs.map((addr) => bintools.addressToString(ava.getHRP(), 'P', addr).slice(2))
+}
+
+function IsRawOutputDeposited(out: BaseOutput): boolean {
+    if (out.getTypeID() === PlatformVMConstants.LOCKEDOUTID) {
+        return !(out as LockedOut).getLockedIDs().getDepositTxID().isEmpty()
+    }
+    return false
 }
 
 export { getTransactionSummary }
