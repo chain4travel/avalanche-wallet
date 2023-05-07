@@ -71,8 +71,38 @@
                             <p>{{ durationText }}</p>
                         </div>
                         <div class="submit_box">
-                            <p v-if="warnShortDuration" class="err">
+                            <p v-if="warnShortDuration && !isMultiSig" class="err">
                                 {{ $t('earn.validate.errs.duration_warn') }}
+                            </p>
+                            <p
+                                v-else-if="
+                                    warnShortDuration &&
+                                    isMultiSig &&
+                                    thresholdMultiSig &&
+                                    !isConfirm
+                                "
+                                class="err"
+                            >
+                                {{
+                                    $t('earn.validate.errs.duration_warn_multisig', {
+                                        threshold: thresholdMultiSig - 1,
+                                    })
+                                }}
+                            </p>
+                            <p
+                                v-else-if="
+                                    warnShortDuration &&
+                                    isMultiSig &&
+                                    thresholdMultiSig &&
+                                    isConfirm
+                                "
+                                class="err"
+                            >
+                                {{
+                                    $t('earn.validate.errs.duration_warn_multisig_sumit', {
+                                        threshold: thresholdMultiSig - 1,
+                                    })
+                                }}
                             </p>
                             <p class="err">{{ err }}</p>
                             <v-btn
@@ -87,9 +117,6 @@
                                 {{ $t('earn.validate.confirm') }}
                             </v-btn>
                             <template v-else>
-                                <p v-if="isMultiSig" class="err">
-                                    {{ $t('earn.validate.label_4') }}
-                                </p>
                                 <v-btn
                                     @click="submit"
                                     class="button_secondary"
@@ -172,6 +199,7 @@ import { WalletType } from '@/js/wallets/types'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import { bnToBig } from '@/helpers/helper'
 import ValidatorPending from './ValidatorPending.vue'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 
 const MIN_MS = 60000
 const HOUR_MS = MIN_MS * 60
@@ -256,6 +284,10 @@ export default class AddValidator extends Vue {
     get isMultiSig() {
         let wallet: WalletType = this.$store.state.activeWallet
         return wallet.type === 'multisig'
+    }
+    get thresholdMultiSig(): number | undefined {
+        let wallet: WalletType = this.$store.state.activeWallet
+        return (wallet as MultisigWallet)?.keyData?.owner?.threshold
     }
     rewardSelect(val: 'local' | 'custom') {
         if (val === 'local') {

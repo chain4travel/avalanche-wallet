@@ -2,7 +2,7 @@
     <modal ref="modal" title="Claim Reward" @beforeClose="beforeClose">
         <div class="claim-reward-modal">
             <div v-if="!claimed">
-                <div>
+                <div v-if="canExecuteMultisigTx">
                     <h3>
                         {{
                             $t('earn.rewards.claim_modal.are_you_sure', {
@@ -11,6 +11,9 @@
                             })
                         }}
                     </h3>
+                </div>
+                <div v-if="!canExecuteMultisigTx">
+                    <AvaxInput v-model="amt" :max="amount" :initial="amount"></AvaxInput>
                     <br />
                     <p class="text-modal">
                         {{
@@ -22,7 +25,7 @@
                     </p>
                 </div>
                 <div class="modal-buttons">
-                    <v-btn depressed class="button_secondary" @click="confirmClaim()">
+                    <v-btn depressed class="button_secondary btn-claim" @click="confirmClaim()">
                         {{ $t('earn.rewards.claim_modal.confirm') }}
                     </v-btn>
                     <v-btn depressed class="button_primary" @click="close()">
@@ -48,6 +51,7 @@
 <script lang="ts">
 import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import AvaxInput from '@/components/misc/AvaxInput.vue'
 import Modal from '../../modals/Modal.vue'
 import { Buffer, BN } from '@c4tplatform/caminojs'
 import Big from 'big.js'
@@ -57,7 +61,7 @@ import { ava, bintools } from '@/AVA'
 import AvaAsset from '@/js/AvaAsset'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import { SignatureError, OutputOwners } from '@c4tplatform/caminojs/dist/common'
+import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
 import { RewardOwner } from '@/components/misc/ValidatorList/types'
 import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { bnToBig } from '@/helpers/helper'
@@ -65,6 +69,7 @@ import { ClaimTx } from '@c4tplatform/caminojs/dist/apis/platformvm/claimtx'
 
 @Component({
     components: {
+        AvaxInput,
         Modal,
     },
 })
@@ -72,8 +77,10 @@ export default class ModalClaimDepositReward extends Vue {
     @Prop({ required: true }) depositTxID!: string
     @Prop({ required: true }) amount!: BN
     @Prop({ required: true }) rewardOwner!: RewardOwner
+    @Prop() canExecuteMultisigTx!: boolean
     claimed: boolean = false
     confiremedClaimedAmount: string = ''
+    amt: BN = this.amount
 
     // @ts-ignore
     helpers = this.globalHelper()
@@ -157,43 +164,40 @@ export default class ModalClaimDepositReward extends Vue {
         )
 
         if (!this.pendingSendMultisigTX) {
-            // Initiate multisig transaction
-            WalletHelper.buildDepositClaimTx(wallet, this.depositTxID, rewardOwner, this.amount)
-                .then(() => {
-                    this.confiremedClaimedAmount = this.formattedAmount(this.amount)
+            WalletHelper.buildDepositClaimTx(wallet, this.depositTxID, rewardOwner, this.amt)
+                .then((value) => {
+                    if (!value) {
+                        // multisg flow
+                        this.$store.dispatch('Platform/updateActiveDepositOffer')
+                        this.$store.dispatch('Signavault/updateTransaction')
+                        dispatchNotification({
+                            message: this.$t('notifications.transfer_success_msg'),
+                            type: 'success',
+                        })
+                        this.claimed = true
+                        return this.updateMultisigTxDetails()
+                    }
+
+                    this.confiremedClaimedAmount = this.formattedAmount(this.amt)
                     this.updateBalance()
                     this.$store.dispatch('Platform/updateActiveDepositOffer')
+                    this.updateMultisigTxDetails()
+                    dispatchNotification({
+                        message: this.$t('notifications.transfer_success_msg'),
+                        type: 'success',
+                    })
                     this.claimed = true
                 })
                 .catch((err) => {
-                    if (err instanceof SignatureError) {
-                        dispatchNotification({
-                            message: this.$t('notifications.claim_success_msg'),
-                            type: 'success',
-                        })
-                        setTimeout(() => {
-                            this.$store.dispatch('Assets/updateUTXOs')
-                            this.$store.dispatch('Signavault/updateTransaction').then(() => {
-                                this.$store.dispatch('History/updateMultisigTransactionHistory')
-                            })
-                        }, 1000)
-                    }
-                    console.error(err)
+                    dispatchNotification({
+                        message: this.$t('notifications.something_went_wrong'),
+                        type: 'error',
+                    })
                     this.claimed = false
                 })
         } else {
-            try {
-                await this.issueMultisigTx()
-                this.updateBalance()
-                this.claimed = true
-            } catch (err) {
-                console.error('Error confirming claim:', err)
-                dispatchNotification({
-                    message: this.$t('notifications.claim_reward_failed'),
-                    type: 'error',
-                })
-                this.claimed = false
-            }
+            this.issueMultisigTx()
+            this.updateBalance()
         }
     }
 
@@ -209,8 +213,10 @@ export default class ModalClaimDepositReward extends Vue {
                 message: 'Your Transaction sent successfully.',
                 type: 'success',
             })
+            this.updateBalance()
             this.$store.dispatch('Platform/updateActiveDepositOffer')
             this.$store.dispatch('Signavault/updateTransaction')
+            this.claimed = true
         } catch (e: any) {
             console.error('MultiSigTx::sign: Error', e)
             this.helpers.dispatchNotification({
