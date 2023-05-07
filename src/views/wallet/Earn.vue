@@ -10,7 +10,7 @@
                     {{ $t('earn.rewards.active_earning.title') }}
                 </button>
             </div>
-            <div class="refresh" v-if="tab === 'actine_earning'">
+            <div class="refresh">
                 <Spinner v-if="loadingRefreshDepositRewards" class="spinner"></Spinner>
                 <button v-else @click="refresh">
                     <v-icon>mdi-refresh</v-icon>
@@ -19,15 +19,11 @@
         </div>
         <div class="pages">
             <transition name="fade" mode="out-in">
-                <div>
-                    <div v-show="tab === `earn_now`" key="earn_now">
-                        {{ $t('earn.rewards.no_saving_pool') }}
-                    </div>
-                    <UserRewards
-                        v-show="tab === `actine_earning`"
-                        key="actine_earning"
-                    ></UserRewards>
-                </div>
+                <DepositOffers v-if="tab === `earn_now`" key="earn_now" />
+                <UserRewards
+                    v-else-if="tab === `actine_earning`"
+                    key="actine_earning"
+                ></UserRewards>
             </transition>
         </div>
     </div>
@@ -37,6 +33,7 @@ import 'reflect-metadata'
 import { Vue, Component } from 'vue-property-decorator'
 
 import { BN } from '@c4tplatform/caminojs/dist'
+import DepositOffers from '@/components/wallet/earn/DepositOffers.vue'
 import UserRewards from '@/components/wallet/earn/UserRewards.vue'
 import { bnToBig } from '@/helpers/helper'
 import Big from 'big.js'
@@ -45,6 +42,7 @@ import Big from 'big.js'
     name: 'earn',
     components: {
         UserRewards,
+        DepositOffers,
     },
 })
 export default class Earn extends Vue {
