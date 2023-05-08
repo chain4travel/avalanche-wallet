@@ -11,6 +11,7 @@
                 placeholder="0.00"
                 @change="amount_in"
                 :readonly="readonly"
+                :initial="initial"
             ></BigNumInput>
         </div>
         <p class="ticker">{{ nativeAssetSymbol }}</p>
@@ -41,11 +42,11 @@ import { priceDict } from '../../store/types'
 })
 export default class AvaxInput extends Vue {
     @Model('change', { type: Object }) readonly amount!: BN
-
     @Prop({
         default: null,
     })
     max?: BN | null
+    @Prop() initial?: BN
 
     @Prop() balance?: Big | null
     @Prop() alias?: string

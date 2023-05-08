@@ -17,8 +17,10 @@
                 <h4>
                     {{ $t('earn.validate.warns.kyc_verified') }}
                     <a
-                        href="https://docs.camino.network/to/wallet-validate-kyc-kyb"
+                        @click="redirect('kyc-kyb')"
+                        href="#"
                         target="_blank"
+                        rel="noopener noreferrer"
                     >
                         <fa icon="external-link-alt"></fa>
                     </a>
@@ -30,8 +32,10 @@
                 <h4>
                     {{ $t('earn.validate.warns.consortium_member_verified') }}
                     <a
-                        href="https://docs.camino.network/to/wallet-validate-c-member"
+                        @click="redirect('validate-c-member')"
+                        href="#"
                         target="_blank"
+                        rel="noopener noreferrer"
                     >
                         <fa icon="external-link-alt"></fa>
                     </a>
@@ -50,18 +54,24 @@
                             cleanAvaxBN(minPlatformUnlocked),
                         ])
                     }}
-                    <a href="https://docs.camino.network/to/wallet-validate-cams" target="_blank">
+                    <a
+                        @click="redirect('validate-cams')"
+                        href="#"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                    >
                         <fa icon="external-link-alt"></fa>
                     </a>
                 </h4>
             </div>
             <div class="requirement_title">
-                <fa v-if="isNodeRegistered" class="success_status_icon" icon="check-circle"></fa>
-                <fa v-else class="error_status_icon" icon="times-circle"></fa>
+                <fa class="info_status_icon" icon="info-circle"></fa>
                 <h4>
                     {{ $t('earn.validate.warns.consortium_member_address_linked_to_node') }}
                     <a
-                        href="https://docs.camino.network/to/wallet-validate-reg-node"
+                        @click="redirect('validate-reg-node')"
+                        href="#"
+                        rel="noopener noreferrer"
                         target="_blank"
                     >
                         <fa icon="external-link-alt"></fa>
@@ -163,6 +173,22 @@ export default class RegisterNode extends Vue {
     nodeId = ''
     showMultisigTransactionDisclaimer = false
 
+    redirect(type: string) {
+        switch (type) {
+            case 'kyc-kyb':
+                window.open('https://docs.camino.network/to/wallet-validate-kyc-kyb', '_blank')
+                break
+            case 'validate-c-member':
+                window.open('https://docs.camino.network/to/wallet-validate-c-member', '_blank')
+                break
+            case 'validate-cams':
+                window.open('https://docs.camino.network/to/wallet-validate-cams', '_blank')
+                break
+            case 'validate-reg-node':
+                window.open('https://docs.camino.network/to/wallet-validate-reg-node', '_blank')
+                break
+        }
+    }
     cleanAvaxBN(val: BN) {
         let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
         return big.toLocaleString()
@@ -235,6 +261,10 @@ export default class RegisterNode extends Vue {
     color: var(--success);
 }
 
+.info_status_icon {
+    color: gray;
+}
+
 .error_status_icon {
     color: var(--error);
 }
@@ -300,6 +330,7 @@ input::placeholder {
 .refresh {
     width: 20px;
     height: 20px;
+
     .v-icon {
         color: var(--primary-color);
     }
@@ -307,6 +338,7 @@ input::placeholder {
     button {
         outline: none !important;
     }
+
     img {
         object-fit: contain;
         width: 100%;

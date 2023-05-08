@@ -1,5 +1,12 @@
 <template>
     <div>
+        <div class="refresh_div">
+            <div class="refresh">
+                <button @click="refresh">
+                    <v-icon>mdi-refresh</v-icon>
+                </button>
+            </div>
+        </div>
         <Spinner class="pending-validator" style="color: var(--primary-color)"></Spinner>
         <br />
         <p>
@@ -13,7 +20,13 @@
                     })
                 }}
             </span>
-            <a class="link-color" :href="link" target="_blank">
+            <a
+                class="link-color"
+                @click="redirect()"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
                 <fa icon="external-link-alt"></fa>
             </a>
         </p>
@@ -34,13 +47,46 @@ export default class ValidatorPending extends Vue {
     @Prop() startDate!: number
     link = 'https://docs.camino.network/to/wallet-validate-pending'
 
+    redirect() {
+        window.open(this.link, '_blank')
+    }
     get startDateFormatted() {
         return new Date(this.startDate * 1000).toLocaleString()
+    }
+
+    refresh() {
+        this.$emit('refresh')
     }
 }
 </script>
 <style scoped lang="scss">
 @use '../../../../styles/main';
+
+.refresh {
+    width: 20px;
+    height: 20px;
+    .v-icon {
+        color: var(--primary-color);
+    }
+
+    button {
+        outline: none !important;
+    }
+    img {
+        object-fit: contain;
+        width: 100%;
+    }
+
+    .spinner {
+        color: var(--primary-color) !important;
+    }
+}
+
+.refresh_div {
+    position: relative;
+    float: right;
+    margin-top: -5%;
+}
 
 .pending-validator {
     font-size: 40px;

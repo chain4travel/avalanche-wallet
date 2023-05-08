@@ -84,18 +84,12 @@ export interface GetDepositsRaw {
 }
 
 export interface ActiveDeposit {
-    id: string
     depositTxID: string
-    interestRateNominator: BN
-    start: BN
-    end: BN
-    minAmount: BN
-    minDuration: number
-    maxDuration: number
-    unlockPeriodDuration: number
-    noRewardsPeriodDuration: number
     memo: string
-    flags: BN
+    start: BN
+    lockDuration: number
+    minAmount: BN
+    interestRateNominator: BN
     amount: BN
     claimedRewardAmount: BN
     pendingRewards: BN
