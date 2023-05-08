@@ -891,7 +891,7 @@
     "validator": {
         "pending": {
             "validator_pending": "Your validator node is waiting for the transaction to be committed. For more information click here.",
-            "validator_pending_with_start_date": "Your node validator transaction will be committed at {startDate}. For more information click here."
+            "validator_pending_with_start_date": "Your validator is registered and will become active at {startDate}. For more information click here."
         },
         "info": {
             "staking_start_date": "Staking Start Date",
