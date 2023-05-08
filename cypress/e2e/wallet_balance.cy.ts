@@ -8,8 +8,7 @@ describe('Wallet Balance Mnemonic', () => {
     })
 
     it('wallet balance', () => {
-        addKopernikusNetwork(cy)
-        //changeNetwork(cy);
+        changeNetwork(cy)
         accessWallet(cy, 'mnemonic')
         interceptXChainBalance()
         interceptPChainBalance()
@@ -47,7 +46,7 @@ async function interceptXChainBalance() {
                         },
                         encoding: 'hex',
                     },
-                    id: 40,
+                    id: req.body.id,
                 },
             })
         } else {
@@ -74,7 +73,7 @@ async function interceptPChainBalance() {
                         },
                         encoding: 'hex',
                     },
-                    id: 106,
+                    id: req.body.id,
                 },
             })
         } else {
@@ -88,7 +87,7 @@ async function interceptChainBalance() {
         if (req.body.method == 'eth_getBalance') {
             req.reply({
                 statusCode: 200,
-                body: { jsonrpc: '2.0', id: 8, result: '0x115883a306cfc4200' },
+                body: { jsonrpc: '2.0', id: req.body.id, result: '0x115883a306cfc4200' },
             })
         } else {
             console.log('Other query in C Chain')
@@ -124,9 +123,6 @@ async function validateAllBalances() {
 
 function getTotalBalanceText(): Promise<number> {
     return new Promise((resolve, reject) => {
-        let balanceNumber = '0'
-        let balanceDecimals = '.0'
-        let balanceTotal = '0'
         cy.get('[data-cy="wallet_balance"]')
             .invoke('text')
             .then((data) => {
