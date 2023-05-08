@@ -37,7 +37,10 @@
                     ></register-node>
                 </div>
                 <template v-else-if="!!pendingValidator">
-                    <validator-pending :startDate="pendingValidator.startTime"></validator-pending>
+                    <validator-pending
+                        :startDate="pendingValidator.startTime"
+                        @refresh="refresh"
+                    ></validator-pending>
                 </template>
                 <template
                     v-else-if="
@@ -296,6 +299,7 @@ export default class Validator extends Vue {
     async refresh() {
         this.loadingRefreshRegisterNode = true
         await this.evaluateCanRegisterNode()
+        await this.updateValidators()
         this.loadingRefreshRegisterNode = false
     }
 
