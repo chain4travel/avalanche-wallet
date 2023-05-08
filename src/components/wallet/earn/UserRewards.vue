@@ -1,13 +1,5 @@
 <template>
     <div>
-        <div class="refresh_div">
-            <div class="refresh">
-                <Spinner v-if="loadingRefreshDepositRewards" class="spinner"></Spinner>
-                <button v-else @click="refresh">
-                    <v-icon>mdi-refresh</v-icon>
-                </button>
-            </div>
-        </div>
         <div class="user_offers" v-if="activeOffers.length > 0">
             <UserRewardCard
                 v-for="(v, i) in activeOffers"
@@ -202,11 +194,6 @@ export default class UserRewards extends Vue {
             else return true
         }
     }
-
-    refresh() {
-        this.$store.dispatch('Platform/updateActiveDepositOffer')
-        this.$store.dispatch('Signavault/updateTransaction')
-    }
 }
 </script>
 <style scoped lang="scss">
@@ -216,13 +203,6 @@ export default class UserRewards extends Vue {
     grid-template-columns: repeat(2, 1fr);
     grid-auto-rows: auto;
     grid-gap: 1rem;
-}
-.user_rewards {
-    padding-bottom: 5vh;
-}
-
-.reward_row {
-    margin-bottom: 12px;
 }
 
 h3 {
@@ -238,35 +218,6 @@ label {
     color: var(--primary-color-light);
     font-size: 14px;
     margin-bottom: 3px;
-}
-
-.amt {
-    font-size: 2em;
-}
-
-.refresh {
-    width: 20px;
-    height: 20px;
-    margin-left: auto;
-    .v-icon {
-        color: var(--primary-color);
-    }
-
-    button {
-        outline: none !important;
-    }
-    img {
-        object-fit: contain;
-        width: 100%;
-    }
-
-    .spinner {
-        color: var(--primary-color) !important;
-    }
-}
-
-.refresh_div {
-    margin-bottom: 10px;
 }
 
 @include main.medium-device {

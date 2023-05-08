@@ -481,6 +481,7 @@
                 "are_you_sure": "Are you sure you want to claim {amount} {symbol} rewards?",
                 "note_message": "Transaction fee:  {fee} {symbol}.",
                 "confirmation_message": "{amount} {symbol} has been claimed.",
+                "signature_collected": "Your signature has been collected.",
                 "confirm": "Confirm",
                 "cancel": "Cancel"
             },
@@ -600,7 +601,7 @@
                 "execute_transaction": "Execute transaction",
                 "sign": "Sign",
                 "already_signed": "You already signed this transaction.",
-                "sign_transaction": "Please sign this transaction by using the Sign button above"
+                "sign_transaction": "Please sign this transaction by using the Sign button above."
             }
         },
         "delegate": {

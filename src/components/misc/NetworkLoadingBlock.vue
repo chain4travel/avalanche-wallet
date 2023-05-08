@@ -24,14 +24,16 @@ export default class NetworkLoadingBlock extends Vue {
 </script>
 <style scoped lang="scss">
 .network_loading {
-    position: absolute;
+    position: fixed;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.4);
-    z-index: 999;
+    z-index: 9999;
     display: flex;
     justify-content: center;
     align-items: center;
+    top: 0;
+    left: 0;
 
     > div {
         border-radius: var(--border-radius-sm);
