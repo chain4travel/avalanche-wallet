@@ -13,6 +13,14 @@
                 :nodeInfo="nodeInfo"
             ></pending-multisig>
             <div v-else>
+                <div class="refresh_div">
+                    <div class="refresh">
+                        <Spinner v-if="loading" class="spinner"></Spinner>
+                        <button v-else @click="refresh">
+                            <v-icon>mdi-refresh</v-icon>
+                        </button>
+                    </div>
+                </div>
                 <div class="rewards-div">
                     <div>
                         <h4 class="input_label">
@@ -206,6 +214,12 @@ export default class ClaimRewards extends Vue {
             this.loading = false
         }, 100)
     }
+
+    refresh() {
+        this.getClaimableReward()
+        this.getPChainAddress()
+        this.getPendingTransaction()
+    }
 }
 </script>
 <style scoped lang="scss">
@@ -261,5 +275,29 @@ h4 {
     left: 15px;
     height: 24px !important;
     top: 5px;
+}
+
+.refresh_div {
+    position: relative;
+    float: right;
+    margin-top: -5%;
+
+    width: 20px;
+    height: 20px;
+    .v-icon {
+        color: var(--primary-color);
+    }
+
+    button {
+        outline: none !important;
+    }
+    img {
+        object-fit: contain;
+        width: 100%;
+    }
+
+    .spinner {
+        color: var(--primary-color) !important;
+    }
 }
 </style>
