@@ -540,7 +540,8 @@ export default class AddValidator extends Vue {
 
     get minValidationEndDate(): string {
         const date = new Date(this.transactionEndDate)
-        const milisMinStakeDuration = ava.getNetwork().P.minStakeDuration * 10000
+        const minStakeDuration = ava.getNetwork().P.minStakeDuration
+        const milisMinStakeDuration = minStakeDuration * 1000
         const end = date.getTime() + milisMinStakeDuration
         const endDate = new Date(end)
         return endDate.toISOString()
@@ -548,8 +549,9 @@ export default class AddValidator extends Vue {
 
     get maxValidationEndDate(): string {
         const date = new Date(this.transactionEndDate)
-        const milisMinStakeDuration = ava.getNetwork().P.maxStakeDuration * 10000
-        const end = date.getTime() + milisMinStakeDuration
+        const maxStakeDuration = ava.getNetwork().P.maxStakeDuration
+        const milisMaxStakeDuration = maxStakeDuration * 1000
+        const end = date.getTime() + milisMaxStakeDuration
         const endDate = new Date(end)
         return endDate.toISOString()
     }
