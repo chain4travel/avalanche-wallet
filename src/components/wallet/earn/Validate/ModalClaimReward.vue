@@ -112,7 +112,7 @@ export default class ModalClaimReward extends Vue {
                 this.close()
                 this.$emit('beforeCloseModal', false)
             } else {
-                this.confirmedClaimedAmountText = new BN(this.amount).toString()
+                this.confirmedClaimedAmountText = SDK.bnToBigAvaxX(new BN(this.amount)).toString()
                 this.claimed = true
             }
         } catch (e) {

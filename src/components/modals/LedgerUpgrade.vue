@@ -14,7 +14,8 @@
                 <small>
                     If you do not have the Avalanche app on your ledger, please add it through the
                     <a
-                        href="https://www.ledger.com/ledger-live/download"
+                        @click="redirect('ledger')"
+                        href="#"
                         target="_blank"
                         rel="noopener noreferrer"
                     >
@@ -22,11 +23,7 @@
                     </a>
                     app manager. The minimum version required to use the app is version 0.5.3, more
                     instructions can be found
-                    <a
-                        target="_blank"
-                        href="https://docs.avax.network/build/tutorials/platform/setup-your-ledger-nano-s-with-avalanche"
-                        rel="noopener noreferrer"
-                    >
+                    <a @click="redirect('docs')" target="_blank" href="#" rel="noopener noreferrer">
                         here
                     </a>
                     .
@@ -54,6 +51,19 @@ export default class LedgerUpgrade extends Vue {
         modal: Modal
     }
 
+    redirect(type: string) {
+        switch (type) {
+            case 'ledger':
+                window.open('https://www.ledger.com/ledger-live/download', '_blank')
+                break
+            case 'docs':
+                window.open(
+                    'https://docs.avax.network/build/tutorials/platform/setup-your-ledger-nano-s-with-avalanche',
+                    '_blank'
+                )
+                break
+        }
+    }
     open() {
         this.$refs.modal.open()
     }

@@ -3,7 +3,8 @@
         <p class="drop"><fa icon="tint"></fa></p>
         <p>{{ $t('transfer.faucet') }}</p>
         <a
-            :href="faucetLink + `?address=${selectedAddress}`"
+            @click="redirect()"
+            href="#"
             target="_blank"
             class="but_primary"
             rel="noopener noreferrer"
@@ -22,6 +23,12 @@ export default {
         },
         selectedAddress() {
             return this.$store.state.address
+        },
+    },
+    methods: {
+        redirect() {
+            let link = this.faucetLink + `?address=${this.selectedAddress}`
+            window.open(link, '_blank')
         },
     },
 }
