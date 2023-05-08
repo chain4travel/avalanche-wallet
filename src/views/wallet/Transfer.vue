@@ -95,7 +95,6 @@
                                     v-if="canExecuteMultisigTx"
                                     depressed
                                     class="button_secondary"
-                                    :loading="isAjax"
                                     @click="issueMultisigTx"
                                 >
                                     {{ $t('transfer.multisig.execute_transaction') }}
@@ -105,7 +104,6 @@
                                     class="button_secondary"
                                     @click="signMultisigTx"
                                     depressed
-                                    :loading="isAjax"
                                     :disabled="disableSignButton"
                                 >
                                     {{ $t('transfer.multisig.sign_transaction') }}
@@ -113,7 +111,6 @@
                                 <v-btn
                                     depressed
                                     class="button_primary"
-                                    :loading="isAjax"
                                     :ripple="false"
                                     @click="cancelMultisigTx"
                                     block
@@ -123,11 +120,7 @@
                             </div>
                         </template>
                         <template v-else-if="isConfirm && !isSuccess && !pendingSendMultisigTX">
-                            <p v-if="isMultiSigErr" style="color: var(--success)">
-                                <fa icon="check-circle"></fa>
-                                {{ $t('transfer.multisig.pending_transaction_created') }}
-                            </p>
-                            <template v-else>
+                            <template v-if="!isMultiSigErr">
                                 <p class="err">{{ err }}</p>
                                 <v-btn
                                     depressed
@@ -153,7 +146,7 @@
                         </template>
                         <template v-else-if="isSuccess || isAborted">
                             <template v-if="!isAborted">
-                                <p style="color: var(--success)">
+                                <p data-cy="transfer-tx-status" style="color: var(--success)">
                                     <fa icon="check-circle"></fa>
                                     {{ $t('transfer.success_title') }}
                                 </p>
@@ -466,10 +459,6 @@ export default class Transfer extends Vue {
         if (!this.pendingSendMultisigTX) return console.log('MultiSigTx::sign: Invalid Tx')
         try {
             await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
-            this.helpers.dispatchNotification({
-                message: 'Your Transaction sent successfully.',
-                type: 'success',
-            })
             this.isConfirm = true
             this.updateMultisigTxDetails()
             await this.onSuccess(this.pendingSendMultisigTX.tx.id)
@@ -573,20 +562,18 @@ export default class Transfer extends Vue {
             .catch((err) => {
                 if (err instanceof SignatureError) {
                     let { dispatchNotification } = this.globalHelper()
-                    dispatchNotification({
-                        message: this.$t('notifications.transfer_success_msg'),
-                        type: 'success',
-                    })
-                    setTimeout(() => {
-                        this.$store.dispatch('Assets/updateUTXOs')
-                        this.$store.dispatch('Signavault/updateTransaction').then(() => {
-                            this.$store.dispatch('updateBalances')
+                    this.$store.dispatch('Assets/updateUTXOs')
+                    this.$store.dispatch('Signavault/updateTransaction').then(() => {
+                        this.$store.dispatch('updateBalances')
+                        dispatchNotification({
+                            message: this.$t('notifications.transfer_success_msg'),
+                            type: 'success',
                         })
-                    }, 2000)
-                    this.txState = TxState.success
-                }
-                this.isMultiSigErr = true
-                this.onError(err)
+                        this.txState = TxState.success
+                        this.isAjax = false
+                        this.isMultiSigErr = true
+                    })
+                } else this.onError(err)
             })
     }
 
