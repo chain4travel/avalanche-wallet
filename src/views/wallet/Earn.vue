@@ -10,6 +10,12 @@
                     {{ $t('earn.rewards.active_earning.title') }}
                 </button>
             </div>
+            <div class="refresh" v-if="tab === 'actine_earning'">
+                <Spinner v-if="loadingRefreshDepositRewards" class="spinner"></Spinner>
+                <button v-else @click="refresh">
+                    <v-icon>mdi-refresh</v-icon>
+                </button>
+            </div>
         </div>
         <div class="pages">
             <transition name="fade" mode="out-in">
@@ -46,6 +52,7 @@ export default class Earn extends Vue {
     subtitle: string = ''
     intervalID: any = null
     tab: string = 'actine_earning'
+    loadingRefreshDepositRewards: boolean = false
 
     transfer() {
         this.$router.replace('/wallet/cross_chain')
@@ -89,6 +96,20 @@ export default class Earn extends Vue {
         let bn = this.$store.state.Platform.minStake
         return bnToBig(bn, 9)
     }
+
+    async refresh() {
+        try {
+            this.loadingRefreshDepositRewards = true
+            await Promise.all([
+                this.$store.dispatch('Platform/updateActiveDepositOffer'),
+                this.$store.dispatch('Signavault/updateTransaction'),
+            ])
+        } catch (error) {
+            console.error('Error refreshing deposit rewards:', error)
+        } finally {
+            this.loadingRefreshDepositRewards = false
+        }
+    }
 }
 </script>
 <style scoped lang="scss">
@@ -99,7 +120,34 @@ export default class Earn extends Vue {
     grid-template-rows: max-content 1fr;
 }
 
+.refresh {
+    max-width: 30px;
+    max-width: 30px;
+    margin-left: auto;
+    position: absolute;
+    top: 11px;
+    right: 0;
+    .v-icon {
+        color: var(--primary-color);
+    }
+
+    button {
+        padding: 0 !important;
+        margin: 0 !important;
+        outline: none !important;
+    }
+    img {
+        object-fit: contain;
+        width: 100%;
+    }
+
+    .spinner {
+        color: var(--primary-color) !important;
+    }
+}
+
 .header {
+    position: relative;
     display: flex;
     align-items: center;
     border-bottom: 2px solid transparent;
