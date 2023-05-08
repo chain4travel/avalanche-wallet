@@ -112,7 +112,6 @@
                     class="button_primary"
                     depressed
                     block
-                    :disabled="!canExecuteMultisigTx"
                 >
                     <Spinner v-if="loadingIssue" class="spinner"></Spinner>
                     <span v-else>
