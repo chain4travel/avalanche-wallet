@@ -170,7 +170,9 @@
         "multisig": {
             "execute_transaction": "Execute transaction",
             "sign_transaction": "Sign transaction",
-            "abort_transaction": "Abort transaction"
+            "abort_transaction": "Abort transaction",
+            "transaction_aborted": "Transaction canceled",
+            "pending_transaction_created": "Pending transaction created"
         },
         "source_chain": {
             "title": "Source Chain"
