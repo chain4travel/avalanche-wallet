@@ -34,7 +34,7 @@ import { Vue, Component, Watch } from 'vue-property-decorator'
 
 import Modal from './Modal.vue'
 import { web3 } from '@/evm'
-import ERC20Abi from '@/abi/IERC20.json'
+import ERC20Abi from '@/abi/IERC20Detailed.json'
 import Erc20Token from '@/js/Erc20Token'
 import { TokenListToken } from '@/store/modules/assets/types'
 
@@ -67,7 +67,7 @@ export default class AddERC20TokenModal extends Vue {
         }
         try {
             //@ts-ignore
-            var tokenInst = new web3.eth.Contract(ERC20Abi.abi, val)
+            var tokenInst = new web3.eth.Contract(ERC20Abi, val)
             let name = await tokenInst.methods.name().call()
             let symbol = await tokenInst.methods.symbol().call()
             let decimals = await tokenInst.methods.decimals().call()
@@ -112,7 +112,7 @@ export default class AddERC20TokenModal extends Vue {
 
             this.$store.dispatch('Notifications/add', {
                 title: 'ERC20 Token Added',
-                message: token.data.name,
+                message: this.name,
             })
             this.close()
         } catch (e) {
