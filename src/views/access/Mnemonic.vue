@@ -8,6 +8,7 @@
             :phrase="phrase.split(' ')"
             class="phrase_disp"
             @update="mnemonicUpdate($event)"
+            @replace="mnemonicReplace($event)"
         />
         <div class="button_container">
             <p class="err" v-if="err">{{ err }}</p>
@@ -57,6 +58,10 @@ export default class Mnemonic extends Vue {
             phraseArray[ev.index] = ev.value
         }
         this.phrase = phraseArray.join(' ')
+    }
+
+    mnemonicReplace(ev: any) {
+        this.phrase = ev.value
     }
 
     errCheck() {

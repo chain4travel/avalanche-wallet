@@ -13,6 +13,9 @@
             </div>
         </div>
         <div class="show-hide-wrapper">
+            <QrReader @change="onQRChange" v-model="phrase" class="qrIn">
+                <fa icon="camera"></fa>
+            </QrReader>
             <button @click="isHidden = !isHidden" class="hidden-toggle">
                 <fa v-if="isHidden" icon="eye-slash"></fa>
                 <fa v-else icon="eye"></fa>
@@ -30,8 +33,14 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { wordlists } from 'bip39'
+// @ts-ignore
+import { QrReader } from '@c4tplatform/vue_components'
 
-@Component
+@Component({
+    components: {
+        QrReader,
+    },
+})
 export default class MnemonicDisplay extends Vue {
     @Prop() phrase!: string[]
 
@@ -43,6 +52,10 @@ export default class MnemonicDisplay extends Vue {
         if (!(window.getComputedStyle(this.$el) as any).webkitTextSecurity) {
             this.password = true
         }
+    }
+
+    onQRChange(val: string) {
+        this.$emit('replace', { value: val })
     }
 
     onSpace() {
@@ -135,6 +148,7 @@ label {
     align-items: flex-start;
     max-height: 1.25em;
     min-width: 1.25em;
+    margin-left: 8px;
 }
 
 .show-hide-wrapper {
