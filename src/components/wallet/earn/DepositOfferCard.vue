@@ -103,12 +103,11 @@ export default class DepositOfferCard extends Vue {
     }
 
     get isDepositDisabled(): boolean {
-        return this.maxDepositAmount.isZero()
+        return true
+        // return this.maxDepositAmount.isZero()
     }
 
     get progress(): string {
-        console.log(this.offer)
-
         return this.offer.totalMaxAmount.isZero()
             ? '0px'
             : this.offer.depositedAmount
