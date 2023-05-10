@@ -11,13 +11,13 @@
         <div>
             <label>{{ $t('earn.validate.confirmation.start') }}</label>
             <p v-if="isMultisig && txEnd">{{ txEnd.toLocaleString() }}</p>
-            <p v-else>{{ $t('earn.validate.confirmation.start_desc') }}</p>
+            <p v-else>{{ $t('earn.validate.confirmation.start_desc', { time: timeSpan }) }}</p>
         </div>
         <div>
             <label>{{ $t('earn.validate.confirmation.end') }}</label>
             <p>{{ end.toLocaleString() }}</p>
         </div>
-        <div v-if="txEnd">
+        <div v-if="txEnd && isMultisig">
             <label>{{ $t('earn.validate.confirmation.transaction_end') }}</label>
             <p>{{ txEnd.toLocaleString() }}</p>
         </div>
@@ -39,6 +39,7 @@ export default class ConfirmPage extends Vue {
     @Prop() rewardAddress!: string
     @Prop() rewardDestination!: string
     @Prop() isMultisig!: boolean
+    @Prop() timeSpan!: number
 
     get amtBig(): Big {
         let stakeAmt = Big(this.amount.toString()).div(Math.pow(10, 9))
