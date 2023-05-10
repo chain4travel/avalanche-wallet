@@ -205,6 +205,7 @@ const MIN_MS = 60000
 const HOUR_MS = MIN_MS * 60
 const DAY_MS = HOUR_MS * 24
 const DEFAULT_VALIDATION_START_TIME = 10
+const SINGLETON_WALLET_MIN_VALIDATION_START_TIME = MIN_MS * 5 // 5 minutes
 
 @Component({
     name: 'add_validator',
@@ -430,9 +431,11 @@ export default class AddValidator extends Vue {
         /* If multisig flow we set the start date of the validator
          * same as the expiration date of the TX in signavault
          * In single sig flow, set the start date of validation
-         * after 25 seconds
+         * after 5 minutes
          */
-        let startDate = this.isMultiSig ? this.formTxExpirationDate : new Date(Date.now() + 25000)
+        let startDate = this.isMultiSig
+            ? this.formTxExpirationDate
+            : new Date(Date.now() + SINGLETON_WALLET_MIN_VALIDATION_START_TIME)
         let endMs = this.formEnd.getTime()
         let startMs = startDate.getTime()
 

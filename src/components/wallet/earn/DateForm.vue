@@ -81,6 +81,7 @@ export default class DateForm extends Vue {
     // now + 15 minutes + 2 weeks (Min Staking Duration)
     get endDateMin() {
         if (this.minEndDate) {
+            this.localEnd = this.minEndDate
             return this.minEndDate
         }
         if (this.typeDateForm == 'transactionDateForm') {
