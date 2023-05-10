@@ -67,15 +67,12 @@
                 <div>
                     <div class="summary" v-if="!isSuccess">
                         <div>
-                            <label>{{ $t('earn.validate.summary.duration') }} *</label>
+                            <label>{{ $t('earn.validate.summary.duration') }}</label>
                             <p>{{ durationText }}</p>
                         </div>
                         <div class="submit_box">
-                            <p v-if="warnShortDuration && !isMultiSig" class="err">
-                                {{ $t('earn.validate.errs.duration_warn') }}
-                            </p>
                             <p
-                                v-else-if="
+                                v-if="
                                     warnShortDuration &&
                                     isMultiSig &&
                                     thresholdMultiSig &&
@@ -85,6 +82,14 @@
                             >
                                 {{
                                     $t('earn.validate.errs.duration_warn_multisig', {
+                                        threshold: thresholdMultiSig - 1,
+                                    })
+                                }}
+                                <em class="cursive">
+                                    {{ $t('earn.validate.errs.cursive_word') }}
+                                </em>
+                                {{
+                                    $t('earn.validate.errs.duration_warn_multisig_confrim', {
                                         threshold: thresholdMultiSig - 1,
                                     })
                                 }}
@@ -99,7 +104,15 @@
                                 class="err"
                             >
                                 {{
-                                    $t('earn.validate.errs.duration_warn_multisig_sumit', {
+                                    $t('earn.validate.errs.duration_warn_multisig', {
+                                        threshold: thresholdMultiSig - 1,
+                                    })
+                                }}
+                                <em class="cursive">
+                                    {{ $t('earn.validate.errs.cursive_word') }}
+                                </em>
+                                {{
+                                    $t('earn.validate.errs.duration_warn_multisig_submit', {
                                         threshold: thresholdMultiSig - 1,
                                     })
                                 }}
@@ -592,7 +605,9 @@ export default class AddValidator extends Vue {
 <style scoped lang="scss">
 @use '../../../../styles/main';
 @use '../../../../styles/abstracts/mixins';
-
+.cursive {
+    font-style: italic;
+}
 form {
     display: grid;
     grid-template-columns: 1fr 340px;

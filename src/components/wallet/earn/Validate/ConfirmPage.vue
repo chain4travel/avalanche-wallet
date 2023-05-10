@@ -17,7 +17,7 @@
             <label>{{ $t('earn.validate.confirmation.end') }}</label>
             <p>{{ end.toLocaleString() }}</p>
         </div>
-        <div v-if="txEnd">
+        <div v-if="txEnd && isMultisig">
             <label>{{ $t('earn.validate.confirmation.transaction_end') }}</label>
             <p>{{ txEnd.toLocaleString() }}</p>
         </div>
