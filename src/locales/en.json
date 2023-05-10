@@ -557,7 +557,7 @@
                 "id": "Node ID",
                 "amount": "Bonded Amount",
                 "start": "Validation Period Start",
-                "start_desc": "Your validation will start at least 5 minutes after you submit this form.",
+                "start_desc": "Your validation period will start {time} minutes after you submit this form.",
                 "end": "Validation Period End",
                 "fee": "Delegation Fee",
                 "reward": "Reward Address",

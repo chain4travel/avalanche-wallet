@@ -62,6 +62,7 @@
                         :reward-address="rewardIn"
                         :reward-destination="rewardDestination"
                         :isMultisig="isMultiSig"
+                        :timeSpan="timeSpanofStartValidationTime"
                     ></ConfirmPage>
                 </transition-group>
                 <div>
@@ -302,6 +303,9 @@ export default class AddValidator extends Vue {
     get thresholdMultiSig(): number | undefined {
         let wallet: WalletType = this.$store.state.activeWallet
         return (wallet as MultisigWallet)?.keyData?.owner?.threshold
+    }
+    get timeSpanofStartValidationTime() {
+        return SINGLETON_WALLET_MIN_VALIDATION_START_TIME / MIN_MS
     }
     rewardSelect(val: 'local' | 'custom') {
         if (val === 'local') {
