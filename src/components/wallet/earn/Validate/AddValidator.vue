@@ -62,20 +62,18 @@
                         :reward-address="rewardIn"
                         :reward-destination="rewardDestination"
                         :isMultisig="isMultiSig"
+                        :timeSpan="timeSpanofStartValidationTime"
                     ></ConfirmPage>
                 </transition-group>
                 <div>
                     <div class="summary" v-if="!isSuccess">
                         <div>
-                            <label>{{ $t('earn.validate.summary.duration') }} *</label>
+                            <label>{{ $t('earn.validate.summary.duration') }}</label>
                             <p>{{ durationText }}</p>
                         </div>
                         <div class="submit_box">
-                            <p v-if="warnShortDuration && !isMultiSig" class="err">
-                                {{ $t('earn.validate.errs.duration_warn') }}
-                            </p>
                             <p
-                                v-else-if="
+                                v-if="
                                     warnShortDuration &&
                                     isMultiSig &&
                                     thresholdMultiSig &&
@@ -85,6 +83,14 @@
                             >
                                 {{
                                     $t('earn.validate.errs.duration_warn_multisig', {
+                                        threshold: thresholdMultiSig - 1,
+                                    })
+                                }}
+                                <em class="cursive">
+                                    {{ $t('earn.validate.errs.cursive_word') }}
+                                </em>
+                                {{
+                                    $t('earn.validate.errs.duration_warn_multisig_confrim', {
                                         threshold: thresholdMultiSig - 1,
                                     })
                                 }}
@@ -99,7 +105,15 @@
                                 class="err"
                             >
                                 {{
-                                    $t('earn.validate.errs.duration_warn_multisig_sumit', {
+                                    $t('earn.validate.errs.duration_warn_multisig', {
+                                        threshold: thresholdMultiSig - 1,
+                                    })
+                                }}
+                                <em class="cursive">
+                                    {{ $t('earn.validate.errs.cursive_word') }}
+                                </em>
+                                {{
+                                    $t('earn.validate.errs.duration_warn_multisig_submit', {
                                         threshold: thresholdMultiSig - 1,
                                     })
                                 }}
@@ -205,6 +219,7 @@ const MIN_MS = 60000
 const HOUR_MS = MIN_MS * 60
 const DAY_MS = HOUR_MS * 24
 const DEFAULT_VALIDATION_START_TIME = 10
+const SINGLETON_WALLET_MIN_VALIDATION_START_TIME = MIN_MS * 5 // 5 minutes
 
 @Component({
     name: 'add_validator',
@@ -288,6 +303,9 @@ export default class AddValidator extends Vue {
     get thresholdMultiSig(): number | undefined {
         let wallet: WalletType = this.$store.state.activeWallet
         return (wallet as MultisigWallet)?.keyData?.owner?.threshold
+    }
+    get timeSpanofStartValidationTime() {
+        return SINGLETON_WALLET_MIN_VALIDATION_START_TIME / MIN_MS
     }
     rewardSelect(val: 'local' | 'custom') {
         if (val === 'local') {
@@ -430,9 +448,11 @@ export default class AddValidator extends Vue {
         /* If multisig flow we set the start date of the validator
          * same as the expiration date of the TX in signavault
          * In single sig flow, set the start date of validation
-         * after 25 seconds
+         * after 5 minutes
          */
-        let startDate = this.isMultiSig ? this.formTxExpirationDate : new Date(Date.now() + 25000)
+        let startDate = this.isMultiSig
+            ? this.formTxExpirationDate
+            : new Date(Date.now() + SINGLETON_WALLET_MIN_VALIDATION_START_TIME)
         let endMs = this.formEnd.getTime()
         let startMs = startDate.getTime()
 
@@ -592,7 +612,9 @@ export default class AddValidator extends Vue {
 <style scoped lang="scss">
 @use '../../../../styles/main';
 @use '../../../../styles/abstracts/mixins';
-
+.cursive {
+    font-style: italic;
+}
 form {
     display: grid;
     grid-template-columns: 1fr 340px;

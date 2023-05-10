@@ -93,7 +93,12 @@
                         })
                     }}
                 </h4>
-
+                <p v-if="SignStatus">
+                    {{ $t('earn.validate.pending_multisig.already_signed') }}
+                </p>
+                <p v-else>
+                    {{ $t('earn.validate.pending_multisig.sign_transaction') }}
+                </p>
                 <v-btn
                     @click="issue"
                     class="button_secondary mt2"
