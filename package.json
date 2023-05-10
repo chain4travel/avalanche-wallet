@@ -21,7 +21,7 @@
   "dependencies": {
     "@c4tplatform/camino-wallet-sdk": "file:camino-wallet-sdk",
     "@c4tplatform/signavaultjs": "^1.0.7",
-    "@c4tplatform/vue_components": "^0.2.5",
+    "@c4tplatform/vue_components": "^0.2.6",
     "@ethereumjs/common": "^3.0.2",
     "@ethereumjs/tx": "^4.0.2",
     "@fortawesome/fontawesome-svg-core": "1.2.26",
