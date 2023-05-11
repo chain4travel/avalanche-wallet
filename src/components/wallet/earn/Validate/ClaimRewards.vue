@@ -11,6 +11,7 @@
                 @refresh="refreshMultisignTx"
                 :nodeId="nodeId"
                 :nodeInfo="nodeInfo"
+                :enableAbortOption="true"
             ></pending-multisig>
             <div v-else>
                 <div class="refresh_div">

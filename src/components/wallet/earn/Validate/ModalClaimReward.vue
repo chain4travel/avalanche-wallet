@@ -3,17 +3,7 @@
         <div class="modal-claim-reward-div">
             <div v-if="!claimed">
                 <div>
-                    <h3 v-if="isMultisignTx">
-                        {{ $t('validator.transaction_reward.are_you_want') }}
-                    </h3>
-                    <h3 v-else>
-                        {{
-                            $t('validator.rewards.modal_claim.are_you_sure', {
-                                amountClaim: amountText,
-                                symbol: symbol,
-                            })
-                        }}
-                    </h3>
+                    <AvaxInput v-model="claimAmount" :max="amount" :initial="amount"></AvaxInput>
                     <br />
                     <p class="text-modal">
                         {{
@@ -59,10 +49,12 @@ import { BN } from '@c4tplatform/caminojs'
 import { WalletHelper } from '../../../../helpers/wallet_helper'
 import * as SDK from '@c4tplatform/camino-wallet-sdk/dist'
 import { ava } from '@/AVA'
+import AvaxInput from '@/components/misc/AvaxInput.vue'
 
 @Component({
     components: {
         Modal,
+        AvaxInput,
     },
 })
 export default class ModalClaimReward extends Vue {
@@ -75,6 +67,7 @@ export default class ModalClaimReward extends Vue {
 
     claimed: boolean = false
     confirmedClaimedAmountText: string = ''
+    claimAmount: BN = this.amount
 
     open() {
         // @ts-ignore
@@ -102,7 +95,7 @@ export default class ModalClaimReward extends Vue {
 
             await WalletHelper.buildClaimTx(
                 this.pChainddress,
-                new BN(this.amount),
+                this.claimAmount,
                 this.$store.state.activeWallet,
                 this.rewardOwner
             )
@@ -112,7 +105,7 @@ export default class ModalClaimReward extends Vue {
                 this.close()
                 this.$emit('beforeCloseModal', false)
             } else {
-                this.confirmedClaimedAmountText = SDK.bnToBigAvaxX(new BN(this.amount)).toString()
+                this.confirmedClaimedAmountText = SDK.bnToBigAvaxX(this.claimAmount).toString()
                 this.claimed = true
             }
         } catch (e) {
