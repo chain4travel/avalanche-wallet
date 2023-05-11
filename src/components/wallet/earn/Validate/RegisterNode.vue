@@ -122,7 +122,9 @@
         </div>
         <div v-if="showMultisigTransactionDisclaimer" class="input_section mt2">
             <div>
-                <h4 class="input_label">{{ $t('earn.validate.label_4') }}</h4>
+                <h4 class="input_label">
+                    {{ $t('earn.validate.label_4', { threshold: thresholdMultiSig - 1 }) }}
+                </h4>
                 <h4 class="mt2">{{ $t('earn.validate.label_5') }}</h4>
                 <span class="disabled_input" role="textbox">
                     {{ nodeId }}
@@ -153,6 +155,8 @@ import {
 } from '@c4tplatform/caminojs/dist/utils'
 import Big from 'big.js'
 import Spinner from '@/components/misc/Spinner.vue'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { WalletType } from '@/js/wallets/types'
 
 @Component({
     components: {
@@ -202,6 +206,11 @@ export default class RegisterNode extends Vue {
     get wallet() {
         let wallet: SingletonWallet = this.$store.state.activeWallet
         return wallet
+    }
+
+    get thresholdMultiSig(): number {
+        let wallet: WalletType = this.$store.state.activeWallet
+        return (wallet as MultisigWallet)?.keyData?.owner?.threshold
     }
 
     get staticAddress() {

@@ -13,7 +13,7 @@
                 </div>
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.min_lock') }}:</label>
-                    <p class="reward">{{ minLockAmount.toLocaleString() }} CAM</p>
+                    <p class="reward">{{ cleanAvaxBN(minLock) }} {{ nativeAssetSymbol }}</p>
                 </div>
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.reward') }}:</label>
@@ -23,31 +23,23 @@
             <div class="offer_detail_right">
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.locked_amount') }}:</label>
-                    <p class="reward">{{ depositAmount | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                    <p class="reward">{{ cleanAvaxBN(lockedAmount) }} {{ nativeAssetSymbol }}</p>
                 </div>
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.pending_reward') }}:</label>
-                    <p class="reward">
-                        {{ pendingRewardsAmount | cleanAvaxBN }} {{ nativeAssetSymbol }}
-                    </p>
+                    <p class="reward">{{ cleanAvaxBN(pendingRewards) }} {{ nativeAssetSymbol }}</p>
                 </div>
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.already_claimed') }}:</label>
-                    <p class="reward">
-                        {{ alreadyClaimedAmount | cleanAvaxBN }} {{ nativeAssetSymbol }}
-                    </p>
+                    <p class="reward">{{ cleanAvaxBN(alreadyClaimed) }} {{ nativeAssetSymbol }}</p>
                 </div>
             </div>
         </div>
-        <template v-if="!isMultiSig">
-            <v-btn
-                class="claim_button button_primary ava_button"
-                @click="openModal"
-                :disabled="!canClaim"
-            >
+        <div v-if="!isMultiSig" class="button_group">
+            <v-btn class="claim_button button_primary" @click="openModal" :disabled="!canClaim">
                 {{ $t('earn.rewards.active_earning.claim') }}
             </v-btn>
-        </template>
+        </div>
         <template v-else>
             <div v-if="signatureStatus === 2" class="button_group">
                 <v-btn
@@ -153,17 +145,12 @@ import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
 import { RewardOwner } from '@/components/misc/ValidatorList/types'
 import { ava, bintools } from '@/AVA'
 
+import { cleanAvaxBN } from '@/helpers/helper'
 import { Buffer } from '@c4tplatform/caminojs/dist'
 import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { ClaimTx } from '@c4tplatform/caminojs/dist/apis/platformvm/claimtx'
 
 @Component({
-    filters: {
-        cleanAvaxBN(val: BN) {
-            let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
-            return big.toLocaleString()
-        },
-    },
     components: {
         ModalClaimDepositReward,
         ModalAbortSigning,
@@ -261,26 +248,6 @@ export default class UserRewardCard extends Vue {
         return this.getFormattedDate(endTimestamp)
     }
 
-    get lockedAmountBig(): Big {
-        return new Big(this.lockedAmount.toString())
-    }
-
-    get depositAmount(): Big {
-        return this.lockedAmountBig
-    }
-
-    get pendingRewardsAmount(): Big {
-        return new Big(this.pendingRewards.toString())
-    }
-
-    get alreadyClaimedAmount(): Big {
-        return new Big(this.alreadyClaimed.toString())
-    }
-
-    get minLockAmount(): Big {
-        return new Big(this.minLock.toString())
-    }
-
     get rewardPercent(): number {
         const interestRateBase = 365 * 24 * 60 * 60
         const interestRateDenominator = 1000000 * interestRateBase
@@ -298,9 +265,12 @@ export default class UserRewardCard extends Vue {
         return big.toLocaleString()
     }
 
-    private updateBalance(): void {
-        this.$store.dispatch('Assets/updateUTXOs')
-        this.$store.dispatch('History/updateTransactionHistory')
+    updateBalance(): void {
+        this.$store.dispatch('updateBalances')
+    }
+
+    cleanAvaxBN(val: BN): string {
+        return cleanAvaxBN(val)
     }
 
     openModal() {
@@ -355,9 +325,8 @@ export default class UserRewardCard extends Vue {
                             message: this.$t('notifications.transfer_success_msg'),
                             type: 'success',
                         })
+                        this.updateBalance()
                         this.$store.dispatch('Platform/updateActiveDepositOffer')
-                        this.$store.dispatch('Assets/updateUTXOs')
-                        this.$store.dispatch('Signavault/updateTransaction')
                         this.$store.dispatch('History/updateMultisigTransactionHistory')
                         this.disclamer = false
                         return this.updateMultisigTxDetails()

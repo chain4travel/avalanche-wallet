@@ -106,7 +106,7 @@ describe('Send: P to P transfer by already owned balance', () => {
             cy.get('.button_primary').eq(1).click({ force: true })
 
             cy.wait('@issueTx').then(() => {
-                cy.get('div.new_order_Form > div:nth-child(2) > div.checkout > p').should(($p) => {
+                cy.get('p[data-cy="transfer-tx-status"]').should(($p) => {
                     expect($p.first()).to.contain('Transaction Sent')
                 })
             })
