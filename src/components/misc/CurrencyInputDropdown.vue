@@ -76,7 +76,7 @@ export default class CurrencyInputDropdown extends Vue {
     @Watch('pendingTxAmount', { immediate: true })
     updateAmount() {
         if (this.chainId === 'P' && !!this.pendingTxAmount) {
-            this.$refs.bigIn.val = new BN(this.pendingTxAmount)
+            this.$refs.bigIn.val = this.pendingTxAmount.replace(/\s/g, '')
         }
     }
     mounted() {
