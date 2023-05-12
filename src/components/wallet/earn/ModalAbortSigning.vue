@@ -9,11 +9,11 @@
                 <p class="text-modal text" v-else>{{ modalText }}</p>
             </div>
             <div class="modal-buttons">
-                <v-btn depressed class="button_secondary" @click="abort()">
-                    {{ $t('earn.rewards.abort_modal.abort') }}
-                </v-btn>
                 <v-btn depressed class="button_primary" @click="close()">
                     {{ $t('earn.rewards.abort_modal.cancel') }}
+                </v-btn>
+                <v-btn depressed class="button_secondary" @click="abort()">
+                    {{ $t('earn.rewards.abort_modal.abort') }}
                 </v-btn>
             </div>
         </div>
