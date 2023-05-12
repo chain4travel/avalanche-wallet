@@ -111,13 +111,7 @@
                         {{ $t('earn.validate.pending_multisig.execute_transaction') }}
                     </span>
                 </v-btn>
-                <v-btn
-                    v-if="enableAbortOption"
-                    @click="abort"
-                    class="button_primary"
-                    depressed
-                    block
-                >
+                <v-btn @click="abort" class="button_primary" depressed block>
                     <Spinner v-if="loadingIssue" class="spinner"></Spinner>
                     <span v-else>
                         {{ $t('earn.rewards.abort_modal.abort') }}
@@ -155,7 +149,6 @@ export default class PendingMultisig extends Vue {
     @Prop() nodeId!: string
     @Prop() nodeInfo!: ValidatorRaw
     @Prop() successMessageForIssue!: string
-    @Prop() enableAbortOption!: boolean
 
     helpers = this.globalHelper()
     loading = false
