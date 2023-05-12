@@ -111,6 +111,24 @@
                         {{ $t('earn.validate.pending_multisig.execute_transaction') }}
                     </span>
                 </v-btn>
+                <v-btn
+                    v-if="enableAbortOption"
+                    @click="abort"
+                    class="button_primary"
+                    depressed
+                    block
+                >
+                    <Spinner v-if="loadingIssue" class="spinner"></Spinner>
+                    <span v-else>
+                        {{ $t('earn.rewards.abort_modal.abort') }}
+                    </span>
+                </v-btn>
+                <p v-if="SignStatus">
+                    {{ $t('earn.validate.pending_multisig.already_signed') }}
+                </p>
+                <p v-else>
+                    {{ $t('earn.validate.pending_multisig.sign_transaction') }}
+                </p>
             </div>
         </div>
     </div>
@@ -137,6 +155,7 @@ export default class PendingMultisig extends Vue {
     @Prop() nodeId!: string
     @Prop() nodeInfo!: ValidatorRaw
     @Prop() successMessageForIssue!: string
+    @Prop() enableAbortOption!: boolean
 
     helpers = this.globalHelper()
     loading = false
@@ -309,6 +328,32 @@ export default class PendingMultisig extends Vue {
 
     refresh() {
         this.$emit('refresh')
+    }
+
+    async abort() {
+        await this.cancelMultisigTx()
+        this.refresh()
+    }
+
+    async cancelMultisigTx() {
+        try {
+            const wallet = this.activeWallet as MultisigWallet
+            if (this.multisigTx) {
+                // cancel from the wallet
+                await wallet.cancelExternal(this.multisigTx?.tx)
+                await this.$store.dispatch('Signavault/updateTransaction')
+                this.helpers.dispatchNotification({
+                    message: 'Transaction has been cancelled',
+                    type: 'success',
+                })
+            }
+        } catch (err) {
+            console.log(err)
+            this.helpers.dispatchNotification({
+                message: 'Cancelling the transaction failed',
+                type: 'error',
+            })
+        }
     }
 }
 </script>
