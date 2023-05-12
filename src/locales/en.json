@@ -538,7 +538,7 @@
             "label_1": "Validator Node's Private Key",
             "description_1": "Node Private Key",
             "label_3": "P-Chain address your validator node will be assigned to",
-            "label_4": "Are you sure you want to initiate a transaction? This requires signatures from other wallets in the multisignature wallet and cannot be undone",
+            "label_4": "Are you sure you want initiate this transaction? To execute this transaction, {threshold} additional signatures from your multisignature co-owners are required.",
             "label_5": "Tx Details",
             "duration": {
                 "label": "Validation End Date",
@@ -575,7 +575,7 @@
                 "id": "Node ID",
                 "amount": "Bonded Amount",
                 "start": "Validation Period Start",
-                "start_desc": "Your validation will start at least 5 minutes after you submit this form.",
+                "start_desc": "Your validation period will start {time} minutes after you submit this form.",
                 "end": "Validation Period End",
                 "fee": "Delegation Fee",
                 "reward": "Reward Address",
@@ -602,8 +602,10 @@
             },
             "errs": {
                 "duration_warn": "WARNING: You must have at least 14 days remaining on your validation period to accept delegations.",
-                "duration_warn_multisig": "WARNING: This transaction must be signed by at least {threshold} additional co-owners of your Multisignature wallet before the validation start date.",
-                "duration_warn_multisig_sumit": "WARNING: This transaction must be signed by at least {threshold} additional co-owners of your Multisignature wallet before the validation start date. Otherwise, this transaction will expire and you need to repeat the process.",
+                "duration_warn_multisig": "WARNING: This transaction must be signed by at least {threshold} additional co-owners of your Multisignature wallet ",
+                "duration_warn_multisig_confrim": "the validation start date.",
+                "cursive_word": "before",
+                "duration_warn_multisig_submit": "the validation start date. Otherwise, this transaction will expire and you need to repeat the process.",
                 "date": "Start date must be in the future and end date must be after start date.",
                 "amount": "Stake amount must be at least {0} @.native:(0)",
                 "id": "Invalid Node ID.",
@@ -917,8 +919,8 @@
             "validator_pending_with_start_date": "Your validator is registered and will become active at {startDate}. For more information click here."
         },
         "info": {
-            "staking_start_date": "Staking Start Date",
-            "staking_end_date": "Staking End Date",
+            "staking_start_date": "Validation Period Start Date",
+            "staking_end_date": "Validation Period End Date",
             "up_time": "Up Time",
             "remaining_validation_period": "Remaining Validation Period",
             "bonded_amount": "Bonded Amount",
