@@ -125,6 +125,12 @@
                 </p>
             </div>
         </div>
+        <ModalAbortSigning
+            ref="modal_abort_signing"
+            :title="$t('validator.abort_transaction.title')"
+            :modalText="$t('earn.rewards.abort_modal.message')"
+            @cancelTx="cancelMultisigTx"
+        />
     </div>
 </template>
 <script lang="ts">
@@ -138,10 +144,12 @@ import { UnsignedTx, AddValidatorTx } from '@c4tplatform/caminojs/dist/apis/plat
 import Big from 'big.js'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import moment from 'moment'
+import ModalAbortSigning from '../ModalAbortSigning.vue'
 
 @Component({
     components: {
         Spinner,
+        ModalAbortSigning,
     },
 })
 export default class PendingMultisig extends Vue {
@@ -149,6 +157,10 @@ export default class PendingMultisig extends Vue {
     @Prop() nodeId!: string
     @Prop() nodeInfo!: ValidatorRaw
     @Prop() successMessageForIssue!: string
+
+    $refs!: {
+        modal_abort_signing: ModalAbortSigning
+    }
 
     helpers = this.globalHelper()
     loading = false
@@ -324,8 +336,7 @@ export default class PendingMultisig extends Vue {
     }
 
     async abort() {
-        await this.cancelMultisigTx()
-        this.refresh()
+        this.$refs.modal_abort_signing.open()
     }
 
     async cancelMultisigTx() {
@@ -339,6 +350,7 @@ export default class PendingMultisig extends Vue {
                     message: 'Transaction has been cancelled',
                     type: 'success',
                 })
+                this.refresh()
             }
         } catch (err) {
             console.log(err)
