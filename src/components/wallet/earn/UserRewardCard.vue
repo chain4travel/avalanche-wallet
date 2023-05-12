@@ -118,11 +118,7 @@
             ref="modal_abort_signing"
             :title="$t('earn.rewards.abort_modal.title')"
             :modalText="$t('earn.rewards.abort_modal.message')"
-        />
-        <ModalAbortSigning
-            ref="modal_abort_signing"
-            :title="$t('earn.rewards.abort_modal.title')"
-            :modalText="$t('earn.rewards.abort_modal.message')"
+            @cancelTx="cancelMultisigTx"
         />
     </div>
 </template>
@@ -407,14 +403,14 @@ export default class UserRewardCard extends Vue {
                 await wallet.cancelExternal(this.pendingSendMultisigTX?.tx)
                 await this.$store.dispatch('Signavault/updateTransaction')
                 this.helpers.dispatchNotification({
-                    message: this.$t('notifications.transfer_cancelled_msg'),
+                    message: this.$t('transfer.multisig.transaction_aborted'),
                     type: 'success',
                 })
             }
         } catch (err) {
             console.log(err)
             this.helpers.dispatchNotification({
-                message: this.$t('notifications.transaction_cancel_failed'),
+                message: this.$t('transfer.multisig.cancel_transaction_failed'),
                 type: 'error',
             })
         }

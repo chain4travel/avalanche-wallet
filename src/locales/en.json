@@ -171,7 +171,8 @@
             "execute_transaction": "Execute transaction",
             "sign_transaction": "Sign transaction",
             "abort_transaction": "Abort transaction",
-            "transaction_aborted": "Transaction canceled",
+            "transaction_aborted": "Transaction has been cancelled",
+            "cancel_transaction_failed": "Cancelling the transaction failed",
             "pending_transaction_created": "Pending transaction created"
         },
         "source_chain": {
