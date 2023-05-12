@@ -55,7 +55,7 @@ import snsWebSdk from '@sumsub/websdk'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { WalletType, WalletNameType } from '@/js/wallets/types'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
-import { kycStyleDay, kycStyleNight } from '@/constants'
+import { KYC_VARIANT, kycStyleDay, kycStyleNight } from '@/constants'
 interface UserData {
     email: string
     phone: string
@@ -129,7 +129,7 @@ export default class KycModal extends Vue {
 
     async getNewAccessToken() {
         if (this.privateKeyC) {
-            const result = await generateToken(this.privateKeyC)
+            const result = await generateToken(this.privateKeyC, KYC_VARIANT.KYC_BASIC)
             return result.access_token
         }
         return ''
