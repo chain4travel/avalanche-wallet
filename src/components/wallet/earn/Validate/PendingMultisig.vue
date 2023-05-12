@@ -117,12 +117,6 @@
                         {{ $t('earn.rewards.abort_modal.abort') }}
                     </span>
                 </v-btn>
-                <p v-if="SignStatus">
-                    {{ $t('earn.validate.pending_multisig.already_signed') }}
-                </p>
-                <p v-else>
-                    {{ $t('earn.validate.pending_multisig.sign_transaction') }}
-                </p>
             </div>
         </div>
         <ModalAbortSigning

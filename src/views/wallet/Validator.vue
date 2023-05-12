@@ -61,6 +61,7 @@
                         :nodeId="nodeId"
                         @validatorReady="verifyValidatorIsReady"
                         @initiated="onAddValidatorInitiated"
+                        @refresh="refresh()"
                     ></add-validator>
                 </template>
                 <div v-else-if="validatorIsSuspended">
@@ -300,6 +301,7 @@ export default class Validator extends Vue {
         this.loadingRefreshRegisterNode = true
         await this.evaluateCanRegisterNode()
         await this.updateValidators()
+        await this.$store.dispatch('Signavault/updateTransaction')
         this.loadingRefreshRegisterNode = false
     }
 
