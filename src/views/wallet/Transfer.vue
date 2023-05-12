@@ -112,7 +112,7 @@
                                     depressed
                                     class="button_primary"
                                     :ripple="false"
-                                    @click="cancelMultisigTx"
+                                    @click="openAbortModal"
                                     block
                                 >
                                     {{ $t('transfer.multisig.abort_transaction') }}
@@ -144,20 +144,15 @@
                                 </v-btn>
                             </template>
                         </template>
-                        <template v-else-if="isSuccess || isAborted">
-                            <template v-if="!isAborted">
-                                <p data-cy="transfer-tx-status" style="color: var(--success)">
-                                    <fa icon="check-circle"></fa>
-                                    {{ $t('transfer.success_title') }}
-                                </p>
-                                <label style="word-break: break-all">
-                                    <b>ID:</b>
-                                    {{ txId }}
-                                </label>
-                            </template>
-                            <template v-else>
-                                <p>{{ $t('transfer.multisig.transaction_aborted') }}</p>
-                            </template>
+                        <template v-else-if="isSuccess">
+                            <p data-cy="transfer-tx-status" style="color: var(--success)">
+                                <fa icon="check-circle"></fa>
+                                {{ $t('transfer.success_title') }}
+                            </p>
+                            <label style="word-break: break-all">
+                                <b>ID:</b>
+                                {{ txId }}
+                            </label>
                             <v-btn
                                 depressed
                                 style="margin-top: 14px"
@@ -174,6 +169,12 @@
                 </div>
             </div>
         </div>
+        <ModalAbortSigning
+            ref="modal_abort_signing"
+            :title="$t('transfer.multisig.abort_transaction')"
+            :modalText="$t('earn.rewards.abort_modal.message')"
+            @cancelTx="cancelMultisigTx"
+        />
     </div>
 </template>
 <script lang="ts">
@@ -181,6 +182,7 @@ import 'reflect-metadata'
 import { Vue, Component, Watch } from 'vue-property-decorator'
 
 import TxList from '@/components/wallet/transfer/TxList.vue'
+import ModalAbortSigning from '@/components/wallet/earn/ModalAbortSigning.vue'
 import Big from 'big.js'
 
 import NftList from '@/components/wallet/transfer/NftList.vue'
@@ -222,6 +224,7 @@ import { getTransactionSummary } from '@/helpers/history_helper'
         TxSummary,
         FormC,
         ChainInput,
+        ModalAbortSigning,
     },
 })
 export default class Transfer extends Vue {
@@ -255,6 +258,11 @@ export default class Transfer extends Vue {
     $refs!: {
         txList: TxList
         nftList: NftList
+        modal_abort_signing: ModalAbortSigning
+    }
+
+    openAbortModal() {
+        this.$refs.modal_abort_signing.open()
     }
 
     confirm() {
@@ -365,15 +373,17 @@ export default class Transfer extends Vue {
         this.isAjax = false
         this.isSuccess = true
         this.txId = tx
-        this.helpers.dispatchNotification({
-            message: this.$t('notifications.transfer_success_msg'),
-            type: 'success',
-        })
-        // Update the user's balance
-        this.$store.dispatch('Assets/updateUTXOs').then(() => {
-            this.updateSendAgainLock()
-        })
-        if (tx) setTimeout(() => this.$store.dispatch('History/updateTransactionHistory'), 3000)
+        if (tx) {
+            this.helpers.dispatchNotification({
+                message: this.$t('notifications.transfer_success_msg'),
+                type: 'success',
+            })
+            // Update the user's balance
+            this.$store.dispatch('Assets/updateUTXOs').then(() => {
+                this.updateSendAgainLock()
+            })
+            setTimeout(() => this.$store.dispatch('History/updateTransactionHistory'), 3000)
+        } else this.canSendAgain = true
     }
 
     updateSendAgainLock() {
@@ -404,6 +414,7 @@ export default class Transfer extends Vue {
         }
     }
     async refresh() {
+        if (!this.isMultiSig) return
         await this.$store.dispatch('Signavault/updateTransaction')
         this.updateMultisigTxDetails()
         if (!this.pendingSendMultisigTX) {
@@ -476,18 +487,17 @@ export default class Transfer extends Vue {
             if (this.pendingSendMultisigTX) {
                 // cancel from the wallet
                 await wallet.cancelExternal(this.pendingSendMultisigTX?.tx)
-                await this.$store.dispatch('Signavault/updateTransaction')
                 this.helpers.dispatchNotification({
-                    message: 'Transaction has been cancelled',
+                    message: this.$t('transfer.multisig.transaction_aborted'),
                     type: 'success',
                 })
                 this.isAborted = true
-                this.onSuccess('')
+                this.updateMultisigTxDetails()
             }
         } catch (err) {
             console.log(err)
             this.helpers.dispatchNotification({
-                message: 'Cancelling the transaction failed',
+                message: this.$t('transfer.multisig.cancel_transaction_failed'),
                 type: 'error',
             })
         }
@@ -536,6 +546,7 @@ export default class Transfer extends Vue {
             }
         } else {
             this.pendingTxAmount = ''
+            if (this.isAborted) this.startAgain()
         }
     }
 
