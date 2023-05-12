@@ -119,11 +119,6 @@
             :title="$t('earn.rewards.abort_modal.title')"
             :modalText="$t('earn.rewards.abort_modal.message')"
         />
-        <ModalAbortSigning
-            ref="modal_abort_signing"
-            :title="$t('earn.rewards.abort_modal.title')"
-            :modalText="$t('earn.rewards.abort_modal.message')"
-        />
     </div>
 </template>
 <script lang="ts">

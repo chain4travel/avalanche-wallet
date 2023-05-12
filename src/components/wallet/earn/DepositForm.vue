@@ -97,6 +97,8 @@ export default class DepositForm extends Vue {
 
     async submitDeposit(): Promise<void> {
         const wallet: WalletType = this.$store.state.activeWallet
+        // @ts-ignore
+        let { dispatchNotification } = this.globalHelper()
         try {
             const result = await WalletHelper.buildDepositTx(
                 wallet,
@@ -110,11 +112,10 @@ export default class DepositForm extends Vue {
                 this.$store.dispatch('Signavault/updateTransaction')
             } else {
                 console.error(error)
-                // this.$store.dispatch('Notifications/add', {
-                //     type: 'error',
-                //     title: 'Deposit Failed',
-                //     message: error,
-                // })
+                dispatchNotification({
+                    message: this.$t('notifications.deposit_failed'),
+                    type: 'error',
+                })
                 return
             }
         }
