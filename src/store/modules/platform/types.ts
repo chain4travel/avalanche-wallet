@@ -7,6 +7,7 @@ import {
     ActiveDeposit,
 } from '@/components/misc/ValidatorList/types'
 import { BN } from '@c4tplatform/caminojs/dist'
+import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
 
 export interface PlatformState {
     validators: ValidatorRaw[]
@@ -15,7 +16,7 @@ export interface PlatformState {
     minStake: BN
     minStakeDelegation: BN
     currentSupply: BN
-    depositOffers: DepositOfferRaw[]
+    depositOffers: DepositOffer[]
     activeDepositOffer: ActiveDeposit[]
 }
 

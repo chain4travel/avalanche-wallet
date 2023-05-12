@@ -450,6 +450,24 @@
                 "back": "Back to Earn"
             }
         },
+        "offer": {
+            "title": "Active Saving Pools",
+            "reward": "Reward",
+            "pool_size": "Pool Size",
+            "pool_start": "Pool Start",
+            "pool_end": "Pool End",
+            "min_deposit": "Minimum Deposit",
+            "min_duration": "Minimum Duration",
+            "max_duration": "Maximum Duration",
+            "unlock_duration": "Unlock Duration",
+            "no_reward_duration": "NoReward Duration",
+            "balance": "Available for Deposit",
+            "deposit": "Deposit Now",
+            "deposit_start": "Deposit Start",
+            "deposit_end": "Deposit End",
+            "deposit_amount": "Deposit Amount",
+            "deposited_amount": "Deposited Amount"
+        },
         "rewards": {
             "total": "Total Rewards",
             "validation": "Validation",
@@ -892,7 +910,9 @@
         "multisig_transaction_not_saved": "Your signature saved successfully!",
         "transaction_cancel_failed": "Cancelling the transaction failed",
         "claim_reward_failed": "Failed to claim reward",
-        "something_went_wrong": "Something went wrong"
+        "something_went_wrong": "Something went wrong",
+        "deposit_success": "Deposit successful",
+        "deposit_failed": "Deposit failed"
     },
     "validator": {
         "pending": {
