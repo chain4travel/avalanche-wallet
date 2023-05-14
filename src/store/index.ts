@@ -167,10 +167,16 @@ export default new Vuex.Store({
 
             await dispatch('Launch/initialize')
             dispatch('activateWallet', state.activeWallet)
+
+            dispatch('checkHDFunds')
         },
 
-        // TODO: Parts can be shared with the logout function below
-        // Similar to logout but keeps the Remembered keys.
+        async onNetworkChange({ commit, dispatch }, net: INetwork) {
+            commit('setNetwork', net)
+
+            dispatch('checkHDFunds')
+        },
+
         async timeoutLogout(store) {
             await store.dispatch('Notifications/add', {
                 title: 'Session Timeout',
@@ -368,6 +374,7 @@ export default new Vuex.Store({
                 wallet.initialize()
                 commit('setActiveWallet', wallet)
                 commit('updateActiveAddress')
+                dispatch('checkHDFunds')
             }
 
             dispatch('Assets/updateWallet').then(() => {
@@ -529,6 +536,51 @@ export default new Vuex.Store({
                     dispatch('History/updateTransactionHistory')
                 })
             })
+        },
+        async checkHDFunds({ state, dispatch }, payload: { wallet: MnemonicWallet; hash: string }) {
+            if (!payload) {
+                if (
+                    !state.activeWallet ||
+                    state.activeWallet.type !== 'singleton' ||
+                    (state.activeWallet as SingletonWallet).getSeed() === ''
+                )
+                    return
+                const seed = (state.activeWallet as SingletonWallet).getSeed()
+                const mnemonic = (state.activeWallet as SingletonWallet).getMnemonic()
+                const hash = createHash('sha256')
+                    .update(seed)
+                    .update(state.network.name)
+                    .digest()
+                    .toString('hex')
+
+                const checkedWallets = localStorage.getItem('hd_check')?.split('#') ?? []
+                if (checkedWallets.includes(hash)) return
+
+                // Create mnemonic wallet without static key
+                const wallet = new MnemonicWallet(mnemonic, seed, false)
+                await wallet.initialize()
+                payload = { wallet, hash }
+            }
+            if (!payload.wallet.isInit) {
+                setTimeout(() => {
+                    dispatch('checkHDFunds', payload)
+                }, 500)
+                return
+            }
+            await payload.wallet.getUTXOs()
+
+            if (
+                payload.wallet.platformUtxoset.getAllUTXOs.length === 0 &&
+                payload.wallet.getUTXOSet().getAllUTXOs().length === 0
+            ) {
+                const checkedWallets = localStorage.getItem('hd_check')?.split('#') ?? []
+                checkedWallets.push(payload.hash)
+                localStorage.setItem('hd_check', checkedWallets.join('#'))
+            }
+            // This is the place where we have to do ask the user to perform BaseTx
+            // of either or both platform / AVM UTXOs and transfer them to the static
+            // wallet (state.activeWallet)
+            console.log(payload.hash)
         },
     },
 })

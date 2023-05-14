@@ -28,17 +28,19 @@ abstract class HdWalletCore extends WalletCore {
     ethKeyPair: SECP256k1KeyPair
     hdKeysLoaded: boolean
 
-    constructor(accountHdKey: HDKey, ethHdNode: HDKey, isPublic = true) {
+    constructor(accountHdKey: HDKey, ethHdNode: HDKey, isPublic = true, useStaticKey = true) {
         super()
         this.ethHdNode = ethHdNode
         this.ethKeyPair = new KeyPair('', '')
         this.ethKeyPair.importKey(Buffer.from(ethHdNode.privateKey))
         this.hdKeysLoaded = false
 
+        const staticNode = useStaticKey ? ethHdNode : undefined
+
         this.chainId = ava.XChain().getBlockchainAlias() || ava.XChain().getBlockchainID()
-        this.externalHelper = new HdHelper('m/0', accountHdKey, ethHdNode, undefined, isPublic)
+        this.externalHelper = new HdHelper('m/0', accountHdKey, staticNode, undefined, isPublic)
         this.internalHelper = new HdHelper('m/1', accountHdKey, undefined, undefined, isPublic)
-        this.platformHelper = new HdHelper('m/0', accountHdKey, ethHdNode, 'P', isPublic)
+        this.platformHelper = new HdHelper('m/0', accountHdKey, staticNode, 'P', isPublic)
     }
 
     getEvmAddressBech(): string {

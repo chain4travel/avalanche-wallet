@@ -169,7 +169,7 @@ const network_module: Module<NetworkState, RootState> = {
             // Set the SDK Network
             setAvalanche(ava)
 
-            commit('setNetwork', net, { root: true })
+            await dispatch('onNetworkChange', net, { root: true })
             state.status = 'connected'
             return true
         },
