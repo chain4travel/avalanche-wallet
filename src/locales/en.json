@@ -964,7 +964,9 @@
             "claimed_tx_issued": "Successful Claim Transaction"
         },
         "abort_transaction": {
-            "title": "Abort Transaction"
+            "title": "Abort Transaction",
+            "cancelled": "Transaction has been cancelled",
+            "failed" : "Cancelling the transaction failed"
         }
     }
 }
