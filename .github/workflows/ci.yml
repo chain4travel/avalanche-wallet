@@ -1,8 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches-ignore: [c4t, dev, suite]
+  pull_request:
+    branches: [c4t, dev, suite, suite-c4t]
 
 env:
   CI: true
