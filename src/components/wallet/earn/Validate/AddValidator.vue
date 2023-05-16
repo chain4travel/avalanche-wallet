@@ -1,193 +1,205 @@
 <template>
-    <div v-if="!validatorIsLoading">
-        <div class="cols">
-            <form @submit.prevent="">
-                <transition-group name="fade" mode="out-in">
-                    <div v-show="!isConfirm" key="form" class="ins_col">
-                        <div>
-                            <h4 class="input_label">{{ $t('earn.validate.nodeId') }}</h4>
-                            <span class="disabled_input" role="textbox">
-                                {{ nodeId }}
-                            </span>
+    <div>
+        <div class="refresh_div">
+            <div class="refresh">
+                <Spinner v-if="loading" class="spinner"></Spinner>
+                <button v-else @click="refresh">
+                    <v-icon>mdi-refresh</v-icon>
+                </button>
+            </div>
+        </div>
+        <div v-if="!validatorIsLoading">
+            <div class="cols">
+                <form @submit.prevent="">
+                    <transition-group name="fade" mode="out-in">
+                        <div v-show="!isConfirm" key="form" class="ins_col">
+                            <div>
+                                <h4 class="input_label">{{ $t('earn.validate.nodeId') }}</h4>
+                                <span class="disabled_input" role="textbox">
+                                    {{ nodeId }}
+                                </span>
+                            </div>
+                            <div v-if="isMultiSig" style="margin: 30px 0">
+                                <h4>{{ $t('earn.validate.transaction_duration.label') }}</h4>
+                                <p class="desc">
+                                    {{ $t('earn.validate.transaction_duration.desc') }}
+                                </p>
+                                <DateForm
+                                    @change_end="setTransactionEnd"
+                                    :typeDateForm="'transactionDateForm'"
+                                    tx="true"
+                                    :minEndDate="minValidationStartDate"
+                                ></DateForm>
+                            </div>
+                            <div style="margin: 30px 0">
+                                <h4>{{ $t('earn.validate.duration.label') }}</h4>
+                                <p class="desc">
+                                    {{ $t('earn.validate.duration.desc') }}
+                                </p>
+                                <DateForm
+                                    @change_end="setEnd"
+                                    :typeDateForm="'validatorDateForm'"
+                                    :minEndDate="minValidationEndDate"
+                                    :maxEndDate="maxValidationEndDate"
+                                ></DateForm>
+                            </div>
+                            <div style="margin: 30px 0">
+                                <h4>{{ $t('earn.validate.amount.label') }}</h4>
+                                <p class="desc">
+                                    {{
+                                        $t('earn.validate.amount.desc', [
+                                            displayMinStakeAmt.toLocaleString(),
+                                        ])
+                                    }}
+                                </p>
+                                <AvaxInput
+                                    v-model="stakeAmt"
+                                    :max="maxAmt"
+                                    ref="avaxinput"
+                                    :readonly="true"
+                                    class="amt_in"
+                                ></AvaxInput>
+                            </div>
                         </div>
-                        <div v-if="isMultiSig" style="margin: 30px 0">
-                            <h4>{{ $t('earn.validate.transaction_duration.label') }}</h4>
-                            <p class="desc">
-                                {{ $t('earn.validate.transaction_duration.desc') }}
-                            </p>
-                            <DateForm
-                                @change_end="setTransactionEnd"
-                                :typeDateForm="'transactionDateForm'"
-                                tx="true"
-                                :minEndDate="minValidationStartDate"
-                            ></DateForm>
-                        </div>
-                        <div style="margin: 30px 0">
-                            <h4>{{ $t('earn.validate.duration.label') }}</h4>
-                            <p class="desc">
-                                {{ $t('earn.validate.duration.desc') }}
-                            </p>
-                            <DateForm
-                                @change_end="setEnd"
-                                :typeDateForm="'validatorDateForm'"
-                                :minEndDate="minValidationEndDate"
-                                :maxEndDate="maxValidationEndDate"
-                            ></DateForm>
-                        </div>
-                        <div style="margin: 30px 0">
-                            <h4>{{ $t('earn.validate.amount.label') }}</h4>
-                            <p class="desc">
-                                {{
-                                    $t('earn.validate.amount.desc', [
-                                        displayMinStakeAmt.toLocaleString(),
-                                    ])
-                                }}
-                            </p>
-                            <AvaxInput
-                                v-model="stakeAmt"
-                                :max="maxAmt"
-                                ref="avaxinput"
-                                :readonly="true"
-                                class="amt_in"
-                            ></AvaxInput>
-                        </div>
-                    </div>
-                    <ConfirmPage
-                        key="confirm"
-                        v-show="isConfirm"
-                        :node-i-d="nodeId"
-                        :end="formEnd"
-                        :txEnd="formTxExpirationDate"
-                        :amount="formAmt"
-                        :reward-address="rewardIn"
-                        :reward-destination="rewardDestination"
-                        :isMultisig="isMultiSig"
-                        :timeSpan="timeSpanofStartValidationTime"
-                    ></ConfirmPage>
-                </transition-group>
-                <div>
-                    <div class="summary" v-if="!isSuccess">
-                        <div>
-                            <label>{{ $t('earn.validate.summary.duration') }}</label>
-                            <p>{{ durationText }}</p>
-                        </div>
-                        <div class="submit_box">
-                            <p
-                                v-if="
-                                    warnShortDuration &&
-                                    isMultiSig &&
-                                    thresholdMultiSig &&
-                                    !isConfirm
-                                "
-                                class="err"
-                            >
-                                {{
-                                    $t('earn.validate.errs.duration_warn_multisig', {
-                                        threshold: thresholdMultiSig - 1,
-                                    })
-                                }}
-                                <em class="cursive">
-                                    {{ $t('earn.validate.errs.cursive_word') }}
-                                </em>
-                                {{
-                                    $t('earn.validate.errs.duration_warn_multisig_confrim', {
-                                        threshold: thresholdMultiSig - 1,
-                                    })
-                                }}
-                            </p>
-                            <p
-                                v-else-if="
-                                    warnShortDuration &&
-                                    isMultiSig &&
-                                    thresholdMultiSig &&
-                                    isConfirm
-                                "
-                                class="err"
-                            >
-                                {{
-                                    $t('earn.validate.errs.duration_warn_multisig', {
-                                        threshold: thresholdMultiSig - 1,
-                                    })
-                                }}
-                                <em class="cursive">
-                                    {{ $t('earn.validate.errs.cursive_word') }}
-                                </em>
-                                {{
-                                    $t('earn.validate.errs.duration_warn_multisig_submit', {
-                                        threshold: thresholdMultiSig - 1,
-                                    })
-                                }}
-                            </p>
-                            <p class="err">{{ err }}</p>
-                            <v-btn
-                                v-if="!isConfirm"
-                                @click="confirm"
-                                class="button_secondary"
-                                depressed
-                                :loading="isLoading"
-                                :disabled="!canSubmit"
-                                block
-                            >
-                                {{ $t('earn.validate.confirm') }}
-                            </v-btn>
-                            <template v-else>
+                        <ConfirmPage
+                            key="confirm"
+                            v-show="isConfirm"
+                            :node-i-d="nodeId"
+                            :end="formEnd"
+                            :txEnd="formTxExpirationDate"
+                            :amount="formAmt"
+                            :reward-address="rewardIn"
+                            :reward-destination="rewardDestination"
+                            :isMultisig="isMultiSig"
+                            :timeSpan="timeSpanofStartValidationTime"
+                        ></ConfirmPage>
+                    </transition-group>
+                    <div>
+                        <div class="summary" v-if="!isSuccess">
+                            <div>
+                                <label>{{ $t('earn.validate.summary.duration') }}</label>
+                                <p>{{ durationText }}</p>
+                            </div>
+                            <div class="submit_box">
+                                <p
+                                    v-if="
+                                        warnShortDuration &&
+                                        isMultiSig &&
+                                        thresholdMultiSig &&
+                                        !isConfirm
+                                    "
+                                    class="err"
+                                >
+                                    {{
+                                        $t('earn.validate.errs.duration_warn_multisig', {
+                                            threshold: thresholdMultiSig - 1,
+                                        })
+                                    }}
+                                    <em class="cursive">
+                                        {{ $t('earn.validate.errs.cursive_word') }}
+                                    </em>
+                                    {{
+                                        $t('earn.validate.errs.duration_warn_multisig_confrim', {
+                                            threshold: thresholdMultiSig - 1,
+                                        })
+                                    }}
+                                </p>
+                                <p
+                                    v-else-if="
+                                        warnShortDuration &&
+                                        isMultiSig &&
+                                        thresholdMultiSig &&
+                                        isConfirm
+                                    "
+                                    class="err"
+                                >
+                                    {{
+                                        $t('earn.validate.errs.duration_warn_multisig', {
+                                            threshold: thresholdMultiSig - 1,
+                                        })
+                                    }}
+                                    <em class="cursive">
+                                        {{ $t('earn.validate.errs.cursive_word') }}
+                                    </em>
+                                    {{
+                                        $t('earn.validate.errs.duration_warn_multisig_submit', {
+                                            threshold: thresholdMultiSig - 1,
+                                        })
+                                    }}
+                                </p>
+                                <p class="err">{{ err }}</p>
                                 <v-btn
-                                    @click="submit"
+                                    v-if="!isConfirm"
+                                    @click="confirm"
                                     class="button_secondary"
                                     depressed
                                     :loading="isLoading"
+                                    :disabled="!canSubmit"
                                     block
                                 >
-                                    {{ $t('earn.validate.submit') }}
+                                    {{ $t('earn.validate.confirm') }}
                                 </v-btn>
-                                <v-btn
-                                    text
-                                    @click="cancelConfirm"
-                                    block
-                                    style="color: var(--primary-color); margin-top: 20px"
-                                >
-                                    {{ $t('earn.validate.cancel') }}
-                                </v-btn>
-                            </template>
-                        </div>
-                    </div>
-                    <div class="success_cont" v-else>
-                        <h2>{{ $t('earn.validate.success.title') }}</h2>
-                        <p>{{ $t('earn.validate.success.desc') }}</p>
-                        <p class="tx_id">Tx ID: {{ txId }}</p>
-
-                        <div class="tx_status">
-                            <div>
-                                <label>{{ $t('earn.validate.success.status') }}</label>
-                                <p v-if="!txStatus">Waiting..</p>
-                                <p v-else>{{ txStatus }}</p>
-                            </div>
-                            <div class="status_icon">
-                                <Spinner
-                                    v-if="!txStatus"
-                                    style="color: var(--primary-color)"
-                                ></Spinner>
-                                <p style="color: var(--success)" v-if="txStatus === 'Committed'">
-                                    <fa icon="check-circle"></fa>
-                                </p>
-                                <p style="color: var(--error)" v-if="txStatus === 'Dropped'">
-                                    <fa icon="times-circle"></fa>
-                                </p>
+                                <template v-else>
+                                    <v-btn
+                                        @click="submit"
+                                        class="button_secondary"
+                                        depressed
+                                        :loading="isLoading"
+                                        block
+                                    >
+                                        {{ $t('earn.validate.submit') }}
+                                    </v-btn>
+                                    <v-btn
+                                        text
+                                        @click="cancelConfirm"
+                                        block
+                                        style="color: var(--primary-color); margin-top: 20px"
+                                    >
+                                        {{ $t('earn.validate.cancel') }}
+                                    </v-btn>
+                                </template>
                             </div>
                         </div>
+                        <div class="success_cont" v-else>
+                            <h2>{{ $t('earn.validate.success.title') }}</h2>
+                            <p>{{ $t('earn.validate.success.desc') }}</p>
+                            <p class="tx_id">Tx ID: {{ txId }}</p>
 
-                        <div class="reason_cont" v-if="txReason">
-                            <label>{{ $t('earn.validate.success.reason') }}</label>
-                            <p>{{ txReason }}</p>
+                            <div class="tx_status">
+                                <div>
+                                    <label>{{ $t('earn.validate.success.status') }}</label>
+                                    <p v-if="!txStatus">Waiting..</p>
+                                    <p v-else>{{ txStatus }}</p>
+                                </div>
+                                <div class="status_icon">
+                                    <Spinner
+                                        v-if="!txStatus"
+                                        style="color: var(--primary-color)"
+                                    ></Spinner>
+                                    <p
+                                        style="color: var(--success)"
+                                        v-if="txStatus === 'Committed'"
+                                    >
+                                        <fa icon="check-circle"></fa>
+                                    </p>
+                                    <p style="color: var(--error)" v-if="txStatus === 'Dropped'">
+                                        <fa icon="times-circle"></fa>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="reason_cont" v-if="txReason">
+                                <label>{{ $t('earn.validate.success.reason') }}</label>
+                                <p>{{ txReason }}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
-
-    <div v-else>
-        <validator-pending></validator-pending>
+        <div v-else>
+            <validator-pending></validator-pending>
+        </div>
     </div>
 </template>
 <script lang="ts">
@@ -249,7 +261,7 @@ export default class AddValidator extends Vue {
     isConfirm = false
     err: string = ''
     stakeAmt: BN = new BN(0)
-
+    loading: boolean = false
     minFee = 2
 
     formAmt: BN = new BN(0)
@@ -607,6 +619,10 @@ export default class AddValidator extends Vue {
         }
         return isReady
     }
+
+    async refresh() {
+        this.$emit('refresh')
+    }
 }
 </script>
 <style scoped lang="scss">
@@ -807,6 +823,32 @@ label {
         border-top: 2px solid var(--bg-light);
         padding-left: 0;
         padding-top: 30px;
+    }
+}
+
+.refresh_div {
+    position: relative;
+    float: right;
+    margin-top: -5%;
+}
+
+.refresh {
+    width: 20px;
+    height: 20px;
+    .v-icon {
+        color: var(--primary-color);
+    }
+
+    button {
+        outline: none !important;
+    }
+    img {
+        object-fit: contain;
+        width: 100%;
+    }
+
+    .spinner {
+        color: var(--primary-color) !important;
     }
 }
 </style>
