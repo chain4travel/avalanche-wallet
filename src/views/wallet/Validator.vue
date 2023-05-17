@@ -89,6 +89,11 @@
                     <div v-if="nodeInfo">
                         <ClaimRewards :nodeId="nodeId" :nodeInfo="nodeInfo" />
                     </div>
+                    <div v-else>
+                        <div class="rewards-not-available">
+                            <RewardsNotAvailable />
+                        </div>
+                    </div>
                 </div>
             </div>
         </transition>
@@ -117,6 +122,7 @@ import { WalletCore } from '@/js/wallets/WalletCore'
 import PendingMultisig from '@/components/wallet/earn/Validate/PendingMultisig.vue'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import ValidatorPending from '@/components/wallet/earn/Validate/ValidatorPending.vue'
+import RewardsNotAvailable from '@/components/wallet/earn/RewardsNotAvailable.vue'
 
 @Component({
     name: 'validator',
@@ -128,6 +134,7 @@ import ValidatorPending from '@/components/wallet/earn/Validate/ValidatorPending
         ClaimRewards,
         PendingMultisig,
         ValidatorPending,
+        RewardsNotAvailable,
     },
 })
 export default class Validator extends Vue {
@@ -484,5 +491,10 @@ span {
 .pending-validator-div {
     position: relative;
     top: 35px;
+}
+
+.rewards-not-available {
+    position: relative;
+    top: 15px;
 }
 </style>
