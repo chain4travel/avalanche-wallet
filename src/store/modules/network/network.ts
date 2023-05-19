@@ -9,6 +9,7 @@ import { BN } from '@c4tplatform/caminojs/dist'
 import { web3 } from '@/evm'
 import { setSocketNetwork } from '@/providers'
 import { setAvalanche } from '@c4tplatform/camino-wallet-sdk/dist'
+import { NETWORK_ALIAS, getNetworkFromUrl } from '@/utils/getUrlNetworkParams'
 
 const network_module: Module<NetworkState, RootState> = {
     namespaced: true,
@@ -76,6 +77,7 @@ const network_module: Module<NetworkState, RootState> = {
             localStorage.setItem('network_selected', data)
         },
         async loadSelectedNetwork({ dispatch, getters }): Promise<boolean> {
+            console.log('selectedNetwork', localStorage.getItem('network_selected'))
             let data = localStorage.getItem('network_selected')
             if (!data) return false
             try {
@@ -86,6 +88,7 @@ const network_module: Module<NetworkState, RootState> = {
                     let net = nets[i]
                     if (JSON.stringify(net.url) === data) {
                         await dispatch('setNetwork', net)
+                        localStorage.setItem('network-name-min', net.name.toLowerCase())
                         return true
                     }
                 }
@@ -195,6 +198,7 @@ const network_module: Module<NetworkState, RootState> = {
 
         async init({ state, commit, dispatch }) {
             const columbusExplorerUrl = `${window.location.protocol}//${window.location.host}/explorer`
+
             let camino = new AvaNetwork(
                 'Camino',
                 'https://api.camino.network',
@@ -225,10 +229,40 @@ const network_module: Module<NetworkState, RootState> = {
             commit('addNetwork', camino)
             commit('addNetwork', columbus)
 
+            // try {
+            //     let urlSubstringParam = getNetworkFromUrl()
+            //     let isSet = await dispatch('loadSelectedNetwork')
+            //     if (!isSet) {
+            //         await dispatch('setNetwork', state.networks[0])
+            //         localStorage.setItem('network-name-min', state.networks[0].name.toLowerCase())
+            //     }
+            //     return true
+            // } catch (e) {
+            //     console.log(e)
+            //     state.status = 'disconnected'
+            // }
+
             try {
-                let isSet = await dispatch('loadSelectedNetwork')
-                if (!isSet) {
-                    await dispatch('setNetwork', state.networks[0])
+                let urlSubstringParam = getNetworkFromUrl()
+
+                if (urlSubstringParam === NETWORK_ALIAS.CUSTOM) {
+                    let isSet = await dispatch('loadSelectedNetwork')
+                    if (!isSet) {
+                        console.log('IsDifferentSet', state.networks)
+                        await dispatch('setNetwork', state.networks[0])
+                    }
+                } else {
+                    console.log('urlSubstringParam', urlSubstringParam)
+                    let networkFromParam = state.networks.find(
+                        (val) => val.name.toLowerCase() === urlSubstringParam
+                    )
+
+                    if (networkFromParam) {
+                        await dispatch('setNetwork', networkFromParam)
+                    } else {
+                        console.error('Network not founded')
+                        await dispatch('setNetwork', state.networks[0])
+                    }
                 }
                 return true
             } catch (e) {
