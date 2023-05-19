@@ -5,6 +5,7 @@
             @ctaClick="consolidateFunds"
             :balances="balances"
             :loading="isProcessing"
+            :totalFee="totalFeeAmount"
         ></ConsolidateFundsModal>
         <h2>{{ $t('advanced.consolidate_funds.title') }}</h2>
         <p style="margin-bottom: 14px !important">
@@ -62,6 +63,13 @@ export default class ConsolidateFunds extends Vue {
 
     get wallet() {
         return this.$store.state.activeWallet
+    }
+
+    get totalFeeAmount() {
+        const feeP = bnToBig(ava.PChain().getTxFee(), 9)
+        const feeX = bnToBig(ava.XChain().getTxFee(), 9)
+        const total = feeP.plus(feeX)
+        return total.toLocaleString()
     }
 
     private bigToBN(val: Big, denomination: number) {

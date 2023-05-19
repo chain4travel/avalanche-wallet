@@ -47,6 +47,13 @@
                     {{ $t('advanced.consolidate_funds.modal.title') }}
                 </v-btn>
             </div>
+            <p v-if="balances?.length" class="fee_note">
+                {{
+                    $t('advanced.consolidate_funds.modal.fee_note', {
+                        feeAmount: totalFee ?? '0.02',
+                    })
+                }}
+            </p>
         </div>
     </modal>
 </template>
@@ -64,6 +71,7 @@ import Modal from './Modal.vue'
 export default class ConsolidateFundsModal extends Vue {
     @Prop() balances!: Array<{ addresses: string[]; amount: Big }>
     @Prop() loading!: boolean
+    @Prop() totalFee!: string
 
     ctaClick() {
         this.$emit('ctaClick')
@@ -118,6 +126,12 @@ export default class ConsolidateFundsModal extends Vue {
     margin-top: 32px;
     display: flex;
     justify-content: end;
+}
+
+.fee_note {
+    margin-top: 8px;
+    font-size: 12px;
+    text-align: right;
 }
 
 @include mixins.mobile-device {
