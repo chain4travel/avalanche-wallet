@@ -85,7 +85,12 @@ export interface AvaWalletCore extends IAddressManager {
     getStake(): Promise<BN>
     getPlatformUTXOSet(): PlatformUTXOSet
     createNftFamily(name: string, symbol: string, groupNum: number): Promise<string>
-    mintNft(mintUtxo: AVMUTXO, payload: PayloadBase, quantity: number): Promise<string>
+    mintNft(
+        mintUtxo: AVMUTXO,
+        payload: PayloadBase,
+        quantity: number,
+        owners: string[]
+    ): Promise<string>
     getEthBalance(): Promise<BN>
     sendEth(to: string, amount: BN, gasPrice: BN, gasLimit: number): Promise<string>
     sendERC20(

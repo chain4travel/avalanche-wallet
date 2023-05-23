@@ -271,6 +271,7 @@
             },
             "form_col": {
                 "label1": "Quantity",
+                "label2": "Owners (optional)",
                 "fee": "Fee",
                 "submit": "Mint"
             },

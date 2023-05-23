@@ -61,9 +61,13 @@ class WalletHelper {
         wallet: WalletType,
         mintUtxo: AVMUTXO,
         payload: PayloadBase,
-        quantity: number
+        quantity: number,
+        owners: string[]
     ) {
         let ownerAddress = wallet.getCurrentAddressAvm()
+        for (let i = owners.length; i < quantity; ++i) {
+            owners.push(ownerAddress)
+        }
         let changeAddress = wallet.getChangeAddressAvm()
         let sourceAddresses = wallet.getAllAddressesX()
 
@@ -71,8 +75,7 @@ class WalletHelper {
         let tx = await buildMintNftTx(
             mintUtxo,
             payload,
-            quantity,
-            ownerAddress,
+            owners,
             changeAddress,
             sourceAddresses,
             utxoSet

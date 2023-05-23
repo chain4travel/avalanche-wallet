@@ -203,7 +203,12 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         throw NotImplementedError
     }
 
-    async mintNft(mintUtxo: AVMUTXO, payload: PayloadBase, quantity: number): Promise<string> {
+    async mintNft(
+        mintUtxo: AVMUTXO,
+        payload: PayloadBase,
+        quantity: number,
+        owners: string[]
+    ): Promise<string> {
         throw NotImplementedError
     }
 
