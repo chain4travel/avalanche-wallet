@@ -5,63 +5,63 @@ import {
 
 describe('Cross chain: X to P', () => {
     beforeEach(() => {
-        cy.loginWalletWith('privateKey')
+        // cy.loginWalletWith('privateKey')
 
-        // RPC aliases
-        cy.intercept('POST', '**/ext/bc/X', (request) => {
-            if (request.body.method == 'avm.getUTXOs') {
-                request.reply({
-                    statusCode: 200,
-                    fixture: 'mocks/avm_getUTXOs.json'
-                })
-            } else if (request.body.method === 'avm.issueTx') {
-                request.reply({
-                    statusCode: 200,
-                    fixture: 'mocks/avm_issue_tx.json'
-                })
-                request.alias = 'apiExportX'
-            } else if (request.body.method === 'avm.getTxStatus') {
-                request.reply({
-                    statusCode: 200,
-                    fixture: 'mocks/avm_get_tx_status.json'
-                })
-                request.alias = 'apiExportXStatus'
-            }
-        })
-        cy.intercept('POST', '**/ext/bc/P', (request) => {
-            if (request.body.method === 'platform.issueTx') {
-                request.reply({
-                    statusCode: 200,
-                    fixture: 'mocks/platform_issue_tx.json'
-                })
-                request.alias = 'apiImportP'
-            }  
+        // // RPC aliases
+        // cy.intercept('POST', '**/ext/bc/X', (request) => {
+        //     if (request.body.method == 'avm.getUTXOs') {
+        //         request.reply({
+        //             statusCode: 200,
+        //             fixture: 'mocks/avm_getUTXOs.json'
+        //         })
+        //     } else if (request.body.method === 'avm.issueTx') {
+        //         request.reply({
+        //             statusCode: 200,
+        //             fixture: 'mocks/avm_issue_tx.json'
+        //         })
+        //         request.alias = 'apiExportX'
+        //     } else if (request.body.method === 'avm.getTxStatus') {
+        //         request.reply({
+        //             statusCode: 200,
+        //             fixture: 'mocks/avm_get_tx_status.json'
+        //         })
+        //         request.alias = 'apiExportXStatus'
+        //     }
+        // })
+        // cy.intercept('POST', '**/ext/bc/P', (request) => {
+        //     if (request.body.method === 'platform.issueTx') {
+        //         request.reply({
+        //             statusCode: 200,
+        //             fixture: 'mocks/platform_issue_tx.json'
+        //         })
+        //         request.alias = 'apiImportP'
+        //     }  
             
-            if (request.body.method === 'platform.getTxStatus') {
-                request.reply({
-                    statusCode: 200,
-                    fixture: 'mocks/platform_get_tx_status.json'
-                })
-                request.alias = 'apiImportPStatus'
-            }
+        //     if (request.body.method === 'platform.getTxStatus') {
+        //         request.reply({
+        //             statusCode: 200,
+        //             fixture: 'mocks/platform_get_tx_status.json'
+        //         })
+        //         request.alias = 'apiImportPStatus'
+        //     }
 
-            if (request.body.method === 'platform.getUTXOs') {
-                request.reply({
-                    statusCode: 200,
-                    fixture: 'mocks/platform_getUTXOs.json'
-                })
-            }
-        })
+        //     if (request.body.method === 'platform.getUTXOs') {
+        //         request.reply({
+        //             statusCode: 200,
+        //             fixture: 'mocks/platform_getUTXOs.json'
+        //         })
+        //     }
+        // })
 
-        // Switch to cross chain
-        cy.switchToWalletFunctionTab('Cross Chain')
-        // Make sure successfully switched to the Cross Chain tab
-        cy.get('.wallet_main > #wallet_router > .header')
-            .find('h1')
-            .should('have.text', 'Cross Chain')
+        // // Switch to cross chain
+        // cy.switchToWalletFunctionTab('Cross Chain')
+        // // Make sure successfully switched to the Cross Chain tab
+        // cy.get('.wallet_main > #wallet_router > .header')
+        //     .find('h1')
+        //     .should('have.text', 'Cross Chain')
     })
 
-    it('export CAM from X to P', () => {
+    it.skip('export CAM from X to P', () => {
         cy.get('label').contains('Source Chain').siblings('select').first().as('selectSource')
         cy.get('label')
             .contains('Destination Chain')

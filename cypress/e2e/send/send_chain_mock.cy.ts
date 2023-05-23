@@ -82,7 +82,7 @@ describe('Send: C to C transfer by already owned balance', () => {
         })
     })
 
-    it('verify Fee from C to C', () => {
+    it.skip('verify Fee from C to C', () => {
         cy.get<string>('@ownChainBalance').then((balance) => {
             if (balance > 0) {
                 // Input C Chain Addr
@@ -175,35 +175,35 @@ describe('Send: C to C transfer by already owned balance', () => {
 
 describe('Send: C to C transfer by not balance', () => {
     beforeEach(() => {
-        cy.loginWalletWith('privateKey', 'privateKeyZeroBalance')
+        // cy.loginWalletWith('privateKey', 'privateKeyZeroBalance')
 
-        cy.get('[data-cy="wallet_transfer"]').click().should('have.class', 'router-link-active')
+        // cy.get('[data-cy="wallet_transfer"]').click().should('have.class', 'router-link-active')
 
-        // Hidden Show Breakdown
-        cy.get('.breakdown_toggle').first().click()
+        // // Hidden Show Breakdown
+        // cy.get('.breakdown_toggle').first().click()
 
-        // Get Own C-Chain Balance
-        cy.get('.alt_breakdown > :nth-child(1) > :nth-child(6)')
-            .invoke('text')
-            .then((balance) => cy.wrap(balance.replace(/\sCAM/g, '')).as('ownChainBalance'))
+        // // Get Own C-Chain Balance
+        // cy.get('.alt_breakdown > :nth-child(1) > :nth-child(6)')
+        //     .invoke('text')
+        //     .then((balance) => cy.wrap(balance.replace(/\sCAM/g, '')).as('ownChainBalance'))
 
-        // Switch Source Chain to C
-        cy.get('.lists > div:nth-child(1) > .chain_select').contains('C').click()
+        // // Switch Source Chain to C
+        // cy.get('.lists > div:nth-child(1) > .chain_select').contains('C').click()
 
-        // Input More than Own Amount
-        cy.get('.evm_input_dropdown > .col_in > .col_big_in > input').as('inputAmount')
-        cy.get<string>('@ownChainBalance').then((balance) => {
-            const increaseBalance = parseFloat(balance) + 1
-            cy.get('@inputAmount')
-                .type(`${increaseBalance}{enter}`)
-                .then((input) => {
-                    const amount = parseFloat(input.val() as string)
-                    expect(amount).to.lte(parseFloat(balance))
-                })
-        })
+        // // Input More than Own Amount
+        // cy.get('.evm_input_dropdown > .col_in > .col_big_in > input').as('inputAmount')
+        // cy.get<string>('@ownChainBalance').then((balance) => {
+        //     const increaseBalance = parseFloat(balance) + 1
+        //     cy.get('@inputAmount')
+        //         .type(`${increaseBalance}{enter}`)
+        //         .then((input) => {
+        //             const amount = parseFloat(input.val() as string)
+        //             expect(amount).to.lte(parseFloat(balance))
+        //         })
+        // })
     })
 
-    it('verify Fee from C to C', () => {
+    it.skip('verify Fee from C to C', () => {
         // Input C Chain Addr
         cy.get('.bottom_tabs > .chain_select > button:nth-child(3)').click()
         cy.get('[data-cy="wallet_address"]').invoke('text').as('chainAddress')

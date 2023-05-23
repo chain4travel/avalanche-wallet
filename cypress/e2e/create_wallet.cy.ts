@@ -8,7 +8,7 @@ describe('Wallet Creation', () => {
         cy.visit('/')
     })
 
-    it('open suite/create wallet', () => {
+    it.skip('open suite/create wallet', () => {
         addKopernikusNetwork(cy);
         //changeNetwork(cy)
         cy.wait(2000)

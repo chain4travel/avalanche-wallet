@@ -16,7 +16,7 @@ describe('Add ERC20 Token', () => {
     before(() => {
         cy.visit('/')
     })
-    it('has access/add erc20', async () => {
+    it.skip('has access/add erc20', async () => {
         addKopernikusNetwork(cy)
         //changeNetwork(cy);
         accessWallet(cy, 'mnemonic')

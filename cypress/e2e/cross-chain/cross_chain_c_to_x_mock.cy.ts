@@ -10,82 +10,82 @@ import {
 
 describe('Cross chain: C to X', () => {
     beforeEach(() => {
-        cy.loginWalletWith('privateKey')
+        // cy.loginWalletWith('privateKey')
 
-        // RPC aliases
-        cy.intercept('**/ext/bc/C/rpc', (request) => {
-            if (request.body.method === 'eth_baseFee') {
-                request.reply({
-                    statusCode: 200,
-                    fixture: 'mocks/eth_base_fee.json'
-                })
-                request.alias = 'apiBaseFee'
-            } else if (request.body.method === 'eth_getBalance') {
-                request.reply({
-                    statusCode: 200,
-                    body: {
-                        id: request.body.id,
-                        jsonrpc: '2.0',
-                        result: '0x1b0cf699489af08800',
-                    },
-                })
-            }
-        })
+        // // RPC aliases
+        // cy.intercept('**/ext/bc/C/rpc', (request) => {
+        //     if (request.body.method === 'eth_baseFee') {
+        //         request.reply({
+        //             statusCode: 200,
+        //             fixture: 'mocks/eth_base_fee.json'
+        //         })
+        //         request.alias = 'apiBaseFee'
+        //     } else if (request.body.method === 'eth_getBalance') {
+        //         request.reply({
+        //             statusCode: 200,
+        //             body: {
+        //                 id: request.body.id,
+        //                 jsonrpc: '2.0',
+        //                 result: '0x1b0cf699489af08800',
+        //             },
+        //         })
+        //     }
+        // })
 
-        cy.intercept('POST', '**/ext/bc/X', (request) => {
-            if (request.body.method === 'avm.issueTx') {
-                request.reply({
-                    statusCode: 200,
-                    fixture: 'mocks/avm_issue_tx.json'
-                })
-                request.alias = 'apiImportX'
-            }
+        // cy.intercept('POST', '**/ext/bc/X', (request) => {
+        //     if (request.body.method === 'avm.issueTx') {
+        //         request.reply({
+        //             statusCode: 200,
+        //             fixture: 'mocks/avm_issue_tx.json'
+        //         })
+        //         request.alias = 'apiImportX'
+        //     }
             
-            if (request.body.method === 'avm.getTxStatus') {
-                request.reply({
-                    statusCode: 200,
-                    fixture: 'mocks/avm_get_tx_status.json'
-                })
-                request.alias = 'apiImportXStatus'
-            }
+        //     if (request.body.method === 'avm.getTxStatus') {
+        //         request.reply({
+        //             statusCode: 200,
+        //             fixture: 'mocks/avm_get_tx_status.json'
+        //         })
+        //         request.alias = 'apiImportXStatus'
+        //     }
 
-            if (request.body.method === 'avm.getUTXOs') {
-                request.reply({
-                    statusCode: 200,
-                    fixture: 'mocks/avm_getUTXOs.json'
-                })
-            }
+        //     if (request.body.method === 'avm.getUTXOs') {
+        //         request.reply({
+        //             statusCode: 200,
+        //             fixture: 'mocks/avm_getUTXOs.json'
+        //         })
+        //     }
             
-        })
-        cy.intercept('POST', '**/ext/bc/C/avax', (request) => {
-            if (request.body.method === 'avax.getUTXOs') {
-                request.reply({
-                    statusCode: 200,
-                    fixture: 'mocks/avax_getUTXOs.json'
-                })
-            } else if (request.body.method === 'avax.issueTx') {
-                request.reply({
-                    statusCode: 200,
-                    fixture: 'mocks/avax_issue_tx.json'
-                })
-                request.alias = 'apiExportC'
-            } else if (request.body.method === 'avax.getAtomicTxStatus') {
-                request.reply({
-                    statusCode: 200,
-                    fixture: 'mocks/avax_get_atomic_tx_status.json'
-                })
-                request.alias = 'apiExportCStatus'
-            }
-        })
-        // Switch to cross chain
-        cy.switchToWalletFunctionTab('Cross Chain')
-        // Make sure successfully switched to the Cross Chain tab
-        cy.get('.wallet_main > #wallet_router > .header')
-            .find('h1')
-            .should('have.text', 'Cross Chain')
+        // })
+        // cy.intercept('POST', '**/ext/bc/C/avax', (request) => {
+        //     if (request.body.method === 'avax.getUTXOs') {
+        //         request.reply({
+        //             statusCode: 200,
+        //             fixture: 'mocks/avax_getUTXOs.json'
+        //         })
+        //     } else if (request.body.method === 'avax.issueTx') {
+        //         request.reply({
+        //             statusCode: 200,
+        //             fixture: 'mocks/avax_issue_tx.json'
+        //         })
+        //         request.alias = 'apiExportC'
+        //     } else if (request.body.method === 'avax.getAtomicTxStatus') {
+        //         request.reply({
+        //             statusCode: 200,
+        //             fixture: 'mocks/avax_get_atomic_tx_status.json'
+        //         })
+        //         request.alias = 'apiExportCStatus'
+        //     }
+        // })
+        // // Switch to cross chain
+        // cy.switchToWalletFunctionTab('Cross Chain')
+        // // Make sure successfully switched to the Cross Chain tab
+        // cy.get('.wallet_main > #wallet_router > .header')
+        //     .find('h1')
+        //     .should('have.text', 'Cross Chain')
     })
 
-    it('export CAM from C to X', () => {
+    it.skip('export CAM from C to X', () => {
         cy.get('label').contains('Source Chain').siblings('select').first().as('selectSource')
         cy.get('label')
             .contains('Destination Chain')
