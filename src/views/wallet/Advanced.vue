@@ -4,11 +4,11 @@
             <h1>{{ $t('advanced.title') }}</h1>
         </div>
         <TokenListModal ref="token_list"></TokenListModal>
-        <div class="grids">
+        <div :class="canConsolidate ? 'grids_4' : 'grids_3'">
             <ChainImport class="grid_box"></ChainImport>
             <SignMessage class="grid_box"></SignMessage>
             <VerifyMessage class="grid_box"></VerifyMessage>
-            <ConsolidateFunds class="grid_box"></ConsolidateFunds>
+            <ConsolidateFunds v-if="canConsolidate" class="grid_box"></ConsolidateFunds>
         </div>
     </div>
 </template>
@@ -36,6 +36,15 @@ export default class Advanced extends Vue {
     $refs!: {
         token_list: TokenListModal
     }
+
+    get canConsolidate() {
+        return this.activeWallet?.getMnemonic() && this.activeWallet?.getMnemonic() !== ''
+    }
+
+    get activeWallet() {
+        return this.$store.state.activeWallet
+    }
+
     openTokenlist() {
         this.$refs.token_list.open()
     }
@@ -47,7 +56,14 @@ export default class Advanced extends Vue {
 h1 {
     font-weight: normal;
 }
-.grids {
+.grids_3 {
+    display: grid;
+    column-gap: 14px;
+    row-gap: 14px;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grids_4 {
     display: grid;
     column-gap: 14px;
     row-gap: 14px;
