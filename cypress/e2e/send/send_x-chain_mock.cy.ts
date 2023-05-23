@@ -122,7 +122,7 @@ describe('Send transaction with x-chain balance', () => {
 
                 // expect display txID
                 cy.wait('@issueTx').then(() => {
-                    cy.get('div.new_order_Form > div:nth-child(2) > div.checkout > p').should(($p) => {
+                    cy.get('p[data-cy="transfer-tx-status"]').should(($p) => {
                         expect($p.first()).to.contain('Transaction Sent')
                     })
                 })

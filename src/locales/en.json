@@ -170,7 +170,10 @@
         "multisig": {
             "execute_transaction": "Execute transaction",
             "sign_transaction": "Sign transaction",
-            "abort_transaction": "Abort transaction"
+            "abort_transaction": "Abort transaction",
+            "transaction_aborted": "Transaction has been cancelled",
+            "cancel_transaction_failed": "Cancelling the transaction failed",
+            "pending_transaction_created": "Pending transaction created"
         },
         "source_chain": {
             "title": "Source Chain"
@@ -447,6 +450,24 @@
                 "back": "Back to Earn"
             }
         },
+        "offer": {
+            "title": "Active Saving Pools",
+            "reward": "Reward",
+            "pool_size": "Pool Size",
+            "pool_start": "Pool Start",
+            "pool_end": "Pool End",
+            "min_deposit": "Minimum Deposit",
+            "min_duration": "Minimum Duration",
+            "max_duration": "Maximum Duration",
+            "unlock_duration": "Unlock Duration",
+            "no_reward_duration": "NoReward Duration",
+            "balance": "Available for Deposit",
+            "deposit": "Deposit Now",
+            "deposit_start": "Deposit Start",
+            "deposit_end": "Deposit End",
+            "deposit_amount": "Deposit Amount",
+            "deposited_amount": "Deposited Amount"
+        },
         "rewards": {
             "total": "Total Rewards",
             "validation": "Validation",
@@ -479,6 +500,7 @@
                 "are_you_sure": "Are you sure you want to claim {amount} {symbol} rewards?",
                 "note_message": "Transaction fee:  {fee} {symbol}.",
                 "confirmation_message": "{amount} {symbol} has been claimed.",
+                "signature_collected": "Your signature has been collected.",
                 "confirm": "Confirm",
                 "cancel": "Cancel"
             },
@@ -517,7 +539,7 @@
             "label_1": "Validator Node's Private Key",
             "description_1": "Node Private Key",
             "label_3": "P-Chain address your validator node will be assigned to",
-            "label_4": "Are you sure you want to initiate a transaction? This requires signatures from other wallets in the multisignature wallet and cannot be undone",
+            "label_4": "Are you sure you want initiate this transaction? To execute this transaction, {threshold} additional signatures from your multisignature co-owners are required.",
             "label_5": "Tx Details",
             "duration": {
                 "label": "Validation End Date",
@@ -554,7 +576,7 @@
                 "id": "Node ID",
                 "amount": "Bonded Amount",
                 "start": "Validation Period Start",
-                "start_desc": "Your validation will start at least 5 minutes after you submit this form.",
+                "start_desc": "Your validation period will start {time} minutes after you submit this form.",
                 "end": "Validation Period End",
                 "fee": "Delegation Fee",
                 "reward": "Reward Address",
@@ -581,8 +603,10 @@
             },
             "errs": {
                 "duration_warn": "WARNING: You must have at least 14 days remaining on your validation period to accept delegations.",
-                "duration_warn_multisig": "WARNING: This transaction must be signed by at least {threshold} additional co-owners of your Multisignature wallet before the validation start date.",
-                "duration_warn_multisig_sumit": "WARNING: This transaction must be signed by at least {threshold} additional co-owners of your Multisignature wallet before the validation start date. Otherwise, this transaction will expire and you need to repeat the process.",
+                "duration_warn_multisig": "WARNING: This transaction must be signed by at least {threshold} additional co-owners of your Multisignature wallet ",
+                "duration_warn_multisig_confrim": "the validation start date.",
+                "cursive_word": "before",
+                "duration_warn_multisig_submit": "the validation start date. Otherwise, this transaction will expire and you need to repeat the process.",
                 "date": "Start date must be in the future and end date must be after start date.",
                 "amount": "Stake amount must be at least {0} @.native:(0)",
                 "id": "Invalid Node ID.",
@@ -598,7 +622,7 @@
                 "execute_transaction": "Execute transaction",
                 "sign": "Sign",
                 "already_signed": "You already signed this transaction.",
-                "sign_transaction": "Please sign this transaction by using the Sign button above"
+                "sign_transaction": "Please sign this transaction by using the Sign button above."
             }
         },
         "delegate": {
@@ -886,16 +910,18 @@
         "multisig_transaction_not_saved": "Your signature saved successfully!",
         "transaction_cancel_failed": "Cancelling the transaction failed",
         "claim_reward_failed": "Failed to claim reward",
-        "something_went_wrong": "Something went wrong"
+        "something_went_wrong": "Something went wrong",
+        "deposit_success": "Deposit successful",
+        "deposit_failed": "Deposit failed"
     },
     "validator": {
         "pending": {
             "validator_pending": "Your validator node is waiting for the transaction to be committed. For more information click here.",
-            "validator_pending_with_start_date": "Your node validator transaction will be committed at {startDate}. For more information click here."
+            "validator_pending_with_start_date": "Your validator is registered and will become active at {startDate}. For more information click here."
         },
         "info": {
-            "staking_start_date": "Staking Start Date",
-            "staking_end_date": "Staking End Date",
+            "staking_start_date": "Validation Period Start Date",
+            "staking_end_date": "Validation Period End Date",
             "up_time": "Up Time",
             "remaining_validation_period": "Remaining Validation Period",
             "bonded_amount": "Bonded Amount",
@@ -936,6 +962,11 @@
             "stake_amount": "Stake Amount",
             "are_you_want": "Are you sure you want to initiate the transaction? This requires signatures from other wallets in the multisignature wallet and cannot be undone for 2-weeks!",
             "claimed_tx_issued": "Successful Claim Transaction"
+        },
+        "abort_transaction": {
+            "title": "Abort Transaction",
+            "cancelled": "Transaction has been cancelled",
+            "failed" : "Cancelling the transaction failed"
         }
     }
 }

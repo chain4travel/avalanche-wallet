@@ -37,7 +37,10 @@
                     ></register-node>
                 </div>
                 <template v-else-if="!!pendingValidator">
-                    <validator-pending :startDate="pendingValidator.startTime"></validator-pending>
+                    <validator-pending
+                        :startDate="pendingValidator.startTime"
+                        @refresh="refresh"
+                    ></validator-pending>
                 </template>
                 <template
                     v-else-if="
@@ -58,6 +61,7 @@
                         :nodeId="nodeId"
                         @validatorReady="verifyValidatorIsReady"
                         @initiated="onAddValidatorInitiated"
+                        @refresh="refresh()"
                     ></add-validator>
                 </template>
                 <div v-else-if="validatorIsSuspended">
@@ -296,6 +300,8 @@ export default class Validator extends Vue {
     async refresh() {
         this.loadingRefreshRegisterNode = true
         await this.evaluateCanRegisterNode()
+        await this.updateValidators()
+        await this.$store.dispatch('Signavault/updateTransaction')
         this.loadingRefreshRegisterNode = false
     }
 
