@@ -67,7 +67,7 @@ export default class TxRow extends Vue {
         if (network.explorerUrl && chains.length > 0) {
             let alias = chains?.find((elem: Chain) => elem.chainID === this.source.chainID)
                 .chainAlias
-            let url = `/explorer/${alias}-chain/tx/${this.source.id}`
+            let url = `/explorer/${network.name.toLowerCase()}/${alias}-chain/tx/${this.source.id}`
             return url
         } else return ''
     }

@@ -48,7 +48,7 @@ export default class TxHistoryRow extends Vue {
         if (network.explorerUrl && chains.length > 0) {
             let alias = chains?.find((elem: Chain) => elem.chainID === this.transaction.chainID)
                 .chainAlias
-            let url = `/explorer/${alias}-chain/tx/${this.transaction.id}`
+            let url = `/explorer/${network.name.toLowerCase()}/${alias}-chain/tx/${this.transaction.id}`
             return url
         } else return ''
     }
