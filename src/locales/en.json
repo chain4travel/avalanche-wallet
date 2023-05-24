@@ -754,7 +754,7 @@
                 "derived_addresses": "Derived Addresses",
                 "no_utxos": "No UTXOs were found on dereived addresses.",
                 "discard": "Discard",
-                "fee_note": "Consolidating funds will incurr a fee of {feeAmount} CAM"
+                "fee_note": "Consolidating funds will incur a fee of {feeAmount} CAM"
             }
         }
     },

@@ -50,7 +50,7 @@
             <p v-if="balances?.length" class="fee_note">
                 {{
                     $t('advanced.consolidate_funds.modal.fee_note', {
-                        feeAmount: totalFee ?? '0.02',
+                        feeAmount: totalFee,
                     })
                 }}
             </p>
