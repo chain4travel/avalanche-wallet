@@ -967,7 +967,8 @@
                 "cancel": "Cancel",
                 "claim": "Claim",
                 "confirmed_claimed": "{amount} {symbol} have been claimed."
-            }
+            },
+            "not_available": "You are currently not eligible for any validation rewards."
         },
         "transaction_reward": {
             "title": "Transaction details",
