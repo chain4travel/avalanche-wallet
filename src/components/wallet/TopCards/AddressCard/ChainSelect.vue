@@ -1,9 +1,9 @@
 <template>
     <div class="chain_select">
-        <button @click="setChain('X')" :active="chain === 'X'">X</button>
-        <button @click="setChain('P')" :active="chain === 'P'" v-if="walletType !== 'multisig'">
-            P
+        <button v-if="walletType !== 'multisig'" @click="setChain('X')" :active="chain === 'X'">
+            X
         </button>
+        <button @click="setChain('P')" :active="chain === 'P'">P</button>
         <button
             @click="setChain('C')"
             :active="chain === 'C'"
@@ -39,12 +39,12 @@ export default class ChainSelect extends Vue {
 </script>
 <style scoped lang="scss">
 .chain_select {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    display: flex;
     font-size: 13px;
     color: var(--primary-color-light);
 }
 button {
+    flex-grow: 1;
     padding: 8px 5px;
     opacity: 0.8;
     outline: none !important;

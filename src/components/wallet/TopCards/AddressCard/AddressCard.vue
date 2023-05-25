@@ -81,7 +81,7 @@ import { ava } from '@/AVA'
 export default class AddressCard extends Vue {
     colorLight: string = '#FFF'
     colorDark: string = '#242729'
-    chainNow: ChainIdType = 'X'
+    chainNow: ChainIdType = this.walletType === 'multisig' ? 'P' : 'X'
 
     $refs!: {
         qr_modal: QRModal
