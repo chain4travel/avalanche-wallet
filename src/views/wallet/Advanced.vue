@@ -37,8 +37,12 @@ export default class Advanced extends Vue {
         token_list: TokenListModal
     }
 
-    get canConsolidate() {
-        return this.activeWallet?.getMnemonic() && this.activeWallet?.getMnemonic() !== ''
+    get canConsolidate(): boolean {
+        try {
+            return this.activeWallet?.getMnemonic() && this.activeWallet?.getMnemonic() !== ''
+        } catch (err) {
+            return false
+        }
     }
 
     get activeWallet() {
