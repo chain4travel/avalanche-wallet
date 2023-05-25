@@ -10,6 +10,11 @@ interface GetNonceType {
     nonce: string
 }
 
+type variantType = {
+    kycStatus: boolean
+    kybStatus: boolean
+}
+
 const BASE_URL = 'https://api.kyc.camino.network/v3'
 
 const kyc_api: AxiosInstance = axios.create({
@@ -59,14 +64,16 @@ async function generateToken(privateKey: string, kyc_variant: KYC_VARIANT): Prom
 async function checkVerificationStatus(
     privateKey: string,
     activeNetworkName: string
-): Promise<boolean> {
+): Promise<variantType> {
     let keyPair = ec.keyFromPrivate(privateKey)
     let pubKey = keyPair.getPublic()
     let url = `/verified/${activeNetworkName}/${pubKey.encode('hex', false)}`
 
     try {
         let res = await kyc_api.get(url)
-        return res.data.kyc_verified
+        let kycStatus: boolean = res.data.variants[KYC_VARIANT.KYC_BASIC]
+        let kybStatus: boolean = res.data.variants[KYC_VARIANT.KYB_BASIC]
+        return { kycStatus, kybStatus }
     } catch (e) {
         throw e
     }
