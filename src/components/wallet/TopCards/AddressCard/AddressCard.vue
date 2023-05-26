@@ -106,6 +106,15 @@ export default class AddressCard extends Vue {
         this.updateQR()
     }
 
+    @Watch('activeWallet', { immediate: true })
+    onActiveWalletChange(wlt: WalletType | null) {
+        if (wlt?.type === 'multisig') {
+            this.chainNow = 'P'
+        } else {
+            this.chainNow = 'X'
+        }
+    }
+
     get addressLabel(): string {
         switch (this.chainNow) {
             default:
