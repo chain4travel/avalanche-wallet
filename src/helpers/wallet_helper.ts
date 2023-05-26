@@ -1,11 +1,13 @@
 import { ava, bintools } from '@/AVA'
 import { ChainIdType, ZeroBN } from '@/constants'
 import { web3 } from '@/evm'
-import { ITransaction } from '@/components/wallet/transfer/types'
+import { BulkOrder, ITransaction } from '@/components/wallet/transfer/types'
+import { getStakeForAddresses } from '@/helpers/utxo_helper'
 import Erc20Token from '@/js/Erc20Token'
 import ERCNftToken from '@/js/ERCNftToken'
-import { getStakeForAddresses } from '@/helpers/utxo_helper'
+import AvaAsset from '@/js/AvaAsset'
 import {
+    buildBulkTransfer,
     buildCreateNftFamilyTx,
     buildEvmTransferErc20Tx,
     buildEvmTransferERCNftTx,
@@ -103,6 +105,27 @@ class WalletHelper {
         const txId: string = await ava.XChain().issueTx(tx)
 
         return txId
+    }
+
+    static async issueBulkTx(
+        wallet: WalletType,
+        asset: AvaAsset,
+        orders: BulkOrder[],
+        memo: Buffer | undefined
+    ): Promise<string> {
+        const fromAddresses = wallet.getAllAddressesX()
+        const changeAddress = wallet.getChangeAddressAvm()
+
+        let unsignedTx = buildBulkTransfer(
+            fromAddresses,
+            [changeAddress],
+            wallet.getUTXOSet(),
+            orders,
+            asset,
+            memo
+        )
+        const tx = await wallet.signX(unsignedTx)
+        return await ava.XChain().issueTx(tx)
     }
 
     static async validate(

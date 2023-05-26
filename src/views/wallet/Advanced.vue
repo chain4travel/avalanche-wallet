@@ -1,7 +1,7 @@
 <template>
     <div>
         <div>
-            <h1>{{ $t('advanced.title') }}</h1>
+            <h2>{{ $t('advanced.title') }}</h2>
         </div>
         <TokenListModal ref="token_list"></TokenListModal>
         <!--        <div class="buts grid_box">-->
@@ -44,7 +44,7 @@ export default class Advanced extends Vue {
 <style scoped lang="scss">
 @use '../../styles/abstracts/mixins';
 
-h1 {
+h2 {
     font-weight: normal;
 }
 .grids {

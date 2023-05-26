@@ -3,7 +3,7 @@
         <div>
             <div class="card_body">
                 <header>
-                    <h1>{{ $t('keys.title') }}</h1>
+                    <h2>{{ $t('keys.title') }}</h2>
                     <div class="button_container" v-if="canEncryptWallet">
                         <button
                             v-if="!account"
@@ -125,8 +125,8 @@ header {
     justify-content: space-between;
 }
 
-h1 {
-    font-weight: lighter;
+h2 {
+    font-weight: normal;
 }
 
 .save_account {

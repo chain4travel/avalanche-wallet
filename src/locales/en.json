@@ -144,6 +144,9 @@
     },
     "transfer": {
         "title": "Send",
+        "transfer": "Transfer",
+        "receivers": "Receivers and Amounts",
+        "airdrop": "Airdrop",
         "no_cash": "You must have an asset in your wallet to issue a transaction.",
         "faucet": "Have you checked our faucet?",
         "to": "To Address",

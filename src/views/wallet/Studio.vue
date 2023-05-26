@@ -1,11 +1,11 @@
 <template>
     <div>
         <div class="header">
-            <h1>{{ $t('studio.title') }}</h1>
-            <h1 class="subtitle" v-if="pageNow">
+            <h2>{{ $t('studio.title') }}</h2>
+            <h4 class="subtitle" v-if="pageNow">
                 / {{ subtitle }}
                 <span @click="cancel"><fa icon="times"></fa></span>
-            </h1>
+            </h4>
         </div>
         <template v-if="!pageNow">
             <p>{{ $t('studio.desc') }}</p>
@@ -119,8 +119,8 @@ export default class Studio extends Vue {
     /*align-items: center;*/
     align-items: center;
 
-    h1 {
-        font-weight: lighter;
+    h2 {
+        font-weight: normal;
     }
 
     .subtitle {

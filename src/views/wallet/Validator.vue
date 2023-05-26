@@ -1,7 +1,7 @@
 <template>
     <div class="earn_page">
         <div class="header">
-            <h1 :class="depositAndBond ? '' : 'wrong_network'">{{ $t('earn.subtitle1') }}</h1>
+            <h2 :class="depositAndBond ? '' : 'wrong_network'">{{ $t('earn.subtitle1') }}</h2>
         </div>
         <transition name="fade" mode="out-in">
             <div>
@@ -181,7 +181,7 @@ export default class Validator extends Vue {
 .header {
     margin-bottom: 1rem;
 
-    h1 {
+    h2 {
         font-weight: normal;
     }
 

@@ -206,6 +206,10 @@ a {
     color: #0085ff !important;
 }
 
+h4 {
+    font-weight: normal;
+}
+
 .input_label {
     margin-bottom: 0.5rem;
 }
@@ -214,7 +218,7 @@ a {
     margin-bottom: 2rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.5rem;
 }
 
 .requirement_title {

@@ -1,7 +1,7 @@
 <template>
     <div class="home_view">
         <div class="header">
-            <h1>{{ $t('portfolio.assets') }}</h1>
+            <h2>{{ $t('portfolio.assets') }}</h2>
             <div>
                 <button
                     @click="tab = 'fungibles'"
@@ -78,7 +78,7 @@ export default {
     flex-wrap: nowrap;
     white-space: nowrap;
 
-    h1 {
+    h2 {
         font-weight: normal;
         margin-right: 30px;
     }

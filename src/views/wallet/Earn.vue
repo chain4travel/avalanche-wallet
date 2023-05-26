@@ -1,7 +1,7 @@
 <template>
     <div class="earn_page">
         <div class="header">
-            <h1>{{ $t('earn.title') }}</h1>
+            <h2>{{ $t('earn.title') }}</h2>
             <div class="tab">
                 <button class="tab_btn" @click="tab = 'earn_now'" :active="tab === `earn_now`">
                     {{ $t('earn.rewards.earn_now.title') }}
@@ -126,11 +126,13 @@ export default class Earn extends Vue {
 .header {
     display: flex;
     align-items: center;
-    border-bottom: 2px solid transparent;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: var(--primary-border);
     flex-wrap: nowrap;
     white-space: nowrap;
 
-    h1 {
+    h2 {
         font-weight: normal;
         margin-right: 30px;
     }

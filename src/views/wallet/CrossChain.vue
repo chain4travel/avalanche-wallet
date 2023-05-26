@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="head">
-            <h1>{{ $t('cross_chain.title') }}</h1>
+            <h2>{{ $t('cross_chain.title') }}</h2>
             <p>
                 {{ $t('cross_chain.desc') }}
             </p>
@@ -22,13 +22,10 @@ import ChainTransfer from '@/components/wallet/ChainTransfer/ChainTransfer.vue'
 export default class CrossChain extends Vue {}
 </script>
 <style scoped lang="scss">
-h1 {
+h2 {
     font-weight: normal;
 }
 .head {
     margin-bottom: 14px;
-    //display: flex;
-    //align-items: center;
-    //justify-content: space-between;
 }
 </style>
