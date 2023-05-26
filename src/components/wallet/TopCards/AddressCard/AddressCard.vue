@@ -124,7 +124,11 @@ export default class AddressCard extends Vue {
             default:
                 return this.getAddressMsgX()
             case 'P':
-                return this.$t('top.address.desc_p') as string
+                return this.$t(
+                    this.walletType === 'multisig'
+                        ? 'top.address.desc_p_multisig'
+                        : 'top.address.desc_p'
+                ) as string
             case 'C':
                 return this.$t('top.address.desc_c') as string
         }
