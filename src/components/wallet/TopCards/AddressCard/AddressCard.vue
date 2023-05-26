@@ -81,7 +81,7 @@ import { ava } from '@/AVA'
 export default class AddressCard extends Vue {
     colorLight: string = '#FFF'
     colorDark: string = '#242729'
-    chainNow: ChainIdType = 'X'
+    chainNow: ChainIdType = this.walletType === 'multisig' ? 'P' : 'X'
 
     $refs!: {
         qr_modal: QRModal
@@ -104,6 +104,15 @@ export default class AddressCard extends Vue {
             this.colorLight = '#FFF'
         }
         this.updateQR()
+    }
+
+    @Watch('activeWallet', { immediate: true })
+    onActiveWalletChange(wlt: WalletType | null) {
+        if (wlt?.type === 'multisig') {
+            this.chainNow = 'P'
+        } else {
+            this.chainNow = 'X'
+        }
     }
 
     get addressLabel(): string {

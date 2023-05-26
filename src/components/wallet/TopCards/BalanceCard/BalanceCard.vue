@@ -63,18 +63,25 @@
                 </div>
                 <div class="alt_breakdown" v-else>
                     <div>
-                        <label>{{ $t('top.balance.available') }} (X)</label>
-                        <p data-cy="top-balance-available-X">
-                            {{ avmUnlocked | cleanAvaxBN }} {{ nativeAssetSymbol }}
-                        </p>
-                        <label>{{ $t('top.balance.available') }} (P)</label>
-                        <p data-cy="top-balance-available-P">
-                            {{ platformUnlocked | cleanAvaxBN }} {{ nativeAssetSymbol }}
-                        </p>
-                        <label>{{ $t('top.balance.available') }} (C)</label>
-                        <p data-cy="top-balance-available-C">
-                            {{ evmUnlocked | cleanAvaxBN }} {{ nativeAssetSymbol }}
-                        </p>
+                        <div v-if="walletType !== 'multisig'">
+                            <label>{{ $t('top.balance.available') }} (X)</label>
+                            <p data-cy="top-balance-available-X">
+                                {{ avmUnlocked | cleanAvaxBN }} {{ nativeAssetSymbol }}
+                            </p>
+                        </div>
+                        <div>
+                            <label>{{ $t('top.balance.available') }} (P)</label>
+                            <p data-cy="top-balance-available-P">
+                                {{ platformUnlocked | cleanAvaxBN }} {{ nativeAssetSymbol }}
+                            </p>
+                        </div>
+
+                        <div v-if="walletType !== 'multisig'">
+                            <label>{{ $t('top.balance.available') }} (C)</label>
+                            <p data-cy="top-balance-available-C">
+                                {{ evmUnlocked | cleanAvaxBN }} {{ nativeAssetSymbol }}
+                            </p>
+                        </div>
                     </div>
                     <div v-if="depositAndBond">
                         <label>{{ $t('top.balance.deposited') }} (P)</label>
@@ -115,7 +122,7 @@ import { BN } from '@c4tplatform/caminojs/dist'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import { bnToBig } from '@/helpers/helper'
 import { priceDict } from '@/store/types'
-import { WalletType } from '@/js/wallets/types'
+import { WalletNameType, WalletType } from '@/js/wallets/types'
 import UtxosBreakdownModal from '@/components/modals/UtxosBreakdown/UtxosBreakdownModal.vue'
 import { ava } from '@/AVA'
 
@@ -150,6 +157,10 @@ export default class BalanceCard extends Vue {
 
     toggleBreakdown() {
         this.isBreakdown = !this.isBreakdown
+    }
+
+    get walletType(): WalletNameType {
+        return this.$store.state.activeWallet.type
     }
 
     get ava_asset(): AvaAsset | null {

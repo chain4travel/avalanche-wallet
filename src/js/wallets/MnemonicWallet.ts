@@ -76,7 +76,7 @@ export default class MnemonicWallet extends HdWalletCore implements IAvaHdWallet
     }
 
     // The master key from caminojs
-    constructor(mnemonic: string, seedStr?: string) {
+    constructor(mnemonic: string, seedStr?: string, useStaticKey?: boolean) {
         const seed: globalThis.Buffer = seedStr
             ? Buffer.from(seedStr, 'hex')
             : bip39.mnemonicToSeedSync(mnemonic)
@@ -85,7 +85,7 @@ export default class MnemonicWallet extends HdWalletCore implements IAvaHdWallet
         let accountHdKey = masterHdKey.derive(AVA_ACCOUNT_PATH)
         let ethAccountKey = masterHdKey.derive(ETH_ACCOUNT_PATH + '/0/0')
 
-        super(accountHdKey, ethAccountKey, false)
+        super(accountHdKey, ethAccountKey, false, useStaticKey)
         this.name = 'Mnemonic Wallet'
 
         // Derive EVM key and address
@@ -149,9 +149,9 @@ export default class MnemonicWallet extends HdWalletCore implements IAvaHdWallet
             return
         }
 
-        super.getUTXOs()
-        this.getStake()
-        this.getEthBalance()
+        await super.getUTXOs()
+        await this.getStake()
+        await this.getEthBalance()
         return
     }
 

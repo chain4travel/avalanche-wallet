@@ -52,6 +52,7 @@ class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet 
 
     key: string
     seed: string = ''
+    mnemonic: string = ''
 
     stakeAmount: BN
 
@@ -73,6 +74,7 @@ class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet 
                 ? Buffer.from(seedStr, 'hex')
                 : bip39.mnemonicToSeedSync(mnemonic)
             this.seed = seed.toString('hex')
+            this.mnemonic = mnemonic
 
             const masterHdKey: HDKey = HDKey.fromMasterSeed(seed)
             const pkBuf = masterHdKey.derive("m/44'/60'/0'/0/0").privateKey
@@ -116,6 +118,10 @@ class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet 
 
     getSeed(): string {
         return this.seed
+    }
+
+    getMnemonic(): string {
+        return this.mnemonic
     }
 
     getStaticKeyPair(): SECP256k1KeyPair | undefined {

@@ -742,6 +742,20 @@
             "label2": "Signature",
             "submit": "Check Source",
             "label3": "Source Addresses"
+        },
+        "consolidate_funds": {
+            "title": "Consolidate funds",
+            "desc": "In case you have funds stuck on derived addresses, you can scan for them and consolidate them here",
+            "cta": "Scan for funds",
+            "modal": {
+                "title": "Consolidate Funds",
+                "body": "The wallet found the following UTXOs that currently allocate funds to one of your derived addresses. To display these funds in your wallet, please consolidate them.",
+                "cancel": "Cancel",
+                "derived_addresses": "Derived Addresses",
+                "no_utxos": "No UTXOs were found on dereived addresses.",
+                "discard": "Discard",
+                "fee_note": "Consolidating funds will incur a fee of {feeAmount} CAM"
+            }
         }
     },
     "activity": {
@@ -912,7 +926,9 @@
         "claim_reward_failed": "Failed to claim reward",
         "something_went_wrong": "Something went wrong",
         "deposit_success": "Deposit successful",
-        "deposit_failed": "Deposit failed"
+        "deposit_failed": "Deposit failed",
+        "consolidate_funds_success": "You have successfully consolidated the funds",
+        "consolidate_funds_error": "Something went wrong when trying to consolidate the funds"
     },
     "validator": {
         "pending": {
@@ -951,7 +967,8 @@
                 "cancel": "Cancel",
                 "claim": "Claim",
                 "confirmed_claimed": "{amount} {symbol} have been claimed."
-            }
+            },
+            "not_available": "You are currently not eligible for any validation rewards."
         },
         "transaction_reward": {
             "title": "Transaction details",

@@ -4,13 +4,11 @@
             <h1>{{ $t('advanced.title') }}</h1>
         </div>
         <TokenListModal ref="token_list"></TokenListModal>
-        <!--        <div class="buts grid_box">-->
-        <!--            <button @click="openTokenlist">Manage Token Lists</button>-->
-        <!--        </div>-->
-        <div class="grids">
+        <div :class="canConsolidate ? 'grids_4' : 'grids_3'">
             <ChainImport class="grid_box"></ChainImport>
             <SignMessage class="grid_box"></SignMessage>
             <VerifyMessage class="grid_box"></VerifyMessage>
+            <ConsolidateFunds v-if="canConsolidate" class="grid_box"></ConsolidateFunds>
         </div>
     </div>
 </template>
@@ -22,6 +20,7 @@ import ChainImport from '@/components/wallet/advanced/ChainImport.vue'
 import SignMessage from '@/components/wallet/advanced/SignMessage/SignMessage.vue'
 import VerifyMessage from '@/components/wallet/advanced/VerifyMessage.vue'
 import TokenListModal from '@/components/modals/TokenList/TokenListModal.vue'
+import ConsolidateFunds from '@/components/wallet/advanced/ConsolidateFunds.vue'
 
 @Component({
     name: 'advanced',
@@ -30,12 +29,26 @@ import TokenListModal from '@/components/modals/TokenList/TokenListModal.vue'
         ChainImport,
         SignMessage,
         VerifyMessage,
+        ConsolidateFunds,
     },
 })
 export default class Advanced extends Vue {
     $refs!: {
         token_list: TokenListModal
     }
+
+    get canConsolidate(): boolean {
+        try {
+            return this.activeWallet?.getMnemonic() && this.activeWallet?.getMnemonic() !== ''
+        } catch (err) {
+            return false
+        }
+    }
+
+    get activeWallet() {
+        return this.$store.state.activeWallet
+    }
+
     openTokenlist() {
         this.$refs.token_list.open()
     }
@@ -47,11 +60,18 @@ export default class Advanced extends Vue {
 h1 {
     font-weight: normal;
 }
-.grids {
+.grids_3 {
     display: grid;
     column-gap: 14px;
     row-gap: 14px;
     grid-template-columns: repeat(3, 1fr);
+}
+
+.grids_4 {
+    display: grid;
+    column-gap: 14px;
+    row-gap: 14px;
+    grid-template-columns: repeat(4, 1fr);
 }
 
 .grid_box {
