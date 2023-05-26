@@ -340,7 +340,7 @@ export default class AddValidator extends Vue {
     }
 
     get stakeDuration(): number {
-        let start = new Date(this.startDate)
+        let start = this.isMultiSig ? new Date(this.transactionEndDate) : new Date(this.startDate)
         let end = new Date(this.endDate)
 
         if (this.isConfirm) {
