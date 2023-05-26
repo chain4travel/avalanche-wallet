@@ -15,10 +15,10 @@
             </span>
         </div>
         <div class="checkout">
-            <div>
+            <p>
                 <label>{{ $t('transfer.memo').toString() }}</label>
                 <textarea class="memo" maxlength="256" placeholder="Memo" v-model="memo"></textarea>
-            </div>
+            </p>
             <v-btn
                 id="submit"
                 depressed
@@ -207,9 +207,10 @@ export default class BulkTransfer extends Vue {
         margin-top: 16px;
         grid-template-columns: auto 200px;
         column-gap: 16px;
-        align-items: center;
+        align-items: end;
     }
     .memo {
+        display: block;
         font-size: 14px;
         background-color: var(--bg-light);
         resize: none;
@@ -217,15 +218,12 @@ export default class BulkTransfer extends Vue {
         height: 52px;
         border-radius: var(--border-radius-sm);
         padding: 4px 12px;
+        margin-top: 10px;
     }
 
     @include mixins.mobile-device {
         .checkout {
-            display: grid;
-            margin-top: 16px;
             grid-template-columns: auto;
-            column-gap: 16px;
-            align-items: center;
         }
     }
 }

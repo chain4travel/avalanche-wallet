@@ -40,6 +40,7 @@
                                 ref="avaxinput"
                                 :readonly="true"
                                 class="amt_in"
+                                :initial="maxAmt"
                             ></AvaxInput>
                         </div>
                     </div>
@@ -179,7 +180,7 @@ export default class AddValidator extends Vue {
     isLoading = false
     isConfirm = false
     err: string = ''
-    stakeAmt: BN = new BN(0)
+    stakeAmt: BN = this.maxAmt
 
     minFee = 2
 
@@ -220,11 +221,11 @@ export default class AddValidator extends Vue {
     }
 
     get minStakeDuration() {
-        return ava.getNetwork().P.minStakeDuration
+        return ava.getNetwork().P.minStakeDuration * 1000
     }
 
     get maxStakeDuration() {
-        return ava.getNetwork().P.maxStakeDuration
+        return ava.getNetwork().P.maxStakeDuration * 1000
     }
 
     get defaultStakeDuration() {

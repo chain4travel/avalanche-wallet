@@ -15,8 +15,10 @@
             <p>{{ $t('transfer.disconnected') }}</p>
         </div>
         <template v-else>
-            <TransferCard v-if="tab === 'transfer'"></TransferCard>
-            <BulkCard v-else></BulkCard>
+            <transition name="fade" mode="out-in">
+                <TransferCard v-if="tab === 'transfer'"></TransferCard>
+                <BulkCard v-else></BulkCard>
+            </transition>
         </template>
     </div>
 </template>
