@@ -28,6 +28,7 @@ const accounts_module: Module<AccountsState, RootState> = {
         accounts: [],
         accountIndex: null,
         kycStatus: false,
+        kybStatus: false,
     },
     mutations: {
         loadAccounts(state) {
@@ -168,11 +169,13 @@ const accounts_module: Module<AccountsState, RootState> = {
             const privKey = wallet.getStaticKeyPair()?.getPrivateKey().toString('hex')
             if (!privKey) return null
             try {
-                state.kycStatus = await checkVerificationStatus(
+                let { kycStatus, kybStatus } = await checkVerificationStatus(
                     privKey,
                     //@ts-ignore
                     rootState.Network.selectedNetwork.name.toLowerCase()
                 )
+                state.kycStatus = kycStatus
+                state.kybStatus = kybStatus
             } catch (e) {
                 console.log((e as Error).message)
                 state.kycStatus = false
@@ -216,6 +219,9 @@ const accounts_module: Module<AccountsState, RootState> = {
 
         kycStatus(state: AccountsState): boolean {
             return state.kycStatus
+        },
+        kybStatus(state: AccountsState): boolean {
+            return state.kybStatus
         },
     },
 }
