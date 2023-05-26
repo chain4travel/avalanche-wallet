@@ -24,6 +24,8 @@ function selectAccountMenuItem(type: string) {
             return AliasPicker
         case 'kyc':
             return AccountKycItem
+        case 'kyb':
+            return AccountKycItem
         case 'user':
             return AccountUserItem
         default:
