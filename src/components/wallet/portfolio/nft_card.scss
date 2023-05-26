@@ -8,6 +8,7 @@
 
 $countW: 28px;
 .count {
+    pointer-events: none;
     position: absolute;
     top: -$countW/3;
     right: -$countW/3;
@@ -18,7 +19,6 @@ $countW: 28px;
     font-size: 12px;
     text-align: center;
     background-color: var(--primary-color);
-    //border: 1px solid var(--bg-wallet);
     color: var(--bg);
     font-weight: bold;
     z-index: 2;

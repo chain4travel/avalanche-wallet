@@ -26,18 +26,10 @@
             </div>
         </div>
         <div class="pages">
-            <transition-group name="fade" mode="out-in">
-                <fungibles
-                    v-show="tab === `fungibles`"
-                    key="fungibles"
-                    :search="search"
-                ></fungibles>
-                <collectibles
-                    v-show="tab === `collectibles`"
-                    key="collectibles"
-                    :search="search"
-                ></collectibles>
-            </transition-group>
+            <transition name="fade" mode="out-in">
+                <fungibles v-if="tab === `fungibles`" key="fungibles" :search="search"></fungibles>
+                <collectibles v-else key="collectibles" :search="search"></collectibles>
+            </transition>
         </div>
     </div>
 </template>
@@ -102,7 +94,6 @@ export default {
 .search {
     background-color: var(--bg-light);
     border-radius: var(--border-radius-sm);
-    /*flex-grow: 1;*/
     height: 46px;
     padding: 5px;
     display: flex;
@@ -118,7 +109,6 @@ export default {
         border-radius: var(--border-radius-sm);
         padding: 10px 0px;
         background-color: var(--bg-wallet-light);
-        /*height: 100%;*/
         height: $icon_w;
         width: $icon_w;
         object-fit: contain;
@@ -170,8 +160,6 @@ export default {
     }
 
     .search {
-        //margin: 15px 0px;
-        //flex-basis: 100%;
         flex-grow: 1;
         height: 36px;
         flex-basis: auto;

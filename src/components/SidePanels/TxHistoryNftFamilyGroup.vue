@@ -72,6 +72,7 @@ export default class TxHistoryNftFamilyGroup extends Vue {
 
 $countW: 18px;
 .count {
+    pointer-events: none;
     position: absolute;
     top: -$countW/2.5;
     left: -$countW/2.5;
@@ -98,10 +99,10 @@ $countW: 18px;
     position: relative;
     border-radius: var(--border-radius-sm);
     overflow: hidden;
-    pointer-events: none;
 }
 
 .payload_view {
+    height: 100%;
 }
 
 @include mixins.mobile-device {
