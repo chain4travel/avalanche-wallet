@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="add_key_string">
         <label>{{ $t('private_key') }}</label>
         <form @submit.prevent="addKey">
             <qr-input @change="validateQR" v-model="privateKeyInput" class="qrIn"></qr-input>
@@ -81,6 +81,10 @@ export default class AddKeyString extends Vue {
 label {
     color: #909090;
     font-size: 12px;
+}
+
+.add_key_string {
+    min-height: 150px;
 }
 
 .qrIn {

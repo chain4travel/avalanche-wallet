@@ -69,6 +69,7 @@ import { LedgerWallet } from '@/js/wallets/LedgerWallet'
 import ChainSelect from '@/components/wallet/TopCards/AddressCard/ChainSelect.vue'
 import { ChainIdType } from '@/constants'
 import { ava } from '@/AVA'
+import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 
 @Component({
     components: {
@@ -139,7 +140,11 @@ export default class AddressCard extends Vue {
 
     get walletType(): WalletNameType {
         let wallet = this.activeWallet
-        if (!wallet) return 'mnemonic'
+        if (
+            !wallet ||
+            (wallet.type === 'singleton' && (wallet as SingletonWallet).getMnemonic() !== '')
+        )
+            return 'mnemonic'
         return wallet.type
     }
 
@@ -224,7 +229,6 @@ export default class AddressCard extends Vue {
                     dark: this.colorDark,
                 },
                 width: size,
-                // height: size,
             },
             function (error: any) {
                 if (error) console.error(error)
@@ -291,18 +295,6 @@ export default class AddressCard extends Vue {
     }
 }
 
-// .qr_but {
-//     background-image: url('/img/qr_icon.png');
-//     .v-icon {
-//     color: var(--primary-color);
-//     }
-// }
-// .print_but {
-//     background-image: url('/img/faucet_icon.png');
-// }
-// .ledger_but {
-//     background-image: url('/img/ledger_icon.png');
-// }
 .copy_but {
     color: var(--primary-color);
 }

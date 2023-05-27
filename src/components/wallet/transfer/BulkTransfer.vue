@@ -206,7 +206,7 @@ export default class BulkTransfer extends Vue {
         display: grid;
         margin-top: 16px;
         grid-template-columns: auto 200px;
-        column-gap: 16px;
+        gap: 16px;
         align-items: end;
     }
     .memo {

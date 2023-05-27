@@ -8,7 +8,6 @@
                     display: 'none',
                     height: `${height}px`,
                     width: `100%`,
-                    // paddingTop: `${100 / aspectRatio}%`,
                 }"
             />
             <canvas
@@ -17,7 +16,6 @@
                 :style="{
                     width: `100%`,
                     height: `${height}px`,
-                    // paddingTop: `${100 / aspectRatio}%`,
                 }"
             ></canvas>
             <v-btn depressed block @click="print" class="print_btn">
@@ -33,6 +31,7 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import Modal from '../Modal.vue'
 
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
+import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 
 import QRCode from 'qrcode'
 import printjs from 'print-js'
@@ -57,7 +56,7 @@ export default class PaperWallet extends Vue {
     qrImg: HTMLImageElement | null = null
     mnemonicImg: HTMLImageElement | null = null
 
-    @Prop() wallet!: MnemonicWallet
+    @Prop() wallet!: MnemonicWallet | SingletonWallet
     // Height and Width of the img and canvas
     width = 100
     height = 100
@@ -72,32 +71,13 @@ export default class PaperWallet extends Vue {
         }, 200)
 
         setTimeout(() => {
-            // this.setSizes()
             this.initBg()
         }, 500)
     }
 
     get address() {
-        try {
-            let wallet: MnemonicWallet = this.$store.state.activeWallet
-            if (!wallet) return '-'
-
-            let key = wallet.externalHelper.getKeyForIndex(0)
-            if (!key) {
-                return '-'
-            }
-            return key.getAddressString()
-        } catch (e) {
-            return '-'
-        }
+        return this.wallet.getBaseAddress()
     }
-
-    // get mnemonic(): string {
-    //     let wallet: MnemonicWallet = this.$store.state.activeWallet
-    //     if (!wallet) return '-'
-    //
-    //     return wallet.getMnemonic() || '-'
-    // }
 
     get aspectRatio(): number {
         return PDF_W / PDF_H
@@ -248,9 +228,6 @@ export default class PaperWallet extends Vue {
 }
 
 .pdf_preview {
-    /*width: 420px;*/
-    /*max-width: 100%;*/
-    /*height: 320px;*/
     border: 1px solid #ddd;
 }
 

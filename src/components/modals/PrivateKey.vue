@@ -1,10 +1,15 @@
 <template>
     <modal ref="modal" :title="$t('modal.priv_key.info')" class="modal_main">
         <div class="singleton_modal_body">
-            <div class="key_raw">
-                <span class="key_raw_title">{{ $t('modal.priv_key.title') }}</span>
-                <br />
-                {{ privateKey }}
+            <div class="key_container">
+                <div class="key_raw">
+                    <span class="key_raw_title">{{ $t('modal.priv_key.title') }}</span>
+                    <br />
+                    {{ privateKey }}
+                </div>
+                <div class="col_qr">
+                    <canvas ref="qr"></canvas>
+                </div>
             </div>
             <p class="warning_text">
                 Warning: Never disclose this key. Anyone with your private keys can steal any assets
@@ -28,7 +33,9 @@
 <script lang="ts">
 import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import QRCode from 'qrcode'
 import Modal from '@/components/modals/Modal.vue'
+
 const ecdsa = require('elliptic').ec
 const ec = new ecdsa('secp256k1')
 
@@ -44,6 +51,10 @@ export default class PrivateKey extends Vue {
     open(): void {
         let modal = this.$refs.modal as Modal
         modal.open()
+
+        Vue.nextTick(() => {
+            this.updateQR()
+        })
     }
 
     get compressedPublicKey(): string {
@@ -55,6 +66,34 @@ export default class PrivateKey extends Vue {
             'hex'
         ).toString('hex')
     }
+
+    updateQR() {
+        let canvas = this.$refs.qr as HTMLCanvasElement
+        if (!canvas) return
+
+        let size = canvas.clientWidth
+        QRCode.toCanvas(
+            canvas,
+            this.privateKey,
+            {
+                scale: 6,
+                color:
+                    this.$root.$data.theme === 'night'
+                        ? {
+                              dark: '#E5E5E5',
+                              light: '#0f172a',
+                          }
+                        : {
+                              dark: '#242729',
+                              light: '#FFF',
+                          },
+                width: size,
+            },
+            function (error: any) {
+                if (error) console.error(error)
+            }
+        )
+    }
 }
 </script>
 <style scoped lang="scss">
@@ -64,11 +103,18 @@ export default class PrivateKey extends Vue {
     padding: 10px 20px;
 }
 
-.copyBut {
-    width: 20px;
-    height: 20px;
-    margin: 15px auto;
-    margin-bottom: 0;
+.col_qr {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 114px;
+    margin-bottom: 12px;
+}
+
+.key_container {
+    display: grid;
+    grid-template-columns: auto 114px;
+    gap: 6px;
 }
 
 .key_raw_title {
@@ -82,8 +128,8 @@ export default class PrivateKey extends Vue {
     text-align: center;
     word-break: break-all;
     background-color: var(--bg);
-    margin: 12px 0px !important;
     border-radius: 2px;
+    margin: 12px 0px !important;
 }
 
 .warning_text {

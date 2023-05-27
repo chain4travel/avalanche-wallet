@@ -137,8 +137,6 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
 import { BN } from '@c4tplatform/caminojs/dist'
 import Big from 'big.js'
-//@ts-ignore
-import { QrInput } from '@c4tplatform/vue_components'
 import { ava, bintools } from '@/AVA'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import ConfirmPage from '@/components/wallet/earn/Validate/ConfirmPage.vue'
@@ -162,7 +160,6 @@ const DAY_MS = HOUR_MS * 24
     components: {
         Tooltip,
         AvaxInput,
-        QrInput,
         ConfirmPage,
         CurrencySelect,
         Spinner,

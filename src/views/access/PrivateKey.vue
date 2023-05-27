@@ -3,16 +3,7 @@
         <div class="content">
             <h1>Private Key</h1>
             <form @submit.prevent="access">
-                <v-text-field
-                    class="pass"
-                    label="Private Key"
-                    dense
-                    solo
-                    flat
-                    :type="inputType"
-                    v-model="privatekey"
-                    hide-details
-                ></v-text-field>
+                <qr-input v-model="privatekey"></qr-input>
                 <p class="err">{{ error }}</p>
                 <v-btn
                     class="ava_button button_primary"
@@ -30,8 +21,14 @@
 </template>
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
+// @ts-ignore
+import { QrInput } from '@c4tplatform/vue_components'
 
-@Component
+@Component({
+    components: {
+        QrInput,
+    },
+})
 export default class PrivateKey extends Vue {
     privatekey: string = ''
     isLoading: boolean = false
@@ -79,12 +76,9 @@ export default class PrivateKey extends Vue {
     margin-bottom: 22px;
 }
 .access_card {
-    /*max-width: 80vw;*/
     background-color: var(--bg-light);
     padding: variables.$container-padding;
     width: 100%;
-    /*max-width: 240px;*/
-    /*max-width: 1000px;*/
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -101,13 +95,7 @@ h1 {
     font-weight: 400;
     margin-bottom: 30px;
 }
-.file_in {
-    margin: 30px auto 10px;
-    font-size: 13px;
-    border: none !important;
-    background-color: var(--bg) !important;
-    /*min-width: 200px*/
-}
+
 a {
     color: variables.$primary-color-light !important;
     text-decoration: underline !important;
@@ -116,14 +104,17 @@ a {
 .link {
     color: var(--secondary-color);
 }
-.remember {
-    margin: 12px 0;
-}
+
 .err {
     font-size: 13px;
     color: var(--error);
     margin: 14px 0px !important;
 }
+
+.qr_input {
+    background-color: var(--bg) !important;
+}
+
 @media only screen and (max-width: variables.$mobile_width) {
     h1 {
         font-size: variables.$m-size-mobile;

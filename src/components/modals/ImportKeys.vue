@@ -136,8 +136,15 @@ export default class ImportKeys extends Vue {
 <style lang="scss">
 @use '../../styles/abstracts/variables';
 
+.add_key_body {
+    .qr_popup {
+        left: 10% !important;
+    }
+}
+
 .v-tab.v-tab {
     font-weight: 700;
+    min-width: 40px;
 }
 
 .v-tabs-slider-wrapper {
