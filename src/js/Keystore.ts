@@ -393,9 +393,15 @@ async function makeKeyfile(
 
     for (let i: number = 0; i < wallets.length; i++) {
         let wallet = wallets[i]
+        let walletType: KeystoreFileKeyType = wallet.type as KeystoreFileKeyType
         let key
         if (wallet.type === 'singleton') {
-            key = (wallet as SingletonWallet).key
+            const sWallet = wallet as SingletonWallet
+            if (sWallet.getMnemonic() === '') key = sWallet.key
+            else {
+                key = sWallet.getMnemonic().concat('\n', sWallet.getSeed())
+                walletType = 'mnemonic'
+            }
         } else if (wallet.type === 'mnemonic') {
             key = (wallet as MnemonicWallet)
                 .getMnemonic()
@@ -411,7 +417,7 @@ async function makeKeyfile(
             name: wallet.name,
             key: bintools.cb58Encode(AjsBuffer.from(pk_crypt.ciphertext)),
             iv: bintools.cb58Encode(AjsBuffer.from(pk_crypt.iv)),
-            type: wallet.type,
+            type: walletType,
         }
         keys.push(key_data)
     }
