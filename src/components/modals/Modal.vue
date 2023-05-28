@@ -32,13 +32,8 @@ export default class Modal extends Vue {
 
     isActive: boolean = false
 
-    destroyed() {
-        setTimeout(() => (document.body.style.overflow = 'auto'), 1000)
-    }
-
     public open() {
         this.isActive = true
-        document.body.style.overflow = 'hidden'
     }
 
     bgclick() {
@@ -50,7 +45,6 @@ export default class Modal extends Vue {
     public close() {
         this.$emit('beforeClose')
         this.isActive = false
-        document.body.style.overflow = 'initial'
     }
 }
 </script>

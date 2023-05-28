@@ -36,7 +36,8 @@ export default class MnemonicPhraseModal extends Vue {
     }
 
     updateQR() {
-        let canvas = this.$refs.qr
+        let canvas = this.$refs.qr as HTMLCanvasElement
+        let size = canvas.clientWidth
         QRCode.toCanvas(
             canvas,
             this.phrase.getValue(),
@@ -46,6 +47,7 @@ export default class MnemonicPhraseModal extends Vue {
                     dark: '#242729',
                     light: '#FFFD',
                 },
+                width: size,
             },
             function (error) {
                 if (error) console.error(error)
@@ -58,13 +60,17 @@ export default class MnemonicPhraseModal extends Vue {
 @use '../../styles/abstracts/mixins';
 
 .mnemonic_modal_body {
-    /*width: 600px;*/
+    display: flex;
+    align-items: center;
+    flex-direction: column;
     max-width: 400px;
     width: 100%;
     padding: 30px;
     background-color: var(--bg-light);
 
     canvas {
+        max-width: 256px;
+        width: 100%;
         border-radius: var(--border-radius-sm);
     }
 }
