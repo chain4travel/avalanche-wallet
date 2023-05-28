@@ -138,7 +138,16 @@ export default class ImportKeys extends Vue {
 
 .add_key_body {
     .qr_popup {
-        left: 10% !important;
+        left: 10%;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .add_key_body {
+        .qr_popup {
+            left: 0;
+            width: 100%;
+        }
     }
 }
 
