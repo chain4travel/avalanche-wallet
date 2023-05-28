@@ -143,7 +143,7 @@ export default class Earn extends Vue {
     }
 
     .tab_btn {
-        padding: 8px 24px;
+        padding: 8px 16px;
         font-size: 14px;
         font-weight: bold;
         margin: 0px 5px;

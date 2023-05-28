@@ -459,7 +459,7 @@
                 "deposit": "Deposit Now"
             },
             "active_earning": {
-                "title": "My Rewards",
+                "title": "Rewards",
                 "deposit_start": "Deposit Start",
                 "deposit_end": "Deposit End",
                 "deposit_amount": "Deposit Amount",
