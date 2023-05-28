@@ -11,6 +11,15 @@ export default {
             val: false,
         }
     },
+    watch: {
+        '$root.theme': [
+            {
+                handler: 'onThemeChange',
+                immediate: false,
+                deep: false,
+            },
+        ],
+    },
     methods: {
         setNight() {
             this.val = true
@@ -33,6 +42,9 @@ export default {
             } else {
                 this.setDay()
             }
+        },
+        onThemeChange(now, before) {
+            this.val = now === 'night'
         },
     },
     mounted() {

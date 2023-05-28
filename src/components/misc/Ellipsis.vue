@@ -2,7 +2,7 @@
     <div class="eps_row" @click.prevent="copyFullText" :pointer="!copy">
         <span class="eps_prefix">{{ prefix }}</span>
         <span class="eps_left">{{ left }}</span>
-        <span class="eps_right">{{ right }}</span>
+        <bdo class="eps_right">{{ right }}</bdo>
         <fa v-if="copy" class="eps_copy" icon="copy" @click.prevent="copyText"></fa>
     </div>
 </template>
@@ -21,12 +21,16 @@ export default class Ellipsis extends Vue {
 
     get left(): string {
         const count = (this.text.length - this.prefixPos) >> 1
-        return this.text.slice(this.prefixPos, count)
+        return this.text.slice(this.prefixPos, this.prefixPos + count)
     }
 
     get right(): string {
         const count = (this.text.length - this.prefixPos) >> 1
-        return this.text.slice(this.prefixPos + count)
+        return this.text
+            .slice(this.prefixPos + count)
+            .split('')
+            .reverse()
+            .join('')
     }
 
     copyText() {
@@ -70,7 +74,7 @@ export default class Ellipsis extends Vue {
     overflow: hidden;
     word-break: break-all;
     direction: rtl;
-    height: 1rem;
+    height: 1.45em;
 }
 
 .eps_copy {

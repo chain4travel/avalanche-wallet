@@ -18,7 +18,7 @@ import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import Modal from '@/components/modals/Modal.vue'
 import ExportWallet from '@/components/wallet/manage/ExportWallet.vue'
-import MnemonicWallet from '@/js/wallets/MnemonicWallet'
+import { HotWalletType } from '@/js/wallets/types'
 
 @Component({
     components: {
@@ -35,7 +35,7 @@ export default class ExportKeys extends Vue {
         export: ExportWallet
     }
 
-    @Prop() wallets!: MnemonicWallet[]
+    @Prop() wallets!: HotWalletType[]
 
     beforeClose() {
         this.$refs.export.clear()

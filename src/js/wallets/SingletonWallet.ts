@@ -125,6 +125,10 @@ class SingletonWallet extends WalletCore implements AvaWalletCore, UnsafeWallet 
         return this.mnemonic?.getValue() ?? ''
     }
 
+    getMnemonicEncrypted(): MnemonicPhrase {
+        return this.mnemonic || new MnemonicPhrase('')
+    }
+
     getStaticKeyPair(): SECP256k1KeyPair | undefined {
         return this.keyPair
     }

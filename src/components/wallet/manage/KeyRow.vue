@@ -1,11 +1,11 @@
 <template>
     <div class="addressItem" :selected="is_default">
-        <ExportKeys v-if="walletType === 'mnemonic'" :wallets="[wallet]" ref="export_wallet" />
-        <MnemonicPhraseModal
-            v-if="walletType === 'mnemonic'"
-            :phrase="mnemonicPhrase"
-            ref="modal"
+        <ExportKeys
+            v-if="walletType === 'mnemonic' || walletType === 'singleton'"
+            :wallets="[wallet]"
+            ref="export_wallet"
         />
+        <MnemonicPhraseModal v-if="hasMnemonic" :phrase="mnemonicPhrase" ref="modal" />
         <HdDerivationListModal :wallet="wallet" ref="modal_hd" v-if="isHDWallet" />
         <MultisigOwnersModal
             :wallet="wallet"
@@ -62,7 +62,7 @@
                             <fa icon="list-ol"></fa>
                         </Tooltip>
                         <Tooltip
-                            v-if="walletType === 'singleton' || walletType === 'mnemonic'"
+                            v-if="walletType === 'mnemonic' || walletType === 'singleton'"
                             :text="$t('keys.export_key')"
                             class="row_but circle"
                             @click.native="showExportModal"
@@ -70,10 +70,7 @@
                             <fa class="fa-regular" icon="upload"></fa>
                         </Tooltip>
                         <div class="text_buts">
-                            <button
-                                v-if="walletType === 'mnemonic' && is_default"
-                                @click="showModal"
-                            >
+                            <button v-if="hasMnemonic" @click="showModal">
                                 {{ $t('keys.view_key') }}
                             </button>
                             <button
@@ -187,13 +184,20 @@ export default class KeyRow extends Vue {
         return this.wallet.type
     }
 
+    get hasMnemonic(): boolean {
+        return (
+            this.wallet.type === 'mnemonic' ||
+            (this.wallet.type === 'singleton' && (this.wallet as SingletonWallet).getSeed() !== '')
+        )
+    }
+
     get isHDWallet() {
         return ['mnemonic', 'ledger'].includes(this.walletType)
     }
 
     get mnemonicPhrase(): MnemonicPhrase | null {
-        if (this.walletType !== 'mnemonic') return null
-        let wallet = this.wallet as MnemonicWallet
+        if (!this.hasMnemonic) return null
+        let wallet = this.wallet as MnemonicWallet | SingletonWallet
         return wallet.getMnemonicEncrypted()
     }
 

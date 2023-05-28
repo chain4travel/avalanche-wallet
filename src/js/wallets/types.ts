@@ -47,6 +47,7 @@ export type AvmImportChainType = 'P' | 'C'
 export type AvmExportChainType = 'P' | 'C'
 
 export type WalletNameType = 'mnemonic' | 'ledger' | 'singleton' | 'multisig'
+export type HotWalletType = MnemonicWallet | SingletonWallet | MultisigWallet
 export type WalletType = MnemonicWallet | LedgerWallet | SingletonWallet | MultisigWallet
 
 interface IAddressManager {

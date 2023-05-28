@@ -133,7 +133,7 @@ export default class AddMnemonic extends Vue {
 textarea {
     padding: 12px;
     font-size: 0.8rem;
-    background-color: var(--bg-wallet);
+    background-color: var(--bg-light);
     resize: none;
     width: 100%;
     height: 120px;

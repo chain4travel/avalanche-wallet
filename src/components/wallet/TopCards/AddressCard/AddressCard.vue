@@ -8,15 +8,15 @@
         ></paper-wallet>
         <p class="addr_info">{{ addressMsg }}</p>
         <div class="bottom">
-            <div class="col_qr">
-                <canvas ref="qr"></canvas>
-            </div>
             <div class="bottom_rest">
                 <p class="subtitle">{{ addressLabel }}</p>
 
-                <p class="addr_text" data-cy="wallet_address">
-                    {{ activeAddress }}
-                </p>
+                <ellipsis
+                    :prefixPos="prefixPos"
+                    :text="activeAddress"
+                    class="addr_text"
+                    data-cy="wallet_address"
+                />
                 <div class="buts">
                     <button :tooltip="$t('top.hover1')" @click="viewQRModal" class="qr_but">
                         <v-icon>mdi-qrcode</v-icon>
@@ -52,13 +52,13 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Watch } from 'vue-property-decorator'
+import { Vue, Component } from 'vue-property-decorator'
 
 import CopyText from '@/components/misc/CopyText.vue'
 import QRModal from '@/components/modals/QRModal.vue'
 import PaperWallet from '@/components/modals/PaperWallet/PaperWallet.vue'
-import QRCode from 'qrcode'
 import { WalletType, WalletNameType } from '@/js/wallets/types'
+import Ellipsis from '@/components/misc/Ellipsis.vue'
 
 import MnemonicWallet, {
     AVA_ACCOUNT_PATH,
@@ -74,37 +74,19 @@ import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 @Component({
     components: {
         CopyText,
+        Ellipsis,
         PaperWallet,
         QRModal,
         ChainSelect,
     },
 })
 export default class AddressCard extends Vue {
-    colorLight: string = '#FFF'
-    colorDark: string = '#242729'
     chainNow: ChainIdType = 'X'
 
     $refs!: {
         qr_modal: QRModal
         print_modal: PaperWallet
         qr: HTMLCanvasElement
-    }
-
-    @Watch('activeAddress')
-    onaddrchange() {
-        this.updateQR()
-    }
-
-    @Watch('$root.theme', { immediate: true })
-    onthemechange(val: string) {
-        if (val === 'night') {
-            this.colorDark = '#E5E5E5'
-            this.colorLight = '#0f172a'
-        } else {
-            this.colorDark = '#242729'
-            this.colorLight = '#FFF'
-        }
-        this.updateQR()
     }
 
     get addressLabel(): string {
@@ -133,9 +115,9 @@ export default class AddressCard extends Vue {
         return this.$t('top.address.desc_x') as string
     }
 
-    get isDayTheme(): boolean {
-        //@ts-ignore
-        return this.$root.theme === 'day'
+    get prefixPos(): number {
+        if (this.chainNow === 'C') return 0
+        return ava.getHRP().length + 3
     }
 
     get walletType(): WalletNameType {
@@ -214,27 +196,6 @@ export default class AddressCard extends Vue {
         // @ts-ignore
         modal.open()
     }
-    updateQR() {
-        let canvas = this.$refs.qr as HTMLCanvasElement
-        if (!canvas) return
-
-        let size = canvas.clientWidth
-        QRCode.toCanvas(
-            canvas,
-            this.activeAddress,
-            {
-                scale: 6,
-                color: {
-                    light: this.colorLight,
-                    dark: this.colorDark,
-                },
-                width: size,
-            },
-            function (error: any) {
-                if (error) console.error(error)
-            }
-        )
-    }
 
     async verifyLedgerAddress() {
         const wallet = this.activeWallet as LedgerWallet
@@ -249,10 +210,6 @@ export default class AddressCard extends Vue {
             case 'C':
                 wallet.ethApp.getAddress(`${LEDGER_ETH_ACCOUNT_PATH}`)
         }
-    }
-
-    mounted() {
-        this.updateQR()
     }
 }
 </script>
@@ -277,8 +234,6 @@ export default class AddressCard extends Vue {
         margin-left: 14px;
         position: relative;
         outline: none;
-        // width: 18px;
-        // height: 18px;
         opacity: 0.6;
 
         background-size: contain;
@@ -304,25 +259,6 @@ export default class AddressCard extends Vue {
     flex-direction: column;
     justify-content: center;
 }
-.mainnet_but {
-    background-image: url('/img/modal_icons/mainnet_addr.svg');
-}
-
-@include mixins.night-mode {
-    // .qr_but {
-    //     background-image: url('/img/qr_icon_night.svg');
-    // }
-    // .print_but {
-    //     background-image: url('/img/print_icon_night.svg');
-    // }
-    // .ledger_but {
-    //     background-image: url('/img/ledger_night.svg');
-    // }
-
-    .mainnet_but {
-        background-image: url('/img/modal_icons/mainnet_addr_night.svg');
-    }
-}
 
 .addr_info {
     margin: 19px !important;
@@ -335,23 +271,13 @@ export default class AddressCard extends Vue {
     border-radius: var(--border-radius-sm);
 }
 
-$qr_width: 110px;
-
 .bottom {
-    display: grid;
-    grid-template-columns: $qr_width 1fr;
-    column-gap: 14px;
+    display: flex;
     padding-right: 18px;
     margin-top: 4px;
     margin-bottom: 4px;
     padding-left: 8px;
     flex-grow: 1;
-
-    canvas {
-        width: $qr_width;
-        height: $qr_width;
-        background-color: transparent;
-    }
 
     .bottom_rest {
         padding-top: 4px;
@@ -361,16 +287,6 @@ $qr_width: 110px;
     }
 }
 
-.sub {
-    margin: 0px 10px !important;
-    text-align: center;
-    font-size: 0.7rem;
-    background-color: variables.$secondary-color;
-    color: #fff;
-    padding: 3px 6px;
-    border-radius: 3px;
-}
-
 .subtitle {
     font-size: 0.7rem;
     color: var(--primary-color-light);
@@ -378,8 +294,7 @@ $qr_width: 110px;
 
 .addr_text {
     font-size: 15px;
-    word-break: break-all;
     color: var(--primary-color);
-    min-height: 55px;
+    min-height: 36px;
 }
 </style>

@@ -77,16 +77,10 @@ export default class PrivateKey extends Vue {
             this.privateKey,
             {
                 scale: 6,
-                color:
-                    this.$root.$data.theme === 'night'
-                        ? {
-                              dark: '#E5E5E5',
-                              light: '#0f172a',
-                          }
-                        : {
-                              dark: '#242729',
-                              light: '#FFF',
-                          },
+                color: {
+                    dark: '#242729',
+                    light: '#FFFD',
+                },
                 width: size,
             },
             function (error: any) {
@@ -107,13 +101,16 @@ export default class PrivateKey extends Vue {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 114px;
     margin-bottom: 12px;
+
+    canvas {
+        border-radius: var(--border-radius-sm);
+    }
 }
 
 .key_container {
     display: grid;
-    grid-template-columns: auto 114px;
+    grid-template-columns: auto 142px;
     gap: 6px;
 }
 

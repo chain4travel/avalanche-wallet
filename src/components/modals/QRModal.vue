@@ -22,9 +22,6 @@ import QRCode from 'qrcode'
     },
 })
 export default class QRModal extends Vue {
-    colorDark: string = '#242729'
-    colorLight: string = '#FFF'
-
     @Prop({ default: '-' }) address!: string
 
     @Watch('address', { immediate: true })
@@ -32,18 +29,6 @@ export default class QRModal extends Vue {
         if (val) {
             this.updateQR()
         }
-    }
-
-    @Watch('$root.theme', { immediate: true })
-    onthemechange(val: string) {
-        if (val === 'night') {
-            this.colorDark = '#E5E5E5'
-            this.colorLight = '#0000'
-        } else {
-            this.colorDark = '#242729'
-            this.colorLight = '#0000'
-        }
-        this.updateQR()
     }
 
     open() {
@@ -63,8 +48,8 @@ export default class QRModal extends Vue {
             {
                 scale: 6,
                 color: {
-                    light: this.colorLight,
-                    dark: this.colorDark,
+                    dark: '#242729',
+                    light: '#FFFD',
                 },
             },
             function (error) {
@@ -78,6 +63,10 @@ export default class QRModal extends Vue {
 .qr_body {
     padding: 30px;
     text-align: center;
+
+    canvas {
+        border-radius: var(--border-radius-sm);
+    }
 }
 
 .qr_body p {

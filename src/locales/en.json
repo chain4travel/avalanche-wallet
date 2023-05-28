@@ -348,7 +348,7 @@
         "edit_wallet_name_tooltip": "Edit wallet name",
         "keys_info": "Key Info",
         "static_keys_info": "Static Key Info",
-        "view_key": "View Key Phrase",
+        "view_key": "Key Phrase",
         "export_key": "Export Key",
         "hd_addresses": "HD Addresses",
         "remove_key": "Remove Key",
@@ -360,7 +360,7 @@
         "password_validation": "Password must be at least 9 characters long.",
         "password_validation2": "Password do not match.",
         "account_name_required": "Account Name Required.",
-        "view_multisig_owners": "Multisig Owners"
+        "view_multisig_owners": "Owners"
     },
     "portfolio": {
         "assets": "Assets",
