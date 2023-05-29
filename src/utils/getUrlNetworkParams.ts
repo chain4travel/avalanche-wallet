@@ -1,3 +1,5 @@
+import { AvaNetwork } from '@/js/AvaNetwork'
+
 export const NETWORK_ALIAS = {
     CAMINO: 'camino',
     COLUMBUS: 'columbus',
@@ -19,4 +21,26 @@ export function getNetworkFromUrl() {
         }
     }
     return ''
+}
+
+export function getCustomNetworks(): AvaNetwork[] {
+    try {
+        let storageNetwork = localStorage.getItem('networks')
+
+        if (storageNetwork !== null && storageNetwork !== undefined) {
+            let customNetworks = JSON.parse(storageNetwork)
+            return customNetworks
+        } else {
+            return []
+        }
+    } catch (e) {
+        return []
+    }
+}
+
+export function compareCustomNetwork(customNetworks: AvaNetwork[], urlParamNetwork: string) {
+    let network = customNetworks.find(
+        (net) => net.name.toLowerCase() === urlParamNetwork.toLowerCase()
+    )
+    return network
 }
