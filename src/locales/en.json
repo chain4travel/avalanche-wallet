@@ -214,16 +214,23 @@
     },
     "kyc_process": {
         "title": "KYC Process",
+        "title-kyb": "KYB Process",
         "desc": "Kyc something something",
         "verify_kyc": "Verify KYC",
+        "verify_kyb": "Verify KYB",
         "kyc_verified": "KYC Verified",
+        "kyb_verified": "KYB Verified",
         "your_email_address": "Your Email Address",
         "email_address": "Email Address",
         "your_phone_number": "Your Phone Number",
         "phone_number": "Phone Number",
         "submit": "Submit",
+        "provider": "All verification are made via a third-party provider",
+        "link_to_documentation": "read our documentation.",
         "info_explanation_p1": "We need your email address and phone number to follow up with you in case your verification requires clarification and to inform you about the verification result.",
-        "info_explanation_p2": "Please enter your contact details below."
+        "info_explanation_p2": "Please enter your contact details below.",
+        "info_explanation_kyb_p1": "Verifying your wallet will allow you or your company to be a more active player in the Camino network, such as interacting with specific dApps and participating in governance, for more information on what the verification enables please",
+        "info_explanation_kyb_p2": "We need your email address and phone number to follow up with you in case your verification requires clarification and to inform you about the verification result"
     },
     "studio": {
         "title": "Studio",
@@ -984,7 +991,7 @@
         "abort_transaction": {
             "title": "Abort Transaction",
             "cancelled": "Transaction has been cancelled",
-            "failed" : "Cancelling the transaction failed"
+            "failed": "Cancelling the transaction failed"
         }
     }
 }
