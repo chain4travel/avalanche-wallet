@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 import sha3 from 'js-sha3'
+import { KYC_VARIANT } from './constants'
 let elliptic = require('elliptic')
 let ec = new elliptic.ec('secp256k1')
 export interface AccessToken {
@@ -9,7 +10,12 @@ interface GetNonceType {
     nonce: string
 }
 
-const BASE_URL = 'https://api.kyc.camino.network/v2'
+type variantType = {
+    kycStatus: boolean
+    kybStatus: boolean
+}
+
+const BASE_URL = 'https://api.kyc.camino.network/v3'
 
 const kyc_api: AxiosInstance = axios.create({
     baseURL: BASE_URL,
@@ -30,7 +36,7 @@ export function getPublicKey(privateKey: string): string | null {
     return pubKey.encode('hex', false)
 }
 
-async function generateToken(privateKey: string): Promise<AccessToken> {
+async function generateToken(privateKey: string, kyc_variant: KYC_VARIANT): Promise<AccessToken> {
     let keyPair = ec.keyFromPrivate(privateKey)
     let privKey = keyPair.getPrivate('hex')
     let pubKey = keyPair.getPublic()
@@ -46,6 +52,7 @@ async function generateToken(privateKey: string): Promise<AccessToken> {
                 Buffer.from([signature.recoveryParam]),
             ]).toString('hex'),
             public_key: pubKey.encode('hex', false),
+            requested_kyc_variant: kyc_variant,
         }
         let res = await kyc_api.post('/accessToken', req)
         return res.data
@@ -57,14 +64,16 @@ async function generateToken(privateKey: string): Promise<AccessToken> {
 async function checkVerificationStatus(
     privateKey: string,
     activeNetworkName: string
-): Promise<boolean> {
+): Promise<variantType> {
     let keyPair = ec.keyFromPrivate(privateKey)
     let pubKey = keyPair.getPublic()
     let url = `/verified/${activeNetworkName}/${pubKey.encode('hex', false)}`
 
     try {
         let res = await kyc_api.get(url)
-        return res.data.kyc_verified
+        let kycStatus: boolean = res.data.variants[KYC_VARIANT.KYC_BASIC]
+        let kybStatus: boolean = res.data.variants[KYC_VARIANT.KYB_BASIC]
+        return { kycStatus, kybStatus }
     } catch (e) {
         throw e
     }

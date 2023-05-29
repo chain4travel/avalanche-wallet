@@ -1,36 +1,67 @@
 <template>
     <div v-if="!isLedger && wallet" style="width: 100%">
-        <template v-if="kycStatus">
-            <button class="success_button">
-                <v-icon>mdi-check-decagram</v-icon>
-                {{ $t('kyc_process.kyc_verified') }}
-            </button>
+        <template v-if="type === 'kyc'">
+            <template v-if="kycStatus">
+                <button class="success_button">
+                    <v-icon>mdi-check-decagram</v-icon>
+                    {{ $t('kyc_process.kyc_verified') }}
+                </button>
+            </template>
+            <template v-else>
+                <KycModal ref="kyc_modal"></KycModal>
+                <button
+                    :disabled="wallet.type === 'multisig'"
+                    class="sidebar_button button_secondary"
+                    @click="openKyc"
+                >
+                    <v-icon color="#fff">mdi-check-decagram</v-icon>
+                    {{ $t('kyc_process.verify_kyc') }}
+                </button>
+            </template>
         </template>
         <template v-else>
-            <KycModal ref="kyc_modal"></KycModal>
-            <button class="sidebar_button button_secondary" @click="openKyc">
-                <v-icon color="#fff">mdi-check-decagram</v-icon>
-                {{ $t('kyc_process.verify_kyc') }}
-            </button>
+            <template v-if="kybStatus">
+                <button class="success_button">
+                    <v-icon>mdi-check-decagram</v-icon>
+                    {{ $t('kyc_process.kyb_verified') }}
+                </button>
+            </template>
+            <template v-else>
+                <KybModal ref="kyb_modal"></KybModal>
+                <button
+                    :disabled="wallet.type === 'multisig'"
+                    class="sidebar_button button_secondary"
+                    @click="openKyb"
+                >
+                    <v-icon color="#fff">mdi-check-decagram</v-icon>
+                    {{ $t('kyc_process.verify_kyb') }}
+                </button>
+            </template>
         </template>
     </div>
 </template>
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Prop } from 'vue-property-decorator'
 import KycModal from '@/components/modals/KycModal.vue'
 import { WalletType } from '@/js/wallets/types'
+import KybModal from '@/components/modals/KybModal.vue'
 @Component({
     components: {
         KycModal,
+        KybModal,
     },
 })
 export default class AccountKycItem extends Vue {
     $refs!: {
         kyc_modal: KycModal
+        kyb_modal: KybModal
     }
-
+    @Prop() type!: string
     get kycStatus(): boolean {
         return this.$store.getters['Accounts/kycStatus']
+    }
+    get kybStatus(): boolean {
+        return this.$store.getters['Accounts/kybStatus']
     }
 
     get wallet(): WalletType | null {
@@ -45,6 +76,9 @@ export default class AccountKycItem extends Vue {
 
     openKyc() {
         this.$refs.kyc_modal.open()
+    }
+    openKyb() {
+        this.$refs.kyb_modal.open()
     }
 }
 </script>
