@@ -15,7 +15,7 @@ export function getNetworkFromUrl() {
             case NETWORK_ALIAS.KOPERNIKUS:
                 return NETWORK_ALIAS.KOPERNIKUS
             default:
-                return NETWORK_ALIAS.CUSTOM
+                return window.location.pathname.split('/')[2]
         }
     }
     return ''
