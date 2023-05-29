@@ -15,7 +15,7 @@
             </p>
             <div v-if="!multisigTx" class="txid">
                 <span class="mr-1">Tx:</span>
-                <ellipsis :text="transaction.id" copy="true"></ellipsis>
+                <ellipsis :text="transaction.id" :copy="Number(2)"></ellipsis>
             </div>
             <router-link v-if="multisigTx !== undefined" :to="multisigTx" class="msig">
                 {{ $t('transactions.multisig') }}

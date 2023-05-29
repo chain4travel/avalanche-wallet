@@ -6,7 +6,7 @@
             </a>
         </td>
         <td class="col_id">
-            <ellipsis :text="utxo.getUTXOID()"></ellipsis>
+            <ellipsis :text="utxo.getUTXOID()" :copy="Number(1)"></ellipsis>
         </td>
         <td>{{ typeName }}</td>
         <td class="col_locktime">{{ locktimeText }}</td>

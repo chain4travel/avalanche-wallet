@@ -41,9 +41,12 @@
                                 </button>
                             </Tooltip>
                         </div>
-                        <span class="addressVal">
-                            {{ walletTitle }}
-                        </span>
+                        <ellipsis
+                            class="addressVal"
+                            :text="walletTitle"
+                            :prefixPos="prefixPos"
+                            :copy="Number(1)"
+                        ></ellipsis>
                     </div>
                     <div class="buts">
                         <Tooltip :text="$t('keys.tooltip')" v-if="isVolatile">
@@ -119,11 +122,13 @@
 import 'reflect-metadata'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
+import { ava } from '@/AVA'
 import MnemonicPhraseModal from '@/components/modals/MnemonicPhraseModal.vue'
 import HdDerivationListModal from '@/components/modals/HdDerivationList/HdDerivationListModal.vue'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import Tooltip from '@/components/misc/Tooltip.vue'
 import Spinner from '@/components/misc/Spinner.vue'
+import Ellipsis from '@/components/misc/Ellipsis.vue'
 
 import ExportKeys from '@/components/modals/ExportKeys.vue'
 import PrivateKey from '@/components/modals/PrivateKey.vue'
@@ -143,6 +148,7 @@ import { MultisigWallet } from '@/js/wallets/MultisigWallet'
         Tooltip,
         ExportKeys,
         PrivateKey,
+        Ellipsis,
     },
 })
 export default class KeyRow extends Vue {
@@ -230,6 +236,10 @@ export default class KeyRow extends Vue {
         }
     }
 
+    get prefixPos(): number {
+        return ava.getHRP().length + 3
+    }
+
     onClickEdit() {
         this.isEditable = !this.isEditable
         if (!this.isEditable) {
@@ -293,23 +303,7 @@ export default class KeyRow extends Vue {
 
 .addressItem {
     font-size: 12px;
-    /*display: grid;*/
-    /*grid-template-columns: 1fr max-content;*/
-    /*grid-gap: 15px;*/
     overflow: auto;
-
-    > * {
-        align-self: center;
-        overflow: auto;
-    }
-}
-
-.key_logo {
-    width: 32px;
-}
-
-.hdlist {
-    grid-column: 1/3;
 }
 
 .buts {
@@ -317,9 +311,10 @@ export default class KeyRow extends Vue {
     align-items: center;
     flex-direction: row;
     flex-wrap: wrap;
+    gap: 8px;
 
-    > * {
-        margin: 0px 4px !important;
+    .row_but {
+        margin: 0px;
     }
 
     .text_buts {
@@ -327,7 +322,7 @@ export default class KeyRow extends Vue {
         flex-direction: column;
 
         > button {
-            text-align: right;
+            text-align: left;
             font-size: 13px;
 
             &:hover {
@@ -338,7 +333,7 @@ export default class KeyRow extends Vue {
 }
 
 .row_but {
-    margin: 0 8px;
+    margin: 4px 8px;
     font-size: 16px;
 }
 
@@ -367,11 +362,6 @@ export default class KeyRow extends Vue {
 .addressItem .selBut {
     color: #867e89;
     padding: 4px 8px;
-
-    span {
-        font-size: 12px;
-        line-height: normal;
-    }
 }
 
 .spinner {
@@ -411,11 +401,6 @@ export default class KeyRow extends Vue {
     font-weight: bold;
 }
 
-.addressVal {
-    overflow: auto;
-    white-space: nowrap;
-}
-
 .edit-wallet-name-container {
     display: flex;
     gap: 0.5rem;
@@ -450,6 +435,7 @@ export default class KeyRow extends Vue {
 @include mixins.mobile-device {
     .header_cols {
         display: block;
+        overflow: auto;
     }
 
     .detail {
@@ -461,6 +447,10 @@ export default class KeyRow extends Vue {
         border-top: 1px solid #ddd;
         padding-top: 12px;
         margin-top: 12px;
+    }
+
+    .addressVal {
+        margin-bottom: 6px;
     }
 }
 </style>
