@@ -4,11 +4,12 @@
             <div v-for="i in wordNum" :key="i" class="word">
                 <p class="index">{{ i }}.</p>
                 <input
+                    autocapitalize="none"
                     :type="isHidden && password ? 'password' : 'text'"
                     :class="getClass(phrase[i - 1])"
                     v-model.trim="phrase[i - 1]"
                     @keydown.space.prevent="onSpace()"
-                    @keyup="$emit('update', { value: phrase[i - 1], index: i - 1 })"
+                    @keyup="keyUp(i - 1)"
                 />
             </div>
         </div>
@@ -78,6 +79,11 @@ export default class MnemonicDisplay extends Vue {
         if (!(wordlists.EN.includes(word) || !word)) ret = ret + ' invalid_input'
         if (!this.password && this.isHidden) ret = ret + ' pass'
         return ret
+    }
+
+    keyUp(i: number) {
+        this.phrase[i] = this.phrase[i].toLowerCase()
+        this.$emit('update', { value: this.phrase[i], index: i })
     }
 }
 </script>
