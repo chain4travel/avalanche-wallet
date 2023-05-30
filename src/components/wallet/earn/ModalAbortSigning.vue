@@ -9,11 +9,11 @@
                 <p class="text-modal text" v-else>{{ modalText }}</p>
             </div>
             <div class="modal-buttons">
-                <v-btn depressed class="button_secondary" @click="abort()">
-                    {{ $t('earn.rewards.abort_modal.abort') }}
-                </v-btn>
                 <v-btn depressed class="button_primary" @click="close()">
                     {{ $t('earn.rewards.abort_modal.cancel') }}
+                </v-btn>
+                <v-btn depressed class="button_secondary" @click="abort()">
+                    {{ $t('earn.rewards.abort_modal.abort') }}
                 </v-btn>
             </div>
         </div>
@@ -23,8 +23,6 @@
 import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import Modal from '../../modals/Modal.vue'
-import { WalletHelper } from '@/helpers/wallet_helper'
-import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 
 @Component({
@@ -49,14 +47,6 @@ export default class ModalAbortSigning extends Vue {
         return this.$store.state.activeWallet
     }
 
-    private get pendingSendMultisigTX(): SignavaultTx | undefined {
-        return this.$store.getters['Signavault/transactions'].find(
-            (item: any) =>
-                item?.tx?.alias === this.activeWallet.getStaticAddress('P') &&
-                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
-        )
-    }
-
     close() {
         this.$refs.modal.close()
     }
@@ -66,29 +56,8 @@ export default class ModalAbortSigning extends Vue {
     }
 
     async abort() {
-        await this.cancelMultisigTx()
+        this.$emit('cancelTx')
         this.$refs.modal.close()
-    }
-
-    async cancelMultisigTx() {
-        try {
-            const wallet = this.activeWallet as MultisigWallet
-            if (this.pendingSendMultisigTX) {
-                // cancel from the wallet
-                await wallet.cancelExternal(this.pendingSendMultisigTX?.tx)
-                await this.$store.dispatch('Signavault/updateTransaction')
-                this.helpers.dispatchNotification({
-                    message: 'Transaction has been cancelled',
-                    type: 'success',
-                })
-            }
-        } catch (err) {
-            console.log(err)
-            this.helpers.dispatchNotification({
-                message: 'Cancelling the transaction failed',
-                type: 'error',
-            })
-        }
     }
 }
 </script>

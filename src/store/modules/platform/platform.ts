@@ -2,6 +2,7 @@ import { Module } from 'vuex'
 import { RootState } from '@/store/types'
 
 import { BN } from '@c4tplatform/caminojs/dist'
+import { ZeroBN } from '@/constants'
 import { ava } from '@/AVA'
 
 import {
@@ -19,6 +20,7 @@ import {
     ActiveDeposit,
 } from '@/components/misc/ValidatorList/types'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
+import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
 
 const MINUTE_MS = 60000
 const HOUR_MS = MINUTE_MS * 60
@@ -86,7 +88,7 @@ const platform_module: Module<PlatformState, RootState> = {
         },
 
         async updateAllDepositOffers({ state, commit }) {
-            const results = await ava.PChain().getAllDepositOffers()
+            const results = (await ava.PChain().getAllDepositOffers()) as DepositOffer[]
 
             commit('updateDepositOffers', results)
         },
@@ -276,6 +278,12 @@ const platform_module: Module<PlatformState, RootState> = {
                 state.validators.findIndex((v) => v.nodeID === nodeID) >= 0 ||
                 state.validatorsPending.findIndex((v) => v.nodeID === nodeID) >= 0
             )
+        },
+
+        depositOffers: (state) => (active: boolean) => {
+            const lockedFlag = new BN(1)
+            const expected = active ? ZeroBN : lockedFlag
+            return state.depositOffers.filter((v) => v.flags.and(lockedFlag).eq(expected))
         },
     },
 }

@@ -111,26 +111,20 @@
                         {{ $t('earn.validate.pending_multisig.execute_transaction') }}
                     </span>
                 </v-btn>
-                <v-btn
-                    v-if="enableAbortOption"
-                    @click="abort"
-                    class="button_primary"
-                    depressed
-                    block
-                >
+                <v-btn @click="abort" class="button_primary" depressed block>
                     <Spinner v-if="loadingIssue" class="spinner"></Spinner>
                     <span v-else>
                         {{ $t('earn.rewards.abort_modal.abort') }}
                     </span>
                 </v-btn>
-                <p v-if="SignStatus">
-                    {{ $t('earn.validate.pending_multisig.already_signed') }}
-                </p>
-                <p v-else>
-                    {{ $t('earn.validate.pending_multisig.sign_transaction') }}
-                </p>
             </div>
         </div>
+        <ModalAbortSigning
+            ref="modal_abort_signing"
+            :title="$t('validator.abort_transaction.title')"
+            :modalText="$t('earn.rewards.abort_modal.message')"
+            @cancelTx="cancelMultisigTx"
+        />
     </div>
 </template>
 <script lang="ts">
@@ -144,10 +138,12 @@ import { UnsignedTx, AddValidatorTx } from '@c4tplatform/caminojs/dist/apis/plat
 import Big from 'big.js'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import moment from 'moment'
+import ModalAbortSigning from '../ModalAbortSigning.vue'
 
 @Component({
     components: {
         Spinner,
+        ModalAbortSigning,
     },
 })
 export default class PendingMultisig extends Vue {
@@ -155,7 +151,10 @@ export default class PendingMultisig extends Vue {
     @Prop() nodeId!: string
     @Prop() nodeInfo!: ValidatorRaw
     @Prop() successMessageForIssue!: string
-    @Prop() enableAbortOption!: boolean
+
+    $refs!: {
+        modal_abort_signing: ModalAbortSigning
+    }
 
     helpers = this.globalHelper()
     loading = false
@@ -331,26 +330,30 @@ export default class PendingMultisig extends Vue {
     }
 
     async abort() {
-        await this.cancelMultisigTx()
-        this.refresh()
+        this.$refs.modal_abort_signing.open()
     }
 
     async cancelMultisigTx() {
+        let messageCancelled = this.$t('validator.abort_transaction.cancelled').toString()
+        let messageFailed = this.$t('validator.abort_transaction.failed').toString()
         try {
             const wallet = this.activeWallet as MultisigWallet
+
             if (this.multisigTx) {
                 // cancel from the wallet
                 await wallet.cancelExternal(this.multisigTx?.tx)
                 await this.$store.dispatch('Signavault/updateTransaction')
+
                 this.helpers.dispatchNotification({
-                    message: 'Transaction has been cancelled',
+                    message: messageCancelled,
                     type: 'success',
                 })
+                this.refresh()
             }
         } catch (err) {
             console.log(err)
             this.helpers.dispatchNotification({
-                message: 'Cancelling the transaction failed',
+                message: messageFailed,
                 type: 'error',
             })
         }
@@ -359,6 +362,7 @@ export default class PendingMultisig extends Vue {
 </script>
 <style scoped lang="scss">
 @use '../../../../styles/abstracts/variables';
+
 .container {
     display: flex;
     gap: 3rem;
@@ -368,9 +372,11 @@ export default class PendingMultisig extends Vue {
     flex-basis: 65%;
     order: 1;
 }
+
 .transaction_details {
     flex-basis: 35%;
     order: 2;
+
     > div {
         background-color: var(--bg-light);
         margin: 14px 0;
@@ -380,6 +386,7 @@ export default class PendingMultisig extends Vue {
             font-size: 14px;
             color: var(--primary-color-light);
         }
+
         p {
             font-size: 16px;
         }
@@ -389,6 +396,7 @@ export default class PendingMultisig extends Vue {
         font-size: 14px;
     }
 }
+
 .dashed_circle {
     min-height: 20px;
     min-width: 20px;
@@ -397,12 +405,14 @@ export default class PendingMultisig extends Vue {
     border: 3px dashed;
     border-color: var(--warning);
 }
+
 .signer_row {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin-top: 1rem;
 }
+
 .success_status {
     color: var(--success);
 }
@@ -410,9 +420,11 @@ export default class PendingMultisig extends Vue {
 .pending_status {
     color: var(--warning);
 }
+
 .refresh {
     width: 20px;
     height: 20px;
+
     .v-icon {
         color: var(--primary-color);
     }
@@ -420,6 +432,7 @@ export default class PendingMultisig extends Vue {
     button {
         outline: none !important;
     }
+
     img {
         object-fit: contain;
         width: 100%;
@@ -435,9 +448,11 @@ export default class PendingMultisig extends Vue {
     float: right;
     margin-top: -5%;
 }
+
 .body_text {
     word-break: break-all;
 }
+
 .mt2 {
     margin: 2rem 0 1rem 0;
 }

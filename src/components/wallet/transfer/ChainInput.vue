@@ -10,14 +10,19 @@
         </div>
         <div class="chain_select">
             <button :active="formType === 'P'" @click="set('P')">P</button>
-            <button :active="formType === 'X'" @click="set('X')">X</button>
-            <button :active="formType === 'C'" @click="set('C')">C</button>
+            <button v-if="walletType !== 'multisig'" :active="formType === 'X'" @click="set('X')">
+                X
+            </button>
+            <button v-if="walletType !== 'multisig'" :active="formType === 'C'" @click="set('C')">
+                C
+            </button>
         </div>
     </div>
 </template>
 <script lang="ts">
 import { Vue, Component, Model, Prop } from 'vue-property-decorator'
 import { ChainIdType } from '@/constants'
+import { WalletNameType } from '@/js/wallets/types'
 
 @Component
 export default class ChainInput extends Vue {
@@ -34,6 +39,10 @@ export default class ChainInput extends Vue {
     }
     get wallet() {
         return this.$store.state.activeWallet
+    }
+
+    get walletType(): WalletNameType {
+        return this.$store.state.activeWallet.type
     }
 
     get isEVMSupported() {
