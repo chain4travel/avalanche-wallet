@@ -5,7 +5,7 @@
         </header>
         <label class="mb-2">{{ $t('access.mnemonic.subtitle') }}</label>
         <MnemonicInput
-            :phrase="phrase.split(' ')"
+            :phrase="phrase"
             class="phrase_disp"
             @update="mnemonicUpdate($event)"
             @replace="mnemonicReplace($event)"
@@ -51,12 +51,11 @@ export default class Mnemonic extends Vue {
     }
 
     mnemonicUpdate(ev: any) {
-        let phraseArray = this.phrase.split(' ')
-        if (ev.value?.split(' ').length === 24) {
-            phraseArray = ev.value.split(' ')
-        } else {
-            phraseArray[ev.index] = ev.value
+        if (ev.index < 0) {
+            this.phrase = ev.value ?? ''
         }
+        const phraseArray = this.phrase.split(' ')
+        phraseArray[ev.index] = ev.value ?? ''
         this.phrase = phraseArray.join(' ')
     }
 
@@ -105,6 +104,7 @@ export default class Mnemonic extends Vue {
         setTimeout(async () => {
             try {
                 await this.$store.dispatch('accessWallet', phrase)
+                document.body.scrollTo(0, 0)
                 this.isLoading = false
             } catch (e) {
                 this.isLoading = false

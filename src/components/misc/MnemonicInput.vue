@@ -4,12 +4,13 @@
             <div v-for="i in wordNum" :key="i" class="word">
                 <p class="index">{{ i }}.</p>
                 <input
-                    autocapitalize="none"
+                    :id="'i' + i"
+                    autocapitalize="off"
+                    spellcheck="false"
                     :type="isHidden && password ? 'password' : 'text'"
-                    :class="getClass(phrase[i - 1])"
-                    v-model.trim="phrase[i - 1]"
-                    @keydown.space.prevent="onSpace()"
-                    @keyup="keyUp(i - 1)"
+                    :class="getClass(phraseArray[i - 1])"
+                    v-model="phraseArray[i - 1]"
+                    @input="onChange(i - 1)"
                 />
             </div>
         </div>
@@ -42,8 +43,9 @@ import { QrReader } from '@c4tplatform/vue_components'
         QrReader,
     },
 })
-export default class MnemonicDisplay extends Vue {
-    @Prop() phrase!: string[]
+export default class MnemonicInput extends Vue {
+    @Prop() phrase!: string
+    phraseArray = this.phrase.split(' ')
 
     isHidden: boolean = true
     wordNum: number = 24
@@ -56,22 +58,8 @@ export default class MnemonicDisplay extends Vue {
     }
 
     onQRChange(val: string) {
+        this.phraseArray = val.split(' ')
         this.$emit('replace', { value: val })
-    }
-
-    onSpace() {
-        let inputs = document.getElementsByTagName('input')
-        let currInput = document.activeElement!
-        for (let i = 0; i < inputs.length; i++) {
-            if (inputs[i] == currInput) {
-                let next = inputs[i + 1]
-                if (next && next.focus) {
-                    next.focus()
-                    next.select()
-                }
-                break
-            }
-        }
     }
 
     getClass(word: string): string {
@@ -81,9 +69,24 @@ export default class MnemonicDisplay extends Vue {
         return ret
     }
 
-    keyUp(i: number) {
-        this.phrase[i] = this.phrase[i].toLowerCase()
-        this.$emit('update', { value: this.phrase[i], index: i })
+    onChange(i: number) {
+        const next = this.phraseArray[i].at(-1) === ' '
+        const corrected = this.phraseArray[i].trim().toLowerCase()
+        const a = corrected.split(' ')
+        if (a.length === 24) {
+            this.$emit('update', { value: corrected, index: -1 })
+            this.phraseArray = a
+        } else {
+            this.$emit('update', { value: a[0], index: i })
+            if (next) {
+                let next = document.getElementById('i' + (i + 2)) as HTMLInputElement
+                if (next && next.focus) {
+                    next.focus()
+                    next.select()
+                }
+            }
+            this.phraseArray[i] = a[0]
+        }
     }
 }
 </script>
