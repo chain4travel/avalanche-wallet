@@ -43,6 +43,7 @@
                         </div>
                         <ellipsis
                             class="addressVal"
+                            title="Address"
                             :text="walletTitle"
                             :prefixPos="prefixPos"
                             :copy="Number(1)"
@@ -395,6 +396,7 @@ export default class KeyRow extends Vue {
     display: flex;
     align-items: flex-start;
     flex-direction: column;
+    flex-grow: 1;
 }
 
 .label {

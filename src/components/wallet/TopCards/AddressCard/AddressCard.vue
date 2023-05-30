@@ -11,6 +11,7 @@
             <div class="bottom_rest">
                 <p class="subtitle">{{ addressLabel }}</p>
                 <ellipsis
+                    title="Address"
                     :prefixPos="prefixPos"
                     :text="activeAddress"
                     class="addr_text"
