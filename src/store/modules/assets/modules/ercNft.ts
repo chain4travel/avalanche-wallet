@@ -86,7 +86,7 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
             // somehow the state became frozen to update, using reassignment to update it
             state.scannedTokens = new Set([
                 ...state.scannedTokens.values(),
-                ...incommingTokens.map(c => c.data.address)
+                ...incommingTokens.map((c) => c.data.address),
             ])
         },
         removeAndSaveCustom(state, tokenToRemove: ERCNftToken) {
@@ -95,7 +95,7 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
                 // somehow the state became frozen to update, using reassignment to update it
                 state.ercNftTokensCustom = [
                     ...state.ercNftTokensCustom.slice(0, index),
-                    ...state.ercNftTokensCustom.slice(index + 1)
+                    ...state.ercNftTokensCustom.slice(index + 1),
                 ]
             }
 
@@ -115,7 +115,7 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
                     JSON.stringify([...state.scannedTokens.values()])
                 )
             }
-        }
+        },
     },
     actions: {
         async removeCustom({ state, commit }, data: ERCNftToken) {
@@ -185,7 +185,7 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
                     .then((tokenIds: ERCNftBalance[]) => {
                         state.walletBalance = {
                             ...state.walletBalance,
-                            [ercNft.data.address]: tokenIds
+                            [ercNft.data.address]: tokenIds,
                         }
                     })
                     .catch((err) => {
@@ -255,7 +255,7 @@ const ercNft_module: Module<ERCNftModuleState, RootState> = {
                         state.ercNftTokenIds = [
                             ...state.ercNftTokenIds.slice(0, index),
                             c,
-                            ...state.ercNftTokenIds.slice(index + 1)
+                            ...state.ercNftTokenIds.slice(index + 1),
                         ]
                         updates.push(c)
                     }
