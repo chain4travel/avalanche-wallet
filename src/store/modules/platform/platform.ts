@@ -2,6 +2,7 @@ import { Module } from 'vuex'
 import { RootState } from '@/store/types'
 
 import { BN } from '@c4tplatform/caminojs/dist'
+import { ZeroBN } from '@/constants'
 import { ava } from '@/AVA'
 
 import {
@@ -16,8 +17,10 @@ import {
     DelegatorPendingRaw,
     DelegatorRaw,
     ValidatorRaw,
+    ActiveDeposit,
 } from '@/components/misc/ValidatorList/types'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
+import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
 
 const MINUTE_MS = 60000
 const HOUR_MS = MINUTE_MS * 60
@@ -39,6 +42,9 @@ const platform_module: Module<PlatformState, RootState> = {
     mutations: {
         setValidators(state, validators: ValidatorRaw[]) {
             state.validators = validators
+        },
+        updateDepositOffers(state, results) {
+            state.depositOffers = results
         },
     },
     actions: {
@@ -82,33 +88,31 @@ const platform_module: Module<PlatformState, RootState> = {
         },
 
         async updateAllDepositOffers({ state, commit }) {
-            const promises = [
-                ava.PChain().getAllDepositOffers(true),
-                ava.PChain().getAllDepositOffers(false),
-            ]
+            const results = (await ava.PChain().getAllDepositOffers()) as DepositOffer[]
 
-            const results = await Promise.all(promises)
-            const concatenatedResults = results[0].concat(results[1])
-            const res = concatenatedResults.filter((value, index, self) => {
-                return self.findIndex((t) => t.id === value.id) === index
-            })
-
-            state.depositOffers = res
+            commit('updateDepositOffers', results)
         },
         async updateActiveDepositOffer({ state, commit, rootState }) {
             try {
                 const wallet = rootState.activeWallet
                 const pAddressStrings = wallet?.getAllAddressesP() as string[] | string
+
+                if (!pAddressStrings) {
+                    state.activeDepositOffer = []
+                    return
+                }
+
                 const utxos = await ava.PChain().getUTXOs(pAddressStrings)
                 const lockedTxIDs = await utxos.utxos.getLockedTxIDs()
                 const activeDepositOffers = await ava.PChain().getDeposits(lockedTxIDs.depositIDs)
 
-                const activeOffers = []
+                const activeOffers = [] as ActiveDeposit[]
 
                 for (const depositOffer of activeDepositOffers.deposits) {
                     const matchingOffer = state.depositOffers.find(
                         (o) => o.id === depositOffer.depositOfferID
                     )
+
                     if (matchingOffer) {
                         const index = activeDepositOffers.deposits.indexOf(depositOffer)
                         activeOffers.push({
@@ -130,7 +134,7 @@ const platform_module: Module<PlatformState, RootState> = {
                 state.activeDepositOffer = activeOffers
             } catch (error) {
                 state.activeDepositOffer = []
-                console.log(error)
+                console.error(error)
             }
         },
     },
@@ -274,6 +278,12 @@ const platform_module: Module<PlatformState, RootState> = {
                 state.validators.findIndex((v) => v.nodeID === nodeID) >= 0 ||
                 state.validatorsPending.findIndex((v) => v.nodeID === nodeID) >= 0
             )
+        },
+
+        depositOffers: (state) => (active: boolean) => {
+            const lockedFlag = new BN(1)
+            const expected = active ? ZeroBN : lockedFlag
+            return state.depositOffers.filter((v) => v.flags.and(lockedFlag).eq(expected))
         },
     },
 }

@@ -1,13 +1,5 @@
 <template>
     <div>
-        <div class="refresh_div">
-            <div class="refresh">
-                <Spinner v-if="loadingRefreshDepositRewards" class="spinner"></Spinner>
-                <button v-else @click="refresh">
-                    <v-icon>mdi-refresh</v-icon>
-                </button>
-            </div>
-        </div>
         <div class="user_offers" v-if="activeOffers.length > 0">
             <UserRewardCard
                 v-for="(v, i) in activeOffers"
@@ -22,8 +14,12 @@
                 :alreadyClaimed="v.claimedRewardAmount"
                 :pendingRewards="v.pendingRewards"
                 :rewardOwner="v.rewardOwner"
+                :signatureStatus="signatureStatus(v.depositTxID)"
+                :alreadySigned="alreadySigned(v.depositTxID)"
+                :disallowedClaim="disallowedClaim(v.depositTxID)"
+                :canExecuteMultisigTx="canExecuteMultisigTx(v.depositTxID)"
                 class="reward_card"
-            ></UserRewardCard>
+            />
         </div>
         <div v-else class="empty">No Active Earning</div>
     </div>
@@ -38,11 +34,16 @@ import UserRewardCard from '@/components/wallet/earn/UserRewardCard.vue'
 import { bnToBig } from '@/helpers/helper'
 import Big from 'big.js'
 import { BN } from '@c4tplatform/caminojs/dist'
-
+import { bintools } from '@/AVA'
 import { WalletType } from '@/js/wallets/types'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { WalletHelper } from '@/helpers/wallet_helper'
-import { SignaVault } from '@/signavault_api'
+import { Buffer } from '@c4tplatform/caminojs/dist'
+import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { ActiveDeposit } from '@/components/misc/ValidatorList/types'
+import { ClaimTx } from '@c4tplatform/caminojs/dist/apis/platformvm/claimtx'
 
 @Component({
     components: {
@@ -53,7 +54,7 @@ import { SignaVault } from '@/signavault_api'
 export default class UserRewards extends Vue {
     @Prop() loadingRefreshDepositRewards!: boolean
 
-    get activeOffers() {
+    get activeOffers(): ActiveDeposit[] {
         return this.$store.state.Platform.activeDepositOffer
     }
 
@@ -111,17 +112,87 @@ export default class UserRewards extends Vue {
         return this.$store.state.activeWallet
     }
 
-    get pendingSendMultisigTX(): SignavaultTx | undefined {
-        return this.$store.getters['Signavault/transactions'].find(
-            (item: any) =>
-                item?.tx?.alias === this.activeWallet.getAllAddressesP()[0] &&
-                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
+    alreadySigned(depositTxID: string): boolean {
+        const txOwners = this.txOwners(depositTxID)
+        if (!txOwners) return false
+
+        const walletAddresses = (this.activeWallet as MultisigWallet)?.wallets?.map(
+            (w) => w?.getAllAddressesP()?.[0]
         )
+        if (!walletAddresses) return false
+
+        const isSigned = txOwners.some((owner) => {
+            if (!owner) return false
+            const isOwnerSigned = owner.signature && walletAddresses.includes(owner.address)
+            return isOwnerSigned
+        })
+
+        return isSigned
     }
 
-    refresh() {
-        this.$store.dispatch('Platform/updateActiveDepositOffer')
-        this.$store.dispatch('Signavault/updateTransaction')
+    pendingSendMultisigTX(): SignavaultTx | undefined {
+        const tx: SignavaultTx = this.$store.getters['Signavault/transactions'].find(
+            (item: any) =>
+                item?.tx?.alias === this.activeWallet.getStaticAddress('P') &&
+                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
+        )
+
+        if (!tx) return undefined
+        return tx
+    }
+
+    signedDepositID() {
+        const tx = this.pendingSendMultisigTX()
+
+        if (!tx) return undefined
+
+        const unsignedTx = new UnsignedTx()
+        unsignedTx.fromBuffer(Buffer.from(tx.tx?.unsignedTx, 'hex'))
+        const utx = unsignedTx.getTransaction() as ClaimTx
+        const claimAmounts = utx.getClaimAmounts()
+
+        return bintools.cb58Encode(claimAmounts[0].getID())
+    }
+
+    getPendingMultisigTx(depositTxID: string): SignavaultTx | undefined {
+        const tx = this.pendingSendMultisigTX()
+        if (!tx) return undefined
+
+        const depositId = this.signedDepositID()
+        if (depositId === depositTxID) return tx
+        else return undefined
+    }
+
+    txOwners(depositTxID: string): ModelMultisigTxOwner[] | [] {
+        return this.getPendingMultisigTx(depositTxID)?.tx?.owners ?? []
+    }
+
+    canExecuteMultisigTx(depositTxID: string): boolean {
+        let signers = 0
+        let threshold = this.getPendingMultisigTx(depositTxID)?.tx?.threshold
+        const txOwners = this.txOwners(depositTxID)
+
+        txOwners.forEach((owner) => {
+            if (owner.signature) signers++
+        })
+        if (threshold) return signers >= threshold
+        return false
+    }
+
+    signatureStatus(depositTxID: string): number {
+        if (!this.getPendingMultisigTx(depositTxID)?.tx) return -1
+        else if (!this.canExecuteMultisigTx(depositTxID)) return 1
+        else if (this.canExecuteMultisigTx(depositTxID)) return 2
+
+        return -1
+    }
+
+    disallowedClaim(depositTxID: string): boolean {
+        if (!this.pendingSendMultisigTX) return false
+        else {
+            if (!this.signedDepositID() || this.signedDepositID() === depositTxID) return false
+            else return true
+        }
     }
 }
 </script>
@@ -132,13 +203,6 @@ export default class UserRewards extends Vue {
     grid-template-columns: repeat(2, 1fr);
     grid-auto-rows: auto;
     grid-gap: 1rem;
-}
-.user_rewards {
-    padding-bottom: 5vh;
-}
-
-.reward_row {
-    margin-bottom: 12px;
 }
 
 h3 {
@@ -154,35 +218,6 @@ label {
     color: var(--primary-color-light);
     font-size: 14px;
     margin-bottom: 3px;
-}
-
-.amt {
-    font-size: 2em;
-}
-
-.refresh {
-    width: 20px;
-    height: 20px;
-    margin-left: auto;
-    .v-icon {
-        color: var(--primary-color);
-    }
-
-    button {
-        outline: none !important;
-    }
-    img {
-        object-fit: contain;
-        width: 100%;
-    }
-
-    .spinner {
-        color: var(--primary-color) !important;
-    }
-}
-
-.refresh_div {
-    margin-bottom: 10px;
 }
 
 @include main.medium-device {

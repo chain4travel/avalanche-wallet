@@ -134,12 +134,13 @@
         },
         "address": {
             "derived": "Derived @.project:(0) Wallet Address",
-            "title_x": "Derived Wallet Address",
-            "title_p": "Derived Platform Wallet Address",
-            "title_c": "Derived EVM Wallet Address",
-            "desc_x_1": "This is your X-Chain address to receive funds.",
+            "title_x": "X-Chain Wallet Address",
+            "title_p": "P-Chain Wallet Address",
+            "title_c": "C-Chain Wallet Address",
+            "desc_x_1": "This is your X-Chain address to send and receive funds.",
             "desc_x_2": "Your address will change after every deposit. You can keep using previous addresses.",
-            "desc_p": "This is your P-Chain address to receive staking rewards and cross chain transfers.",
+            "desc_p": "This is your P-Chain address to send and receive funds, receive rewards and govern the network.",
+            "desc_p_multisig": "This is your P-Chain Multisignature address to send and receive funds, receive validator rewards and govern the network.",
             "desc_c": "This is your C-Chain address. Use it to interact with the ethereum virtual machine."
         }
     },
@@ -170,7 +171,10 @@
         "multisig": {
             "execute_transaction": "Execute transaction",
             "sign_transaction": "Sign transaction",
-            "abort_transaction": "Abort transaction"
+            "abort_transaction": "Abort transaction",
+            "transaction_aborted": "Transaction has been cancelled",
+            "cancel_transaction_failed": "Cancelling the transaction failed",
+            "pending_transaction_created": "Pending transaction created"
         },
         "source_chain": {
             "title": "Source Chain"
@@ -210,16 +214,23 @@
     },
     "kyc_process": {
         "title": "KYC Process",
+        "title-kyb": "KYB Process",
         "desc": "Kyc something something",
         "verify_kyc": "Verify KYC",
+        "verify_kyb": "Verify KYB",
         "kyc_verified": "KYC Verified",
+        "kyb_verified": "KYB Verified",
         "your_email_address": "Your Email Address",
         "email_address": "Email Address",
         "your_phone_number": "Your Phone Number",
         "phone_number": "Phone Number",
         "submit": "Submit",
+        "provider": "All verification are made via a third-party provider",
+        "link_to_documentation": "read our documentation.",
         "info_explanation_p1": "We need your email address and phone number to follow up with you in case your verification requires clarification and to inform you about the verification result.",
-        "info_explanation_p2": "Please enter your contact details below."
+        "info_explanation_p2": "Please enter your contact details below.",
+        "info_explanation_kyb_p1": "Verifying your wallet will allow you or your company to be a more active player in the Camino network, such as interacting with specific dApps and participating in governance, for more information on what the verification enables please",
+        "info_explanation_kyb_p2": "We need your email address and phone number to follow up with you in case your verification requires clarification and to inform you about the verification result"
     },
     "studio": {
         "title": "Studio",
@@ -397,7 +408,7 @@
     "earn": {
         "title": "Earn",
         "desc": "You can earn more @.native:(0) by staking your existing tokens.",
-        "subtitle1": "Setting up a Validator Node",
+        "subtitle1": "Validator",
         "subtitle2": "Delegate",
         "subtitle3": "Cross Chain Transfer",
         "subtitle4": "Estimated Rewards",
@@ -447,6 +458,24 @@
                 "back": "Back to Earn"
             }
         },
+        "offer": {
+            "title": "Active Saving Pools",
+            "reward": "Reward",
+            "pool_size": "Pool Size",
+            "pool_start": "Pool Start",
+            "pool_end": "Pool End",
+            "min_deposit": "Minimum Deposit",
+            "min_duration": "Minimum Duration",
+            "max_duration": "Maximum Duration",
+            "unlock_duration": "Unlock Duration",
+            "no_reward_duration": "NoReward Duration",
+            "balance": "Available for Deposit",
+            "deposit": "Deposit Now",
+            "deposit_start": "Deposit Start",
+            "deposit_end": "Deposit End",
+            "deposit_amount": "Deposit Amount",
+            "deposited_amount": "Deposited Amount"
+        },
         "rewards": {
             "total": "Total Rewards",
             "validation": "Validation",
@@ -467,6 +496,7 @@
                 "claim": "Claim Rewards",
                 "initiate_transaction": "Initiate Transaction",
                 "cancel": "Cancel",
+                "abort": "Abort",
                 "are_you_sure": "Are you sure you want to initiate the transaction? this requires signatures from other wallets in the multisignature wallet and cannot be undone for 2-weeks?",
                 "sign": "Sign",
                 "signed": "Signed {nbSigners}/{threshold}",
@@ -476,9 +506,16 @@
             },
             "claim_modal": {
                 "are_you_sure": "Are you sure you want to claim {amount} {symbol} rewards?",
-                "note_message": "Kindly be aware that confirming this reward claim will require you to pay a transaction fee of {fee} {symbol}. Do you wish to proceed with the claim?",
-                "confirmation_message": "{amount} {symbol} have been claimed.",
+                "note_message": "Transaction fee:  {fee} {symbol}.",
+                "confirmation_message": "{amount} {symbol} has been claimed.",
+                "signature_collected": "Your signature has been collected.",
                 "confirm": "Confirm",
+                "cancel": "Cancel"
+            },
+            "abort_modal": {
+                "title": "Abort Claim Rewards",
+                "message": "Are you sure you want to abort this transaction?",
+                "abort": "Abort",
                 "cancel": "Cancel"
             },
             "no_saving_pool": "No saving pools available",
@@ -510,11 +547,11 @@
             "label_1": "Validator Node's Private Key",
             "description_1": "Node Private Key",
             "label_3": "P-Chain address your validator node will be assigned to",
-            "label_4": "Are you sure you want to initiate a transaction? This requires signatures from other wallets in the multisignature wallet and cannot be undone",
+            "label_4": "Are you sure you want initiate this transaction? To execute this transaction, {threshold} additional signatures from your multisignature co-owners are required.",
             "label_5": "Tx Details",
             "duration": {
                 "label": "Validation End Date",
-                "desc": "Your @.native:(0) tokens will be locked until this date.",
+                "desc": "Your @.native:(0) tokens will be bonded until this date.",
                 "start": "Start Date & Time",
                 "end": "End Date & Time"
             },
@@ -546,9 +583,9 @@
             "confirmation": {
                 "id": "Node ID",
                 "amount": "Bonded Amount",
-                "start": "Start Date",
-                "start_desc": "Your validation will start at least 5 minutes after you submit this form.",
-                "end": "End Date",
+                "start": "Validation Period Start",
+                "start_desc": "Your validation period will start {time} minutes after you submit this form.",
+                "end": "Validation Period End",
                 "fee": "Delegation Fee",
                 "reward": "Reward Address",
                 "type_local": "This wallet",
@@ -570,10 +607,14 @@
                 "camino_available": "{0} @.native:(0) are available on your P-chain address",
                 "kyc_verified": "KYC or KYB verified",
                 "consortium_member_verified": "Accepted to be a member of the consortium",
-                "consortium_member_address_linked_to_node": "Your consortium member address is linked to your Node ID"
+                "consortium_member_address_linked_to_node": "Consortium member address needs to be linked to your NodeID"
             },
             "errs": {
                 "duration_warn": "WARNING: You must have at least 14 days remaining on your validation period to accept delegations.",
+                "duration_warn_multisig": "WARNING: This transaction must be signed by at least {threshold} additional co-owners of your Multisignature wallet ",
+                "duration_warn_multisig_confrim": "the validation start date.",
+                "cursive_word": "before",
+                "duration_warn_multisig_submit": "the validation start date. Otherwise, this transaction will expire and you need to repeat the process.",
                 "date": "Start date must be in the future and end date must be after start date.",
                 "amount": "Stake amount must be at least {0} @.native:(0)",
                 "id": "Invalid Node ID.",
@@ -585,9 +626,11 @@
             "pending_multisig": {
                 "signed": "Signed",
                 "pending": "Pending",
-                "threshold": "{value}  out of  {threshold}  co-owners in your Multisig must sign the transaction that your validator node can be succesfully registered.",
+                "threshold": "{value} of your Multisignature’s co-owners have already signed this transaction. In total, {threshold} signatures are needed to enable executing the transaction.",
                 "execute_transaction": "Execute transaction",
-                "sign": "Sign"
+                "sign": "Sign",
+                "already_signed": "You already signed this transaction.",
+                "sign_transaction": "Please sign this transaction by using the Sign button above."
             }
         },
         "delegate": {
@@ -707,6 +750,20 @@
             "label2": "Signature",
             "submit": "Check Source",
             "label3": "Source Addresses"
+        },
+        "consolidate_funds": {
+            "title": "Consolidate funds",
+            "desc": "In case you have funds stuck on derived addresses, you can scan for them and consolidate them here",
+            "cta": "Scan for funds",
+            "modal": {
+                "title": "Consolidate Funds",
+                "body": "The wallet found the following UTXOs that currently allocate funds to one of your derived addresses. To display these funds in your wallet, please consolidate them.",
+                "cancel": "Cancel",
+                "derived_addresses": "Derived Addresses",
+                "no_utxos": "No UTXOs were found on dereived addresses.",
+                "discard": "Discard",
+                "fee_note": "Consolidating funds will incur a fee of {feeAmount} CAM"
+            }
         }
     },
     "activity": {
@@ -869,23 +926,31 @@
         "keys_remove_success": "Private key and assets removed from the wallet.",
         "transfer_success_msg": "You have succesfully sent your transaction.",
         "transfer_error_msg": "Failed to send transaction.",
+        "transfer_cancelled_msg": "Transaction has been cancelled.",
         "execute_multisig_transaction_error": "Transaction execution failed",
         "multisig_transaction_saved": "Your signature saved successfully!",
-        "multisig_transaction_not_saved": "Your signature saved successfully!"
+        "multisig_transaction_not_saved": "Your signature saved successfully!",
+        "transaction_cancel_failed": "Cancelling the transaction failed",
+        "claim_reward_failed": "Failed to claim reward",
+        "something_went_wrong": "Something went wrong",
+        "deposit_success": "Deposit successful",
+        "deposit_failed": "Deposit failed",
+        "consolidate_funds_success": "You have successfully consolidated the funds",
+        "consolidate_funds_error": "Something went wrong when trying to consolidate the funds"
     },
     "validator": {
         "pending": {
             "validator_pending": "Your validator node is waiting for the transaction to be committed. For more information click here.",
-            "validator_pending_with_start_date": "Your node validator transaction will be committed at {startDate}. For more information click here."
+            "validator_pending_with_start_date": "Your validator is registered and will become active at {startDate}. For more information click here."
         },
         "info": {
-            "staking_start_date": "Staking Start Date",
-            "staking_end_date": "Staking End Date",
+            "staking_start_date": "Validation Period Start Date",
+            "staking_end_date": "Validation Period End Date",
             "up_time": "Up Time",
             "remaining_validation_period": "Remaining Validation Period",
             "bonded_amount": "Bonded Amount",
             "tx_id": "Tx ID",
-            "validator_running": "Your validator node is running"
+            "validator_running": "Validator"
         },
         "suspended": {
             "validator_suspended": "Your validator node has been suspended.",
@@ -910,17 +975,23 @@
                 "cancel": "Cancel",
                 "claim": "Claim",
                 "confirmed_claimed": "{amount} {symbol} have been claimed."
-            }
+            },
+            "not_available": "You are currently not eligible for any validation rewards."
         },
-        "transaction_reward" : {
-            "title" : "Transaction details",
-            "from" : "From",
+        "transaction_reward": {
+            "title": "Transaction details",
+            "from": "From",
             "reward_address": "Reward Address",
             "start_date": "Start Date",
             "end_date": "End Date",
             "stake_amount": "Stake Amount",
             "are_you_want": "Are you sure you want to initiate the transaction? This requires signatures from other wallets in the multisignature wallet and cannot be undone for 2-weeks!",
             "claimed_tx_issued": "Successful Claim Transaction"
+        },
+        "abort_transaction": {
+            "title": "Abort Transaction",
+            "cancelled": "Transaction has been cancelled",
+            "failed": "Cancelling the transaction failed"
         }
     }
 }

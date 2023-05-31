@@ -34,7 +34,8 @@ import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 import { ChainIdType, ZeroBN } from '@/constants'
 import { bnToBig } from '@/helpers/helper'
-
+import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 class WalletHelper {
     static async getStake(wallet: WalletType): Promise<BN> {
         let addrs = wallet.getAllAddressesP()
@@ -569,6 +570,34 @@ class WalletHelper {
         }
     }
 
+    static async buildDepositTx(
+        wallet: WalletType,
+        depositID: string,
+        depositDuration: number,
+        depositAmount: BN
+    ) {
+        const pAddressStrings = wallet.getAllAddressesP()
+        const signerAddresses = wallet.getSignerAddresses('P')
+        const rewardAddress = bintools.parseAddress(wallet.getPlatformRewardAddress(), 'P')
+        const changeAddress = wallet.getChangeAddressPlatform()
+
+        const unsignedTx = await ava
+            .PChain()
+            .buildDepositTx(
+                wallet.platformUtxoset,
+                [pAddressStrings, signerAddresses],
+                [changeAddress],
+                depositID,
+                depositDuration,
+                new OutputOwners([rewardAddress], ZeroBN, 1),
+                Buffer.alloc(0),
+                ZeroBN,
+                depositAmount
+            )
+        let tx = await wallet.signP(unsignedTx)
+        return await ava.PChain().issueTx(tx)
+    }
+
     static getUnsignedTxType(utx: string): string {
         let unsignedTx = new UnsignedTx()
         unsignedTx.fromBuffer(Buffer.from(utx, 'hex'))
@@ -622,6 +651,54 @@ class WalletHelper {
         }
 
         return amount
+    }
+
+    static async scanForHdFunds(wlt: WalletType) {
+        if (wlt.type !== 'singleton' || (wlt as SingletonWallet).getSeed() === '') return
+
+        const seed = (wlt as SingletonWallet).getSeed()
+        const mnemonic = (wlt as SingletonWallet).getMnemonic()
+        const wallet = new MnemonicWallet(mnemonic, seed, true)
+        await wallet.initialize()
+        await wallet.getUTXOs()
+
+        // Filter utxos containing destination address
+        const UTXOs = wallet
+            .getUTXOSet()
+            .getAllUTXOs()
+            ?.filter((utxo) => {
+                const out = utxo.getOutput()
+                const addrs = out.getAddresses()
+                const hrp = ava.getHRP()
+                const addrsClean = addrs.map((addr) => {
+                    return bintools.addressToString(hrp, 'X', addr)
+                })
+
+                if (!addrsClean.includes((wlt as SingletonWallet)?.getCurrentAddressAvm())) {
+                    return utxo
+                }
+            })
+        const platformUTXOs = wallet
+            .getPlatformUTXOSet()
+            .getAllUTXOs()
+            ?.filter((utxo) => {
+                const out = utxo.getOutput()
+                const addrs = out.getAddresses()
+                const hrp = ava.getHRP()
+                const addrsClean = addrs.map((addr) => {
+                    return bintools.addressToString(hrp, 'P', addr)
+                })
+
+                if (!addrsClean.includes((wlt as SingletonWallet)?.getCurrentAddressPlatform())) {
+                    return utxo
+                }
+            })
+
+        return {
+            wallet,
+            UTXOs,
+            platformUTXOs,
+        }
     }
 }
 

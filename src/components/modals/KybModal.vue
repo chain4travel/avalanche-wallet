@@ -2,42 +2,64 @@
     <div>
         <Modal
             ref="modal"
-            :title="$t('kyc_process.title')"
+            :title="$t('kyc_process.title-kyb')"
             class="modal_main"
             @beforeClose="beforeClose"
         >
             <div v-if="!userDataSubmitted" class="KYCform">
                 <div class="request-text">
-                    {{ $t('kyc_process.info_explanation_p1') }}
-                    <br />
-                    {{ $t('kyc_process.info_explanation_p2') }}
-                </div>
-                <form @submit.prevent="submitUserData">
-                    <div>
-                        <label>{{ $t('kyc_process.your_email_address') }}</label>
-                        <input
-                            type="text"
-                            :placeholder="$t('kyc_process.email_address')"
-                            v-model="userData.email"
-                        />
-                    </div>
-                    <div>
-                        <label>{{ $t('kyc_process.your_phone_number') }}</label>
-                        <input
-                            type="tel"
-                            :placeholder="$t('kyc_process.phone_number')"
-                            v-model="userData.phone"
-                        />
-                    </div>
-                    <v-btn
-                        type="submit"
-                        :disabled="submitUserDataDisabled"
-                        :loading="isLoading"
-                        class="button_submit_form"
+                    {{ $t('kyc_process.info_explanation_kyb_p1') }}
+                    <a
+                        @click="redirect('documentation')"
+                        href="#"
+                        target="_blank"
+                        rel="noopener noreferrer"
                     >
-                        {{ $t('kyc_process.submit') }}
-                    </v-btn>
-                </form>
+                        {{ $t('kyc_process.link_to_documentation') }}
+                    </a>
+                </div>
+                <div class="container-kyb">
+                    <div class="text">
+                        {{ $t('kyc_process.info_explanation_kyb_p2') }}
+                    </div>
+                    <form @submit.prevent="submitUserData">
+                        <div>
+                            <label>{{ $t('kyc_process.your_email_address') }}</label>
+                            <input
+                                type="text"
+                                :placeholder="$t('kyc_process.email_address')"
+                                v-model="userData.email"
+                            />
+                        </div>
+                        <div>
+                            <label>{{ $t('kyc_process.your_phone_number') }}</label>
+                            <input
+                                type="tel"
+                                :placeholder="$t('kyc_process.phone_number')"
+                                v-model="userData.phone"
+                            />
+                        </div>
+                        <v-btn
+                            type="submit"
+                            :disabled="submitUserDataDisabled"
+                            :loading="isLoading"
+                            class="button_submit_form"
+                        >
+                            {{ $t('kyc_process.submit') }}
+                        </v-btn>
+                    </form>
+                </div>
+                <p>
+                    {{ $t('kyc_process.provider') }}
+                    <a
+                        @click="redirect('provider')"
+                        href="#"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Sumsub
+                    </a>
+                </p>
             </div>
             <div id="sumsub-websdk-container"></div>
             <div v-if="verficationCompleted" class="kyc_action">
@@ -66,7 +88,7 @@ interface UserData {
         Modal,
     },
 })
-export default class KycModal extends Vue {
+export default class KybModal extends Vue {
     @Prop() walle!: WalletType
     $refs!: {
         modal: Modal
@@ -112,9 +134,6 @@ export default class KycModal extends Vue {
             .withConf({
                 email: applicantEmail,
                 phone: applicantPhone,
-                uiConf: {
-                    customCssStr: this.background,
-                },
             })
             .withOptions({ addViewportTag: false, adaptIframeHeight: true })
             .on('idCheck.applicantStatus', async (applicantStatus) => {
@@ -129,7 +148,7 @@ export default class KycModal extends Vue {
 
     async getNewAccessToken() {
         if (this.privateKeyC) {
-            const result = await generateToken(this.privateKeyC, KYC_VARIANT.KYC_BASIC)
+            const result = await generateToken(this.privateKeyC, KYC_VARIANT.KYB_BASIC)
             return result.access_token
         }
         return ''
@@ -151,7 +170,19 @@ export default class KycModal extends Vue {
             this.isLoading = false
         }
     }
-
+    redirect(type: string) {
+        switch (type) {
+            case 'documentation':
+                window.open(
+                    ' https://docs.camino.network/validator-guides/add-validator-with-curl/#know-your-customer--know-your-business-verification',
+                    '_blank'
+                )
+                break
+            case 'provider':
+                window.open('https://sumsub.com/', '_blank')
+                break
+        }
+    }
     async open() {
         this.$refs.modal.open()
     }
@@ -182,6 +213,7 @@ export default class KycModal extends Vue {
         border-radius: var(--border-radius-sm) !important;
         overflow: auto;
         min-height: 200px;
+        cursor: auto;
         @include mixins.mobile-device {
             max-height: 90vh;
             max-width: none;
@@ -224,6 +256,27 @@ h1 {
     position: relative;
     padding: 16px 22px;
 }
+.container-kyb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 1rem 0;
+    justify-content: space-between;
+    gap: 1rem;
+    .text,
+    form {
+        flex: 1 0 46%;
+    }
+    .text {
+        padding: 1rem;
+        flex-grow: 1;
+        text-align: center;
+        color: var(--primary-contrast-text);
+        border-radius: var(--border-radius-sm);
+        box-shadow: var(--box-shadow);
+        background-color: var(--bg-light);
+    }
+}
 .KYCform {
     padding: 20px;
     border-radius: var(--border-radius-sm);
@@ -234,11 +287,16 @@ h1 {
         text-align: center;
         color: var(--primary-contrast-text);
         border-radius: var(--border-radius-sm);
-        margin-bottom: 25px;
         box-shadow: var(--box-shadow);
         background-color: var(--bg-light);
     }
+    a {
+        color: var(--secondary-color);
+        cursor: pointer;
+        text-decoration: underline;
+    }
     form {
+        flex: 0 0 50%;
         display: grid;
         gap: 10px;
         label {
@@ -251,6 +309,10 @@ h1 {
             flex-direction: column;
             margin-bottom: 5px;
         }
+    }
+    p {
+        text-align: center;
+        padding: 1rem;
     }
 }
 

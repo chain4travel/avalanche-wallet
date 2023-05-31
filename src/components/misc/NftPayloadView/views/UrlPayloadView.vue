@@ -15,7 +15,9 @@
                 <fa icon="link"></fa>
             </p>
             <p class="warn">Do NOT click links you do not trust.</p>
-            <a :href="url" target="_blank" rel="noopener noreferrer">{{ url }}</a>
+            <a @click="redirectUrl()" href="#" target="_blank" rel="noopener noreferrer">
+                {{ url }}
+            </a>
         </div>
     </div>
 </template>
@@ -32,8 +34,13 @@ export default class UrlPayloadView extends Vue {
     isImage = false
     isVideo = false
     isHover = false
+
     get url() {
         return this.payload.getContent().toString()
+    }
+
+    redirectUrl() {
+        window.open(this.url, '_blank')
     }
 
     get fileType(): string | null {

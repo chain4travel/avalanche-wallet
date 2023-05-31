@@ -7,13 +7,13 @@
                     <big-num-input
                         ref="bigIn"
                         @change="amount_in"
-                        class="bigIn"
+                        :class="['bigIn', { pending: pendingSendMultisigTX && chainId === 'P' }]"
                         contenteditable="bigIn"
                         :max="max_amount"
                         :denomination="denomination"
                         :step="stepSize"
                         :placeholder="placeholder"
-                        :disabled="disabled || pendingSendMultisigTX"
+                        :disabled="disabled || (pendingSendMultisigTX && chainId === 'P')"
                     ></big-num-input>
                 </div>
             </div>
@@ -76,7 +76,7 @@ export default class CurrencyInputDropdown extends Vue {
     @Watch('pendingTxAmount', { immediate: true })
     updateAmount() {
         if (this.chainId === 'P' && !!this.pendingTxAmount) {
-            this.$refs.bigIn.val = new BN(this.pendingTxAmount)
+            this.$refs.bigIn.val = this.pendingTxAmount.replace(/\s/g, '')
         }
     }
     mounted() {
@@ -232,6 +232,9 @@ export default class CurrencyInputDropdown extends Vue {
     font-size: 15px;
     font-family: 'Inter';
     /*background-color: #303030;*/
+}
+.pending {
+    color: var(--primary-color-light) !important;
 }
 
 .max_in_cont {

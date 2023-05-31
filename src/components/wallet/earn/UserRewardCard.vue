@@ -13,7 +13,7 @@
                 </div>
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.min_lock') }}:</label>
-                    <p class="reward">{{ minLockAmount.toLocaleString() }} CAM</p>
+                    <p class="reward">{{ cleanAvaxBN(minLock) }} {{ nativeAssetSymbol }}</p>
                 </div>
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.reward') }}:</label>
@@ -23,71 +23,86 @@
             <div class="offer_detail_right">
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.locked_amount') }}:</label>
-                    <p class="reward">{{ depositAmount | cleanAvaxBN }} {{ nativeAssetSymbol }}</p>
+                    <p class="reward">{{ cleanAvaxBN(lockedAmount) }} {{ nativeAssetSymbol }}</p>
                 </div>
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.pending_reward') }}:</label>
-                    <p class="reward">
-                        {{ pendingRewardsAmount | cleanAvaxBN }} {{ nativeAssetSymbol }}
-                    </p>
+                    <p class="reward">{{ cleanAvaxBN(pendingRewards) }} {{ nativeAssetSymbol }}</p>
                 </div>
                 <div>
                     <label>{{ $t('earn.rewards.active_earning.already_claimed') }}:</label>
-                    <p class="reward">
-                        {{ alreadyClaimedAmount | cleanAvaxBN }} {{ nativeAssetSymbol }}
-                    </p>
+                    <p class="reward">{{ cleanAvaxBN(alreadyClaimed) }} {{ nativeAssetSymbol }}</p>
                 </div>
             </div>
         </div>
-        <template v-if="!isMultiSig">
+        <div v-if="!isMultiSig" class="button_group">
             <v-btn class="claim_button button_primary" @click="openModal" :disabled="!canClaim">
                 {{ $t('earn.rewards.active_earning.claim') }}
             </v-btn>
-        </template>
+        </div>
         <template v-else>
-            <v-btn
-                v-if="signatureStatus === -1 && !disclamer"
-                class="claim_button button_primary"
-                @click="disclamer = true"
-                :disabled="!canClaim"
-            >
-                {{ $t('earn.rewards.active_earning.claim') }}
-            </v-btn>
-            <div v-if="signatureStatus === -1 && disclamer" class="initiate_button_group">
-                <v-btn class="claim_button button_primary" @click="disclamer = false">
-                    {{ $t('earn.rewards.active_earning.cancel') }}
-                </v-btn>
+            <div v-if="signatureStatus === 2" class="button_group">
                 <v-btn
                     class="claim_button button_secondary"
-                    @click="confirmClaim"
+                    @click="openModal"
+                    :disabled="!canClaim"
+                >
+                    {{ $t('earn.rewards.active_earning.execute_claim') }}
+                </v-btn>
+                <v-btn class="claim_button button_primary" @click="openAbortModal">
+                    {{ $t('earn.rewards.active_earning.abort') }}
+                </v-btn>
+            </div>
+            <div v-else-if="signatureStatus === -1 && disclamer" class="button_group">
+                <v-btn
+                    class="claim_button bordered_button"
+                    @click="openModal"
                     :disabled="!canClaim"
                 >
                     {{ $t('earn.rewards.active_earning.initiate_transaction') }}
                 </v-btn>
+                <v-btn class="claim_button button_primary" @click="disclamer = false">
+                    {{ $t('earn.rewards.active_earning.cancel') }}
+                </v-btn>
             </div>
-            <v-btn
-                v-else-if="signatureStatus === 1"
-                class="claim_button button_primary"
-                @click="signMultisigTx"
-                :disabled="alreadySigned"
-            >
-                {{
-                    !alreadySigned
-                        ? $t('earn.rewards.active_earning.sign')
-                        : $t('earn.rewards.active_earning.signed', {
-                              nbSigners: numberOfSignatures,
-                              threshold: threshold,
-                          })
-                }}
-            </v-btn>
-            <v-btn
-                v-else-if="signatureStatus === 2"
-                class="claim_button button_primary"
-                @click="openModal"
-                :disabled="!canClaim"
-            >
-                {{ $t('earn.rewards.active_earning.execute_claim') }}
-            </v-btn>
+            <div v-else-if="signatureStatus === 1 && !alreadySigned" class="button_group">
+                <v-btn
+                    class="claim_button bordered_button"
+                    @click="signMultisigTx"
+                    :disabled="alreadySigned"
+                >
+                    {{ $t('earn.rewards.active_earning.sign') }}
+                </v-btn>
+                <v-btn class="claim_button button_primary" @click="openAbortModal">
+                    {{ $t('earn.rewards.active_earning.abort') }}
+                </v-btn>
+            </div>
+            <div v-else-if="signatureStatus === 1 && alreadySigned" class="button_group">
+                <v-btn
+                    class="claim_button bordered_button"
+                    @click="signMultisigTx"
+                    :disabled="alreadySigned"
+                >
+                    {{
+                        $t('earn.rewards.active_earning.signed', {
+                            nbSigners: numberOfSignatures,
+                            threshold: threshold,
+                        })
+                    }}
+                </v-btn>
+                <v-btn class="claim_button button_primary" @click="openAbortModal">
+                    {{ $t('earn.rewards.active_earning.abort') }}
+                </v-btn>
+            </div>
+            <div v-else class="button_group">
+                <v-btn
+                    class="claim_button button_primary"
+                    @click="disclamer = true"
+                    :disabled="!canClaim || disallowedClaim"
+                >
+                    {{ $t('earn.rewards.active_earning.claim') }}
+                </v-btn>
+            </div>
             <div v-if="disclamer && !alreadySigned" class="err">
                 {{ $t('earn.rewards.active_earning.are_you_sure') }}
             </div>
@@ -97,6 +112,13 @@
             :depositTxID="depositTxID"
             :amount="pendingRewards"
             :rewardOwner="rewardOwner"
+            :canExecuteMultisigTx="canExecuteMultisigTx"
+        />
+        <ModalAbortSigning
+            ref="modal_abort_signing"
+            :title="$t('earn.rewards.abort_modal.title')"
+            :modalText="$t('earn.rewards.abort_modal.message')"
+            @cancelTx="cancelMultisigTx"
         />
     </div>
 </template>
@@ -107,39 +129,37 @@ import { BN } from '@c4tplatform/caminojs'
 import Big from 'big.js'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import AvaAsset from '@/js/AvaAsset'
-import ModalClaimDepositReward from './ClaimDepositRewardModal.vue'
+import ModalClaimDepositReward from './ModalClaimDepositReward.vue'
+import ModalAbortSigning from './ModalAbortSigning.vue'
 import { WalletHelper } from '@/helpers/wallet_helper'
 
 import { WalletType } from '@/js/wallets/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
-import { SignatureError, OutputOwners } from '@c4tplatform/caminojs/dist/common'
+import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
 import { RewardOwner } from '@/components/misc/ValidatorList/types'
 import { ava, bintools } from '@/AVA'
 
+import { cleanAvaxBN } from '@/helpers/helper'
 import { Buffer } from '@c4tplatform/caminojs/dist'
+import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { ClaimTx } from '@c4tplatform/caminojs/dist/apis/platformvm/claimtx'
 
 @Component({
-    filters: {
-        cleanAvaxBN(val: BN) {
-            let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
-            return big.toLocaleString()
-        },
-    },
     components: {
         ModalClaimDepositReward,
+        ModalAbortSigning,
     },
 })
 export default class UserRewardCard extends Vue {
     now: number = Date.now()
     intervalID: any = null
     claimDisabled: boolean = true
-
     claimed: boolean = false
     confiremedClaimedAmount: string = ''
     disclamer: boolean = false
-
+    signedDepositID: string = ''
     // @ts-ignore
     helpers = this.globalHelper()
 
@@ -153,38 +173,56 @@ export default class UserRewardCard extends Vue {
     @Prop() pendingRewards!: BN
     @Prop() alreadyClaimed!: BN
     @Prop() rewardOwner!: RewardOwner
-
-    $refs!: {
-        modal_claim_reward: ModalClaimDepositReward
-    }
-
-    updateNow() {
-        this.now = Date.now()
-    }
-
-    created() {
-        this.intervalID = setInterval(() => {
-            this.updateNow()
-        }, 2000)
-    }
-    destroyed() {
-        clearInterval(this.intervalID)
-    }
+    @Prop() signatureStatus!: number
+    @Prop() alreadySigned!: boolean
+    @Prop() disallowedClaim!: boolean
+    @Prop() canExecuteMultisigTx!: boolean
 
     get activeWallet(): MultisigWallet {
         return this.$store.state.activeWallet
     }
 
-    get isMultiSig(): boolean {
-        let wallet: WalletType = this.$store.state.activeWallet
-        return wallet.type === 'multisig'
+    get avaAsset(): AvaAsset | null {
+        return this.$store.getters['Assets/AssetAVA']
+    }
+
+    get nativeAssetSymbol(): string {
+        return this.avaAsset?.symbol ?? ''
+    }
+
+    get canClaim(): boolean {
+        return parseInt(this.pendingRewards.toString()) > 0
+    }
+
+    private get pendingSendMultisigTX(): SignavaultTx | undefined {
+        return this.$store.getters['Signavault/transactions'].find(
+            (item: any) =>
+                item?.tx?.alias === this.activeWallet.getStaticAddress('P') &&
+                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
+        )
+    }
+
+    private get txOwners(): ModelMultisigTxOwner[] | [] {
+        return this.pendingSendMultisigTX?.tx?.owners ?? []
+    }
+
+    get numberOfSignatures(): number {
+        let signers = 0
+        this.txOwners.forEach((owner) => {
+            if (owner.signature) signers++
+        })
+        return signers
+    }
+
+    get threshold(): number {
+        return this.pendingSendMultisigTX?.tx?.threshold ?? 0
     }
 
     get rewardTitle(): string {
         return Buffer.from(this.title.replace('0x', ''), 'hex').toString()
     }
 
-    getFormattedDate(timestamp: number): string {
+    private getFormattedDate(timestamp: number): string {
         const date = new Date(timestamp * 1000)
 
         return date.toLocaleString('en-US', {
@@ -206,26 +244,6 @@ export default class UserRewardCard extends Vue {
         return this.getFormattedDate(endTimestamp)
     }
 
-    get lockedAmountBig(): Big {
-        return new Big(this.lockedAmount.toString())
-    }
-
-    get depositAmount(): Big {
-        return this.lockedAmountBig
-    }
-
-    get pendingRewardsAmount(): Big {
-        return new Big(this.pendingRewards.toString())
-    }
-
-    get alreadyClaimedAmount(): Big {
-        return new Big(this.alreadyClaimed.toString())
-    }
-
-    get minLockAmount(): Big {
-        return new Big(this.minLock.toString())
-    }
-
     get rewardPercent(): number {
         const interestRateBase = 365 * 24 * 60 * 60
         const interestRateDenominator = 1000000 * interestRateBase
@@ -233,87 +251,49 @@ export default class UserRewardCard extends Vue {
         return (parseInt(this.rewards) / interestRateDenominator) * interestRateBase * 100
     }
 
-    get ava_asset(): AvaAsset | null {
-        let ava = this.$store.getters['Assets/AssetAVA']
-        return ava
+    get isMultiSig(): boolean {
+        let wallet: WalletType = this.$store.state.activeWallet
+        return wallet.type === 'multisig'
     }
 
-    get nativeAssetSymbol(): string {
-        return this.ava_asset?.symbol ?? ''
-    }
-
-    get canClaim(): boolean {
-        return parseInt(this.pendingRewards.toString()) > 0
-    }
-
-    get pendingSendMultisigTX(): SignavaultTx | undefined {
-        return this.$store.getters['Signavault/transactions'].find(
-            (item: any) =>
-                item?.tx?.alias === this.activeWallet.getStaticAddress('P') &&
-                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
-        )
-    }
-
-    get txOwners(): ModelMultisigTxOwner[] | [] {
-        return this.pendingSendMultisigTX?.tx?.owners ?? []
-    }
-
-    get alreadySigned(): boolean {
-        let isSigned = false
-        this.txOwners.forEach((owner) => {
-            if (
-                (this.activeWallet as MultisigWallet).wallets.find(
-                    (w) => w?.getAllAddressesP()?.[0] === owner.address
-                )
-            ) {
-                if (owner.signature) isSigned = true
-            }
-        })
-
-        return isSigned
-    }
-
-    get signatureStatus(): number {
-        // first claim
-        if (!this.pendingSendMultisigTX?.tx) return -1
-        // has signed and cannot execute
-        else if (!this.canExecuteMultisigTx) return 1
-        // has signed and can execute
-        else if (this.canExecuteMultisigTx) return 2
-
-        return 0
-    }
-
-    get numberOfSignatures(): number {
-        let signers = 0
-        this.txOwners.forEach((owner) => {
-            if (owner.signature) signers++
-        })
-        return signers
-    }
-
-    get threshold(): number {
-        return this.pendingSendMultisigTX?.tx?.threshold ?? 0
-    }
-
-    get canExecuteMultisigTx(): boolean {
-        let signers = 0
-        let threshold = this.pendingSendMultisigTX?.tx?.threshold
-        this.txOwners.forEach((owner) => {
-            if (owner.signature) signers++
-        })
-        if (threshold) return signers >= threshold
-        return false
-    }
-
-    formattedAmount(val: BN): string {
+    private formattedAmount(val: BN): string {
         let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
         return big.toLocaleString()
     }
 
     updateBalance(): void {
-        this.$store.dispatch('Assets/updateUTXOs')
-        this.$store.dispatch('History/updateTransactionHistory')
+        this.$store.dispatch('updateBalances')
+    }
+
+    cleanAvaxBN(val: BN): string {
+        return cleanAvaxBN(val)
+    }
+
+    openModal() {
+        this.disclamer = false
+        this.$refs.modal_claim_reward.open()
+    }
+
+    openAbortModal() {
+        this.$refs.modal_abort_signing.open()
+    }
+
+    $refs!: {
+        modal_claim_reward: ModalClaimDepositReward
+        modal_abort_signing: ModalAbortSigning
+    }
+
+    updateNow() {
+        this.now = Date.now()
+    }
+
+    created() {
+        this.intervalID = setInterval(() => {
+            this.updateNow()
+        }, 2000)
+    }
+    destroyed() {
+        clearInterval(this.intervalID)
     }
 
     async confirmClaim() {
@@ -334,11 +314,24 @@ export default class UserRewardCard extends Vue {
                 rewardOwner,
                 this.pendingRewards
             )
-                .then(() => {
+                .then((value) => {
+                    if (!value) {
+                        // multisg flow
+                        dispatchNotification({
+                            message: this.$t('notifications.transfer_success_msg'),
+                            type: 'success',
+                        })
+                        this.updateBalance()
+                        this.$store.dispatch('Platform/updateActiveDepositOffer')
+                        this.$store.dispatch('History/updateMultisigTransactionHistory')
+                        this.disclamer = false
+                        return this.updateMultisigTxDetails()
+                    }
+
                     this.confiremedClaimedAmount = this.formattedAmount(this.pendingRewards)
                     setTimeout(() => this.updateBalance(), 500)
                     this.$store.dispatch('Platform/updateActiveDepositOffer')
-                    this.$store.dispatch('Signavault/updateTransaction')
+                    this.updateMultisigTxDetails()
                     dispatchNotification({
                         message: this.$t('notifications.transfer_success_msg'),
                         type: 'success',
@@ -347,19 +340,10 @@ export default class UserRewardCard extends Vue {
                     this.disclamer = false
                 })
                 .catch((err) => {
-                    if (err instanceof SignatureError) {
-                        dispatchNotification({
-                            message: this.$t('notifications.transfer_success_msg'),
-                            type: 'success',
-                        })
-                        setTimeout(() => {
-                            this.$store.dispatch('Assets/updateUTXOs')
-                            this.$store.dispatch('Signavault/updateTransaction').then(() => {
-                                this.$store.dispatch('History/updateMultisigTransactionHistory')
-                            })
-                        }, 1000)
-                    }
-                    console.log(err)
+                    dispatchNotification({
+                        message: this.$t('notifications.something_went_wrong'),
+                        type: 'error',
+                    })
                     this.claimed = false
                 })
         } else {
@@ -385,20 +369,22 @@ export default class UserRewardCard extends Vue {
                 message: this.$t('multisig_transaction_not_saved'),
                 type: 'error',
             })
+            this.disclamer = false
         }
     }
 
-    async issueMultisigTx() {
+    private async issueMultisigTx() {
         const wallet = this.activeWallet
         if (!wallet || !(wallet instanceof MultisigWallet))
-            return console.log('MultiSigTx::sign: Invalid wallet')
-        if (!this.pendingSendMultisigTX) return console.log('MultiSigTx::sign: Invalid Tx')
+            return console.error('MultiSigTx::sign: Invalid wallet')
+        if (!this.pendingSendMultisigTX) return console.error('MultiSigTx::sign: Invalid Tx')
         try {
             await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
             this.helpers.dispatchNotification({
                 message: this.$t('notifications.transfer_success_msg'),
                 type: 'success',
             })
+            this.updateMultisigTxDetails()
             this.$store.dispatch('Platform/updateActiveDepositOffer')
             this.$store.dispatch('Signavault/updateTransaction')
         } catch (e: any) {
@@ -409,8 +395,36 @@ export default class UserRewardCard extends Vue {
         }
     }
 
-    openModal() {
-        this.$refs.modal_claim_reward.open()
+    async cancelMultisigTx() {
+        try {
+            const wallet = this.activeWallet as MultisigWallet
+            if (this.pendingSendMultisigTX) {
+                // cancel from the wallet
+                await wallet.cancelExternal(this.pendingSendMultisigTX?.tx)
+                await this.$store.dispatch('Signavault/updateTransaction')
+                this.helpers.dispatchNotification({
+                    message: this.$t('transfer.multisig.transaction_aborted'),
+                    type: 'success',
+                })
+            }
+        } catch (err) {
+            console.log(err)
+            this.helpers.dispatchNotification({
+                message: this.$t('transfer.multisig.cancel_transaction_failed'),
+                type: 'error',
+            })
+        }
+    }
+
+    private async updateMultisigTxDetails() {
+        if (this.pendingSendMultisigTX) {
+            let unsignedTx = new UnsignedTx()
+            unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
+            const utx = unsignedTx.getTransaction() as ClaimTx
+            const claimAmounts = utx.getClaimAmounts()
+
+            this.signedDepositID = bintools.cb58Encode(claimAmounts[0].getID())
+        } else this.signedDepositID = ''
     }
 }
 </script>
@@ -492,6 +506,31 @@ export default class UserRewardCard extends Vue {
     }
 }
 
+.v-btn {
+    margin-top: 0.5rem;
+}
+
+.bordered_button {
+    border-width: 1px;
+    border-style: solid;
+    border-radius: var(--border-radius-lg);
+    padding: 8px 24px;
+    border-color: var(--primary-btn-border-color);
+    color: var(--primary-btn-border-color);
+    background-color: transparent !important;
+    &:hover {
+        opacity: 0.6;
+    }
+    &[disabled] {
+        background: var(--bg-light);
+        border: var(--primary-border);
+        color: var(--primary-color-light);
+        border: var(--primary-border);
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+}
+
 label {
     color: var(--primary-color-light) !important;
 }
@@ -500,15 +539,17 @@ label {
     border-radius: var(--border-radius-sm);
     width: min-content;
     padding: 8px 30px;
-    margin-left: auto;
+    // margin-left: auto;
     &[disabled] {
         background-color: var(--primary-color) !important;
     }
 }
 
-.initiate_button_group {
+.button_group {
+    display: flex;
     margin-left: auto;
     gap: 0.5rem;
+    justify-content: end;
 }
 
 .err {

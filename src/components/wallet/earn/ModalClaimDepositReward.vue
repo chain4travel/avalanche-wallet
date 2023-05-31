@@ -1,8 +1,8 @@
 <template>
     <modal ref="modal" title="Claim Reward" @beforeClose="beforeClose">
         <div class="claim-reward-modal">
-            <div v-if="!claimed">
-                <div>
+            <div v-if="claimed === 0">
+                <div v-if="canExecuteMultisigTx">
                     <h3>
                         {{
                             $t('earn.rewards.claim_modal.are_you_sure', {
@@ -11,6 +11,9 @@
                             })
                         }}
                     </h3>
+                </div>
+                <div v-if="!canExecuteMultisigTx">
+                    <AvaxInput v-model="amt" :max="amount" :initial="amount"></AvaxInput>
                     <br />
                     <p class="text-modal">
                         {{
@@ -22,15 +25,15 @@
                     </p>
                 </div>
                 <div class="modal-buttons">
-                    <v-btn depressed class="button_primary" @click="close()">
-                        {{ $t('earn.rewards.claim_modal.cancel') }}
-                    </v-btn>
                     <v-btn depressed class="button_secondary btn-claim" @click="confirmClaim()">
                         {{ $t('earn.rewards.claim_modal.confirm') }}
                     </v-btn>
+                    <v-btn depressed class="button_primary" @click="close()">
+                        {{ $t('earn.rewards.claim_modal.cancel') }}
+                    </v-btn>
                 </div>
             </div>
-            <div class="confirmed-claimed" v-else>
+            <div class="confirmed-claimed" v-else-if="claimed === 1">
                 <br />
                 <h2>
                     {{
@@ -42,14 +45,20 @@
                 </h2>
                 <br />
             </div>
+            <div class="confirmed-claimed" v-else>
+                <br />
+                <h2>{{ $t('earn.rewards.claim_modal.signature_collected') }}</h2>
+                <br />
+            </div>
         </div>
     </modal>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import AvaxInput from '@/components/misc/AvaxInput.vue'
 import Modal from '../../modals/Modal.vue'
-import { BN } from '@c4tplatform/caminojs'
+import { Buffer, BN } from '@c4tplatform/caminojs'
 import Big from 'big.js'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import { WalletHelper } from '@/helpers/wallet_helper'
@@ -57,20 +66,26 @@ import { ava, bintools } from '@/AVA'
 import AvaAsset from '@/js/AvaAsset'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import { SignatureError, OutputOwners } from '@c4tplatform/caminojs/dist/common'
+import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
 import { RewardOwner } from '@/components/misc/ValidatorList/types'
+import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { bnToBig } from '@/helpers/helper'
+import { ClaimTx } from '@c4tplatform/caminojs/dist/apis/platformvm/claimtx'
 
 @Component({
     components: {
+        AvaxInput,
         Modal,
     },
 })
 export default class ModalClaimDepositReward extends Vue {
-    @Prop() depositTxID!: string
-    @Prop() amount!: BN
-    @Prop() rewardOwner!: RewardOwner
-    claimed: boolean = false
+    @Prop({ required: true }) depositTxID!: string
+    @Prop({ required: true }) amount!: BN
+    @Prop({ required: true }) rewardOwner!: RewardOwner
+    @Prop() canExecuteMultisigTx!: boolean
+    claimed: number = 0 // 0:false, 1:true, 2:pending
     confiremedClaimedAmount: string = ''
+    amt: BN = this.amount
 
     // @ts-ignore
     helpers = this.globalHelper()
@@ -79,8 +94,13 @@ export default class ModalClaimDepositReward extends Vue {
         modal: Modal
     }
 
+    mounted() {
+        this.updateMultisigTxDetails()
+    }
+
     open() {
         this.$refs.modal.open()
+        this.updateMultisigTxDetails()
     }
 
     close() {
@@ -90,12 +110,11 @@ export default class ModalClaimDepositReward extends Vue {
     beforeClose() {
         this.confiremedClaimedAmount = ''
         this.$emit('beforeCloseModal', this.claimed)
-        this.claimed = false
+        this.claimed = 0
     }
 
     updateBalance(): void {
-        this.$store.dispatch('Assets/updateUTXOs')
-        this.$store.dispatch('History/updateTransactionHistory')
+        this.$store.dispatch('updateBalances')
     }
 
     formattedAmount(val: BN): string {
@@ -107,17 +126,20 @@ export default class ModalClaimDepositReward extends Vue {
         return this.$store.state.activeWallet
     }
 
+    get isMultiSig(): boolean {
+        return this.activeWallet.type === 'multisig'
+    }
+
     get feeAmt(): string {
         return this.formattedAmount(ava.PChain().getTxFee())
     }
 
     get claimableAmount(): string {
-        return this.formattedAmount(this.amount)
+        return this.confiremedClaimedAmount.toLocaleString()
     }
 
     get ava_asset(): AvaAsset | null {
-        let ava = this.$store.getters['Assets/AssetAVA']
-        return ava
+        return this.$store.getters['Assets/AssetAVA']
     }
 
     get nativeAssetSymbol(): string {
@@ -144,60 +166,61 @@ export default class ModalClaimDepositReward extends Vue {
         )
 
         if (!this.pendingSendMultisigTX) {
-            // Initiate multisig transaction
-            WalletHelper.buildDepositClaimTx(wallet, this.depositTxID, rewardOwner, this.amount)
-                .then(() => {
-                    this.confiremedClaimedAmount = this.formattedAmount(this.amount)
-                    setTimeout(() => this.updateBalance(), 500)
-                    this.$store.dispatch('Platform/updateActiveDepositOffer')
-                    this.claimed = true
-                })
-                .catch((err) => {
-                    if (err instanceof SignatureError) {
+            WalletHelper.buildDepositClaimTx(wallet, this.depositTxID, rewardOwner, this.amt)
+                .then((value) => {
+                    if (!value) {
+                        // multisg flow
+                        this.$store.dispatch('Platform/updateActiveDepositOffer')
+                        this.$store.dispatch('Signavault/updateTransaction')
                         dispatchNotification({
-                            message: this.$t('notifications.claim_success_msg'),
+                            message: this.$t('notifications.transfer_success_msg'),
                             type: 'success',
                         })
-                        setTimeout(() => {
-                            this.$store.dispatch('Assets/updateUTXOs')
-                            this.$store.dispatch('Signavault/updateTransaction').then(() => {
-                                this.$store.dispatch('History/updateMultisigTransactionHistory')
-                            })
-                        }, 1000)
+                        this.claimed = 2
+                        return this.updateMultisigTxDetails()
                     }
-                    console.log(err)
-                    this.claimed = false
+
+                    this.confiremedClaimedAmount = this.formattedAmount(this.amt)
+                    this.updateBalance()
+                    this.$store.dispatch('Platform/updateActiveDepositOffer')
+                    this.updateMultisigTxDetails()
+                    dispatchNotification({
+                        message: this.$t('notifications.transfer_success_msg'),
+                        type: 'success',
+                    })
+                    this.claimed = 1
+                })
+                .catch((err) => {
+                    dispatchNotification({
+                        message: this.$t('notifications.something_went_wrong'),
+                        type: 'error',
+                    })
+                    this.claimed = 0
                 })
         } else {
-            this.confiremedClaimedAmount = this.formattedAmount(this.amount)
-
-            try {
-                await this.issueMultisigTx()
-                this.updateBalance()
-                this.claimed = true
-            } catch (err) {
-                this.claimed = false
-            }
+            this.issueMultisigTx()
+            this.updateBalance()
         }
     }
 
     async issueMultisigTx() {
         const wallet = this.activeWallet
         if (!wallet || !(wallet instanceof MultisigWallet))
-            return console.log('MultiSigTx::sign: Invalid wallet')
-        if (!this.pendingSendMultisigTX) return console.log('MultiSigTx::sign: Invalid Tx')
+            return console.error('MultiSigTx::sign: Invalid wallet')
+        if (!this.pendingSendMultisigTX) return console.error('MultiSigTx::sign: Invalid Tx')
         try {
-            console.log('MultiSigTx::sign: Issuing tx')
-
+            await this.updateMultisigTxDetails()
             await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
             this.helpers.dispatchNotification({
                 message: 'Your Transaction sent successfully.',
                 type: 'success',
             })
+            this.updateBalance()
             this.$store.dispatch('Platform/updateActiveDepositOffer')
             this.$store.dispatch('Signavault/updateTransaction')
+            this.claimed = 1
         } catch (e: any) {
-            console.log('MultiSigTx::sign: Error', e)
+            console.error('MultiSigTx::sign: Error', e)
             this.helpers.dispatchNotification({
                 message: this.$t('notifications.execute_multisig_transaction_error'),
                 type: 'error',
@@ -205,10 +228,21 @@ export default class ModalClaimDepositReward extends Vue {
             throw e
         }
     }
+
+    async updateMultisigTxDetails() {
+        if (this.pendingSendMultisigTX) {
+            let unsignedTx = new UnsignedTx()
+            unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
+            const utx = unsignedTx.getTransaction() as ClaimTx
+            const claimAmounts = utx.getClaimAmounts()
+
+            const amount = claimAmounts[0].getAmount()
+            this.confiremedClaimedAmount = bnToBig(new BN(amount), 9)?.toLocaleString()
+        } else this.confiremedClaimedAmount = this.formattedAmount(this.amt)
+    }
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
 .claim-reward-modal {
     padding: 30px 22px;
     text-align: center;
@@ -224,8 +258,7 @@ export default class ModalClaimDepositReward extends Vue {
 }
 
 .text-modal {
-    text-align: left;
-    color: var(--error);
+    color: var(--warning);
 }
 
 @media screen and (max-width: 720px) {
