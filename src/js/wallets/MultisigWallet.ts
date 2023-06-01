@@ -583,7 +583,7 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
             throw e
         }
         // Throw to supress issueTx
-        throw new SignatureError('Transaction recorded for signing')
+        // throw new SignatureError('Transaction recorded for signing')
     }
 
     _buildMultisigKeychain(tx: ModelMultisigTx): KeyChainResult {
