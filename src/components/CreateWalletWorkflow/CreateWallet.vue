@@ -129,7 +129,10 @@
                                                     >
                                                         {{ $t('create.success_submit') }}
                                                     </button>
-                                                    <div @click="navigate('/login')" class="link">
+                                                    <div
+                                                        @click="navigate('/login')"
+                                                        class="link confirm-cancel-link"
+                                                    >
                                                         {{ $t('create.cancel') }}
                                                     </div>
                                                     <ToS style="margin: 30px 0 !important"></ToS>
@@ -416,10 +419,6 @@ a {
 
             .access {
             }
-
-            .link {
-                margin-left: 40px;
-            }
         }
     }
 }
@@ -532,6 +531,13 @@ a {
             }
         }
     }
+}
+.confirm-cancel-link {
+    width: 175px;
+    max-width: 175px;
+    text-align: center;
+    position: relative;
+    top: 10px;
 }
 </style>
 <style lang="scss">
