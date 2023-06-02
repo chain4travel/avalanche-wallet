@@ -196,7 +196,9 @@ textarea {
 }
 
 .link {
+    display: flex;
     margin-bottom: 0px;
+    justify-content: center;
 }
 
 @include mixins.mobile_device {
