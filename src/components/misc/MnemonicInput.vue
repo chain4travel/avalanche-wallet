@@ -4,12 +4,13 @@
             <div v-for="i in wordNum" :key="i" class="word">
                 <p class="index">{{ i }}.</p>
                 <input
+                    :id="'i' + i"
+                    autocapitalize="off"
+                    spellcheck="false"
                     :type="isHidden && password ? 'password' : 'text'"
                     :class="getClass(phrase[i - 1])"
-                    v-model.trim="phrase[i - 1]"
-                    @keydown.space.prevent="onSpace()"
-                    @keyup="$emit('update', { value: phrase[i - 1], index: i - 1 })"
-                    :data-cy="getDataCY(i)"
+                    v-model="phrase[i - 1]"
+                    @input="onChange(i - 1)"
                 />
             </div>
         </div>
@@ -46,23 +47,8 @@ export default class MnemonicDisplay extends Vue {
         }
     }
 
-    onSpace() {
-        let inputs = document.getElementsByTagName('input')
-        let currInput = document.activeElement!
-        for (let i = 0; i < inputs.length; i++) {
-            if (inputs[i] == currInput) {
-                let next = inputs[i + 1]
-                if (next && next.focus) {
-                    next.focus()
-                    next.select()
-                }
-                break
-            }
-        }
-    }
-
-    getDataCY(pos: number) {
-        return `mnemonic-field-${pos}`
+    onQRChange(val: string) {
+        this.$emit('replace', { value: val })
     }
 
     getClass(word: string): string {
@@ -70,6 +56,27 @@ export default class MnemonicDisplay extends Vue {
         if (!(wordlists.EN.includes(word) || !word)) ret = ret + ' invalid_input'
         if (!this.password && this.isHidden) ret = ret + ' pass'
         return ret
+    }
+
+    onChange(i: number) {
+        const next = this.phrase[i].at(-1) === ' '
+        const corrected = this.phrase[i].trim().toLowerCase()
+        const a = corrected.split(' ')
+        if (a.length === 24) {
+            this.$emit('update', { value: corrected, index: -1 })
+            this.phrase = a
+        } else {
+            this.$emit('update', { value: a[0], index: i })
+            if (next) {
+                let next = document.getElementById('i' + (i + 2)) as HTMLInputElement
+                if (next && next.focus) {
+                    next.focus()
+                    next.select()
+                }
+            }
+            this.phrase[i] = a[0]
+            this.phrase = this.phrase.map((v) => v)
+        }
     }
 }
 </script>
