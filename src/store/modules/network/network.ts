@@ -10,7 +10,6 @@ import { web3 } from '@/evm'
 import { setSocketNetwork } from '@/providers'
 import { setAvalanche } from '@c4tplatform/camino-wallet-sdk/dist'
 import {
-    NETWORK_ALIAS,
     getNetworkFromUrl,
     getCustomNetworks,
     compareCustomNetwork,
@@ -82,7 +81,6 @@ const network_module: Module<NetworkState, RootState> = {
             localStorage.setItem('network_selected', data)
         },
         async loadSelectedNetwork({ dispatch, getters }): Promise<boolean> {
-            console.log('selectedNetwork', localStorage.getItem('network_selected'))
             let data = localStorage.getItem('network_selected')
             if (!data) return false
             try {
