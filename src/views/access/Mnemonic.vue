@@ -52,12 +52,11 @@ export default class Mnemonic extends Vue {
     }
 
     mnemonicUpdate(ev: any) {
-        let phraseArray = this.phrase.split(' ')
-        if (ev.value?.split(' ').length === 24) {
-            phraseArray = ev.value.split(' ')
-        } else {
-            phraseArray[ev.index] = ev.value
+        if (ev.index < 0) {
+            this.phrase = ev.value ?? ''
         }
+        const phraseArray = this.phrase.split(' ')
+        phraseArray[ev.index] = ev.value ?? ''
         this.phrase = phraseArray.join(' ')
     }
 
