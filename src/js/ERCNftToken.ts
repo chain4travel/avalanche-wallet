@@ -89,6 +89,7 @@ class ERCNftToken {
             if (t.data.type === 'ERC1155') addresses[0].push(t.data.address)
             else if (t.data.type === 'ERC721') addresses[1].push(t.data.address)
         })
+        let changed = false
         for (let i = 0; i < 2; ++i) {
             if (addresses[i].length === 0) continue
 
@@ -121,18 +122,25 @@ class ERCNftToken {
                         log.data,
                         log.topics.slice(1)
                     )
-                    if (parsed.tokenId) entry.add(parsed.tokenId)
-                    else if (parsed.id) entry.add(parsed.id)
-                    else for (const id of parsed.ids) entry.add(id)
+                    if (parsed.tokenId) {
+                        entry.add(parsed.tokenId)
+                        changed = true
+                    }
+                    else if (parsed.id) {
+                        entry.add(parsed.id)
+                        changed = true
+                    }
+                    else {
+                        for (const id of parsed.ids) entry.add(id)
+                        changed = true
+                    }
                 }
             }
         }
-        let changed = false
         tokens.forEach((t) => {
             const entry = collector.get(t.data.address)
             if (entry && entry.size != t.data.ercTokenIds.length) {
                 t.data.ercTokenIds = [...entry.values()]
-                changed = true
             }
         })
         return changed
