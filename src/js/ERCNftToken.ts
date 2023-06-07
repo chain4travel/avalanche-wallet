@@ -125,12 +125,10 @@ class ERCNftToken {
                     if (parsed.tokenId) {
                         entry.add(parsed.tokenId)
                         changed = true
-                    }
-                    else if (parsed.id) {
+                    } else if (parsed.id) {
                         entry.add(parsed.id)
                         changed = true
-                    }
-                    else {
+                    } else {
                         for (const id of parsed.ids) entry.add(id)
                         changed = true
                     }

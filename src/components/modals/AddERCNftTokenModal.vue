@@ -91,7 +91,9 @@ export default class AddERCNftTokenModal extends Vue {
             if (isErc1155) {
                 tokenInst = new web3.eth.Contract(IERC1155Abi as AbiItem[], val)
                 const metadataUri = await tokenInst.methods.uri(0).call()
-                const uri = metadataUri?.startsWith('ipfs://') ? `${CF_IPFS_BASE}${metadataUri.substring(7)}` : metadataUri
+                const uri = metadataUri?.startsWith('ipfs://')
+                    ? `${CF_IPFS_BASE}${metadataUri.substring(7)}`
+                    : metadataUri
                 const metadata = await axios.get(uri.replace('{id}', 0))
 
                 this.name = metadata.data.name

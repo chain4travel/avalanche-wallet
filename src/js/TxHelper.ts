@@ -299,7 +299,7 @@ export async function buildEvmTransferERCNftTx(
     gasLimit: number,
     token: ERCNftToken,
     tokenId: string,
-    amount?: BN,
+    amount?: BN
 ) {
     const nonce = await web3.eth.getTransactionCount(from)
     const chainId = await web3.eth.getChainId()

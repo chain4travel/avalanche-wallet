@@ -125,12 +125,7 @@ import { Vue, Component } from 'vue-property-decorator'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
 import { priceDict } from '@/store/types'
 import { WalletType } from '@/js/wallets/types'
-import {
-    GasHelper,
-    TxHelper,
-    bnToAvaxC,
-    bnToBigAvaxX,
-} from '@c4tplatform/camino-wallet-sdk/dist'
+import { GasHelper, TxHelper, bnToAvaxC, bnToBigAvaxX } from '@c4tplatform/camino-wallet-sdk/dist'
 
 // @ts-ignore
 import { QrInput } from '@c4tplatform/vue_components'

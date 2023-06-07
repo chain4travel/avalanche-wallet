@@ -1,6 +1,10 @@
 <template>
     <div class="evm_input_dropdown">
-        <div class="col_in hover_border" :class="{ col_in_amount: collectible?.token.data.type === 'ERC1155' }" :disabled="disabled">
+        <div
+            class="col_in hover_border"
+            :class="{ col_in_amount: collectible?.token.data.type === 'ERC1155' }"
+            :disabled="disabled"
+        >
             <template v-if="!isCollectible">
                 <button class="max_but" @click="maxOut" :disabled="disabled">MAX</button>
                 <div class="col_big_in">
