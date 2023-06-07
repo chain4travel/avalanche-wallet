@@ -414,10 +414,11 @@ class WalletHelper {
         gasPrice: BN,
         gasLimit: number,
         token: ERCNftToken,
-        tokenId: string
+        tokenId: string,
+        amount: BN,
     ) {
         let fromAddr = '0x' + wallet.getEvmAddress()
-        let tx = await buildEvmTransferERCNftTx(fromAddr, to, gasPrice, gasLimit, token, tokenId)
+        let tx = await buildEvmTransferERCNftTx(fromAddr, to, gasPrice, gasLimit, token, tokenId, amount)
         let signedTx = await wallet.signEvm(tx)
         let txHex = signedTx.serialize().toString('hex')
         let hash = await web3.eth.sendSignedTransaction('0x' + txHex)

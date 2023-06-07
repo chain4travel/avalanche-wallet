@@ -129,13 +129,11 @@ import {
     GasHelper,
     TxHelper,
     bnToAvaxC,
-    bnToBigAvaxC,
     bnToBigAvaxX,
 } from '@c4tplatform/camino-wallet-sdk/dist'
 
 // @ts-ignore
 import { QrInput } from '@c4tplatform/vue_components'
-import Big from 'big.js'
 import { BN } from '@c4tplatform/caminojs/dist'
 import { bnToBig } from '@/helpers/helper'
 import { web3 } from '@/evm'
@@ -313,7 +311,8 @@ export default class FormC extends Vue {
             let tx = this.formCollectible.token.createTransferTx(
                 fromAddr,
                 toAddr,
-                this.formCollectible.id.tokenId
+                this.formCollectible.id.tokenId,
+                this.formAmount.toNumber()
             )
             let estGas = await WalletHelper.estimateTxGas(this.wallet, tx)
             this.gasLimit = estGas
@@ -427,7 +426,8 @@ export default class FormC extends Vue {
                     gasPriceWei,
                     this.gasLimit,
                     this.formCollectible.token,
-                    this.formCollectible.id.tokenId
+                    this.formCollectible.id.tokenId,
+                    this.formAmount
                 )
                 this.onSuccess(txHash)
             }
