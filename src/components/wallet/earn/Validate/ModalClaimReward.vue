@@ -19,7 +19,12 @@
                     <v-btn depressed class="button_primary" @click="close()">
                         {{ $t('validator.rewards.modal_claim.cancel') }}
                     </v-btn>
-                    <v-btn depressed class="button_secondary btn-claim" @click="confirmClaim()">
+                    <v-btn
+                        :disabled="disabledInput"
+                        depressed
+                        class="button_secondary btn-claim"
+                        @click="confirmClaim()"
+                    >
                         {{ $t('validator.rewards.modal_claim.claim') }}
                     </v-btn>
                 </div>
@@ -125,6 +130,14 @@ export default class ModalClaimReward extends Vue {
 
     get nativeAssetSymbol(): string {
         return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
+    }
+
+    get disabledInput() {
+        if (this.claimAmount.toNumber() <= 0) {
+            return true
+        } else {
+            return false
+        }
     }
 }
 </script>
