@@ -231,8 +231,6 @@ export default class ClaimRewards extends Vue {
         await this.getClaimableReward()
         await this.getPChainAddress()
         await this.getPendingTransaction()
-
-        console.log('rewardAmountData', this.rewardAmount.toNumber())
         this.loading = false
     }
 }
