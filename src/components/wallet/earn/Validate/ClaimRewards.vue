@@ -39,6 +39,7 @@
                                 class="button_secondary btn-claim-reward"
                                 depressed
                                 @click="openModalClaimReward"
+                                :disabled="disabledButtonRewards"
                             >
                                 {{ $t('validator.rewards.claim.claim_rewards') }}
                             </v-btn>
@@ -162,6 +163,14 @@ export default class ClaimRewards extends Vue {
         }
     }
 
+    get disabledButtonRewards() {
+        if (this.rewardAmount.toNumber() <= 0) {
+            return true
+        } else {
+            return false
+        }
+    }
+
     async getPChainAddress() {
         try {
             if (this.$store.state.activeWallet instanceof MultisigWallet) {
@@ -215,10 +224,12 @@ export default class ClaimRewards extends Vue {
         }, 100)
     }
 
-    refresh() {
-        this.getClaimableReward()
-        this.getPChainAddress()
-        this.getPendingTransaction()
+    async refresh() {
+        this.loading = true
+        await this.getClaimableReward()
+        await this.getPChainAddress()
+        await this.getPendingTransaction()
+        this.loading = false
     }
 }
 </script>
