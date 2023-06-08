@@ -122,16 +122,10 @@ class ERCNftToken {
                         log.data,
                         log.topics.slice(1)
                     )
-                    if (parsed.tokenId) {
-                        entry.add(parsed.tokenId)
-                        changed = true
-                    } else if (parsed.id) {
-                        entry.add(parsed.id)
-                        changed = true
-                    } else {
-                        for (const id of parsed.ids) entry.add(id)
-                        changed = true
-                    }
+                    if (parsed.tokenId) entry.add(parsed.tokenId)
+                    else if (parsed.id) entry.add(parsed.id)
+                    else for (const id of parsed.ids) entry.add(id)
+                    changed = true
                 }
             }
         }
