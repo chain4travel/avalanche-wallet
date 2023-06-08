@@ -136,6 +136,8 @@ export default class ClaimRewards extends Vue {
 
         if (responseClaimable != null && responseClaimable != undefined) {
             this.rewardAmount = responseClaimable.validatorRewards
+        } else {
+            this.rewardAmount = new BN(0)
         }
     }
 
@@ -229,6 +231,8 @@ export default class ClaimRewards extends Vue {
         await this.getClaimableReward()
         await this.getPChainAddress()
         await this.getPendingTransaction()
+
+        console.log('rewardAmountData', this.rewardAmount.toNumber())
         this.loading = false
     }
 }
