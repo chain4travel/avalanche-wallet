@@ -213,14 +213,14 @@ export default class ClaimRewards extends Vue {
         }, 100)
     }
 
-    issued() {
+    async issued() {
         this.loading = true
-        this.$store.dispatch('Signavault/updateTransaction')
+        await this.$store.dispatch('Signavault/updateTransaction')
 
-        setTimeout(() => {
-            this.getClaimableReward()
-            this.$store.dispatch('Assets/updateUTXOs')
-            this.$store.dispatch('History/updateTransactionHistory')
+        setTimeout(async () => {
+            await this.getClaimableReward()
+            await this.$store.dispatch('Assets/updateUTXOs')
+            await this.$store.dispatch('History/updateTransactionHistory')
             this.pendingTx = undefined
             this.loading = false
         }, 100)

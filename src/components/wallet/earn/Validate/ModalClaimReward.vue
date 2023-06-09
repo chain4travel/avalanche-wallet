@@ -87,6 +87,8 @@ export default class ModalClaimReward extends Vue {
 
     async confirmClaim() {
         try {
+            console.log('amountDataProp', this.amount.toNumber())
+            console.log('amountDataInternal', this.claimAmount.toNumber())
             let txClaim = this.$store.getters['Signavault/transactions'].find(
                 (item: any) =>
                     item?.tx?.alias === this.pChainddress &&
