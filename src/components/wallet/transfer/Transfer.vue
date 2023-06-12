@@ -227,7 +227,7 @@ export default class Transfer extends Vue {
         let chain = addr.split('-')
 
         if (chain[0] !== this.formType[0]) {
-            err.push('Invalid address. You can only send to other X addresses.')
+            err.push(`Invalid address. You can only send to other ${this.formType} addresses.`)
         }
 
         if (!isValidAddress(addr)) {
