@@ -298,7 +298,8 @@ export async function buildEvmTransferERCNftTx(
     gasPrice: BN,
     gasLimit: number,
     token: ERCNftToken,
-    tokenId: string
+    tokenId: string,
+    amount?: BN
 ) {
     const nonce = await web3.eth.getTransactionCount(from)
     const chainId = await web3.eth.getChainId()
@@ -316,7 +317,7 @@ export async function buildEvmTransferERCNftTx(
         ),
     }
 
-    let tokenTx = token.createTransferTx(from, to, tokenId)
+    let tokenTx = token.createTransferTx(from, to, tokenId, amount?.toNumber())
 
     let tx = new Transaction(
         {
