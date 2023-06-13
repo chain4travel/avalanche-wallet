@@ -1,9 +1,11 @@
 <template>
     <div v-if="!isLedger && wallet" class="settings__container">
-        <template v-if="account">
-            <ManageAccount />
-        </template>
-        <template v-else><SaveAccount :setAccount="setAccount" /></template>
+        <div class="content">
+            <template v-if="account">
+                <ManageAccount />
+            </template>
+            <template v-else><SaveAccount :setAccount="setAccount" /></template>
+        </div>
     </div>
 </template>
 <script lang="ts">
@@ -38,6 +40,15 @@ export default class Settings extends Vue {
     height: 100%;
     width: 100%;
     padding: 4rem 0;
+    display: flex;
+    justify-content: center;
     max-width: 1536px;
+}
+.content {
+    width: fit-content;
+    height: fit-content;
+    padding: 32px;
+    border-radius: 18px;
+    border: 1px solid rgba(145, 158, 171, 0.24);
 }
 </style>

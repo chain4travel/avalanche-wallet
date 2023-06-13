@@ -88,10 +88,14 @@ export default class ManageAccount extends Vue {
 .container {
     height: 100%;
     color: var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .header {
     margin-bottom: 14px;
+    text-align: center;
     h1 {
         font-size: 36px;
         font-weight: bold;
