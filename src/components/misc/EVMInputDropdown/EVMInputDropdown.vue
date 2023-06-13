@@ -1,6 +1,10 @@
 <template>
     <div class="evm_input_dropdown">
-        <div class="col_in hover_border" :disabled="disabled">
+        <div
+            class="col_in hover_border"
+            :class="{ col_in_amount: collectible?.token.data.type === 'ERC1155' }"
+            :disabled="disabled"
+        >
             <template v-if="!isCollectible">
                 <button class="max_but" @click="maxOut" :disabled="disabled">MAX</button>
                 <div class="col_big_in">
@@ -18,13 +22,24 @@
             </template>
             <template v-else>
                 <ERCNftView
-                    :token="collectible.token"
-                    :index="collectible.id"
+                    :token="collectible?.token"
+                    :index="collectible?.id"
                     class="collectible_item"
                 ></ERCNftView>
                 <p style="align-self: center; padding-left: 12px">
-                    TOKEN ID: {{ collectible.id.tokenId }}
+                    TOKEN ID: {{ collectible?.id.tokenId }}
                 </p>
+                <BigNumInput
+                    v-if="collectible?.token.data.type === 'ERC1155'"
+                    :max="max_amount"
+                    :denomination="denomination"
+                    :step="stepSize"
+                    :placeholder="placeholder"
+                    ref="bigIn"
+                    @change="amount_in"
+                    class="bigIn"
+                    :disabled="disabled"
+                ></BigNumInput>
             </template>
         </div>
         <EVMAssetDropdown
@@ -37,7 +52,7 @@
             <p class="bal">Balance: {{ balance.toLocaleString() }}</p>
         </div>
         <div class="bal_col" v-else>
-            <p class="bal">Balance: {{ collectible.id.quantity }}</p>
+            <p class="bal">Balance: {{ collectible?.id.quantity }}</p>
         </div>
     </div>
 </template>
@@ -84,7 +99,9 @@ export default class EVMInputDropdown extends Vue {
 
     get max_amount(): BN {
         // Subtract gas
-        if (this.isNative) {
+        if (this.isCollectible) {
+            return new BN(this.collectible?.id.quantity || 0)
+        } else if (this.isNative) {
             let limit = new BN(this.gasLimit)
             let fee = limit.mul(this.gasPrice)
             return this.balanceBN.sub(fee)
@@ -97,7 +114,9 @@ export default class EVMInputDropdown extends Vue {
         return this.token === 'native'
     }
     get denomination(): number {
-        if (this.isNative) {
+        if (this.isCollectible) {
+            return 0
+        } else if (this.isNative) {
             return 18
         } else {
             return parseInt((this.token as Erc20Token).data.decimals as string)
@@ -211,6 +230,10 @@ export default class EVMInputDropdown extends Vue {
     position: relative;
     display: grid;
     grid-template-columns: max-content 1fr;
+}
+
+.col_in_amount {
+    grid-template-columns: auto max-content 1fr;
 }
 
 .col_big_in {

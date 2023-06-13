@@ -35,7 +35,7 @@ export default class EVMAssetDropdown extends Vue {
 
     get symbol() {
         if (this.selected === 'native') return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
-        else return this.selected.data.symbol
+        else return this.selected.data.symbol ?? this.selected.data.name
     }
 
     showPopup() {

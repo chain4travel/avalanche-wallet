@@ -11,6 +11,7 @@
                     :class="getClass(phrase[i - 1])"
                     v-model="phrase[i - 1]"
                     @input="onChange(i - 1)"
+                    :data-cy="getDataCY(i)"
                 />
             </div>
         </div>
@@ -77,6 +78,11 @@ export default class MnemonicDisplay extends Vue {
             this.phrase[i] = a[0]
             this.phrase = this.phrase.map((v) => v)
         }
+    }
+
+    //Id for Cypress Test
+    getDataCY(pos: number) {
+        return `mnemonic-field-${pos}`
     }
 }
 </script>
