@@ -73,6 +73,8 @@ import { WalletType } from '@c4tplatform/camino-wallet-sdk'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import PendingMultisig from './PendingMultisig.vue'
 import Spinner from '@/components/misc/Spinner.vue'
+import * as SDK from '@c4tplatform/camino-wallet-sdk/dist'
+import { ava } from '@/AVA'
 
 @Component({
     components: {
@@ -166,7 +168,8 @@ export default class ClaimRewards extends Vue {
     }
 
     get disabledButtonRewards() {
-        if (this.rewardAmount.toNumber() <= 0) {
+        let rewardAmountInCam = parseFloat(SDK.bnToBigAvaxX(this.rewardAmount).toString())
+        if (rewardAmountInCam <= parseFloat(this.feeTx.toString())) {
             return true
         } else {
             return false
@@ -232,6 +235,10 @@ export default class ClaimRewards extends Vue {
         await this.getPChainAddress()
         await this.getPendingTransaction()
         this.loading = false
+    }
+
+    get feeTx() {
+        return SDK.bnToBigAvaxX(ava.PChain().getTxFee())
     }
 }
 </script>
