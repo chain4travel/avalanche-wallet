@@ -115,4 +115,7 @@ export default class ManageAccount extends Vue {
         max-width: fit-content;
     }
 }
+.err {
+    color: var(--warning);
+}
 </style>

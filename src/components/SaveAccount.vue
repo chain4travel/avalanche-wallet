@@ -167,7 +167,9 @@ form {
 input {
     background-color: var(--bg-light);
     color: var(--primary-color);
-    padding: 6px 14px;
+    padding: 12px;
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--bg-light);
 }
 
 .cancel_but {
@@ -188,6 +190,6 @@ input {
 }
 
 .err {
-    color: var(--error);
+    color: var(--warning);
 }
 </style>
