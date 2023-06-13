@@ -14,15 +14,6 @@
         </div>
 
         <div class="options" v-if="!subComponent">
-            <button
-                v-if="hasVolatile"
-                @click="saveKeys"
-                class="ava_button"
-                style="color: var(--warning)"
-            >
-                <fa icon="exclamation-triangle"></fa>
-                Save Keys
-            </button>
             <v-btn class="button_primary" @click="changePassword">
                 {{ $t('keys.change_password') }}
             </v-btn>
@@ -95,13 +86,16 @@ export default class ManageAccount extends Vue {
 </script>
 <style scoped lang="scss">
 .container {
-    width: 100%;
     height: 100%;
     color: var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .header {
     margin-bottom: 14px;
+    text-align: center;
     h1 {
         font-size: 48px;
         font-weight: bold;

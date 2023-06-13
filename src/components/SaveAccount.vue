@@ -131,10 +131,14 @@ export default class SaveAccount extends Vue {
 </script>
 <style scoped lang="scss">
 .container {
-    width: 100%;
     height: 100%;
-    padding-top: 4rem;
+    color: var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
     &__input {
+        width: 100%;
         display: flex;
         flex-direction: column;
         gap: 1rem;
@@ -153,7 +157,8 @@ export default class SaveAccount extends Vue {
 form {
     display: flex;
     flex-direction: column;
-
+    align-items: center;
+    margin: 2rem 0;
     > * {
         margin: 6px 0px;
     }
@@ -179,6 +184,7 @@ input {
 .submit {
     margin-top: 30px;
     max-width: 400px;
+    width: 100%;
 }
 
 .err {

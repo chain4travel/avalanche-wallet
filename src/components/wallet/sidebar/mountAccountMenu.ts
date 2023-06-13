@@ -9,7 +9,6 @@ import i18n from '@/plugins/i18n'
 import BootstrapVue from 'bootstrap-vue'
 import vuetify from '@/plugins/vuetify'
 
-import AccountUserItem from './AccountUserItem.vue'
 import AccountKycItem from './AccountKycItem.vue'
 import AccountCard from './AccountCard.vue'
 import AliasPicker from '../manage/AliasPicker.vue'
