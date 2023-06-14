@@ -27,7 +27,7 @@
                 :is="subComponent"
                 v-bind="[{ accountName: account.name }]"
             ></component>
-            <button @click="clear">{{ $t('access.cancel') }}</button>
+            <button @click="clear" class="cancel">{{ $t('access.cancel') }}</button>
         </template>
     </div>
 </template>
@@ -88,27 +88,28 @@ export default class ManageAccount extends Vue {
 .container {
     height: 100%;
     color: var(--primary-color);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 .header {
     margin-bottom: 14px;
-    text-align: center;
     h1 {
-        font-size: 48px;
+        font-size: 36px;
         font-weight: bold;
     }
     p {
-        font-size: 20px;
+        font-size: 18px;
         font-family: 'Inter' sans-serif;
     }
 }
 
+.cancel {
+    width: 100%;
+    text-align: center;
+    max-width: 400px;
+}
 .options {
     display: flex;
-    max-width: 450px;
+    max-width: 400px;
     gap: 1rem;
     flex-wrap: wrap;
     .v-btn {
