@@ -133,10 +133,6 @@ export default class SaveAccount extends Vue {
 .container {
     height: 100%;
     color: var(--primary-color);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
     &__input {
         width: 100%;
         display: flex;
@@ -145,19 +141,16 @@ export default class SaveAccount extends Vue {
         max-width: 400px;
     }
     h1 {
-        font-size: 48px;
+        font-size: 36px;
         font-weight: bold;
     }
     p {
-        font-size: 20px;
+        font-size: 18px;
         font-family: 'Inter' sans-serif;
     }
 }
 
 form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     margin: 2rem 0;
     > * {
         margin: 6px 0px;
