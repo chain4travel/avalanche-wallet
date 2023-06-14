@@ -39,6 +39,7 @@
                                 class="button_secondary btn-claim-reward"
                                 depressed
                                 @click="openModalClaimReward"
+                                :disabled="disabledButtonRewards"
                             >
                                 {{ $t('validator.rewards.claim.claim_rewards') }}
                             </v-btn>
@@ -72,6 +73,8 @@ import { WalletType } from '@c4tplatform/camino-wallet-sdk'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import PendingMultisig from './PendingMultisig.vue'
 import Spinner from '@/components/misc/Spinner.vue'
+import * as SDK from '@c4tplatform/camino-wallet-sdk/dist'
+import { ava } from '@/AVA'
 
 @Component({
     components: {
@@ -135,6 +138,8 @@ export default class ClaimRewards extends Vue {
 
         if (responseClaimable != null && responseClaimable != undefined) {
             this.rewardAmount = responseClaimable.validatorRewards
+        } else {
+            this.rewardAmount = new BN(0)
         }
     }
 
@@ -159,6 +164,15 @@ export default class ClaimRewards extends Vue {
             return bigBal.toLocaleString(9)
         } else {
             return bigBal.toLocaleString(3)
+        }
+    }
+
+    get disabledButtonRewards() {
+        let rewardAmountInCam = parseFloat(SDK.bnToBigAvaxX(this.rewardAmount).toString())
+        if (rewardAmountInCam <= parseFloat(this.feeTx.toString())) {
+            return true
+        } else {
+            return false
         }
     }
 
@@ -202,23 +216,29 @@ export default class ClaimRewards extends Vue {
         }, 100)
     }
 
-    issued() {
+    async issued() {
         this.loading = true
-        this.$store.dispatch('Signavault/updateTransaction')
+        await this.$store.dispatch('Signavault/updateTransaction')
 
-        setTimeout(() => {
-            this.getClaimableReward()
-            this.$store.dispatch('Assets/updateUTXOs')
-            this.$store.dispatch('History/updateTransactionHistory')
+        setTimeout(async () => {
+            await this.getClaimableReward()
+            await this.$store.dispatch('Assets/updateUTXOs')
+            await this.$store.dispatch('History/updateTransactionHistory')
             this.pendingTx = undefined
             this.loading = false
         }, 100)
     }
 
-    refresh() {
-        this.getClaimableReward()
-        this.getPChainAddress()
-        this.getPendingTransaction()
+    async refresh() {
+        this.loading = true
+        await this.getClaimableReward()
+        await this.getPChainAddress()
+        await this.getPendingTransaction()
+        this.loading = false
+    }
+
+    get feeTx() {
+        return SDK.bnToBigAvaxX(ava.PChain().getTxFee())
     }
 }
 </script>
