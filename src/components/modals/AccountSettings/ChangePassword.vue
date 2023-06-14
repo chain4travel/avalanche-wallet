@@ -81,7 +81,7 @@ export default class ChangePassword extends Vue {
                     message: this.$t('notifications.change_password'),
                     type: 'success',
                 })
-                this.$parent.close()
+                if (this.$parent?.close) this.$parent?.close()
             })
             .catch((err) => {
                 this.error = err

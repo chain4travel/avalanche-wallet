@@ -34,7 +34,7 @@ export default class DeleteAccount extends Vue {
                 message: notificationMessage,
                 type: 'success',
             })
-            this.$parent.close()
+            if (this.$parent?.close) this.$parent?.close()
         } catch (err: any) {
             console.error(err)
             this.error = err.message
