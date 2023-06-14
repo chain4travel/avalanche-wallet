@@ -231,14 +231,14 @@ const network_module: Module<NetworkState, RootState> = {
 
                 if (urlSubstringParam !== undefined) {
                     let networkFromParam = state.networks.find(
-                        (val) => val.name.toLowerCase() === urlSubstringParam
+                        (val) => val.name.toLowerCase() === urlSubstringParam.toLowerCase()
                     )
 
                     if (networkFromParam) {
                         await dispatch('setNetwork', networkFromParam)
                     } else {
                         let networkCustomFromParam = state.networksCustom.find(
-                            (val) => val.name.toLowerCase() === urlSubstringParam
+                            (val) => val.name.toLowerCase() === urlSubstringParam.toLowerCase()
                         )
 
                         if (networkCustomFromParam) {
