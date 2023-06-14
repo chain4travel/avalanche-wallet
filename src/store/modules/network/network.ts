@@ -227,7 +227,7 @@ const network_module: Module<NetworkState, RootState> = {
             commit('addNetwork', columbus)
 
             try {
-                let urlSubstringParam = window.location.pathname.split('/')[2]
+                let urlSubstringParam = window.location.pathname?.split('/')?.[2]
 
                 if (urlSubstringParam !== undefined) {
                     let networkFromParam = state.networks.find(
