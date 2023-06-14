@@ -988,7 +988,7 @@
             "reward_address": "Reward Address",
             "start_date": "Start Date",
             "end_date": "End Date",
-            "stake_amount": "Stake Amount",
+            "stake_amount": "Bond Amount",
             "are_you_want": "Are you sure you want to initiate the transaction? This requires signatures from other wallets in the multisignature wallet and cannot be undone for 2-weeks!",
             "claimed_tx_issued": "Successful Claim Transaction"
         },
