@@ -195,6 +195,7 @@ const network_module: Module<NetworkState, RootState> = {
 
         async init({ state, commit, dispatch }) {
             const columbusExplorerUrl = `${window.location.protocol}//${window.location.host}/explorer`
+
             let camino = new AvaNetwork(
                 'Camino',
                 'https://api.camino.network',
@@ -226,10 +227,30 @@ const network_module: Module<NetworkState, RootState> = {
             commit('addNetwork', columbus)
 
             try {
-                let isSet = await dispatch('loadSelectedNetwork')
-                if (!isSet) {
+                let urlSubstringParam = window.location.pathname?.split('/')?.[2]
+
+                if (urlSubstringParam !== undefined) {
+                    let networkFromParam = state.networks.find(
+                        (val) => val.name.toLowerCase() === urlSubstringParam.toLowerCase()
+                    )
+
+                    if (networkFromParam) {
+                        await dispatch('setNetwork', networkFromParam)
+                    } else {
+                        let networkCustomFromParam = state.networksCustom.find(
+                            (val) => val.name.toLowerCase() === urlSubstringParam.toLowerCase()
+                        )
+
+                        if (networkCustomFromParam) {
+                            await dispatch('setNetwork', networkCustomFromParam)
+                        } else {
+                            await dispatch('setNetwork', state.networks[0])
+                        }
+                    }
+                } else {
                     await dispatch('setNetwork', state.networks[0])
                 }
+
                 return true
             } catch (e) {
                 console.log(e)
