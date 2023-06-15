@@ -9,11 +9,10 @@ import i18n from '@/plugins/i18n'
 import BootstrapVue from 'bootstrap-vue'
 import vuetify from '@/plugins/vuetify'
 
-import AccountUserItem from './AccountUserItem.vue'
 import AccountKycItem from './AccountKycItem.vue'
 import AccountCard from './AccountCard.vue'
 import AliasPicker from '../manage/AliasPicker.vue'
-
+import Settings from './Settings.vue'
 Vue.use(VueMeta)
 Vue.use(BootstrapVue)
 Vue.component('datetime', Datetime)
@@ -27,7 +26,7 @@ function selectAccountMenuItem(type: string) {
         case 'kyb':
             return AccountKycItem
         case 'user':
-            return AccountUserItem
+            return Settings
         default:
             return AccountCard
     }
