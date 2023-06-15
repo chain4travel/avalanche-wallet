@@ -469,10 +469,10 @@ export default class Transfer extends Vue {
             return console.log('MultiSigTx::sign: Invalid wallet')
         if (!this.pendingSendMultisigTX) return console.log('MultiSigTx::sign: Invalid Tx')
         try {
-            await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
+            let txID = await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
             this.isConfirm = true
             this.updateMultisigTxDetails()
-            await this.onSuccess(this.pendingSendMultisigTX.tx.id)
+            await this.onSuccess(txID)
         } catch (e: any) {
             this.helpers.dispatchNotification({
                 message: this.$t('notifications.execute_multisig_transaction_error'),

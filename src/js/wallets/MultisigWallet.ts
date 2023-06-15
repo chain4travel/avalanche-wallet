@@ -423,7 +423,7 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         }
     }
 
-    async issueExternal(tx: ModelMultisigTx): Promise<void> {
+    async issueExternal(tx: ModelMultisigTx): Promise<string> {
         // Recover data from tx
         const kcData = this._buildMultisigKeychain(tx)
         // Add our own signatures. we usw the last for signing external rq
@@ -451,10 +451,13 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         const signature = signer.sign(signedTxHash)
 
         const sv = SignaVault()
-        await sv.issueMultisigTx({
-            signature: signature.toString('hex'),
-            signedTx: signedTxBytes.toString('hex'),
-        })
+        let { txID } = (
+            await sv.issueMultisigTx({
+                signature: signature.toString('hex'),
+                signedTx: signedTxBytes.toString('hex'),
+            })
+        ).data
+        return txID
     }
 
     async cancelExternal(tx: ModelMultisigTx) {
