@@ -61,6 +61,7 @@ module.exports = {
                 './mountAccounts': './src/components/Access/mountAccounts.ts',
                 './mountKyesComponent': './src/components/wallet/manage/mountKyesComponent.ts',
                 './mountsaveKyesButton': './src/views/wallet/mountSaveKeysButton.ts',
+                './mountCreateMultisigWallet': './src/views/mountCreateMultisigWallet.ts',
             },
         }),
         new HtmlWebPackPlugin({

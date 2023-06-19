@@ -942,6 +942,9 @@
         "consolidate_funds_success": "You have successfully consolidated the funds",
         "consolidate_funds_error": "Something went wrong when trying to consolidate the funds"
     },
+    "create_multisig": {
+        "disclamer": "Saving the multisignature wallet definition will incurr a fee {fee} {symbol}"
+    },
     "validator": {
         "pending": {
             "validator_pending": "Your validator node is waiting for the transaction to be committed. For more information click here.",
