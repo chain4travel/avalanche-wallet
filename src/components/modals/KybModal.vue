@@ -1,6 +1,7 @@
 <template>
     <div>
         <Modal
+            :isKybModal="true"
             ref="modal"
             :title="$t('kyc_process.title-kyb')"
             class="modal_main"
@@ -43,7 +44,7 @@
                             type="submit"
                             :disabled="submitUserDataDisabled"
                             :loading="isLoading"
-                            class="button_submit_form"
+                            class="button_submit_form submit"
                         >
                             {{ $t('kyc_process.submit') }}
                         </v-btn>
@@ -225,7 +226,9 @@ export default class KybModal extends Vue {
             transform: translate(-50%, -50%);
         }
     }
-
+    .submit {
+        justify-self: end;
+    }
     .modal_bg {
         width: 100vw !important;
         position: fixed;
