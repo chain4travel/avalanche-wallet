@@ -34,6 +34,7 @@ export default class Modal extends Vue {
     @Prop({ default: '' }) subtitle!: string
     @Prop({ default: true }) can_close!: boolean
     @Prop({ default: false }) icy!: boolean
+    @Prop() isKybModal?: boolean
 
     isActive: boolean = false
 
@@ -47,7 +48,7 @@ export default class Modal extends Vue {
     }
 
     bgclick() {
-        if (this.can_close) {
+        if (!this.isKybModal && this.can_close) {
             this.close()
         }
     }
