@@ -6,6 +6,7 @@
             :title="$t('kyc_process.title-kyb')"
             class="modal_main"
             @beforeClose="beforeClose"
+            :canCloseKybModal="canCloseModal"
         >
             <div v-if="!userDataSubmitted" class="KYCform">
                 <div class="request-text">
@@ -67,6 +68,7 @@
                 <v-btn type="cancel" @click="close" class="outlined_button">Close</v-btn>
             </div>
         </Modal>
+        <Disclaimer ref="disclaimer" @change="updateCloseState" />
     </div>
 </template>
 <script lang="ts">
@@ -79,6 +81,7 @@ import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { WalletType, WalletNameType } from '@/js/wallets/types'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import { KYC_VARIANT, kycStyleDay, kycStyleNight } from '@/constants'
+import Disclaimer from './DisclaimerModal.vue'
 interface UserData {
     email: string
     phone: string
@@ -87,14 +90,17 @@ interface UserData {
 @Component({
     components: {
         Modal,
+        Disclaimer,
     },
 })
 export default class KybModal extends Vue {
     @Prop() walle!: WalletType
     $refs!: {
         modal: Modal
+        disclaimer: Disclaimer
     }
     /**/
+    canCloseModal = false
     modalLight: string = '#FFF'
     modalDark: string = '#242729'
     background: string = 'body {background-color: red !important;}'
@@ -185,6 +191,7 @@ export default class KybModal extends Vue {
         }
     }
     async open() {
+        this.canCloseModal = false
         this.$refs.modal.open()
     }
 
@@ -192,13 +199,17 @@ export default class KybModal extends Vue {
         await this.$store.dispatch('Accounts/updateKycStatus')
         this.$refs.modal.close()
     }
-
+    updateCloseState() {
+        this.canCloseModal = true
+        this.close()
+    }
     beforeClose() {
         this.userDataSubmitted = false
         this.userData = {
             email: '',
             phone: '',
         }
+        if (!this.canCloseModal) this.$refs.disclaimer.open()
     }
 }
 </script>
@@ -326,50 +337,6 @@ h1 {
     color: #f5f5f5;
 }
 
-/* .document-status {
-    background-color: transparent !important;
-} */
-/* .steps {
-}
-.step .activ {
-}
-
-.step.active .line {
-    background-color: red;
-}
-.bullet::before {
-    background-color: black;
-}
-.title {
-    color: white;
-}
-
-.step .title {
-    color: #f5f5f5;
-}
-.step.active .title {
-    color: #149ded;
-} */
-/* button.submit,
-button[type='submit'] {
-    border-radius: 12px;
-    background-color: transparent;
-    background-image: none;
-    color: #149ded;
-    border: 1px solid #149ded;
-}
-.upload-payment-item .upload-item {
-    border: 1px solid rgba(203, 213, 225, 0.12);
-    border-radius: 7px;
-    box-shadow: rgb(0 0 0 / 10%) 0px 0px 5px;
-    background-color: var(--white-color);
-}
-
-section {
-    border-radius: 7px;
-    box-shadow: rgb(0 0 0 / 10%) 0px 0px 5px;
-    background-color: #1e293b;
-} */
 .step.active.pending .bullet:before {
     background-color: var(--orange-color);
 }
@@ -397,10 +364,4 @@ input {
     font-size: 13px;
     outline: none;
 }
-
-/* .step.pending .bullet {
-    background-color: #0f172a;
-    background-image: none;
-    border-color: #0f172a;
-} */
 </style>

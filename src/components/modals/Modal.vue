@@ -35,6 +35,7 @@ export default class Modal extends Vue {
     @Prop({ default: true }) can_close!: boolean
     @Prop({ default: false }) icy!: boolean
     @Prop() isKybModal?: boolean
+    @Prop() canCloseKybModal?: boolean
 
     isActive: boolean = false
 
@@ -55,8 +56,15 @@ export default class Modal extends Vue {
 
     public close() {
         this.$emit('beforeClose')
-        this.isActive = false
-        document.body.style.overflow = 'initial'
+        if (this.isKybModal) {
+            if (this.canCloseKybModal) {
+                this.isActive = false
+                document.body.style.overflow = 'initial'
+            }
+        } else {
+            this.isActive = false
+            document.body.style.overflow = 'initial'
+        }
     }
 }
 </script>
