@@ -28,17 +28,19 @@ abstract class HdWalletCore extends WalletCore {
     ethKeyPair: SECP256k1KeyPair
     hdKeysLoaded: boolean
 
-    constructor(accountHdKey: HDKey, ethHdNode: HDKey, isPublic = true) {
+    constructor(accountHdKey: HDKey, ethHdNode: HDKey, isPublic = true, useStaticKey = true) {
         super()
         this.ethHdNode = ethHdNode
         this.ethKeyPair = new KeyPair('', '')
         this.ethKeyPair.importKey(Buffer.from(ethHdNode.privateKey))
         this.hdKeysLoaded = false
 
+        const staticNode = useStaticKey ? ethHdNode : undefined
+
         this.chainId = ava.XChain().getBlockchainAlias() || ava.XChain().getBlockchainID()
-        this.externalHelper = new HdHelper('m/0', accountHdKey, ethHdNode, undefined, isPublic)
+        this.externalHelper = new HdHelper('m/0', accountHdKey, staticNode, undefined, isPublic)
         this.internalHelper = new HdHelper('m/1', accountHdKey, undefined, undefined, isPublic)
-        this.platformHelper = new HdHelper('m/0', accountHdKey, ethHdNode, 'P', isPublic)
+        this.platformHelper = new HdHelper('m/0', accountHdKey, staticNode, 'P', isPublic)
     }
 
     getEvmAddressBech(): string {
@@ -84,15 +86,15 @@ abstract class HdWalletCore extends WalletCore {
         this.internalHelper.startUTXOFetch()
         this.platformHelper.startUTXOFetch()
 
-        this.updateUTXOsX()
-        this.updateUTXOsP()
+        await this.updateUTXOsX()
+        await this.updateUTXOsP()
 
         return
     }
 
     async updateUTXOsX() {
-        this.updateUTXOsExternal()
-        this.updateUTXOsInternal()
+        await this.updateUTXOsExternal()
+        await this.updateUTXOsInternal()
     }
 
     async updateUTXOsExternal() {
@@ -234,16 +236,11 @@ abstract class HdWalletCore extends WalletCore {
         this.isInit = false
         this.stakeAmount = new BN(0)
 
-        this.externalHelper.findHdIndex().then(() => {
-            this.updateInitState()
-        })
-        this.internalHelper.findHdIndex().then(() => {
-            this.updateInitState()
-        })
-        this.platformHelper.findHdIndex().then(() => {
-            this.updateInitState()
-        })
+        await this.externalHelper.findHdIndex()
+        await this.internalHelper.findHdIndex()
+        await this.platformHelper.findHdIndex()
 
+        this.updateInitState()
         // TODO: Handle EVM changes
     }
 

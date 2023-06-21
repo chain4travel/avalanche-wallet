@@ -16,76 +16,83 @@
         </div>
         <transition name="fade" mode="out-in">
             <div>
-                <p v-if="!depositAndBond" class="wrong_network">{{ $t('earn.warning_3') }}</p>
-                <div v-else-if="!isNodeRegistered" class="no_balance">
-                    <pending-multisig
-                        v-if="!!multisigPendingNodeTx"
-                        :multisigTx="multisigPendingNodeTx"
-                        @issued="onNodeRegistered"
-                        @refresh="handlePendingMultisigRefresh"
-                    ></pending-multisig>
-                    <register-node
-                        v-else
-                        :isKycVerified="isKycVerified"
-                        :isConsortiumMember="isConsortiumMember"
-                        :minPlatformUnlocked="minPlatformUnlocked"
-                        :hasEnoughLockablePlatformBalance="hasEnoughLockablePlatformBalance"
-                        :isNodeRegistered="isNodeRegistered"
-                        @registered="onNodeRegistered"
-                        :loadingRefreshRegisterNode="loadingRefreshRegisterNode"
-                        @refresh="refresh()"
-                    ></register-node>
-                </div>
-                <template v-else-if="!!pendingValidator">
-                    <validator-pending
-                        :startDate="pendingValidator.startTime"
-                        @refresh="refresh"
-                    ></validator-pending>
-                </template>
-                <template
-                    v-else-if="
-                        (nodeInfo === undefined || nodeInfo === null) &&
-                        !validatorIsSuspended &&
-                        !pendingValidator
-                    "
-                >
-                    <pending-multisig
-                        v-if="!!multisigPendingNodeTx"
-                        :nodeId="nodeId"
-                        :multisigTx="multisigPendingNodeTx"
-                        @issued="onAddValidatorIssued"
-                        @refresh="handlePendingMultisigRefresh"
-                    ></pending-multisig>
-                    <add-validator
-                        v-else
-                        :nodeId="nodeId"
-                        @validatorReady="verifyValidatorIsReady"
-                        @initiated="onAddValidatorInitiated"
-                    ></add-validator>
-                </template>
-                <div v-else-if="validatorIsSuspended">
-                    <validator-suspended :nodeId="nodeId"></validator-suspended>
-                </div>
-                <div v-else>
-                    <div class="tab-nav">
-                        <div>
-                            <button
-                                @click="tab = 'opt-validator'"
-                                :active="tab === `opt-validator`"
-                            >
-                                {{ $t('validator.rewards.tab.node') }}
-                            </button>
-                            <button @click="tab = 'opt-rewards'" :active="tab === `opt-rewards`">
-                                {{ $t('validator.rewards.tab.rewards') }}
-                            </button>
-                        </div>
+                <div class="tab-nav">
+                    <div>
+                        <button @click="tab = 'opt-validator'" :active="tab === `opt-validator`">
+                            {{ $t('validator.rewards.tab.node') }}
+                        </button>
+                        <button @click="tab = 'opt-rewards'" :active="tab === `opt-rewards`">
+                            {{ $t('validator.rewards.tab.rewards') }}
+                        </button>
                     </div>
+                </div>
 
-                    <div v-if="tab == 'opt-validator'">
+                <div v-if="tab == 'opt-validator'">
+                    <p v-if="!depositAndBond" class="wrong_network">{{ $t('earn.warning_3') }}</p>
+                    <div v-else-if="!isNodeRegistered" class="no_balance">
+                        <pending-multisig
+                            v-if="!!multisigPendingNodeTx"
+                            :multisigTx="multisigPendingNodeTx"
+                            @issued="onNodeRegistered"
+                            @refresh="handlePendingMultisigRefresh"
+                        ></pending-multisig>
+                        <register-node
+                            v-else
+                            :isKycVerified="isKycVerified"
+                            :isConsortiumMember="isConsortiumMember"
+                            :minPlatformUnlocked="minPlatformUnlocked"
+                            :hasEnoughLockablePlatformBalance="hasEnoughLockablePlatformBalance"
+                            :isNodeRegistered="isNodeRegistered"
+                            @registered="onNodeRegistered"
+                            :loadingRefreshRegisterNode="loadingRefreshRegisterNode"
+                            @refresh="refresh()"
+                        ></register-node>
+                    </div>
+                    <template v-else-if="!!pendingValidator">
+                        <div class="pending-validator-div">
+                            <validator-pending
+                                :startDate="pendingValidator.startTime"
+                                @refresh="refresh"
+                            ></validator-pending>
+                        </div>
+                    </template>
+                    <template
+                        v-else-if="
+                            (nodeInfo === undefined || nodeInfo === null) &&
+                            !validatorIsSuspended &&
+                            !pendingValidator
+                        "
+                    >
+                        <pending-multisig
+                            v-if="!!multisigPendingNodeTx"
+                            :nodeId="nodeId"
+                            :multisigTx="multisigPendingNodeTx"
+                            @issued="onAddValidatorIssued"
+                            @refresh="handlePendingMultisigRefresh"
+                        ></pending-multisig>
+                        <add-validator
+                            v-else
+                            :nodeId="nodeId"
+                            @validatorReady="verifyValidatorIsReady"
+                            @initiated="onAddValidatorInitiated"
+                            @refresh="refresh()"
+                        ></add-validator>
+                    </template>
+                    <div v-else-if="validatorIsSuspended">
+                        <validator-suspended :nodeId="nodeId"></validator-suspended>
+                    </div>
+                    <div v-else>
                         <validator-info :nodeId="nodeId" :nodeInfo="nodeInfo"></validator-info>
                     </div>
-                    <div v-if="tab == 'opt-rewards'">
+                </div>
+                <div v-if="tab == 'opt-rewards'">
+                    <div v-if="nodeInfo">
                         <ClaimRewards :nodeId="nodeId" :nodeInfo="nodeInfo" />
+                    </div>
+                    <div v-else>
+                        <div class="rewards-not-available">
+                            <RewardsNotAvailable />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -115,6 +122,7 @@ import { WalletCore } from '@/js/wallets/WalletCore'
 import PendingMultisig from '@/components/wallet/earn/Validate/PendingMultisig.vue'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import ValidatorPending from '@/components/wallet/earn/Validate/ValidatorPending.vue'
+import RewardsNotAvailable from '@/components/wallet/earn/RewardsNotAvailable.vue'
 
 @Component({
     name: 'validator',
@@ -126,6 +134,7 @@ import ValidatorPending from '@/components/wallet/earn/Validate/ValidatorPending
         ClaimRewards,
         PendingMultisig,
         ValidatorPending,
+        RewardsNotAvailable,
     },
 })
 export default class Validator extends Vue {
@@ -300,6 +309,7 @@ export default class Validator extends Vue {
         this.loadingRefreshRegisterNode = true
         await this.evaluateCanRegisterNode()
         await this.updateValidators()
+        await this.$store.dispatch('Signavault/updateTransaction')
         this.loadingRefreshRegisterNode = false
     }
 
@@ -476,5 +486,15 @@ span {
             border-bottom: 2px solid var(--secondary-color);
         }
     }
+}
+
+.pending-validator-div {
+    position: relative;
+    top: 35px;
+}
+
+.rewards-not-available {
+    position: relative;
+    top: 15px;
 }
 </style>

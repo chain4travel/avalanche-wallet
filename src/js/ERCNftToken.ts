@@ -1,8 +1,10 @@
+import axios from 'axios'
+
 import { AbiItem, Contract, web3 } from '@/evm'
 import IERC721Abi from '@/abi/IERC721MetaData.json'
 import IERC1155Abi from '@/abi/IERC1155MetaData.json'
 import { ERCNftBalance, ERCNftTokenInput } from '@/store/modules/assets/modules/types'
-import axios from 'axios'
+import { CF_IPFS_BASE } from '@/constants'
 
 interface TokenDataCache {
     [index: number]: string
@@ -12,9 +14,9 @@ interface URIDataCache {
     [index: number]: string
 }
 
-const ERC721ID = '0x80ac58cd'
+export const ERC721ID = '0x80ac58cd'
 const ERC721MetadataID = '0x5b5e139f'
-const ERC1155ID = '0xd9b67a26'
+export const ERC1155ID = '0xd9b67a26'
 
 const ERC721_TRANSFER = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
 const ERC1155_TRANSFER_SINGLE = '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62'
@@ -87,6 +89,7 @@ class ERCNftToken {
             if (t.data.type === 'ERC1155') addresses[0].push(t.data.address)
             else if (t.data.type === 'ERC721') addresses[1].push(t.data.address)
         })
+        let changed = false
         for (let i = 0; i < 2; ++i) {
             if (addresses[i].length === 0) continue
 
@@ -122,15 +125,14 @@ class ERCNftToken {
                     if (parsed.tokenId) entry.add(parsed.tokenId)
                     else if (parsed.id) entry.add(parsed.id)
                     else for (const id of parsed.ids) entry.add(id)
+                    changed = true
                 }
             }
         }
-        let changed = false
         tokens.forEach((t) => {
             const entry = collector.get(t.data.address)
             if (entry && entry.size != t.data.ercTokenIds.length) {
                 t.data.ercTokenIds = [...entry.values()]
-                changed = true
             }
         })
         return changed
@@ -200,10 +202,10 @@ class ERCNftToken {
         return res
     }
 
-    createTransferTx(from: string, to: string, id: string) {
+    createTransferTx(from: string, to: string, id: string, amount?: number) {
         return this.contract
             ? this.data.type === 'ERC1155'
-                ? this.contract.methods.safeTransferFrom(from, to, id, 1, '0x')
+                ? this.contract.methods.safeTransferFrom(from, to, id, amount, '0x')
                 : this.contract.methods.transferFrom(from, to, id)
             : undefined
     }
@@ -217,7 +219,8 @@ class ERCNftToken {
                 ? await this.contract.methods.uri(id).call()
                 : await this.contract.methods.tokenURI(id).call()
 
-        if (data.startsWith('ipfs://')) data = 'https://ipfs.io/ipfs' + data.substring(7)
+        data = data.replace('{id}', id)
+        if (data.startsWith('ipfs://')) data = CF_IPFS_BASE + data.substring(7)
         this.tokenCache[id] = data
         return data
     }
@@ -228,7 +231,7 @@ class ERCNftToken {
         const uri: string = await this.getTokenURI(id)
         if (!uri) return null
 
-        const res = (await axios.get(uri)).data
+        const res = (await axios.get(uri.replace('{id}', String(id)))).data
         //Save to cache
         this.uriDataCache[id] = res
         return res

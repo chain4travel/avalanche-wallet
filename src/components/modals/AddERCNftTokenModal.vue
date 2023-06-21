@@ -37,12 +37,15 @@
 <script lang="ts">
 import 'reflect-metadata'
 import { Vue, Component, Watch } from 'vue-property-decorator'
+import axios from 'axios'
 
 import Modal from './Modal.vue'
-import { web3 } from '@/evm'
+import { AbiItem, web3 } from '@/evm'
 import IERCNftAbi from '@/abi/IERC721MetaData.json'
+import IERC1155Abi from '@/abi/IERC1155MetaData.json'
 import { ERCNftTokenInput } from '@/store/modules/assets/modules/types'
-import ERCNftToken from '@/js/ERCNftToken'
+import ERCNftToken, { ERC721ID, ERC1155ID } from '@/js/ERCNftToken'
+import { CF_IPFS_BASE } from '@/constants'
 
 @Component({
     components: {
@@ -72,16 +75,32 @@ export default class AddERCNftTokenModal extends Vue {
             return false
         }
         try {
-            //@ts-ignore
-            var tokenInst = new web3.eth.Contract(IERCNftAbi, val)
-            let name = await tokenInst.methods.name().call()
-            let symbol = await tokenInst.methods.symbol().call()
+            let tokenInst = new web3.eth.Contract(IERCNftAbi as AbiItem[], val)
+            const isErc721 = await tokenInst.methods.supportsInterface(ERC721ID).call()
+            if (isErc721) {
+                let name = await tokenInst.methods.name().call()
+                let symbol = await tokenInst.methods.symbol().call()
 
-            this.symbol = symbol
-            this.name = name
+                this.symbol = symbol
+                this.name = name
 
-            this.canAdd = true
-            return true
+                this.canAdd = true
+                return true
+            }
+            const isErc1155 = await tokenInst.methods.supportsInterface(ERC1155ID).call()
+            if (isErc1155) {
+                tokenInst = new web3.eth.Contract(IERC1155Abi as AbiItem[], val)
+                const metadataUri = await tokenInst.methods.uri(0).call()
+                const uri = metadataUri?.startsWith('ipfs://')
+                    ? `${CF_IPFS_BASE}${metadataUri.substring(7)}`
+                    : metadataUri
+                const metadata = await axios.get(uri.replace('{id}', 0))
+
+                this.name = metadata.data.name
+                this.symbol = metadata.data.symbol
+                this.canAdd = true
+                return true
+            }
         } catch (e) {
             this.canAdd = false
             this.symbol = '-'
@@ -110,7 +129,7 @@ export default class AddERCNftTokenModal extends Vue {
                 ercTokenIds: [],
             }
 
-            // let token: ERCNftToken = await this.$store.dispatch('Assets/ERCNft/addCustom', data)
+            let token: ERCNftToken = await this.$store.dispatch('Assets/ERCNft/addCustom', data)
             let { dispatchNotification } = this.globalHelper()
             dispatchNotification({
                 message: this.$t('notifications.ERCNft_token_added'),

@@ -117,25 +117,27 @@
                                     </div>
                                     <!-- STEP 2b - ACCESS -->
                                     <div class="access_cont" v-if="isVerified">
-                                        <div class="submit">
-                                            <transition name="fade" mode="out-in">
-                                                <Spinner v-if="isLoad" class="spinner"></Spinner>
-                                                <div v-else>
-                                                    <button
-                                                        class="button_primary ava_button access generate"
-                                                        @click="access"
-                                                        :disabled="!canSubmit"
-                                                        data-cy="btn-success-mnemonic"
-                                                    >
-                                                        {{ $t('create.success_submit') }}
-                                                    </button>
-                                                    <div @click="navigate('/login')" class="link">
-                                                        {{ $t('create.cancel') }}
-                                                    </div>
-                                                    <ToS style="margin: 30px 0 !important"></ToS>
+                                        <transition name="fade" mode="out-in">
+                                            <Spinner v-if="isLoad" class="spinner"></Spinner>
+                                            <div v-else>
+                                                <br />
+                                                <button
+                                                    class="button_primary ava_button access generate"
+                                                    @click="access"
+                                                    :disabled="!canSubmit"
+                                                    data-cy="btn-success-mnemonic"
+                                                >
+                                                    {{ $t('create.success_submit') }}
+                                                </button>
+                                                <div
+                                                    @click="navigate('/login')"
+                                                    class="link confirm-cancel-link"
+                                                >
+                                                    {{ $t('create.cancel') }}
                                                 </div>
-                                            </transition>
-                                        </div>
+                                                <ToS style="margin: 30px 0 !important"></ToS>
+                                            </div>
+                                        </transition>
                                     </div>
                                 </div>
                             </div>
@@ -416,10 +418,6 @@ a {
 
             .access {
             }
-
-            .link {
-                margin-left: 40px;
-            }
         }
     }
 }
@@ -532,6 +530,16 @@ a {
             }
         }
     }
+}
+.confirm-cancel-link {
+    position: relative;
+    top: 10px;
+}
+
+.div-button-access-and-cancel {
+    position: relative;
+    align-items: center;
+    text-align: center;
 }
 </style>
 <style lang="scss">

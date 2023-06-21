@@ -1,49 +1,74 @@
 <template>
     <div>
         <Modal
+            :isKybModal="true"
             ref="modal"
-            :title="$t('kyc_process.title')"
+            :title="$t('kyc_process.title-kyb')"
             class="modal_main"
             @beforeClose="beforeClose"
+            :canCloseKybModal="canCloseModal"
         >
             <div v-if="!userDataSubmitted" class="KYCform">
                 <div class="request-text">
-                    {{ $t('kyc_process.info_explanation_p1') }}
-                    <br />
-                    {{ $t('kyc_process.info_explanation_p2') }}
-                </div>
-                <form @submit.prevent="submitUserData">
-                    <div>
-                        <label>{{ $t('kyc_process.your_email_address') }}</label>
-                        <input
-                            type="text"
-                            :placeholder="$t('kyc_process.email_address')"
-                            v-model="userData.email"
-                        />
-                    </div>
-                    <div>
-                        <label>{{ $t('kyc_process.your_phone_number') }}</label>
-                        <input
-                            type="tel"
-                            :placeholder="$t('kyc_process.phone_number')"
-                            v-model="userData.phone"
-                        />
-                    </div>
-                    <v-btn
-                        type="submit"
-                        :disabled="submitUserDataDisabled"
-                        :loading="isLoading"
-                        class="button_submit_form"
+                    {{ $t('kyc_process.info_explanation_kyb_p1') }}
+                    <a
+                        @click="redirect('documentation')"
+                        href="#"
+                        target="_blank"
+                        rel="noopener noreferrer"
                     >
-                        {{ $t('kyc_process.submit') }}
-                    </v-btn>
-                </form>
+                        {{ $t('kyc_process.link_to_documentation') }}
+                    </a>
+                </div>
+                <div class="container-kyb">
+                    <div class="text">
+                        {{ $t('kyc_process.info_explanation_kyb_p2') }}
+                    </div>
+                    <form @submit.prevent="submitUserData">
+                        <div>
+                            <label>{{ $t('kyc_process.your_email_address') }}</label>
+                            <input
+                                type="text"
+                                :placeholder="$t('kyc_process.email_address')"
+                                v-model="userData.email"
+                            />
+                        </div>
+                        <div>
+                            <label>{{ $t('kyc_process.your_phone_number') }}</label>
+                            <input
+                                type="tel"
+                                :placeholder="$t('kyc_process.phone_number')"
+                                v-model="userData.phone"
+                            />
+                        </div>
+                        <v-btn
+                            type="submit"
+                            :disabled="submitUserDataDisabled"
+                            :loading="isLoading"
+                            class="button_submit_form submit"
+                        >
+                            {{ $t('kyc_process.submit') }}
+                        </v-btn>
+                    </form>
+                </div>
+                <p>
+                    {{ $t('kyc_process.provider') }}
+                    <a
+                        @click="redirect('provider')"
+                        href="#"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Sumsub
+                    </a>
+                </p>
             </div>
             <div id="sumsub-websdk-container"></div>
             <div v-if="verficationCompleted" class="kyc_action">
                 <v-btn type="cancel" @click="close" class="outlined_button">Close</v-btn>
             </div>
         </Modal>
+        <Disclaimer ref="disclaimer" @change="updateCloseState" />
     </div>
 </template>
 <script lang="ts">
@@ -56,6 +81,7 @@ import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { WalletType, WalletNameType } from '@/js/wallets/types'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import { KYC_VARIANT, kycStyleDay, kycStyleNight } from '@/constants'
+import Disclaimer from './DisclaimerModal.vue'
 interface UserData {
     email: string
     phone: string
@@ -64,14 +90,17 @@ interface UserData {
 @Component({
     components: {
         Modal,
+        Disclaimer,
     },
 })
-export default class KycModal extends Vue {
+export default class KybModal extends Vue {
     @Prop() walle!: WalletType
     $refs!: {
         modal: Modal
+        disclaimer: Disclaimer
     }
     /**/
+    canCloseModal = false
     modalLight: string = '#FFF'
     modalDark: string = '#242729'
     background: string = 'body {background-color: red !important;}'
@@ -112,9 +141,6 @@ export default class KycModal extends Vue {
             .withConf({
                 email: applicantEmail,
                 phone: applicantPhone,
-                uiConf: {
-                    customCssStr: this.background,
-                },
             })
             .withOptions({ addViewportTag: false, adaptIframeHeight: true })
             .on('idCheck.applicantStatus', async (applicantStatus) => {
@@ -129,7 +155,7 @@ export default class KycModal extends Vue {
 
     async getNewAccessToken() {
         if (this.privateKeyC) {
-            const result = await generateToken(this.privateKeyC, KYC_VARIANT.KYC_BASIC)
+            const result = await generateToken(this.privateKeyC, KYC_VARIANT.KYB_BASIC)
             return result.access_token
         }
         return ''
@@ -151,8 +177,21 @@ export default class KycModal extends Vue {
             this.isLoading = false
         }
     }
-
+    redirect(type: string) {
+        switch (type) {
+            case 'documentation':
+                window.open(
+                    ' https://docs.camino.network/validator-guides/add-validator-with-curl/#know-your-customer--know-your-business-verification',
+                    '_blank'
+                )
+                break
+            case 'provider':
+                window.open('https://sumsub.com/', '_blank')
+                break
+        }
+    }
     async open() {
+        this.canCloseModal = false
         this.$refs.modal.open()
     }
 
@@ -160,13 +199,17 @@ export default class KycModal extends Vue {
         await this.$store.dispatch('Accounts/updateKycStatus')
         this.$refs.modal.close()
     }
-
+    updateCloseState() {
+        this.canCloseModal = true
+        this.close()
+    }
     beforeClose() {
         this.userDataSubmitted = false
         this.userData = {
             email: '',
             phone: '',
         }
+        if (!this.canCloseModal) this.$refs.disclaimer.open()
     }
 }
 </script>
@@ -182,6 +225,7 @@ export default class KycModal extends Vue {
         border-radius: var(--border-radius-sm) !important;
         overflow: auto;
         min-height: 200px;
+        cursor: auto;
         @include mixins.mobile-device {
             max-height: 90vh;
             max-width: none;
@@ -193,7 +237,9 @@ export default class KycModal extends Vue {
             transform: translate(-50%, -50%);
         }
     }
-
+    .submit {
+        justify-self: end;
+    }
     .modal_bg {
         width: 100vw !important;
         position: fixed;
@@ -224,6 +270,27 @@ h1 {
     position: relative;
     padding: 16px 22px;
 }
+.container-kyb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 1rem 0;
+    justify-content: space-between;
+    gap: 1rem;
+    .text,
+    form {
+        flex: 1 0 46%;
+    }
+    .text {
+        padding: 1rem;
+        flex-grow: 1;
+        text-align: center;
+        color: var(--primary-contrast-text);
+        border-radius: var(--border-radius-sm);
+        box-shadow: var(--box-shadow);
+        background-color: var(--bg-light);
+    }
+}
 .KYCform {
     padding: 20px;
     border-radius: var(--border-radius-sm);
@@ -234,11 +301,16 @@ h1 {
         text-align: center;
         color: var(--primary-contrast-text);
         border-radius: var(--border-radius-sm);
-        margin-bottom: 25px;
         box-shadow: var(--box-shadow);
         background-color: var(--bg-light);
     }
+    a {
+        color: var(--secondary-color);
+        cursor: pointer;
+        text-decoration: underline;
+    }
     form {
+        flex: 0 0 50%;
         display: grid;
         gap: 10px;
         label {
@@ -252,6 +324,10 @@ h1 {
             margin-bottom: 5px;
         }
     }
+    p {
+        text-align: center;
+        padding: 1rem;
+    }
 }
 
 .popup {
@@ -261,50 +337,6 @@ h1 {
     color: #f5f5f5;
 }
 
-/* .document-status {
-    background-color: transparent !important;
-} */
-/* .steps {
-}
-.step .activ {
-}
-
-.step.active .line {
-    background-color: red;
-}
-.bullet::before {
-    background-color: black;
-}
-.title {
-    color: white;
-}
-
-.step .title {
-    color: #f5f5f5;
-}
-.step.active .title {
-    color: #149ded;
-} */
-/* button.submit,
-button[type='submit'] {
-    border-radius: 12px;
-    background-color: transparent;
-    background-image: none;
-    color: #149ded;
-    border: 1px solid #149ded;
-}
-.upload-payment-item .upload-item {
-    border: 1px solid rgba(203, 213, 225, 0.12);
-    border-radius: 7px;
-    box-shadow: rgb(0 0 0 / 10%) 0px 0px 5px;
-    background-color: var(--white-color);
-}
-
-section {
-    border-radius: 7px;
-    box-shadow: rgb(0 0 0 / 10%) 0px 0px 5px;
-    background-color: #1e293b;
-} */
 .step.active.pending .bullet:before {
     background-color: var(--orange-color);
 }
@@ -332,10 +364,4 @@ input {
     font-size: 13px;
     outline: none;
 }
-
-/* .step.pending .bullet {
-    background-color: #0f172a;
-    background-image: none;
-    border-color: #0f172a;
-} */
 </style>
