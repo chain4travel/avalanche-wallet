@@ -30,9 +30,8 @@ import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { LedgerWallet } from '@/js/wallets/LedgerWallet'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import { ExportChainsC, ExportChainsP, ExportChainsX } from '@c4tplatform/camino-wallet-sdk/dist'
 import { UTXOSet as EVMUTXOSet } from '@c4tplatform/caminojs/dist/apis/evm/utxos'
-import { ChainIdType } from '@/constants'
+import { ChainIdType, CrossChainsC, CrossChainsP, CrossChainsX } from '@/constants'
 
 export interface IIndexKeyCache {
     [index: number]: AVMKeyPair
@@ -124,13 +123,13 @@ export interface AvaWalletCore extends IAddressManager {
         rewardAddress?: string,
         utxos?: PlatformUTXO[]
     ): Promise<string>
-    exportFromXChain(amt: BN, destinationChain: ExportChainsX): Promise<string>
-    exportFromPChain(amt: BN, destinationChain: ExportChainsP): Promise<string>
-    exportFromCChain(amt: BN, destinationChain: ExportChainsC, baseFee: BN): Promise<string>
+    exportFromXChain(amt: BN, destinationChain: CrossChainsX): Promise<string>
+    exportFromPChain(amt: BN, destinationChain: CrossChainsP): Promise<string>
+    exportFromCChain(amt: BN, destinationChain: CrossChainsC, baseFee: BN): Promise<string>
 
-    importToPlatformChain(sourceChain: ExportChainsP): Promise<string>
-    importToXChain(sourceChain: ExportChainsX): Promise<string>
-    importToCChain(sourceChain: ExportChainsC, baseFee: BN, utxoSet?: EVMUTXOSet): Promise<string>
+    importToPlatformChain(sourceChain: CrossChainsP): Promise<string>
+    importToXChain(sourceChain: CrossChainsX): Promise<string>
+    importToCChain(sourceChain: CrossChainsC, baseFee: BN, utxoSet?: EVMUTXOSet): Promise<string>
     issueBatchTx(
         chainId: ChainIdType,
         orders: (AVMUTXO | ITransaction)[],

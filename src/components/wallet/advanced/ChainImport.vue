@@ -41,16 +41,13 @@
 import 'reflect-metadata'
 import { Vue, Component } from 'vue-property-decorator'
 
+import { CrossChainsC, CrossChainsP, CrossChainsX } from '@/constants'
+import { getBaseFeeRecommended, estimateImportGasFeeFromMockTx } from '@/helpers/gas_helper'
+import { avaxCtoX } from '@/helpers/helper'
 import Spinner from '@/components/misc/Spinner.vue'
 import { WalletType } from '@/js/wallets/types'
+
 import { BN } from '@c4tplatform/caminojs/dist'
-import {
-    ExportChainsC,
-    ExportChainsP,
-    ExportChainsX,
-    GasHelper,
-    avaxCtoX,
-} from '@c4tplatform/camino-wallet-sdk/dist'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 @Component({
@@ -72,7 +69,7 @@ export default class ChainImport extends Vue {
         return this.wallet.ethAddress
     }
 
-    async atomicImportX(sourceChain: ExportChainsX) {
+    async atomicImportX(sourceChain: CrossChainsX) {
         this.beforeSubmit()
         if (!this.wallet) return
 
@@ -86,7 +83,7 @@ export default class ChainImport extends Vue {
         }
     }
 
-    async atomicImportP(source: ExportChainsP) {
+    async atomicImportP(source: CrossChainsP) {
         this.beforeSubmit()
         if (!this.wallet) return
         try {
@@ -97,7 +94,7 @@ export default class ChainImport extends Vue {
         }
     }
 
-    async atomicImportC(source: ExportChainsC) {
+    async atomicImportC(source: CrossChainsC) {
         this.beforeSubmit()
         if (!this.wallet) return
         try {
@@ -105,7 +102,7 @@ export default class ChainImport extends Vue {
             const utxos = utxoSet.getAllUTXOs()
 
             const numIns = utxos.length
-            const baseFee = await GasHelper.getBaseFeeRecommended()
+            const baseFee = await getBaseFeeRecommended()
 
             if (numIns === 0) {
                 throw new Error('Nothing to import.')
@@ -116,7 +113,7 @@ export default class ChainImport extends Vue {
                 return acc + utxo.getOutput().getAddresses().length
             }, 0)
 
-            const gas = GasHelper.estimateImportGasFeeFromMockTx(numIns, numSigs)
+            const gas = estimateImportGasFeeFromMockTx(numIns, numSigs)
 
             const totFee = baseFee.mul(new BN(gas))
             let txId = await this.wallet.importToCChain(source, avaxCtoX(totFee))

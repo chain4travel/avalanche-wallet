@@ -120,7 +120,7 @@ import 'reflect-metadata'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 
 import { ava } from '@/AVA'
-import { ChainIdType } from '@/constants'
+import { ChainIdType, CrossChainsC, CrossChainsP, CrossChainsX } from '@/constants'
 import Dropdown from '@/components/misc/Dropdown.vue'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
 import Spinner from '@/components/misc/Spinner.vue'
@@ -131,9 +131,22 @@ import { ChainSwapFormData, TxState } from '@/components/wallet/ChainTransfer/ty
 import AvaAsset from '@/js/AvaAsset'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { WalletType } from '@/js/wallets/types'
+import {
+    BN,
+    Big,
+    avaxCtoX,
+    bnToBig,
+    bnToAvaxX,
+    bnToBigAvaxX,
+    bnToBigAvaxC,
+    bigToBN,
+} from '@/helpers/helper'
+import {
+    estimateExportGasFeeFromMockTx,
+    estimateImportGasFeeFromMockTx,
+    getBaseFeeRecommended,
+} from '@/helpers/gas_helper'
 
-import { BN } from '@c4tplatform/caminojs/dist'
-import * as SDK from '@c4tplatform/camino-wallet-sdk/dist'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 const IMPORT_DELAY = 5000 // in ms
@@ -215,7 +228,7 @@ export default class ChainTransfer extends Vue {
 
     get evmUnlocked(): BN {
         let balRaw = this.wallet.ethBalance
-        return SDK.avaxCtoX(balRaw)
+        return avaxCtoX(balRaw)
     }
 
     get balanceBN(): BN {
@@ -228,15 +241,15 @@ export default class ChainTransfer extends Vue {
         }
     }
 
-    get balanceBig(): SDK.Big {
-        return SDK.bnToBig(this.balanceBN, 9)
+    get balanceBig(): Big {
+        return bnToBig(this.balanceBN, 9)
     }
 
     get formAmtText() {
-        return SDK.bnToAvaxX(this.formAmt)
+        return bnToAvaxX(this.formAmt)
     }
 
-    get fee(): SDK.Big {
+    get fee(): Big {
         return this.exportFee.add(this.importFee)
     }
 
@@ -244,27 +257,27 @@ export default class ChainTransfer extends Vue {
         return this.importFeeBN.add(this.exportFeeBN)
     }
 
-    getFee(chain: ChainIdType, isExport: boolean): SDK.Big {
+    getFee(chain: ChainIdType, isExport: boolean): Big {
         if (chain === 'X') {
-            return SDK.bnToBigAvaxX(ava.XChain().getTxFee())
+            return bnToBigAvaxX(ava.XChain().getTxFee())
         } else if (chain === 'P') {
-            return SDK.bnToBigAvaxX(ava.PChain().getTxFee())
+            return bnToBigAvaxX(ava.PChain().getTxFee())
         } else {
             const fee = isExport
-                ? SDK.GasHelper.estimateExportGasFeeFromMockTx(
-                      this.targetChain as SDK.ExportChainsC,
+                ? estimateExportGasFeeFromMockTx(
+                      this.targetChain as CrossChainsC,
                       this.amt,
                       this.wallet.getEvmAddress(),
                       this.wallet.getCurrentAddressPlatform()
                   )
-                : SDK.GasHelper.estimateImportGasFeeFromMockTx(1, 1)
+                : estimateImportGasFeeFromMockTx(1, 1)
 
             const totFeeWei = this.baseFee.mul(new BN(fee))
-            return SDK.bnToBigAvaxC(totFeeWei)
+            return bnToBigAvaxC(totFeeWei)
         }
     }
 
-    get importFee(): SDK.Big {
+    get importFee(): Big {
         return this.getFee(this.targetChain, false)
     }
 
@@ -272,15 +285,15 @@ export default class ChainTransfer extends Vue {
      * Returns the import fee in nNative
      */
     get importFeeBN(): BN {
-        return SDK.bigToBN(this.importFee, 9)
+        return bigToBN(this.importFee, 9)
     }
 
-    get exportFee(): SDK.Big {
+    get exportFee(): Big {
         return this.getFee(this.sourceChain, true)
     }
 
     get exportFeeBN(): BN {
-        return SDK.bigToBN(this.exportFee, 9)
+        return bigToBN(this.exportFee, 9)
     }
 
     /**
@@ -322,7 +335,7 @@ export default class ChainTransfer extends Vue {
     }
 
     async updateBaseFee() {
-        this.baseFee = await SDK.GasHelper.getBaseFeeRecommended()
+        this.baseFee = await getBaseFeeRecommended()
     }
 
     async submit() {
@@ -351,21 +364,21 @@ export default class ChainTransfer extends Vue {
                 case 'X':
                     exportTxId = await wallet.exportFromXChain(
                         amt,
-                        destinationChain as SDK.ExportChainsX,
+                        destinationChain as CrossChainsX,
                         this.importFeeBN
                     )
                     break
                 case 'P':
                     exportTxId = await wallet.exportFromPChain(
                         amt,
-                        destinationChain as SDK.ExportChainsP,
+                        destinationChain as CrossChainsP,
                         this.importFeeBN
                     )
                     break
                 case 'C':
                     exportTxId = await wallet.exportFromCChain(
                         amt,
-                        destinationChain as SDK.ExportChainsC,
+                        destinationChain as CrossChainsC,
                         this.exportFeeBN
                     )
                     break
@@ -453,14 +466,12 @@ export default class ChainTransfer extends Vue {
         let importTxId
         try {
             if (this.targetChain === 'P') {
-                importTxId = await wallet.importToPlatformChain(
-                    this.sourceChain as SDK.ExportChainsP
-                )
+                importTxId = await wallet.importToPlatformChain(this.sourceChain as CrossChainsP)
             } else if (this.targetChain === 'X') {
-                importTxId = await wallet.importToXChain(this.sourceChain as SDK.ExportChainsX)
+                importTxId = await wallet.importToXChain(this.sourceChain as CrossChainsX)
             } else {
                 importTxId = await wallet.importToCChain(
-                    this.sourceChain as SDK.ExportChainsC,
+                    this.sourceChain as CrossChainsC,
                     this.importFeeBN,
                     undefined,
                     this.exportId

@@ -46,7 +46,7 @@ import { WalletHelper } from '@/helpers/wallet_helper'
 import AvaAsset from '@/js/AvaAsset'
 import { WalletType } from '@/js/wallets/types'
 
-import { BN, Buffer } from '@c4tplatform/camino-wallet-sdk'
+import { BN, Buffer } from '@c4tplatform/caminojs/dist'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 @Component

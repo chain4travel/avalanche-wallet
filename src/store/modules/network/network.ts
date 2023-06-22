@@ -8,7 +8,6 @@ import { explorer_api } from '@/explorer_api'
 import { BN } from '@c4tplatform/caminojs/dist'
 import { web3 } from '@/evm'
 import { setSocketNetwork } from '../../../providers'
-import { setAvalanche } from '@c4tplatform/camino-wallet-sdk/dist'
 const network_module: Module<NetworkState, RootState> = {
     namespaced: true,
     state: {
@@ -165,9 +164,6 @@ const network_module: Module<NetworkState, RootState> = {
             dispatch('History/getAliasChains', null, { root: true })
             await dispatch('Signavault/updateTransaction', undefined, { root: true })
             dispatch('History/updateTransactionHistory', null, { root: true })
-
-            // Set the SDK Network
-            setAvalanche(ava)
 
             commit('setNetwork', net, { root: true })
             state.status = 'connected'

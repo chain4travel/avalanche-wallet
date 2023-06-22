@@ -57,7 +57,7 @@ import { PayloadBase } from '@c4tplatform/caminojs/dist/utils'
 import { HdWalletCore } from './HdWalletCore'
 import { ILedgerAppConfig } from '@/store/types'
 import { WalletNameType } from '@/js/wallets/types'
-import { bnToBig } from '@/helpers/helper'
+import { bnToBig, aliasFromChainId } from '@/helpers/helper'
 import { abiDecoder, web3 } from '@/evm'
 import { AVA_ACCOUNT_PATH, ETH_ACCOUNT_PATH, LEDGER_ETH_ACCOUNT_PATH } from './MnemonicWallet'
 import { ChainIdType } from '@/constants'
@@ -65,7 +65,6 @@ import { ParseableAvmTxEnum, ParseablePlatformEnum, ParseableEvmTxEnum } from '.
 import { ILedgerBlockMessage } from '../../store/modules/ledger/types'
 import Erc20Token from '@/js/Erc20Token'
 import { WalletHelper } from '@/helpers/wallet_helper'
-import { idToChainAlias } from '@c4tplatform/camino-wallet-sdk/dist'
 
 export const MIN_EVM_SUPPORT_V = '0.5.3'
 
@@ -726,7 +725,7 @@ class LedgerWallet extends HdWalletCore implements AvaWalletCore {
         if (txType === PlatformVMConstants.EXPORTTX) {
             const destChainBuff = (tx as PlatformExportTx).getDestinationChain()
             // If destination chain is C chain, sign hash
-            const destChain = idToChainAlias(bintools.cb58Encode(destChainBuff))
+            const destChain = aliasFromChainId(bintools.cb58Encode(destChainBuff))
             if (destChain === 'C') {
                 canLedgerParse = false
             }
@@ -735,7 +734,7 @@ class LedgerWallet extends HdWalletCore implements AvaWalletCore {
         if (txType === PlatformVMConstants.IMPORTTX) {
             const sourceChainBuff = (tx as PlatformImportTx).getSourceChain()
             // If destination chain is C chain, sign hash
-            const sourceChain = idToChainAlias(bintools.cb58Encode(sourceChainBuff))
+            const sourceChain = aliasFromChainId(bintools.cb58Encode(sourceChainBuff))
             if (sourceChain === 'C') {
                 canLedgerParse = false
             }
@@ -781,7 +780,7 @@ class LedgerWallet extends HdWalletCore implements AvaWalletCore {
         if (typeId === EVMConstants.EXPORTTX) {
             const destChainBuff = (tx as EVMExportTx).getDestinationChain()
             // If destination chain is C chain, sign hash
-            const destChain = idToChainAlias(bintools.cb58Encode(destChainBuff))
+            const destChain = aliasFromChainId(bintools.cb58Encode(destChainBuff))
             if (destChain === 'P') {
                 canLedgerParse = false
             }
@@ -790,7 +789,7 @@ class LedgerWallet extends HdWalletCore implements AvaWalletCore {
         if (typeId === EVMConstants.IMPORTTX) {
             const sourceChainBuff = (tx as EVMImportTx).getSourceChain()
             // If destination chain is C chain, sign hash
-            const sourceChain = idToChainAlias(bintools.cb58Encode(sourceChainBuff))
+            const sourceChain = aliasFromChainId(bintools.cb58Encode(sourceChainBuff))
             if (sourceChain === 'P') {
                 canLedgerParse = false
             }

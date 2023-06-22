@@ -37,19 +37,20 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import { BN } from '@c4tplatform/caminojs/dist'
 import { ava, bintools } from '@/AVA'
 import { ChainIdType } from '@/constants'
 import { ExtIssueResult, MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { getBaseFeeRecommended, estimateImportGasFeeFromMockTx } from '@/helpers/gas_helper'
+import { avaxCtoX } from '@/helpers/helper'
 import { platformUTXOsToEvmSet } from '@/helpers/utxo_helper'
 import { TransactionType } from '@/store/modules/history/types'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 
+import { BN } from '@c4tplatform/caminojs/dist'
 import {
     PlatformVMConstants,
     ExportTx as PVMExportTx,
 } from '@c4tplatform/caminojs/dist/apis/platformvm'
-import { avaxCtoX, GasHelper } from '@c4tplatform/camino-wallet-sdk/dist'
 
 @Component
 export default class MultisigTx extends Vue {
@@ -73,9 +74,9 @@ export default class MultisigTx extends Vue {
         } else if (chain === 'P') {
             return ava.PChain().getTxFee()
         } else {
-            const baseFee = await GasHelper.getBaseFeeRecommended()
+            const baseFee = await getBaseFeeRecommended()
 
-            const fee = GasHelper.estimateImportGasFeeFromMockTx(1, 1)
+            const fee = estimateImportGasFeeFromMockTx(1, 1)
             const totFeeWei = baseFee.mul(new BN(fee))
             return avaxCtoX(totFeeWei)
         }
