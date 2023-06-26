@@ -21,6 +21,7 @@ import {
     UnsignedTx as PlatformUnsignedTx,
     UTXO as PlatformUTXO,
     UTXOSet as PlatformUTXOSet,
+    DepositTx,
 } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import {
     MultisigKeyChain,
@@ -532,6 +533,15 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
                     '|'
                 )
                 msKeyChain.addKey(new MultisigKeyPair(msKeyChain, key.getAddress(), signature))
+            })
+        }
+
+        // DepositTx has optional signatures for verifying DepositOwner
+        if (utx.getTransaction().getTxType() === PlatformVMConstants.DEPOSITTX) {
+            const sigs = (utx.getTransaction() as DepositTx).getOwnerSignatures()
+            sigs.forEach((v) => {
+                msKeyChain.addKey(new MultisigKeyPair(msKeyChain, v[0], v[1]))
+                metadata = metadata.concat(v[0].toString('hex'), '#', v[1].toString('hex'), '|')
             })
         }
 

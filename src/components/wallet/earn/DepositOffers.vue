@@ -3,12 +3,24 @@
         <h4 class="balance">
             {{ $t('earn.rewards.offer.balance') }}: {{ cleanAvaxBN(maxDepositAmount) }}
             {{ nativeAssetSymbol }}
-            <button v-if="$data.depositOffer" @click="closeOffer" class="close_offer">
+            <button
+                v-if="$data.depositOffer !== undefined || $data.createOffer"
+                @click="closeOffer"
+                class="close_offer"
+            >
                 <fa icon="times"></fa>
+            </button>
+            <button v-else-if="canAddOffers" @click="addOffer()" class="close_offer">
+                <fa icon="plus"></fa>
             </button>
         </h4>
         <transition name="fade" mode="out-in">
-            <div v-if="$data.depositOffer" class="user_offers" key="offer">
+            <CreateOfferForm
+                v-if="$data.createOffer"
+                key="create"
+                @selectOffer="selectOffer"
+            ></CreateOfferForm>
+            <div v-else-if="$data.depositOffer" class="user_offers" key="offer">
                 <DepositOfferCard
                     :key="'os'"
                     :offer="$data.depositOffer"
@@ -43,6 +55,7 @@ import { Component, Vue } from 'vue-property-decorator'
 
 import DepositOfferCard from '@/components/wallet/earn/DepositOfferCard.vue'
 import DepositForm from '@/components/wallet/earn/DepositForm.vue'
+import CreateOfferForm from '@/components/wallet/earn/CreateOfferForm.vue'
 import { cleanAvaxBN } from '@/helpers/helper'
 
 import { BN } from '@c4tplatform/caminojs/dist'
@@ -50,11 +63,13 @@ import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfa
 
 @Component({
     components: {
+        CreateOfferForm,
         DepositOfferCard,
         DepositForm,
     },
     data: () => ({
         depositOffer: undefined,
+        createOffer: false,
     }),
 })
 export default class DepositOffers extends Vue {
@@ -76,16 +91,26 @@ export default class DepositOffers extends Vue {
         return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
     }
 
+    get canAddOffers(): boolean {
+        return this.$store.getters['Platform/isOfferCreator']
+    }
+
     cleanAvaxBN(val: BN): string {
         return cleanAvaxBN(val)
     }
 
     selectOffer(offer: DepositOffer): void {
         this.$data.depositOffer = offer
+        if (offer === undefined) this.$data.createOffer = false
+    }
+
+    addOffer(): void {
+        this.$data.createOffer = true
     }
 
     closeOffer(): void {
         this.$data.depositOffer = undefined
+        this.$data.createOffer = false
     }
 }
 </script>

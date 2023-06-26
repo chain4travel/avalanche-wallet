@@ -106,23 +106,24 @@ export default class DepositOfferCard extends Vue {
         return this.maxDepositAmount.isZero()
     }
 
+    get amountLimit(): { nominator: BN; amount: BN } {
+        return this.offer.upgradeVersion === 0 || !this.offer.totalMaxAmount.isZero()
+            ? { nominator: this.offer.depositedAmount, amount: this.offer.totalMaxAmount }
+            : { nominator: this.offer.rewardedAmount, amount: this.offer.totalMaxRewardAmount }
+    }
+
     get progress(): string {
-        return this.offer.totalMaxAmount.isZero()
+        const amt = this.amountLimit
+        return amt.amount.isZero()
             ? '0px'
-            : this.offer.depositedAmount
-                  .div(this.offer.totalMaxAmount)
-                  .mul(new BN(100))
-                  .toString() + '%'
+            : amt.nominator.div(amt.amount).mul(new BN(100)).toString() + '%'
     }
 
     get progressText(): string {
-        return this.offer.totalMaxAmount.isZero()
+        const amt = this.amountLimit
+        return amt.amount.isZero()
             ? 'No Limit'
-            : this.progress +
-                  '(' +
-                  cleanAvaxBN(this.offer.totalMaxAmount) +
-                  this.nativeAssetSymbol +
-                  ')'
+            : this.progress + '(' + cleanAvaxBN(amt.amount) + this.nativeAssetSymbol + ')'
     }
 
     emitOffer(): void {

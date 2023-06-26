@@ -444,6 +444,22 @@
             "earn_now": {
                 "title": "Saving Pools"
             },
+            "create": {
+                "offer_start": "Offer Start",
+                "offer_end": "Offer End",
+                "interrest_rate": "Interrest rate ( *1 000 000 )",
+                "min_amount": "Min Amount",
+                "total_max_amount": "Total Max Amount",
+                "min_duration": "Minimum Duration (Sec)",
+                "max_duration": "Maximum Duration (Sec)",
+                "unlock_duration": "Unlock Duration (Sec)",
+                "no_rewards_duration": "No Rewards Duration (Sec)",
+                "memo": "Title",
+                "flags": "Flags (Blocked:1)",
+                "total_max_reward_amount": "Total Max Reward Amount",
+                "owner_address": "Owner Address (optional)",
+                "submit": "Create Offer"
+            },
             "offer": {
                 "title": "Active Saving Pools",
                 "reward": "Reward",

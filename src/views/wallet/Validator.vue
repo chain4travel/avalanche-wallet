@@ -41,14 +41,11 @@ import { bnToBig } from '@/helpers/helper'
 import Big from 'big.js'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import RegisterNode from '@/components/wallet/earn/Validate/RegisterNode.vue'
-import {
-    ADDRESSSTATECONSORTIUM,
-    ADDRESSSTATEDEFERRED,
-    ADDRESSSTATEKYCVERIFIED,
-} from '@c4tplatform/caminojs/dist/apis/platformvm/addressstatetx'
+import { AddressState } from '@c4tplatform/caminojs/dist/apis/platformvm/addressstatetx'
 import { WalletCore } from '@/js/wallets/WalletCore'
 import { ava } from '@/AVA'
 import { AvaNetwork } from '@/js/AvaNetwork'
+import { OneBN } from '@/constants'
 
 @Component({
     name: 'validator',
@@ -85,11 +82,10 @@ export default class Validator extends Vue {
     @Watch('$store.state.network')
     @Watch('$store.state.activeWallet')
     evaluateCanRegisterNode() {
-        const BN_ONE = new BN(1)
         const p1 = WalletHelper.getAddressState(this.staticAddress).then((result) => {
-            this.isKycVerified = !result.and(BN_ONE.shln(ADDRESSSTATEKYCVERIFIED)).isZero()
-            this.isConsortiumMember = !result.and(BN_ONE.shln(ADDRESSSTATECONSORTIUM)).isZero()
-            this.isSuspended = !result.and(BN_ONE.shln(ADDRESSSTATEDEFERRED)).isZero()
+            this.isKycVerified = !result.and(OneBN.shln(AddressState.KYC_VERIFIED)).isZero()
+            this.isConsortiumMember = !result.and(OneBN.shln(AddressState.CONSORTIUM)).isZero()
+            this.isSuspended = !result.and(OneBN.shln(AddressState.NODE_DEFERRED)).isZero()
         })
         const p2 = WalletHelper.getRegisteredNode(this.staticAddress).then(
             (nodeID) => (this.registeredNodeID = nodeID),

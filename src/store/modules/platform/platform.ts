@@ -1,7 +1,7 @@
 import { Module } from 'vuex'
 
 import { ava } from '@/AVA'
-import { ZeroBN } from '@/constants'
+import { OneBN, ZeroBN } from '@/constants'
 import { RootState } from '@/store/types'
 import {
     ValidatorRaw,
@@ -13,6 +13,7 @@ import {
 
 import { BN } from '@c4tplatform/caminojs/dist'
 import { Claimable, OwnerParam } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
+import { AddressState } from '@c4tplatform/caminojs/dist/apis/platformvm'
 
 const platform_module: Module<PlatformState, RootState> = {
     namespaced: true,
@@ -27,10 +28,18 @@ const platform_module: Module<PlatformState, RootState> = {
             treasuryRewards: [],
             depositRewards: [],
         },
+        addressStates: ZeroBN,
+        sunrisePhase: 0,
     },
     mutations: {
         setValidators(state, validators: ValidatorRaw[]) {
             state.validators = validators
+        },
+        setAddressStates(state, states: BN) {
+            state.addressStates = states
+        },
+        setSunrisePhase(state, phase: number) {
+            state.sunrisePhase = phase
         },
     },
     actions: {
@@ -46,6 +55,8 @@ const platform_module: Module<PlatformState, RootState> = {
         async update({ dispatch }) {
             dispatch('updateCurrentSupply')
             dispatch('updateMinStakeAmount')
+            dispatch('updateSunrisePhase')
+            dispatch('updateAddressStates')
             dispatch('updateValidators').then(() =>
                 dispatch('updateAllDepositOffers').then(() => dispatch('updateRewards'))
             )
@@ -153,6 +164,23 @@ const platform_module: Module<PlatformState, RootState> = {
             }
             state.rewards = newRewards
         },
+        async updateAddressStates({ commit, rootState }) {
+            const address = rootState.activeWallet?.getStaticAddress('P')
+            const states = address ? await ava.PChain().getAddressStates(address) : ZeroBN
+            commit('setAddressStates', states)
+        },
+        async updateSunrisePhase({ commit }) {
+            let sp = 0
+            try {
+                let res = await ava.PChain().getUpgradePhases()
+                sp = res.SunrisePhase
+            } catch (e: any) {
+                if ((e.message as string).indexOf('platform.GetUpgradePhases') > 0)
+                    console.log(e.message)
+                throw e
+            }
+            commit('setSunrisePhase', sp)
+        },
     },
     getters: {
         // Return if a given nodeID is either current or pending validator
@@ -174,6 +202,12 @@ const platform_module: Module<PlatformState, RootState> = {
         },
         depositOffer: (state) => (depositOfferID: string) => {
             return state.depositOffers.find((v) => v.id === depositOfferID)
+        },
+        isOfferCreator: (state): boolean => {
+            return !state.addressStates.and(OneBN.shln(AddressState.OFFERS_CREATOR)).isZero()
+        },
+        getSunrisePhase(state): number {
+            return state.sunrisePhase
         },
     },
 }

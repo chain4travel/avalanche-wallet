@@ -20,6 +20,7 @@ import { BN, Buffer } from '@c4tplatform/caminojs/dist'
 import {
     ClaimAmountParams,
     ClaimType,
+    DepositOffer,
     UTXO as PlatformUTXO,
     UTXOSet as PlatformUTXOSet,
 } from '@c4tplatform/caminojs/dist/apis/platformvm'
@@ -448,18 +449,45 @@ class WalletHelper {
         const rewardAddress = bintools.parseAddress(wallet.getPlatformRewardAddress(), 'P')
         const changeAddress = wallet.getChangeAddressPlatform()
 
+        const unsignedTx = await ava.PChain().buildDepositTx(
+            0, //UpgradeVersion
+            wallet.platformUtxoset,
+            [pAddressStrings, signerAddresses],
+            [changeAddress],
+            depositID,
+            depositDuration,
+            new OutputOwners([rewardAddress], ZeroBN, 1),
+            Buffer.alloc(20), // empty address
+            [],
+            [],
+            [],
+            Buffer.alloc(0),
+            ZeroBN,
+            depositAmount
+        )
+        let tx = await wallet.signP(unsignedTx)
+        return await ava.PChain().issueTx(tx)
+    }
+
+    static async buildAddDepositOfferTx(wallet: WalletType, offer: DepositOffer) {
+        const pAddressStrings = wallet.getAllAddressesP()
+        const signerAddresses = wallet.getSignerAddresses('P')
+        const changeAddress = wallet.getChangeAddressPlatform()
+
+        const creatorAddress = pAddressStrings[0]
+        const creatorAuth: [number, Buffer | string][] = [[0, pAddressStrings[0]]]
+
         const unsignedTx = await ava
             .PChain()
-            .buildDepositTx(
+            .buildAddDepositOfferTx(
                 wallet.platformUtxoset,
                 [pAddressStrings, signerAddresses],
                 [changeAddress],
-                depositID,
-                depositDuration,
-                new OutputOwners([rewardAddress], ZeroBN, 1),
+                offer,
+                creatorAddress,
+                creatorAuth,
                 Buffer.alloc(0),
-                ZeroBN,
-                depositAmount
+                ZeroBN
             )
         let tx = await wallet.signP(unsignedTx)
         return await ava.PChain().issueTx(tx)
@@ -467,3 +495,4 @@ class WalletHelper {
 }
 
 export { WalletHelper }
+export type { DepositOffer }

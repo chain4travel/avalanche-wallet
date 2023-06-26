@@ -1,6 +1,6 @@
 <template>
     <div class="avax_input">
-        <div class="col1 hover_border">
+        <div :class="'col1'.concat(readonly ? '' : ' hover_border')">
             <button class="max_but" @click="maxOut" v-if="max">MAX</button>
             <BigNumInput
                 ref="amt_in"
@@ -92,11 +92,10 @@ export default class AvaxInput extends Vue {
     grid-gap: 0px 10px;
     color: var(--primary-color);
     width: 100%;
-    height: 40px;
 
     .amt_in {
         color: var(--primary-color);
-        font-size: 15px;
+        font-size: 14px;
         font-family: 'Inter';
         flex-grow: 1;
         flex-shrink: 1;
@@ -104,14 +103,12 @@ export default class AvaxInput extends Vue {
         box-sizing: content-box;
         outline: none !important;
         border: none !important;
-        //padding: 0 12px !important;
     }
 
     .ticker,
     .amt_in,
     .max_but {
         background-color: var(--bg-light);
-        //border-radius: 3px;
     }
 }
 
@@ -149,18 +146,15 @@ export default class AvaxInput extends Vue {
     grid-template-columns: max-content 1fr;
     width: 100%;
     box-sizing: border-box;
-    padding: 8px 14px;
+    padding: 6px 12px;
     position: relative;
 }
 
 .ticker {
     border-radius: var(--border-radius-sm);
-    padding: 8px 14px;
+    padding: 6px 12px;
 }
 
-p {
-    text-align: center;
-}
 .max_but {
     font-size: 13px;
     opacity: 0.4;

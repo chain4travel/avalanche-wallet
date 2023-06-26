@@ -22,7 +22,7 @@ module.exports = {
                 config.devtool = 'source-map'
             }
         } else if (process.env.NODE_ENV === 'production') {
-            this.parallel = require("os").cpus().length > 1
+            this.parallel = require('os').cpus().length > 1
             config.optimization = {
                 minimize: true,
                 minimizer: [new TerserPlugin()],
@@ -40,10 +40,16 @@ module.exports = {
                 assert: require.resolve('assert/'),
                 buffer: require.resolve('buffer/'),
                 crypto: require.resolve('crypto-browserify'),
+                stream: require.resolve('stream-browserify'),
                 http: false,
                 https: false,
                 os: false,
-                stream: require.resolve('stream-browserify'),
+                fs: false,
+                tls: false,
+                path: false,
+                url: false,
+                zlib: false,
+                net: false,
             },
             alias: {
                 '~root/./src': path.resolve(__dirname, 'src'),

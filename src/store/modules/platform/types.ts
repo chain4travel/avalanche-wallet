@@ -15,6 +15,8 @@ export interface PlatformState {
     currentSupply: BN
     depositOffers: DepositOffer[]
     rewards: PlatformRewards
+    addressStates: BN
+    sunrisePhase: number
 }
 
 export interface ValidatorRaw {

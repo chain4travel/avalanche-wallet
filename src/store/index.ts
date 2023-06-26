@@ -529,6 +529,7 @@ export default new Vuex.Store({
                     dispatch('History/updateTransactionHistory')
                 })
             })
+            dispatch('Platform/updateAddressStates')
         },
     },
 })
