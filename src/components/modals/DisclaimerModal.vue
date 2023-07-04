@@ -2,16 +2,14 @@
     <modal :title="$t('kyc_process.title-disclaimer-modal')" ref="modal">
         <div class="modal__body">
             <p class="modal__body--text">
-                {{ $t('kyc_process.disclaimer-modal-p1') }}
-                <br />
-                {{ $t('kyc_process.disclaimer-modal-p2') }}
+                {{ $t('kyc_process.disclaimer-modal') }}
             </p>
             <div class="modal__body--buttons">
-                <v-btn class="button_primary" @click="close(true)">
-                    {{ $t('kyc_process.disclaimer-modal-close') }}
-                </v-btn>
                 <v-btn class="button_primary" @click="close(false)">
                     {{ $t('kyc_process.disclaimer-modal-continue') }}
+                </v-btn>
+                <v-btn class="button_primary" @click="close(true)">
+                    {{ $t('kyc_process.disclaimer-modal-close') }}
                 </v-btn>
             </div>
         </div>
