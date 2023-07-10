@@ -34,6 +34,8 @@ export default class Modal extends Vue {
     @Prop({ default: '' }) subtitle!: string
     @Prop({ default: true }) can_close!: boolean
     @Prop({ default: false }) icy!: boolean
+    @Prop() isKybModal?: boolean
+    @Prop() canCloseKybModal?: boolean
 
     isActive: boolean = false
 
@@ -47,15 +49,22 @@ export default class Modal extends Vue {
     }
 
     bgclick() {
-        if (this.can_close) {
+        if (!this.isKybModal && this.can_close) {
             this.close()
         }
     }
 
     public close() {
         this.$emit('beforeClose')
-        this.isActive = false
-        document.body.style.overflow = 'initial'
+        if (this.isKybModal) {
+            if (this.canCloseKybModal) {
+                this.isActive = false
+                document.body.style.overflow = 'initial'
+            }
+        } else {
+            this.isActive = false
+            document.body.style.overflow = 'initial'
+        }
     }
 }
 </script>

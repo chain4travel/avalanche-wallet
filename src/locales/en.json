@@ -215,6 +215,7 @@
     "kyc_process": {
         "title": "KYC Process",
         "title-kyb": "KYB Process",
+        "title-disclaimer-modal": "Are you sure you want to close this window?",
         "desc": "Kyc something something",
         "verify_kyc": "Verify KYC",
         "verify_kyb": "Verify KYB",
@@ -226,10 +227,13 @@
         "phone_number": "Phone Number",
         "submit": "Submit",
         "provider": "All verification are made via a third-party provider",
+        "disclaimer-modal-continue": "Continue KYB",
+        "disclaimer-modal-close": "Close Window",
         "link_to_documentation": "read our documentation.",
         "info_explanation_p1": "We need your email address and phone number to follow up with you in case your verification requires clarification and to inform you about the verification result.",
         "info_explanation_p2": "Please enter your contact details below.",
-        "info_explanation_kyb_p1": "Verifying your wallet will allow you or your company to be a more active player in the Camino network, such as interacting with specific dApps and participating in governance, for more information on what the verification enables please",
+        "disclaimer-modal": "Please be aware that after closing the KYB window, you will need to re-enter your email address and phone number to pick up where you left off.",
+        "info_explanation_kyb_p1": "Verifying your wallet will allow you or your company to be a more trusted contributor in the Camino network, such as interacting with specific dApps and participating in governance, for more information on what the verification enables please",
         "info_explanation_kyb_p2": "We need your email address and phone number to follow up with you in case your verification requires clarification and to inform you about the verification result"
     },
     "studio": {
