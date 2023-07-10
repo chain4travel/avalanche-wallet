@@ -940,7 +940,9 @@
         "deposit_success": "Deposit successful",
         "deposit_failed": "Deposit failed",
         "consolidate_funds_success": "You have successfully consolidated the funds",
-        "consolidate_funds_error": "Something went wrong when trying to consolidate the funds"
+        "consolidate_funds_error": "Something went wrong when trying to consolidate the funds",
+        "msig_creation_success": "Multisig wallet created successfully",
+        "msig_creation_failed": "Something went wrong when trying to create the multisig wallet"
     },
     "create_multisig": {
         "disclamer": "Saving the multisignature wallet definition will incurr a fee {fee} {symbol}"

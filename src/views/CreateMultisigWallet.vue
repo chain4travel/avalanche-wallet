@@ -7,8 +7,8 @@
                 <div class="input-with-warning">
                     <input
                         class="full-width-input"
-                        :name="$t('keys.save_account.placeholder_1').toString()"
                         placeholder="Multisignature Name"
+                        v-model="multisigName"
                     />
                     <span class="warning">
                         Please note thiscription will be public on the Camino Network. Choose wisely
@@ -23,26 +23,18 @@
                     <div class="address-input">
                         <input
                             class="full-width-input"
-                            :name="$t('keys.save_account.placeholder_1').toString()"
                             :placeholder="`Owner ${index + 1} Address`"
                             v-model="address.address"
+                            :disabled="index === 0"
                         />
                         <input
                             class="msig-address-name"
-                            :name="$t('keys.save_account.placeholder_1').toString()"
-                            :placeholder="`MSig Address Name ${index + 1}`"
+                            :placeholder="index === 0 ? 'My Address' : `Owner ${index + 1} Name`"
                             v-model="address.name"
                         />
                     </div>
-                    <button
-                        @click="removeAddress(index)"
-                        class="circle delete-button"
-                        v-if="mode === 'edit'"
-                    >
-                        <fa icon="minus"></fa>
-                    </button>
                 </div>
-                <div class="add-new-address" v-if="mode === 'create'">
+                <div class="add-new-address" v-if="mode === 'create' && addresses.length < 128">
                     <button @click="addAddress" class="circle plus-button">
                         <fa icon="plus"></fa>
                     </button>
@@ -55,13 +47,17 @@
                 <h3>Multisignature Threshold</h3>
                 <input
                     class="threshold-input"
-                    :name="$t('keys.save_account.placeholder_1').toString()"
                     placeholder="Multisignature Threshold"
+                    v-model.number="threshold"
                 />
             </div>
         </div>
-        <div class="action-buttons" v-if="isSinglton">
-            <v-btn class="button_primary ava_button" @click="createWallet">
+        <div class="action-buttons" v-if="isSingleton">
+            <v-btn
+                class="button_primary ava_button"
+                @click="createWallet"
+                :disabled="disableMsigCreation"
+            >
                 Create Multisignature Wallet
             </v-btn>
             <span class="warning">
@@ -73,26 +69,6 @@
                 }}
             </span>
         </div>
-        <div class="action-buttons" v-if="isMultisig && mode === 'edit'">
-            <v-btn class="button_primary ava_button" @click="cancelEdit">Cancel</v-btn>
-            <v-btn class="button_primary ava_button" @click="saveWallet">
-                Save Multisig Wallet
-            </v-btn>
-            <span class="warning">
-                {{
-                    $t('create_multisig.disclamer', {
-                        fee: feeAmt,
-                        symbol: nativeAssetSymbol,
-                    })
-                }}
-            </span>
-        </div>
-        <div class="action-buttons" v-if="isMultisig && mode !== 'edit'">
-            <v-btn class="button_primary ava_button" @click="abortEdit">Abort</v-btn>
-            <v-btn class="button_primary ava_button" @click="signWallet">
-                Sign Edited Multisig Wallet
-            </v-btn>
-        </div>
     </div>
 </template>
 
@@ -103,21 +79,52 @@ import { ava } from '@/AVA'
 import { BN } from '@c4tplatform/caminojs'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import AvaAsset from '@/js/AvaAsset'
-import Big from 'big.js'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import { AvaNetwork } from '@/js/AvaNetwork'
+import { WalletHelper } from '../helpers/wallet_helper'
 
 @Component
 export default class CreateMultisigWallet extends Vue {
-    addresses: { address: string; name: string }[] = [{ address: '', name: '' }]
+    multisigName: string = ''
+    addresses: { address: string; name: string }[] = [
+        { address: this.getStaticPAddress(), name: 'My Address' },
+        { address: '', name: '' },
+    ]
+    threshold: number = 1
     mode: 'create' | 'edit' | 'delete' | 'view' = 'create'
 
     get walletType(): WalletType {
         return this.$store.state.activeWallet.type
     }
 
+    get activeNetwork(): null | AvaNetwork {
+        return this.$store.state.Network.selectedNetwork
+    }
+
+    get disableMsigCreation(): boolean {
+        return (
+            !this.multisigName ||
+            !this.threshold ||
+            this.addresses.length === 0 ||
+            // this.addresses.some((address) => address.address === '') ||
+            // this.addresses.some((address) => address.name === '') ||
+            this.threshold > this.addresses.length ||
+            this.threshold < 1
+        )
+    }
+
+    updateFirstAddress(): void {
+        const newPAddress = this.getStaticPAddress()
+        this.addresses = [{ address: newPAddress, name: 'My Address' }, ...this.addresses.slice(1)]
+    }
+
+    @Watch('activeNetwork')
+    onActiveNetworkChanged(): void {
+        this.updateFirstAddress()
+    }
+
     @Watch('walletType')
-    onWalletTypeChanged(newVal: WalletType) {
-        console.log('walletType', newVal)
+    onWalletTypeChanged(newVal: WalletType): void {
         if (newVal instanceof SingletonWallet) {
             this.mode = 'create'
         } else {
@@ -125,53 +132,72 @@ export default class CreateMultisigWallet extends Vue {
         }
     }
 
-    mounted() {
-        console.log('wallet', this.multiSigAliases)
+    getStaticPAddress(): string {
+        const wallet = this.$store.state.activeWallet as WalletType
+        return wallet.getStaticAddress('P')
     }
 
-    addAddress() {
+    addAddress(): void {
+        if (this.addresses.length >= 128) return
         this.addresses.push({ address: '', name: '' })
     }
 
-    removeAddress(index: number) {
-        console.log('removeAddress', index)
+    removeAddress(index: number): void {
+        if (index === 0) return
+
         this.addresses.splice(index, 1)
         if (this.addresses.length === 0) {
             this.addAddress()
         }
     }
 
-    createWallet() {
-        console.log('createWallet')
+    resetForm(): void {
+        this.multisigName = ''
+        this.addresses = [
+            { address: this.getStaticPAddress(), name: 'My Address' },
+            { address: '', name: '' },
+        ]
+        this.threshold = 1
     }
 
-    editWallet() {
-        this.mode = 'edit'
-    }
+    async createWallet(): Promise<void> {
+        const wallet = this.$store.state.activeWallet as WalletType
+        const newMemo = this.multisigName
+        // @ts-ignore
+        let { dispatchNotification } = this.globalHelper()
 
-    deleteWallet() {
-        this.mode = 'delete'
+        try {
+            const result = await WalletHelper.sendMultisigAliasTxCreate(
+                wallet,
+                this.addresses,
+                newMemo
+            )
+            // const localStorageAccounIndex = this.$store.state.Accounts.accountIndex
+
+            if (result) {
+                this.resetForm()
+                dispatchNotification({
+                    message: this.$t('notifications.msig_creation_success'),
+                    type: 'success',
+                })
+            } else {
+                dispatchNotification({
+                    message: this.$t('notifications.msig_creation_failed'),
+                    type: 'error',
+                })
+            }
+        } catch (e) {
+            console.error(e)
+            dispatchNotification({
+                message: this.$t('notifications.msig_creation_failed'),
+                type: 'error',
+            })
+            return
+        }
     }
 
     formattedAmount(val: BN): string {
-        let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
-        return big.toLocaleString()
-    }
-
-    cancelEdit() {
-        this.mode = 'view'
-    }
-
-    saveWallet() {
-        console.log('saveWallet')
-    }
-
-    abortEdit() {
-        console.log('abortEdit')
-    }
-
-    signWallet() {
-        console.log('signWallet')
+        return `${(Number(val.toString()) / Number(ONEAVAX.toString())).toLocaleString()}`
     }
 
     get feeAmt(): string {
@@ -186,18 +212,9 @@ export default class CreateMultisigWallet extends Vue {
         return this.$store.getters['Assets/AssetAVA']
     }
 
-    get isSinglton() {
+    get isSingleton(): boolean {
         let wallet: WalletType = this.$store.state.activeWallet
         return wallet.type === 'singleton'
-    }
-
-    get isMultisig() {
-        let wallet: WalletType = this.$store.state.activeWallet
-        return wallet.type === 'multisig'
-    }
-
-    get multiSigAliases(): string[] {
-        return this.$store.getters.multiSigAliases
     }
 }
 </script>
