@@ -59,7 +59,7 @@
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        Sumsub
+                        Sumsub Privacy Notice.
                     </a>
                 </p>
             </div>
@@ -186,7 +186,7 @@ export default class KybModal extends Vue {
                 )
                 break
             case 'provider':
-                window.open('https://sumsub.com/', '_blank')
+                window.open('https://sumsub.com/privacy-notice-service/', '_blank')
                 break
         }
     }
@@ -198,17 +198,17 @@ export default class KybModal extends Vue {
     async close() {
         await this.$store.dispatch('Accounts/updateKycStatus')
         this.$refs.modal.close()
+        this.userDataSubmitted = false
+        this.userData = {
+            email: '',
+            phone: '',
+        }
     }
     updateCloseState() {
         this.canCloseModal = true
         this.close()
     }
     beforeClose() {
-        this.userDataSubmitted = false
-        this.userData = {
-            email: '',
-            phone: '',
-        }
         if (!this.canCloseModal) this.$refs.disclaimer.open()
     }
 }

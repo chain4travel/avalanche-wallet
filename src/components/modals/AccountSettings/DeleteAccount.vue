@@ -1,10 +1,22 @@
 <template>
     <form @submit.prevent="submit">
-        <input class="single_line_input" type="password" v-model="pass" placeholder="Password" />
+        <input class="camino--input" type="password" v-model="pass" placeholder="Password" />
         <p class="err">{{ error }}</p>
-        <v-btn class="button_secondary" :disabled="!canSubmit" depressed block small type="submit">
-            Delete
-        </v-btn>
+        <div class="buttons_container">
+            <button
+                :class="['camino__transparent--button', { 'camino--button--disabled': !canSubmit }]"
+                :disabled="!canSubmit"
+                depressed
+                block
+                small
+                type="submit"
+            >
+                Delete
+            </button>
+            <button class="camino__negative--button" small block depressed @click="cancel">
+                Cancel
+            </button>
+        </div>
     </form>
 </template>
 <script lang="ts">
@@ -22,7 +34,9 @@ export default class DeleteAccount extends Vue {
         if (this.pass.length < 1) return false
         return true
     }
-
+    cancel() {
+        this.$emit('clear')
+    }
     async submit() {
         this.error = ''
         try {
@@ -43,5 +57,14 @@ export default class DeleteAccount extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use './style';
+.buttons_container {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+input {
+    width: 100%;
+    max-width: 300px;
+}
 </style>

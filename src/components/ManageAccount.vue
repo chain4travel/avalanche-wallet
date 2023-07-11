@@ -1,33 +1,44 @@
 <template>
-    <div class="container">
+    <div class="manage_account--container">
         <div class="header">
             <h1>{{ selectedTitle }}</h1>
-            <p class="err small">
-                {{ $t('keys.save_account.warning') }}
-                <br />
-                Make sure you have your
-                <b>mnemonic phrase</b>
-                or
-                <b>private key</b>
-                saved.
-            </p>
+            <div class="warning-container">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                >
+                    <path d="M13 14H11V9H13M13 18H11V16H13M1 21H23L12 2L1 21Z" fill="#E5A21F" />
+                </svg>
+                <p class="err small">
+                    {{ $t('keys.save_account.warning') }}
+                    <br />
+                    Make sure you have your
+                    <b>mnemonic phrase</b>
+                    or
+                    <b>private key</b>
+                    saved.
+                </p>
+            </div>
         </div>
 
         <div class="options" v-if="!subComponent">
-            <v-btn class="button_primary" @click="changePassword">
+            <button class="camino__transparent--button" @click="changePassword">
                 {{ $t('keys.change_password') }}
-            </v-btn>
-            <v-btn class="button_primary" @click="deleteAccount">
+            </button>
+            <button class="camino__negative--button" @click="deleteAccount">
                 {{ $t('keys.delete_account') }}
-            </v-btn>
+            </button>
         </div>
         <template v-else>
             <component
                 v-if="subComponent"
                 :is="subComponent"
                 v-bind="[{ accountName: account.name }]"
+                @clear="clear"
             ></component>
-            <button @click="clear" class="cancel">{{ $t('access.cancel') }}</button>
         </template>
     </div>
 </template>
@@ -85,28 +96,45 @@ export default class ManageAccount extends Vue {
 }
 </script>
 <style scoped lang="scss">
-.container {
+.manage_account--container {
+    margin-top: 4rem;
     height: 100%;
     color: var(--primary-color);
 }
 
 .header {
-    margin-bottom: 14px;
+    padding: 16px 24px;
+    padding-left: 0px;
     h1 {
-        font-size: 36px;
-        font-weight: bold;
+        color: var(--primary-color);
+        font-family: 'Inter';
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 32px;
+        margin-bottom: 8px;
     }
     p {
-        font-size: 18px;
-        font-family: 'Inter' sans-serif;
+        font-family: 'Inter';
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 20px;
+        letter-spacing: 0em;
+        text-align: left;
+        margin: 0 !important;
     }
 }
-
-.cancel {
-    width: 100%;
-    text-align: center;
-    max-width: 400px;
+.warning-container {
+    display: flex;
+    max-width: fit-content;
+    padding: 16px;
+    align-items: flex-start;
+    gap: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--camino-warning-border);
+    background: var(--camino-warning-background);
 }
+
 .options {
     display: flex;
     max-width: 400px;
@@ -117,6 +145,11 @@ export default class ManageAccount extends Vue {
     }
 }
 .err {
-    color: var(--warning);
+    font-family: 'Inter';
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+    color: var(--camino-warning-color);
 }
 </style>
