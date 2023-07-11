@@ -59,7 +59,7 @@
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        Sumsub
+                        Sumsub Privacy Notice.
                     </a>
                 </p>
             </div>
@@ -186,7 +186,7 @@ export default class KybModal extends Vue {
                 )
                 break
             case 'provider':
-                window.open('https://sumsub.com/', '_blank')
+                window.open('https://sumsub.com/privacy-notice-service/', '_blank')
                 break
         }
     }

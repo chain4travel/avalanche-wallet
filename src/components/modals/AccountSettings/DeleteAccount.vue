@@ -60,8 +60,9 @@ export default class DeleteAccount extends Vue {
 .buttons_container {
     display: flex;
     gap: 8px;
-    margin-top: 8px;
+    margin-top: 16px;
 }
+
 input {
     width: 100%;
     max-width: 300px;

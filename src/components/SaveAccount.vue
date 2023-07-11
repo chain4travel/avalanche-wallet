@@ -182,9 +182,12 @@ export default class SaveAccount extends Vue {
 
 form {
     margin: 1rem 0;
-    > * {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    /* > * {
         margin: 6px 0px;
-    }
+    } */
     label {
         font-family: 'Inter';
         font-size: 14px;
@@ -193,19 +196,6 @@ form {
         line-height: 20px;
     }
 }
-
-/* input {
-    background-color: var(--bg-light);
-    color: var(--primary-color);
-    padding: 12px;
-    border-radius: var(--border-radius-lg);
-    border: 1px solid var(--bg-light);
-} */
-
-/* .cancel_but {
-    color: #999;
-    font-size: 0.9rem;
-} */
 
 .password {
     background-color: var(--bg-light);

@@ -103,7 +103,7 @@ export default class ChangePassword extends Vue {
 form {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 16px;
     max-width: 300px;
 }
 </style>
