@@ -7,6 +7,8 @@
     --secondary-border: solid 1px var(--secondary-border-color);
     --box-shadow: rgb(0 0 0 / 10%) 0px 0px 5px;
     --tooltip-bg: rgba(51, 65, 85, 0.92);
+    --slate-600 : #475569;
+    --negative-background: #e5431f;
 }
 
 html[data-theme='day'] {
@@ -23,7 +25,7 @@ html[data-theme='day'] {
     --info: #2c7490;
     --info-1: 44, 116, 144;
     --bg-wallet: #f5f6fa;
-    --warning: #f19d38;
+    --warning: #e5a21f;
     --bg-wallet-light: #ffffff;
     --primary-border-color: rgba(203, 213, 225, 0.12);
     --secondary-border-color: #e2e8f0;
@@ -61,6 +63,9 @@ html[data-theme='night'] {
     --sidebar-background: #1e293b;
     --icon-color: #ffffff;
     --icon-color--light: #ffffff;
+    --camino-brand-too-blue-to-be-true : #0085FF;
+    --camino-slate-slate-950: #020617;
+    --camino-slate-slate-600 : #475569;
 }
 body {
     overflow: auto;

@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="manage_account--container">
         <div class="header">
             <h1>{{ selectedTitle }}</h1>
             <p class="err small">
@@ -14,20 +14,20 @@
         </div>
 
         <div class="options" v-if="!subComponent">
-            <v-btn class="button_primary" @click="changePassword">
+            <button class="camino__transparent--button" @click="changePassword">
                 {{ $t('keys.change_password') }}
-            </v-btn>
-            <v-btn class="button_primary" @click="deleteAccount">
+            </button>
+            <button class="camino__negative--button" @click="deleteAccount">
                 {{ $t('keys.delete_account') }}
-            </v-btn>
+            </button>
         </div>
         <template v-else>
             <component
                 v-if="subComponent"
                 :is="subComponent"
                 v-bind="[{ accountName: account.name }]"
+                @clear="clear"
             ></component>
-            <button @click="clear" class="cancel">{{ $t('access.cancel') }}</button>
         </template>
     </div>
 </template>
@@ -85,28 +85,33 @@ export default class ManageAccount extends Vue {
 }
 </script>
 <style scoped lang="scss">
-.container {
+.manage_account--container {
+    margin-top: 4rem;
     height: 100%;
     color: var(--primary-color);
 }
 
 .header {
-    margin-bottom: 14px;
+    padding: 16px 24px;
+    padding-left: 0px;
     h1 {
-        font-size: 36px;
-        font-weight: bold;
+        color: var(--primary-color);
+        font-family: 'Inter';
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 32px;
     }
     p {
-        font-size: 18px;
-        font-family: 'Inter' sans-serif;
+        font-family: 'Inter';
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 20px;
+        letter-spacing: 0em;
+        text-align: left;
     }
 }
 
-.cancel {
-    width: 100%;
-    text-align: center;
-    max-width: 400px;
-}
 .options {
     display: flex;
     max-width: 400px;
@@ -117,6 +122,6 @@ export default class ManageAccount extends Vue {
     }
 }
 .err {
-    color: var(--warning);
+    color: #e5a21f;
 }
 </style>

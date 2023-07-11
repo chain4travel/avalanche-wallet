@@ -10,6 +10,7 @@
             <div class="container__input">
                 <label>{{ $t('keys.save_account.placeholder_1') }}</label>
                 <input
+                    class="camino--input"
                     v-model="accountName"
                     :name="$t('keys.save_account.placeholder_1').toString()"
                     placeholder="Account Name"
@@ -19,6 +20,7 @@
             <div class="container__input">
                 <label>{{ $t('keys.save_account.placeholder_2') }}</label>
                 <input
+                    class="camino--input"
                     type="password"
                     :placeholder="$t('keys.save_account.placeholder_2').toString()"
                     v-model="password"
@@ -27,6 +29,7 @@
             <div class="container__input">
                 <label>{{ $t('keys.save_account.placeholder_3') }}</label>
                 <input
+                    class="camino--input"
                     type="password"
                     :placeholder="$t('keys.save_account.placeholder_3').toString()"
                     v-model="password_confirm"
@@ -42,14 +45,14 @@
                 <b>private key</b>
                 saved.
             </p>
-            <v-btn
-                class="button_primary submit"
+            <button
+                :class="['camino__primary--button', { 'camino--button--disabled': !canSubmit }]"
                 :disabled="!canSubmit"
                 type="submit"
                 :loading="isLoading"
             >
                 {{ $t('keys.save_account.submit') }}
-            </v-btn>
+            </button>
         </form>
     </div>
 </template>
@@ -133,20 +136,35 @@ export default class SaveAccount extends Vue {
 .container {
     height: 100%;
     color: var(--primary-color);
+    padding: 16px 24px;
+    padding-left: 0px;
+    margin-top: 4rem;
     &__input {
         width: 100%;
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 4px;
         max-width: 400px;
+        align-items: flex-start;
+        input {
+            width: 100%;
+        }
     }
     h1 {
-        font-size: 36px;
-        font-weight: bold;
+        color: var(--primary-color);
+        font-family: 'Inter';
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 32px;
     }
     p {
-        font-size: 18px;
-        font-family: 'Inter' sans-serif;
+        font-family: 'Inter';
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 20px;
+        letter-spacing: 0em;
+        text-align: left;
     }
 }
 
@@ -155,20 +173,27 @@ form {
     > * {
         margin: 6px 0px;
     }
+    label {
+        font-family: 'Inter';
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 20px;
+    }
 }
 
-input {
+/* input {
     background-color: var(--bg-light);
     color: var(--primary-color);
     padding: 12px;
     border-radius: var(--border-radius-lg);
     border: 1px solid var(--bg-light);
-}
+} */
 
-.cancel_but {
+/* .cancel_but {
     color: #999;
     font-size: 0.9rem;
-}
+} */
 
 .password {
     background-color: var(--bg-light);

@@ -1,27 +1,30 @@
 <template>
     <form @submit.prevent="submit" class="change_pass_form">
-        <input
-            placeholder="Old Password"
-            type="password"
-            class="single_line_input"
-            v-model="passOld"
-        />
-        <input
-            placeholder="New Password"
-            type="password"
-            class="single_line_input"
-            v-model="pass"
-        />
+        <input placeholder="Old Password" type="password" class="camino--input" v-model="passOld" />
+        <input placeholder="New Password" type="password" class="camino--input" v-model="pass" />
         <input
             placeholder="Confirm Password"
             type="password"
-            class="single_line_input"
+            class="camino--input"
             v-model="passConfirm"
         />
         <p class="err">{{ error }}</p>
-        <v-btn class="button_secondary" small block depressed :disabled="!canSubmit" type="submit">
-            Submit
-        </v-btn>
+        <div class="buttons_container">
+            <button
+                :class="['camino__primary--button', { 'camino--button--disabled': !canSubmit }]"
+                class="camino__primary--button"
+                small
+                block
+                depressed
+                :disabled="!canSubmit"
+                type="submit"
+            >
+                Submit
+            </button>
+            <button class="camino__negative--button" small block depressed @click="cancel">
+                Cancel
+            </button>
+        </div>
     </form>
 </template>
 <script lang="ts">
@@ -59,7 +62,9 @@ export default class ChangePassword extends Vue {
         if (this.passConfirm.length < 1) return false
         return true
     }
-
+    cancel() {
+        this.$emit('clear')
+    }
     async submit() {
         this.error = ''
         let err = this.errCheck()
@@ -90,5 +95,15 @@ export default class ChangePassword extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use './style';
+.buttons_container {
+    display: flex;
+    gap: 8px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 300px;
+}
 </style>
