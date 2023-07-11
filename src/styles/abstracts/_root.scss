@@ -9,6 +9,7 @@
     --tooltip-bg: rgba(51, 65, 85, 0.92);
     --slate-600 : #475569;
     --negative-background: #e5431f;
+    --white : #fff;
 }
 
 html[data-theme='day'] {
@@ -36,6 +37,9 @@ html[data-theme='day'] {
     --sidebar-background: #fff;
     --icon-color: #0f172a;
     --icon-color-light: #334155;
+    --camino-warning-border : rgba(229, 162, 31, 0.50);;
+    --camino-warning-background : rgba(229, 162, 31, 0.05);
+    --camino-warning-color : #334155;
 }
 
 html[data-theme='night'] {
@@ -66,6 +70,9 @@ html[data-theme='night'] {
     --camino-brand-too-blue-to-be-true : #0085FF;
     --camino-slate-slate-950: #020617;
     --camino-slate-slate-600 : #475569;
+    --camino-warning-border : rgba(229, 162, 31, 0.3);
+    --camino-warning-background : rgba(229, 162, 31, 0.05);
+    --camino-warning-color : #cbd4e2;
 }
 body {
     overflow: auto;

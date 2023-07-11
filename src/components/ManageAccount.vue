@@ -2,15 +2,26 @@
     <div class="manage_account--container">
         <div class="header">
             <h1>{{ selectedTitle }}</h1>
-            <p class="err small">
-                {{ $t('keys.save_account.warning') }}
-                <br />
-                Make sure you have your
-                <b>mnemonic phrase</b>
-                or
-                <b>private key</b>
-                saved.
-            </p>
+            <div class="warning-container">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                >
+                    <path d="M13 14H11V9H13M13 18H11V16H13M1 21H23L12 2L1 21Z" fill="#E5A21F" />
+                </svg>
+                <p class="err small">
+                    {{ $t('keys.save_account.warning') }}
+                    <br />
+                    Make sure you have your
+                    <b>mnemonic phrase</b>
+                    or
+                    <b>private key</b>
+                    saved.
+                </p>
+            </div>
         </div>
 
         <div class="options" v-if="!subComponent">
@@ -101,6 +112,7 @@ export default class ManageAccount extends Vue {
         font-style: normal;
         font-weight: 600;
         line-height: 32px;
+        margin-bottom: 8px;
     }
     p {
         font-family: 'Inter';
@@ -109,7 +121,18 @@ export default class ManageAccount extends Vue {
         line-height: 20px;
         letter-spacing: 0em;
         text-align: left;
+        margin: 0 !important;
     }
+}
+.warning-container {
+    display: flex;
+    max-width: fit-content;
+    padding: 16px;
+    align-items: flex-start;
+    gap: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--camino-warning-border);
+    background: var(--camino-warning-background);
 }
 
 .options {
@@ -122,6 +145,11 @@ export default class ManageAccount extends Vue {
     }
 }
 .err {
-    color: #e5a21f;
+    font-family: 'Inter';
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+    color: var(--camino-warning-color);
 }
 </style>

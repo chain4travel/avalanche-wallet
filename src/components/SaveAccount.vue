@@ -36,15 +36,26 @@
                 />
             </div>
             <p class="err">{{ err }}</p>
-            <p class="err small">
-                {{ $t('keys.save_account.warning') }}
-                <br />
-                Make sure you have your
-                <b>mnemonic phrase</b>
-                or
-                <b>private key</b>
-                saved.
-            </p>
+            <div class="warning-container">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                >
+                    <path d="M13 14H11V9H13M13 18H11V16H13M1 21H23L12 2L1 21Z" fill="#E5A21F" />
+                </svg>
+                <p class="err small">
+                    {{ $t('keys.save_account.warning') }}
+                    <br />
+                    Make sure you have your
+                    <b>mnemonic phrase</b>
+                    or
+                    <b>private key</b>
+                    saved.
+                </p>
+            </div>
             <button
                 :class="['camino__primary--button', { 'camino--button--disabled': !canSubmit }]"
                 :disabled="!canSubmit"
@@ -165,11 +176,12 @@ export default class SaveAccount extends Vue {
         line-height: 20px;
         letter-spacing: 0em;
         text-align: left;
+        margin: 0 !important;
     }
 }
 
 form {
-    margin: 2rem 0;
+    margin: 1rem 0;
     > * {
         margin: 6px 0px;
     }
@@ -207,7 +219,17 @@ form {
     width: 100%;
 }
 
+.warning-container {
+    display: flex;
+    max-width: fit-content;
+    padding: 16px;
+    align-items: flex-start;
+    gap: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--camino-warning-border);
+    background: var(--camino-warning-background);
+}
 .err {
-    color: var(--warning);
+    color: var(--camino-warning-color);
 }
 </style>
