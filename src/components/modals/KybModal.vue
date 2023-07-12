@@ -198,17 +198,17 @@ export default class KybModal extends Vue {
     async close() {
         await this.$store.dispatch('Accounts/updateKycStatus')
         this.$refs.modal.close()
+        this.userDataSubmitted = false
+        this.userData = {
+            email: '',
+            phone: '',
+        }
     }
     updateCloseState() {
         this.canCloseModal = true
         this.close()
     }
     beforeClose() {
-        this.userDataSubmitted = false
-        this.userData = {
-            email: '',
-            phone: '',
-        }
         if (!this.canCloseModal) this.$refs.disclaimer.open()
     }
 }

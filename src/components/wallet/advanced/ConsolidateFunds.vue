@@ -36,7 +36,8 @@ import Big from 'big.js'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import AvaAsset from '@/js/AvaAsset'
 import { ITransaction } from '@/components/wallet/transfer/types'
-import { BN, Buffer, ChainIdType } from '@c4tplatform/camino-wallet-sdk'
+import { BN, Big, bnToBig } from '@/helpers/helper'
+import { ChainIdType } from '@/constants'
 const uuidv1 = require('uuid/v1')
 
 @Component({

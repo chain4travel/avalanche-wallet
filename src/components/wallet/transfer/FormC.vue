@@ -125,7 +125,8 @@ import { Vue, Component } from 'vue-property-decorator'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
 import { priceDict } from '@/store/types'
 import { WalletType } from '@/js/wallets/types'
-import { GasHelper, TxHelper, bnToAvaxC, bnToBigAvaxX } from '@c4tplatform/camino-wallet-sdk/dist'
+import { bnToAvaxC, bnToBigAvaxC, bnToBigAvaxX } from '@/helpers/helper'
+import { estimateAvaxGas, getAdjustedGasPrice } from '@/helpers/gas_helper'
 
 // @ts-ignore
 import { QrInput } from '@c4tplatform/vue_components'
@@ -190,7 +191,7 @@ export default class FormC extends Vue {
     }
 
     async updateGasPrice() {
-        this.gasPrice = await GasHelper.getAdjustedGasPrice()
+        this.gasPrice = await getAdjustedGasPrice()
     }
 
     onAmountChange(val: BN) {
@@ -281,7 +282,7 @@ export default class FormC extends Vue {
         if (!this.isCollectible) {
             if (this.formToken === 'native') {
                 // For native asset Transfers
-                let gasLimit = await TxHelper.estimateAvaxGas(
+                let gasLimit = await estimateAvaxGas(
                     this.wallet.getEvmAddress(),
                     this.formAddress,
                     this.formAmount,
