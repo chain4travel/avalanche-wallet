@@ -47,9 +47,9 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import Modal from '../../../modals/Modal.vue'
 import { BN } from '@c4tplatform/caminojs'
 import { WalletHelper } from '../../../../helpers/wallet_helper'
-import * as SDK from '@c4tplatform/camino-wallet-sdk/dist'
 import { ava } from '@/AVA'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
+import { bnToBigAvaxX } from '@/helpers/helper'
 
 @Component({
     components: {
@@ -105,7 +105,7 @@ export default class ModalClaimReward extends Vue {
                 this.close()
                 this.$emit('beforeCloseModal', false)
             } else {
-                this.confirmedClaimedAmountText = SDK.bnToBigAvaxX(this.claimAmount).toString()
+                this.confirmedClaimedAmountText = bnToBigAvaxX(this.claimAmount).toString()
                 this.claimed = true
             }
         } catch (e) {
@@ -120,7 +120,7 @@ export default class ModalClaimReward extends Vue {
     }
 
     get feeTx() {
-        return SDK.bnToBigAvaxX(ava.PChain().getTxFee())
+        return bnToBigAvaxX(ava.PChain().getTxFee())
     }
 
     get nativeAssetSymbol(): string {

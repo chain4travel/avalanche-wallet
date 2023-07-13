@@ -43,6 +43,11 @@ module.exports = {
         ],
     },
     resolve: {
+        fallback: {
+            fs: false,
+            tls: false,
+            net: false,
+        },
         extensions: ['.tsx', '.ts', '.vue', '.jsx', '.js', '.json'],
         alias: {
             vue: 'vue/dist/vue.min.js',
