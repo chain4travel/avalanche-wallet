@@ -5,12 +5,12 @@
                 {{ $t('kyc_process.disclaimer-modal') }}
             </p>
             <div class="modal__body--buttons">
-                <v-btn class="button_primary" @click="close(false)">
+                <button class="camino__primary--button" @click="close(false)">
                     {{ $t('kyc_process.disclaimer-modal-continue') }}
-                </v-btn>
-                <v-btn class="button_primary" @click="close(true)">
+                </button>
+                <button class="camino__negative--button" @click="close(true)">
                     {{ $t('kyc_process.disclaimer-modal-close') }}
-                </v-btn>
+                </button>
             </div>
         </div>
     </modal>
@@ -54,10 +54,19 @@ export default class Disclaimer extends Vue {
         background-color: var(--bg-light);
         font-size: 1.1rem;
     }
+    button {
+        font-family: 'Inter';
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 20px;
+        letter-spacing: 0em;
+        text-align: left;
+        margin: 0 !important;
+    }
     &--buttons {
         display: flex;
         justify-content: center;
-        gap: 0.5rem;
+        gap: 12px;
     }
 }
 </style>

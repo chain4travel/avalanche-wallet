@@ -7,6 +7,9 @@
     --secondary-border: solid 1px var(--secondary-border-color);
     --box-shadow: rgb(0 0 0 / 10%) 0px 0px 5px;
     --tooltip-bg: rgba(51, 65, 85, 0.92);
+    --slate-600 : #475569;
+    --negative-background: #e5431f;
+    --white : #fff;
 }
 
 html[data-theme='day'] {
@@ -23,7 +26,7 @@ html[data-theme='day'] {
     --info: #2c7490;
     --info-1: 44, 116, 144;
     --bg-wallet: #f5f6fa;
-    --warning: #f19d38;
+    --warning: #e5a21f;
     --bg-wallet-light: #ffffff;
     --primary-border-color: rgba(203, 213, 225, 0.12);
     --secondary-border-color: #e2e8f0;
@@ -34,6 +37,9 @@ html[data-theme='day'] {
     --sidebar-background: #fff;
     --icon-color: #0f172a;
     --icon-color-light: #334155;
+    --camino-warning-border : rgba(229, 162, 31, 0.50);;
+    --camino-warning-background : rgba(229, 162, 31, 0.05);
+    --camino-warning-color : #334155;
 }
 
 html[data-theme='night'] {
@@ -61,6 +67,12 @@ html[data-theme='night'] {
     --sidebar-background: #1e293b;
     --icon-color: #ffffff;
     --icon-color--light: #ffffff;
+    --camino-brand-too-blue-to-be-true : #0085FF;
+    --camino-slate-slate-950: #020617;
+    --camino-slate-slate-600 : #475569;
+    --camino-warning-border : rgba(229, 162, 31, 0.3);
+    --camino-warning-background : rgba(229, 162, 31, 0.05);
+    --camino-warning-color : #cbd4e2;
 }
 body {
     overflow: auto;
