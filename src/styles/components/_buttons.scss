@@ -126,3 +126,46 @@
 .v-btn__content {
     color: var(--primary-contrast-text);
 }
+
+.camino__primary--button {
+    display: flex;
+    padding: 10px 16px;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    /* flex: 1 0 0; */
+    border-radius: 8px;
+    background: #0085ff;
+    width: fit-content;
+    height: 40px;
+}
+
+.camino__transparent--button {
+    display: flex;
+    padding: 10px 16px;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    border-radius: 8px;
+    border: 1px solid var(--slate-600);
+    height: 40px;
+}
+
+.camino--button--disabled {
+    opacity: 0.5;
+}
+
+.camino__negative--button {
+    height: 40px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    gap: 6px;
+    font-family: 'Inter';
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: var(--white);
+    background-color: var(--negative-background);
+}

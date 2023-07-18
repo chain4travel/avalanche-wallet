@@ -37,7 +37,6 @@ export default class Settings extends Vue {
 .settings__container {
     height: 100%;
     width: 100%;
-    padding: 4rem 0;
     max-width: 1536px;
 }
 </style>
