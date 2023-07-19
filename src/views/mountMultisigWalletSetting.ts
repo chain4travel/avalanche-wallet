@@ -8,13 +8,13 @@ import 'vue-datetime/dist/vue-datetime.css'
 import i18n from '@/plugins/i18n'
 import BootstrapVue from 'bootstrap-vue'
 import vuetify from '@/plugins/vuetify'
-import CreateMultisigWallet from './CreateMultisigWallet.vue'
+import MultisigWalletSetting from './MultisigWalletSetting.vue'
 
 Vue.use(VueMeta)
 Vue.use(BootstrapVue)
 Vue.component('datetime', Datetime)
 
-export const mountCreateMultisigWallet = (el: string, props: any) => {
+export const mountMultisigWalletSetting = (el: string, props: any) => {
     const { dispatchNotification } = props
     const MyPlugin = {
         install(Vue) {
@@ -37,7 +37,7 @@ export const mountCreateMultisigWallet = (el: string, props: any) => {
             const context = {
                 props: props,
             }
-            return createElement(CreateMultisigWallet, context)
+            return createElement(MultisigWalletSetting, context)
         },
     })
     app.$mount(el)

@@ -1,23 +1,24 @@
 <template>
-    <div class="container">
-        <h1>Multisignature Wallet</h1>
-        <div>
+    <div class="msig-create--container">
+        <h1>{{ $t('create_multisig.title') }}</h1>
+        <div class="msig-create--form">
             <div class="input-container">
-                <h3>Multisignature Name</h3>
+                <h3>{{ $t('create_multisig.name') }}</h3>
                 <div class="input-with-warning">
-                    <input
-                        class="full-width-input"
-                        placeholder="Multisignature Name"
+                    <CamInput
                         v-model="multisigName"
+                        :placeholder="$t('create_multisig.name')"
+                        :error="nameLengthError"
+                        :errorMessage="$t('create_multisig.errors.msig_name')"
                     />
-                    <span class="warning">
-                        Please note thiscription will be public on the Camino Network. Choose wisely
-                    </span>
+                    <Alert variant="warning">
+                        {{ $t('create_multisig.alert.wize_name') }}
+                    </Alert>
                 </div>
             </div>
 
             <div class="input-container">
-                <h3>Multisignature Co-Owners</h3>
+                <h3>{{ $t('create_multisig.co-owners') }}</h3>
                 <div v-for="(address, index) in addresses" :key="index" class="multisig_address">
                     <div class="circle number">{{ index + 1 }}</div>
                     <div class="address-input">
@@ -25,7 +26,6 @@
                             class="full-width-input"
                             :placeholder="`Owner ${index + 1} Address`"
                             v-model="address.address"
-                            :disabled="index === 0"
                         />
                         <input
                             class="msig-address-name"
@@ -34,44 +34,51 @@
                         />
                     </div>
                 </div>
-                <div class="add-new-address" v-if="mode === 'create' && addresses.length < 128">
-                    <button @click="addAddress" class="circle plus-button">
-                        <fa icon="plus"></fa>
-                    </button>
+
+                <div class="add-new-address" v-if="addresses.length < 128">
+                    <div class="circle number">{{ addresses.length + 1 }}</div>
+                    <div class="add-new-address--button">
+                        <button @click="addAddress" class="circle plus-button">
+                            <fa icon="plus"></fa>
+                        </button>
+                    </div>
                 </div>
+
+                <Alert variant="negative" v-if="multupleSameAddresses">
+                    {{ $t('create_multisig.errors.same_address_twice') }}
+                </Alert>
             </div>
 
-            <div class="divider"></div>
-
             <div class="input-container">
-                <h3>Multisignature Threshold</h3>
-                <input
-                    class="threshold-input"
-                    placeholder="Multisignature Threshold"
+                <div class="divider"></div>
+                <h3>{{ $t('create_multisig.threshold') }}</h3>
+                <CamInput
                     v-model.number="threshold"
+                    :placeholder="$t('create_multisig.threshold')"
+                    :error="thresholdError"
+                    :errorMessage="$t('create_multisig.errors.threshold_exceeds_owners')"
+                    class="msig-threshold-input"
                 />
             </div>
         </div>
-        <div class="action-buttons" v-if="isSingleton">
-            <v-btn
-                class="button_primary ava_button"
+
+        <div class="action-buttons">
+            <button
+                :class="[
+                    'camino__transparent--button',
+                    { 'camino--button--disabled': disableMsigCreation },
+                ]"
                 @click="createWallet"
                 :disabled="disableMsigCreation"
             >
-                Create Multisignature Wallet
-            </v-btn>
-            <span class="warning">
-                {{
-                    $t('create_multisig.disclamer', {
-                        fee: feeAmt,
-                        symbol: nativeAssetSymbol,
-                    })
-                }}
-            </span>
+                {{ $t('create_multisig.create_multisig') }}
+            </button>
+            <Alert variant="warning">
+                {{ $t('create_multisig.disclamer', { fee: feeAmt, symbol: nativeAssetSymbol }) }}
+            </Alert>
         </div>
     </div>
 </template>
-
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { WalletType } from '@/js/wallets/types'
@@ -80,10 +87,18 @@ import { BN } from '@c4tplatform/caminojs'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import AvaAsset from '@/js/AvaAsset'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { AvaNetwork } from '@/js/AvaNetwork'
 import { WalletHelper } from '../helpers/wallet_helper'
+import Alert from '@/components/Alert.vue'
+import CamInput from '@/components/CamInput.vue'
 
-@Component
+@Component({
+    components: {
+        Alert,
+        CamInput,
+    },
+})
 export default class CreateMultisigWallet extends Vue {
     multisigName: string = ''
     addresses: { address: string; name: string }[] = [
@@ -91,26 +106,72 @@ export default class CreateMultisigWallet extends Vue {
         { address: '', name: '' },
     ]
     threshold: number = 1
-    mode: 'create' | 'edit' | 'delete' | 'view' = 'create'
 
-    get walletType(): WalletType {
-        return this.$store.state.activeWallet.type
+    @Watch('multisigName')
+    onInputValueChange() {
+        console.log('multisigName changed', this.multisigName)
+    }
+
+    get activeWallet(): SingletonWallet | MultisigWallet {
+        return this.$store?.state?.activeWallet
+    }
+
+    get walletType(): WalletType | string {
+        return this.activeWallet?.type
     }
 
     get activeNetwork(): null | AvaNetwork {
-        return this.$store.state.Network.selectedNetwork
+        return this.$store?.state?.Network?.selectedNetwork
+    }
+
+    get feeAmt(): string {
+        return this.formattedAmount(ava.PChain().getTxFee())
+    }
+
+    get nativeAssetSymbol(): string {
+        return this.ava_asset?.symbol ?? ''
+    }
+
+    get ava_asset(): AvaAsset | null {
+        return this.$store.getters['Assets/AssetAVA']
+    }
+
+    get multiSigAliases(): string[] {
+        return this.$store.getters.multiSigAliases
     }
 
     get disableMsigCreation(): boolean {
+        const filledAddresses = this.addresses.filter((a) => a.address !== '')
+        const uniqueAddresses = new Set(filledAddresses.map((a) => a.address))
+
         return (
             !this.multisigName ||
             !this.threshold ||
-            this.addresses.length === 0 ||
-            // this.addresses.some((address) => address.address === '') ||
-            // this.addresses.some((address) => address.name === '') ||
-            this.threshold > this.addresses.length ||
-            this.threshold < 1
+            filledAddresses.length === 0 ||
+            uniqueAddresses.size !== filledAddresses.length ||
+            this.thresholdError ||
+            this.nameLengthError
         )
+    }
+
+    get thresholdError() {
+        return this.threshold > this.addresses.length
+    }
+
+    get nameLengthError() {
+        const bytes = new TextEncoder().encode(this.multisigName)
+        return bytes.length > 64
+    }
+
+    get multupleSameAddresses(): boolean {
+        const filledAddresses = this.addresses.filter((a) => a.address !== '')
+        const uniqueAddresses = new Set(filledAddresses.map((a) => a.address))
+
+        return uniqueAddresses.size !== filledAddresses.length
+    }
+
+    formattedAmount(val: BN): string {
+        return `${(Number(val.toString()) / Number(ONEAVAX.toString())).toLocaleString()}`
     }
 
     updateFirstAddress(): void {
@@ -123,15 +184,6 @@ export default class CreateMultisigWallet extends Vue {
         this.updateFirstAddress()
     }
 
-    @Watch('walletType')
-    onWalletTypeChanged(newVal: WalletType): void {
-        if (newVal instanceof SingletonWallet) {
-            this.mode = 'create'
-        } else {
-            this.mode = 'view'
-        }
-    }
-
     getStaticPAddress(): string {
         const wallet = this.$store.state.activeWallet as WalletType
         return wallet.getStaticAddress('P')
@@ -140,15 +192,6 @@ export default class CreateMultisigWallet extends Vue {
     addAddress(): void {
         if (this.addresses.length >= 128) return
         this.addresses.push({ address: '', name: '' })
-    }
-
-    removeAddress(index: number): void {
-        if (index === 0) return
-
-        this.addresses.splice(index, 1)
-        if (this.addresses.length === 0) {
-            this.addAddress()
-        }
     }
 
     resetForm(): void {
@@ -161,21 +204,43 @@ export default class CreateMultisigWallet extends Vue {
     }
 
     async createWallet(): Promise<void> {
-        const wallet = this.$store.state.activeWallet as WalletType
         const newMemo = this.multisigName
         // @ts-ignore
-        let { dispatchNotification } = this.globalHelper()
+        let { dispatchNotification, updateShowAlias } = this.globalHelper()
+        const filteredAddresses = this.addresses
+            .filter((address) => address.address !== '')
+            .map((address) => address.address)
 
         try {
             const result = await WalletHelper.sendMultisigAliasTxCreate(
-                wallet,
-                this.addresses,
-                newMemo
+                this.activeWallet,
+                filteredAddresses,
+                newMemo,
+                Number(this.threshold)
             )
-            // const localStorageAccounIndex = this.$store.state.Accounts.accountIndex
 
             if (result) {
+                // Add multisig p-chain addressess name to local storage
+
+                // const localStorageAccountIndex = this.$store.state.Accounts.accountIndex
+                // let accounts = JSON.parse(localStorage.getItem('accounts') || '[]')
+                // if (accounts[localStorageAccountIndex]) {
+                //     if (!accounts[localStorageAccountIndex].multisigAddresses)
+                //         accounts[localStorageAccountIndex].multisigAddresses = []
+
+                //     accounts[localStorageAccountIndex].multisigAddresses.push(this.addresses)
+                //     localStorage.setItem('accounts', JSON.stringify(accounts))
+                // }
+                // setTimeout(async () => {
+                //     const aliases = await getMultisigAliases(filteredAddresses)
+                //     console.log('Aliases', aliases)
+                // }, 3000)
                 this.resetForm()
+
+                // Show Switch wallet Button if multisig wallet is created
+
+                // this.$store.dispatch('fetchMultiSigAliases', { disable: false })
+                // updateShowAlias()
                 dispatchNotification({
                     message: this.$t('notifications.msig_creation_success'),
                     type: 'success',
@@ -195,78 +260,61 @@ export default class CreateMultisigWallet extends Vue {
             return
         }
     }
-
-    formattedAmount(val: BN): string {
-        return `${(Number(val.toString()) / Number(ONEAVAX.toString())).toLocaleString()}`
-    }
-
-    get feeAmt(): string {
-        return this.formattedAmount(ava.PChain().getTxFee())
-    }
-
-    get nativeAssetSymbol(): string {
-        return this.ava_asset?.symbol ?? ''
-    }
-
-    get ava_asset(): AvaAsset | null {
-        return this.$store.getters['Assets/AssetAVA']
-    }
-
-    get isSingleton(): boolean {
-        let wallet: WalletType = this.$store.state.activeWallet
-        return wallet.type === 'singleton'
-    }
 }
 </script>
 
 <style scoped lang="scss">
 @use '../styles/abstracts/mixins';
-.container {
-    border: var(--primary-border);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--box-shadow);
-    padding: 22px 20px;
-    background-color: var(--bg-wallet-light);
-    flex: 1;
-    height: 100%;
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-
-    > * {
-        margin: 6px 0px;
+.msig-create {
+    &--container {
+        margin-top: 4rem;
+        margin-bottom: 4rem;
+        height: 100%;
+        color: var(--primary-color);
+        gap: 1rem;
+        h1 {
+            color: var(--camino-slate-slate-white);
+            font-family: Inter;
+            font-size: 28px;
+            font-style: normal;
+            font-weight: 600;
+            line-height: 36px;
+            margin-bottom: 20px;
+        }
     }
-}
-
-input {
-    background-color: var(--bg-light);
-    color: var(--primary-color);
-    padding: 12px;
-    border-radius: var(--border-radius-lg);
-    border: 1px solid var(--bg-light);
-}
-
-.cancel_but {
-    color: #999;
-    font-size: 0.9rem;
-}
-
-.password {
-    background-color: var(--bg-light);
-    color: var(--primary-color);
-    padding: 6px 14px;
-}
-
-.err {
-    color: var(--error);
+    &--form {
+        gap: 16px;
+        display: flex;
+        flex-direction: column;
+    }
 }
 
 .input-container {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    h3 {
+        color: var(--camino-slate-slate-white);
+        font-family: Inter;
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 32px;
+    }
+}
+
+input {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--camino-slate-slate-600, #475569);
+    &:focus {
+        border-color: var(--camino-brand-too-blue-to-be-true);
+        box-shadow: 0px 0px 0px 3px var(--camino-brand-too-blue-to-be-true-100);
+    }
+}
+
+.full-width-input {
+    flex: 1;
 }
 
 .input-with-warning {
@@ -280,21 +328,16 @@ input {
     font-size: 13px;
 }
 
+.error-message {
+    color: var(--error);
+}
+
 .address-input {
     display: flex;
     justify-content: center;
     flex-direction: row;
     gap: 1rem;
-    width: 100%;
-}
-
-.full-width-input {
-    flex: 1;
-}
-
-.threshold-input {
-    width: 100%;
-    max-width: 250px;
+    width: calc(100% - 51px);
 }
 
 .msig-address-name {
@@ -324,8 +367,7 @@ input {
     height: 35px !important;
 }
 
-.plus-button,
-.delete-button {
+.plus-button {
     font-size: 10px;
     width: 40px !important;
     height: 40px !important;
@@ -333,9 +375,14 @@ input {
 
 .add-new-address {
     display: flex;
-    justify-content: center;
     align-items: center;
-    width: 100%;
+    gap: 1rem;
+    &--button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+    }
 }
 
 .divider {
@@ -345,25 +392,23 @@ input {
 }
 
 .action-buttons {
+    margin-left: auto;
+    flex-direction: column;
+    justify-content: flex-end;
     display: flex;
-    flex-flow: column wrap;
-    align-content: flex-end;
-    gap: 0.5rem;
+    flex-direction: column;
+    align-items: flex-end;
+    max-width: fit-content;
     margin-top: 1rem;
+    gap: 0.5rem;
+    width: auto;
 }
 
-.create-wallet {
-    display: flex;
-    flex-flow: column wrap;
-    align-content: flex-end;
-    gap: 0.5rem;
-}
-
-.edit-wallet {
-    display: flex;
-    flex-flow: column wrap;
-    align-content: flex-end;
-    gap: 0.5rem;
+[data-theme='day'] {
+    h1,
+    h3 {
+        color: var(--camino-slate-slate-950, #020617);
+    }
 }
 
 @include mixins.mobile-device {
@@ -374,6 +419,24 @@ input {
     .msig-address-name {
         width: 100%;
         max-width: 100%;
+    }
+}
+</style>
+<style lang="scss">
+@use '../styles/abstracts/mixins';
+.msig-threshold-input {
+    width: 100%;
+    input {
+        max-width: 250px;
+    }
+}
+
+@include mixins.mobile-device {
+    .msig-threshold-input {
+        width: 100%;
+        input {
+            max-width: 100%;
+        }
     }
 }
 </style>

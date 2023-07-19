@@ -723,19 +723,19 @@ class WalletHelper {
 
     static async sendMultisigAliasTxCreate(
         wallet: WalletType,
-        addresses: { address: string; name: string }[],
-        memo: string
+        addresses: string[],
+        memo: string,
+        threshold: number
     ) {
         const pchain = ava.PChain()
-        const pAddressStrings = addresses.map((a) => a.address)
-        const fromAddresses = [wallet.getStaticAddress('P')]
+        const pAddressStrings = [wallet.getStaticAddress('P')]
 
         const multisigAliasParams: MultisigAliasParams = {
             memo: memo,
             owners: new OutputOwners(
-                pAddressStrings.map((address: string) => pchain.parseAddress(address)),
+                addresses.map((address: string) => pchain.parseAddress(address)),
                 new BN(0),
-                1
+                threshold
             ),
             auth: [],
         }
@@ -745,11 +745,10 @@ class WalletHelper {
             .buildMultisigAliasTx(
                 wallet.platformUtxoset,
                 pAddressStrings,
-                fromAddresses,
+                pAddressStrings,
                 multisigAliasParams,
                 undefined,
-                ZeroBN,
-                1
+                ZeroBN
             )
         let tx = await wallet.signP(unsignedTx)
         return await ava.PChain().issueTx(tx)
