@@ -65,7 +65,7 @@
         <div class="action-buttons">
             <button
                 :class="[
-                    'camino__transparent--button',
+                    'camino__primary--button',
                     { 'camino--button--disabled': disableMsigCreation },
                 ]"
                 @click="createWallet"
@@ -275,6 +275,7 @@ export default class CreateMultisigWallet extends Vue {
             font-weight: 600;
             line-height: 36px;
             margin-bottom: 20px;
+            padding: 16px 0px 0px 0px;
         }
     }
     &--form {
