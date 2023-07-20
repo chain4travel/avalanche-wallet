@@ -107,11 +107,6 @@ export default class CreateMultisigWallet extends Vue {
     ]
     threshold: number = 1
 
-    @Watch('multisigName')
-    onInputValueChange() {
-        console.log('multisigName changed', this.multisigName)
-    }
-
     get activeWallet(): SingletonWallet | MultisigWallet {
         return this.$store?.state?.activeWallet
     }
