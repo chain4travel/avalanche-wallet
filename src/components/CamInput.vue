@@ -36,7 +36,6 @@ export default class CamInput extends Vue {
     @Prop({ default: false }) error!: boolean
     @Prop({ default: '' }) errorMessage!: string
     @Prop({ default: '' }) value!: string
-    s
     updateValue(event: Event) {
         this.$emit('input', (event.target as HTMLInputElement).value)
     }

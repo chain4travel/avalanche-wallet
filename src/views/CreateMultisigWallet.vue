@@ -92,6 +92,7 @@ import { AvaNetwork } from '@/js/AvaNetwork'
 import { WalletHelper } from '../helpers/wallet_helper'
 import Alert from '@/components/Alert.vue'
 import CamInput from '@/components/CamInput.vue'
+import { getMultisigAliasesFromTxId } from '@/utils/multisig'
 
 @Component({
     components: {
@@ -140,7 +141,6 @@ export default class CreateMultisigWallet extends Vue {
         const uniqueAddresses = new Set(filledAddresses.map((a) => a.address))
 
         return (
-            !this.multisigName ||
             !this.threshold ||
             filledAddresses.length === 0 ||
             uniqueAddresses.size !== filledAddresses.length ||
@@ -198,8 +198,31 @@ export default class CreateMultisigWallet extends Vue {
         this.threshold = 1
     }
 
+    async updateMultisigAccount(result: any) {
+        const msigAlias = await getMultisigAliasesFromTxId(result)
+        const localStorageAccountIndex = this.$store.state.Accounts.accountIndex
+        let accounts = JSON.parse(localStorage.getItem('accounts') || '[]')
+
+        if (accounts[localStorageAccountIndex]) {
+            if (!accounts[localStorageAccountIndex].multisignatures)
+                accounts[localStorageAccountIndex].multisignatures = []
+
+            // Filter out empty addresses
+            const filteredAddresses = this.addresses.filter(
+                (addressObj) => addressObj.address.trim() !== ''
+            )
+
+            const multisignature = {
+                alias: msigAlias,
+                addresses: filteredAddresses,
+            }
+
+            accounts[localStorageAccountIndex].multisignatures.push(multisignature)
+            localStorage.setItem('accounts', JSON.stringify(accounts))
+        }
+    }
+
     async createWallet(): Promise<void> {
-        const newMemo = this.multisigName
         // @ts-ignore
         let { dispatchNotification, updateShowAlias } = this.globalHelper()
         const filteredAddresses = this.addresses
@@ -210,31 +233,17 @@ export default class CreateMultisigWallet extends Vue {
             const result = await WalletHelper.sendMultisigAliasTxCreate(
                 this.activeWallet,
                 filteredAddresses,
-                newMemo,
+                this.multisigName,
                 Number(this.threshold)
             )
 
             if (result) {
-                // Add multisig p-chain addressess name to local storage
-
-                // const localStorageAccountIndex = this.$store.state.Accounts.accountIndex
-                // let accounts = JSON.parse(localStorage.getItem('accounts') || '[]')
-                // if (accounts[localStorageAccountIndex]) {
-                //     if (!accounts[localStorageAccountIndex].multisigAddresses)
-                //         accounts[localStorageAccountIndex].multisigAddresses = []
-
-                //     accounts[localStorageAccountIndex].multisigAddresses.push(this.addresses)
-                //     localStorage.setItem('accounts', JSON.stringify(accounts))
-                // }
-                // setTimeout(async () => {
-                //     const aliases = await getMultisigAliases(filteredAddresses)
-                //     console.log('Aliases', aliases)
-                // }, 3000)
+                this.updateMultisigAccount(result)
                 this.resetForm()
-
                 setTimeout(() => {
                     updateShowAlias()
                 }, 3000)
+
                 dispatchNotification({
                     message: this.$t('notifications.msig_creation_success'),
                     type: 'success',
