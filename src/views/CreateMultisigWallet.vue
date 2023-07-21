@@ -232,10 +232,9 @@ export default class CreateMultisigWallet extends Vue {
                 // }, 3000)
                 this.resetForm()
 
-                // Show Switch wallet Button if multisig wallet is created
-
-                // this.$store.dispatch('fetchMultiSigAliases', { disable: false })
-                // updateShowAlias()
+                setTimeout(() => {
+                    updateShowAlias()
+                }, 3000)
                 dispatchNotification({
                     message: this.$t('notifications.msig_creation_success'),
                     type: 'success',

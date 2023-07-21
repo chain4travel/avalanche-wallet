@@ -1,5 +1,5 @@
 <template>
-    <div class="camino__alert" :class="['camino__alert--' + variant]">
+    <div class="camino-alert" :class="['camino-alert__' + variant]">
         <template v-if="variant === 'default'">
             <svg
                 width="24"
@@ -85,7 +85,7 @@ export default class Alert extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.camino__alert {
+.camino-alert {
     display: flex;
     max-width: fit-content;
     padding: 16px;
@@ -98,7 +98,7 @@ export default class Alert extends Vue {
     font-weight: 400;
     line-height: 20px;
 
-    &--content {
+    &__content {
         color: var(--camino-slate-slate-300);
         display: flex;
         flex-direction: column;
@@ -107,46 +107,48 @@ export default class Alert extends Vue {
         flex: 1 0 0;
     }
 
-    &--title {
+    &__title {
         color: var(--camino-slate-white);
         font-size: 16px;
         font-weight: 600;
         line-height: 24px;
     }
 
-    &--default {
+    &__default {
         border: 1px solid var(--camino-slate-slate-300, #cbd4e2);
         background: var(--camino-slate-slate-100, #f1f5f9);
     }
 
-    &--info {
+    &__info {
         border: 1px solid rgba(0, 133, 255, 0.5);
         background: rgba(0, 133, 255, 0.05);
     }
 
-    &--positive {
+    &__positive {
         border: 1px solid rgba(9, 222, 107, 0.5);
         background: rgba(9, 222, 107, 0.05);
     }
 
-    &--warning {
+    &__warning {
         border: 1px solid var(--camino-warning-border);
         background: var(--camino-warning-background);
     }
 
-    &--negative {
+    &__negative {
         border: 1px solid rgba(229, 67, 31, 0.5);
         background: rgba(229, 67, 31, 0.05);
     }
 }
 
 [data-theme='day'] {
-    .camino__alert--content {
-        color: var(--camino-slate-slate-700);
-    }
+    .camino-alert {
+        &__content {
+            color: var(--camino-slate-slate-700);
+        }
 
-    .camino__alert--title {
-        color: var(--camino-slate-slate-800);
+        &__title {
+            color: var(--camino-slate-slate-800);
+        }
     }
 }
 </style>

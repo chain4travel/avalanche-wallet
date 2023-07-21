@@ -15,12 +15,13 @@ Vue.use(BootstrapVue)
 Vue.component('datetime', Datetime)
 
 export const mountMultisigWalletSetting = (el: string, props: any) => {
-    const { dispatchNotification } = props
+    const { dispatchNotification, updateShowAlias } = props
     const MyPlugin = {
         install(Vue) {
             Vue.prototype.globalHelper = () => {
                 return {
                     dispatchNotification: (params) => dispatchNotification(params),
+                    updateShowAlias: () => updateShowAlias(),
                 }
             }
         },
