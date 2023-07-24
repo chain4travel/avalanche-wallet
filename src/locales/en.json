@@ -944,7 +944,26 @@
         "deposit_success": "Deposit successful",
         "deposit_failed": "Deposit failed",
         "consolidate_funds_success": "You have successfully consolidated the funds",
-        "consolidate_funds_error": "Something went wrong when trying to consolidate the funds"
+        "consolidate_funds_error": "Something went wrong when trying to consolidate the funds",
+        "msig_creation_success": "Multisig wallet created successfully",
+        "msig_creation_failed": "Something went wrong when trying to create the multisig wallet"
+    },
+    "create_multisig": {
+        "title": "Multisignature Wallet",
+        "name": "Multisignature Name",
+        "co-owners": "Multisignature Co-Owners",
+        "threshold": "Multisignature Threshold",
+        "create_multisig": "Create Multisignature Wallet",
+        "disclamer": "Saving the multisignature wallet definition will incur a fee {fee} {symbol}",
+        "alert": {
+            "wize_name": "Please note this description will be public on the Camino Network. Choose wisely"
+        },
+        "errors": {
+            "msig_name": "Multisignature name must be between 3 and 64 characters long",
+            "threshold_exceeds_owners": "Threshold cannot exceed the number of owners",
+            "multisig_name_too_long": "Multisignature name is too long. Please choose a shorter name.",
+            "same_address_twice": "The same P-Chain address should not appear more than once"
+        }
     },
     "validator": {
         "pending": {

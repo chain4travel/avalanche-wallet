@@ -36,6 +36,7 @@ import { ChainIdType, ZeroBN } from '@/constants'
 import { bnToBig } from '@/helpers/helper'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
+import { MultisigAliasParams } from '@c4tplatform/caminojs/dist/apis/platformvm'
 class WalletHelper {
     static async getStake(wallet: WalletType): Promise<BN> {
         let addrs = wallet.getAllAddressesP()
@@ -718,6 +719,39 @@ class WalletHelper {
             UTXOs,
             platformUTXOs,
         }
+    }
+
+    static async sendMultisigAliasTxCreate(
+        wallet: WalletType,
+        addresses: string[],
+        memo: string,
+        threshold: number
+    ) {
+        const pchain = ava.PChain()
+        const pAddressStrings = [wallet.getStaticAddress('P')]
+
+        const multisigAliasParams: MultisigAliasParams = {
+            memo: memo,
+            owners: new OutputOwners(
+                addresses.map((address: string) => pchain.parseAddress(address)),
+                new BN(0),
+                threshold
+            ),
+            auth: [],
+        }
+
+        const unsignedTx = await ava
+            .PChain()
+            .buildMultisigAliasTx(
+                wallet.platformUtxoset,
+                pAddressStrings,
+                pAddressStrings,
+                multisigAliasParams,
+                undefined,
+                ZeroBN
+            )
+        let tx = await wallet.signP(unsignedTx)
+        return await ava.PChain().issueTx(tx)
     }
 }
 

@@ -79,6 +79,7 @@ module.exports = {
                 './mountAccounts': './src/components/Access/mountAccounts.ts',
                 './mountKyesComponent': './src/components/wallet/manage/mountKyesComponent.ts',
                 './mountsaveKyesButton': './src/views/wallet/mountSaveKeysButton.ts',
+                './mountMultisigWalletSetting': './src/views/mountMultisigWalletSetting.ts',
                 './mountVersionComponent': './src/components/misc/mountVersion.ts',
             },
         }),
