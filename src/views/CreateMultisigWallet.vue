@@ -238,11 +238,11 @@ export default class CreateMultisigWallet extends Vue {
             )
 
             if (result) {
-                this.updateMultisigAccount(result)
-                this.resetForm()
+                await this.updateMultisigAccount(result)
                 setTimeout(() => {
                     updateShowAlias()
                 }, 3000)
+                this.resetForm()
 
                 dispatchNotification({
                     message: this.$t('notifications.msig_creation_success'),
