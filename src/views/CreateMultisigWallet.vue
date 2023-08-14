@@ -198,27 +198,36 @@ export default class CreateMultisigWallet extends Vue {
         this.threshold = 1
     }
 
-    async updateMultisigAccount(result: any) {
-        const msigAlias = await getMultisigAliasesFromTxId(result)
-        const localStorageAccountIndex = this.$store.state.Accounts.accountIndex
-        let accounts = JSON.parse(localStorage.getItem('accounts') || '[]')
+    async addMultisigAccountToLocalStorage(TxId: string) {
+        try {
+            const msigAlias = await getMultisigAliasesFromTxId(TxId)
+            const localStorageAccountIndex = this.$store.state.Accounts.accountIndex
+            let accounts = JSON.parse(localStorage.getItem('accounts') || '[]')
 
-        if (accounts[localStorageAccountIndex]) {
-            if (!accounts[localStorageAccountIndex].multisignatures)
-                accounts[localStorageAccountIndex].multisignatures = []
+            if (accounts[localStorageAccountIndex]) {
+                if (!accounts[localStorageAccountIndex].multisignatures)
+                    accounts[localStorageAccountIndex].multisignatures = []
 
-            // Filter out empty addresses
-            const filteredAddresses = this.addresses.filter(
-                (addressObj) => addressObj.address.trim() !== ''
-            )
+                // Filter out empty addresses
+                const filteredAddresses = this.addresses.filter(
+                    (addressObj) => addressObj.address.trim() !== ''
+                )
 
-            const multisignature = {
-                alias: msigAlias,
-                addresses: filteredAddresses,
+                const multisignature = {
+                    alias: msigAlias,
+                    addresses: filteredAddresses,
+                }
+
+                accounts[localStorageAccountIndex].multisignatures.push(multisignature)
+                localStorage.setItem('accounts', JSON.stringify(accounts))
+            } else {
+                console.error(`Account with index ${localStorageAccountIndex} does not exist.`)
             }
-
-            accounts[localStorageAccountIndex].multisignatures.push(multisignature)
-            localStorage.setItem('accounts', JSON.stringify(accounts))
+        } catch (error) {
+            console.error(
+                'An error occurred while adding multisig account to local storage: ',
+                error
+            )
         }
     }
 
@@ -238,7 +247,7 @@ export default class CreateMultisigWallet extends Vue {
             )
 
             if (result) {
-                await this.updateMultisigAccount(result)
+                await this.addMultisigAccountToLocalStorage(result)
                 setTimeout(() => {
                     updateShowAlias()
                 }, 3000)
