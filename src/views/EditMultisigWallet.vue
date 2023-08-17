@@ -12,7 +12,7 @@
                         :errorMessage="$t('create_multisig.errors.msig_name')"
                         :disabled="mode !== 'EDIT' || pendingSendMultisigTX"
                     />
-                    <Alert variant="warning" v-if="mode === 'EDIT'">
+                    <Alert variant="warning" v-if="!pendingSendMultisigTX">
                         {{ $t('create_multisig.alert.wize_name') }}
                     </Alert>
                 </div>
@@ -111,7 +111,7 @@
                 </button>
             </div>
 
-            <Alert variant="warning" v-if="mode !== 'VIEW'">
+            <Alert variant="warning" v-if="!pendingSendMultisigTX || canExecuteMultisigTx()">
                 {{ $t('create_multisig.disclamer', { fee: feeAmt, symbol: nativeAssetSymbol }) }}
             </Alert>
         </div>
