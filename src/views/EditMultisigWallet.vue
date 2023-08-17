@@ -19,7 +19,7 @@
             </div>
 
             <div class="input-container">
-                <h3>{{ $t('create_multisig.co-owners') }}</h3>
+                <h3 style="margin-top: 10px">{{ $t('create_multisig.co-owners') }}</h3>
                 <div v-for="(address, index) in addresses" :key="index" class="multisig_address">
                     <div class="circle number">{{ index + 1 }}</div>
                     <div class="address-input">
@@ -62,11 +62,13 @@
             <div class="divider"></div>
 
             <div class="input-container">
-                <h3>Multisignature Threshold</h3>
+                <h3>{{ $t('edit_multisig.threshold') }}</h3>
                 <CamInput
                     class="threshold-input"
                     placeholder="Multisignature Threshold"
                     v-model.number="threshold"
+                    :error="thresholdError"
+                    :errorMessage="$t('edit_multisig.errors.threshold_exceeds_owners')"
                     :disabled="mode !== 'EDIT' || pendingSendMultisigTX"
                 />
             </div>
@@ -76,27 +78,29 @@
             <div class="action_buttons" v-if="needSignatures() && alreadySigned()">
                 <button class="camino__negative--button" @click="abortEditMsig">Abort</button>
                 <button class="camino__primary--button" @click="signEditMsig" disabled>
-                    Signed {{ numberOfSignatures }} out of {{ threshold }} required signatures
+                    {{
+                        $t('edit_multisig.signed_edit_multisig', { numberOfSignatures, threshold })
+                    }}
                 </button>
             </div>
 
             <div class="action_buttons" v-else-if="needSignatures() && !alreadySigned()">
                 <button class="camino__negative--button" @click="abortEditMsig">Abort</button>
                 <button class="camino__primary--button" @click="signMultisigTx">
-                    Sign edited multisignature wallet
+                    {{ $t('edit_multisig.sign_edit_multisig') }}
                 </button>
             </div>
 
             <div class="action_buttons" v-else-if="canExecuteMultisigTx()">
                 <button class="camino__negative--button" @click="abortEditMsig">Abort</button>
                 <button class="camino__primary--button" @click="signEditMsig">
-                    Execute transaction
+                    {{ $t('edit_multisig.execute_edit_multisig') }}
                 </button>
             </div>
 
             <div class="action_buttons" v-else-if="mode === 'VIEW'">
                 <button class="camino__primary--button" @click="startEditMsig">
-                    Edit multisignature wallet
+                    {{ $t('edit_multisig.edit_multisig') }}
                 </button>
             </div>
 
@@ -105,9 +109,9 @@
                 <button
                     class="camino__primary--button"
                     @click="saveEditMsig"
-                    :disabled="!msigEdited"
+                    :disabled="!msigEdited || disableMsigCreation"
                 >
-                    Save multisignature wallet
+                    {{ $t('edit_multisig.save_edit_multisig') }}
                 </button>
             </div>
 
@@ -174,6 +178,10 @@ export default class EditMultisigWallet extends Vue {
         return bytes.length > MAX_NAME_BYTE_SIZE
     }
 
+    get thresholdError() {
+        return this.threshold > this.addresses.length
+    }
+
     get multipleSameAddresses(): boolean {
         const filledAddresses = this.addresses.filter((a) => a.address !== '')
         const uniqueAddresses = new Set(filledAddresses.map((a) => a.address))
@@ -214,6 +222,19 @@ export default class EditMultisigWallet extends Vue {
             (item: any) =>
                 item?.tx?.alias === this.activeWallet?.getAllAddressesP()[0] &&
                 WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'MultisigAliasTx'
+        )
+    }
+
+    get disableMsigCreation(): boolean {
+        const filledAddresses = this.addresses.filter((a) => a.address !== '')
+        const uniqueAddresses = new Set(filledAddresses.map((a) => a.address))
+
+        return (
+            !this.threshold ||
+            filledAddresses.length === 0 ||
+            uniqueAddresses.size !== filledAddresses.length ||
+            this.thresholdError ||
+            this.nameLengthError
         )
     }
 
@@ -497,10 +518,16 @@ export default class EditMultisigWallet extends Vue {
             await this.updateMultisigTxDetails()
             await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
             this.$store.dispatch('Signavault/updateTransaction')
-            dispatchNotification({ message: this.$t('msig_edit_success'), type: 'success' })
+            dispatchNotification({
+                message: this.$t('notifications.msig_edit_success'),
+                type: 'success',
+            })
         } catch (e: any) {
             console.error('MultiSigTx::sign: Error', e)
-            dispatchNotification({ message: this.$t('msig_edit_failed'), type: 'error' })
+            dispatchNotification({
+                message: this.$t('notifications.msig_edit_failed'),
+                type: 'error',
+            })
             throw e
         }
     }

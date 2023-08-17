@@ -18,7 +18,7 @@
             </div>
 
             <div class="input-container">
-                <h3>{{ $t('create_multisig.co-owners') }}</h3>
+                <h3 style="margin-top: 10px">{{ $t('create_multisig.co-owners') }}</h3>
                 <div v-for="(address, index) in addresses" :key="index" class="multisig_address">
                     <div class="circle number">{{ index + 1 }}</div>
                     <div class="address-input">
