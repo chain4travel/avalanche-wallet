@@ -945,8 +945,10 @@
         "deposit_failed": "Deposit failed",
         "consolidate_funds_success": "You have successfully consolidated the funds",
         "consolidate_funds_error": "Something went wrong when trying to consolidate the funds",
-        "msig_creation_success": "Multisig wallet created successfully",
-        "msig_creation_failed": "Something went wrong when trying to create the multisig wallet"
+        "msig_creation_success": "Multisignature wallet created successfully",
+        "msig_creation_failed": "Something went wrong when trying to create the multisigture wallet",
+        "msig_edit_success": "Edit multisignature wallet successfully",
+        "msig_edit_failed": "Multisignature edit failed"
     },
     "create_multisig": {
         "title": "Multisignature Wallet",
@@ -964,6 +966,9 @@
             "multisig_name_too_long": "Multisignature name is too long. Please choose a shorter name.",
             "same_address_twice": "The same P-Chain address should not appear more than once"
         }
+    },
+    "edit_multisig": {
+        "title": "Edit Multisignature Wallet"
     },
     "validator": {
         "pending": {
