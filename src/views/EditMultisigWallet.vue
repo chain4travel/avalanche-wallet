@@ -21,7 +21,16 @@
             <div class="input-container">
                 <h3 style="margin-top: 10px">{{ $t('create_multisig.co-owners') }}</h3>
                 <div v-for="(address, index) in addresses" :key="index" class="multisig_address">
-                    <div class="circle number">{{ index + 1 }}</div>
+                    <div class="msig_address_info_button">
+                        <div class="circle number">{{ index + 1 }}</div>
+                        <button
+                            @click="removeAddress(index)"
+                            class="circle delete-button mobile"
+                            v-if="mode === 'EDIT'"
+                        >
+                            <fa icon="minus"></fa>
+                        </button>
+                    </div>
                     <div class="address-input">
                         <CamInput
                             class="full-width-input"
@@ -38,7 +47,7 @@
                     </div>
                     <button
                         @click="removeAddress(index)"
-                        class="circle delete-button"
+                        class="circle delete-button desktop"
                         v-if="mode === 'EDIT'"
                     >
                         <fa icon="minus"></fa>
@@ -715,8 +724,27 @@ input {
 
 .action_buttons {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     margin: 0.5rem 0rem 0.5rem 0rem;
+}
+
+.delete-button {
+    width: 35px !important;
+    height: 35px !important;
+}
+.delete-button.mobile {
+    display: none;
+}
+
+.delete-button.desktop {
+    display: flex;
+}
+
+.msig_address_info_button {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 .delete_info {
@@ -740,6 +768,18 @@ input {
     .msig-address-name {
         width: 100%;
         max-width: 100%;
+    }
+
+    .multisig_address {
+        gap: 0.5rem;
+    }
+
+    .delete-button.mobile {
+        display: flex;
+    }
+
+    .delete-button.desktop {
+        display: none;
     }
 }
 </style>

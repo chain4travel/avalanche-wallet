@@ -138,6 +138,10 @@ export default class Alert extends Vue {
         border: 1px solid rgba(229, 67, 31, 0.5);
         background: rgba(229, 67, 31, 0.05);
     }
+
+    svg {
+        min-width: 20px;
+    }
 }
 
 [data-theme='day'] {
