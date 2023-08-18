@@ -90,7 +90,10 @@
                 </button>
                 <button class="camino__primary--button" @click="signEditMsig" disabled>
                     {{
-                        $t('edit_multisig.signed_edit_multisig', { numberOfSignatures, threshold })
+                        $t('edit_multisig.signed_edit_multisig', {
+                            numberOfSignatures,
+                            threshold: pendingSendMultisigTX?.tx?.threshold,
+                        })
                     }}
                 </button>
             </div>
@@ -157,6 +160,7 @@ import { AvaNetwork } from '@/js/AvaNetwork'
 import AvaAsset from '@/js/AvaAsset'
 import Alert from '@/components/Alert.vue'
 import CamInput from '@/components/CamInput.vue'
+import { InitialStates } from '@c4tplatform/caminojs/dist/apis/avm'
 
 const MAX_ADDRESS_COUNT = 128
 const UPDATE_ALIAS_TIMEOUT = 3000
@@ -481,7 +485,6 @@ export default class EditMultisigWallet extends Vue {
             }
         } else {
             await this.issueMultisigTx()
-            this.fetchMultisigAliases()
             await this.getAliasInfos()
             this.updateInitialMultisigState()
             setTimeout(() => updateShowAlias(), UPDATE_ALIAS_TIMEOUT)
@@ -633,6 +636,7 @@ export default class EditMultisigWallet extends Vue {
 
                 // Check if the multisignature with the given alias exists
                 const existingMultisigIndex = targetMultisignatures.findIndex(
+                    // @ts-ignore
                     (m) => m.alias === msigAlias
                 )
 
@@ -654,24 +658,6 @@ export default class EditMultisigWallet extends Vue {
                 error
             )
         }
-    }
-
-    async fetchMultisigAliases(): Promise<void> {
-        this.updateMultisigAccountInLocalStorage()
-
-        // Fetch multisig aliases after a delay
-        setTimeout(async () => {
-            const aliasesResponse = await this.$store.dispatch('fetchMultiSigAliases', {
-                disable: false,
-            })
-            let aliases = aliasesResponse.map((alias: string): string => 'P-' + alias)
-            const targetAlias = this.$store.state.activeWallet?.getStaticAddress('P')
-            if (this.$store.state.activeWallet?.type === 'multisig' && targetAlias) {
-                aliases = aliases.filter((alias: string) => alias !== targetAlias)
-            }
-
-            await this.$store.dispatch('addWalletsMultisig', { keys: aliases })
-        }, UPDATE_ALIAS_TIMEOUT)
     }
 }
 </script>
