@@ -347,8 +347,6 @@ export default class EditMultisigWallet extends Vue {
     }
 
     removeAddress(index: number): void {
-        if (index === 0) return
-
         this.addresses.splice(index, 1)
         if (this.addresses.length === 0) this.addAddress()
     }
