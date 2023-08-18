@@ -94,6 +94,10 @@ import Alert from '@/components/Alert.vue'
 import CamInput from '@/components/CamInput.vue'
 import { getMultisigAliasesFromTxId } from '@/utils/multisig'
 
+const MAX_ADDRESS_COUNT = 128
+const UPDATE_ALIAS_TIMEOUT = 3000
+const MAX_NAME_BYTE_SIZE = 64
+
 @Component({
     components: {
         Alert,
@@ -155,7 +159,7 @@ export default class CreateMultisigWallet extends Vue {
 
     get nameLengthError() {
         const bytes = new TextEncoder().encode(this.multisigName)
-        return bytes.length > 64
+        return bytes.length > MAX_NAME_BYTE_SIZE
     }
 
     get multupleSameAddresses(): boolean {
@@ -185,7 +189,7 @@ export default class CreateMultisigWallet extends Vue {
     }
 
     addAddress(): void {
-        if (this.addresses.length >= 128) return
+        if (this.addresses.length >= MAX_ADDRESS_COUNT) return
         this.addresses.push({ address: '', name: '' })
     }
 
@@ -202,6 +206,12 @@ export default class CreateMultisigWallet extends Vue {
         try {
             const msigAlias = await getMultisigAliasesFromTxId(TxId)
             const localStorageAccountIndex = this.$store.state.Accounts.accountIndex
+
+            if (localStorageAccountIndex === null || localStorageAccountIndex === undefined) {
+                console.error('localStorageAccountIndex is null or undefined.')
+                return
+            }
+
             let accounts = JSON.parse(localStorage.getItem('accounts') || '[]')
 
             if (accounts[localStorageAccountIndex]) {
@@ -248,13 +258,16 @@ export default class CreateMultisigWallet extends Vue {
 
             if (result) {
                 await this.addMultisigAccountToLocalStorage(result)
-                setTimeout(() => {
-                    updateShowAlias()
-                }, 3000)
+                const msigAlias = await getMultisigAliasesFromTxId(result)
+                setTimeout(
+                    () => this.$store.dispatch('fetchMultiSigAliases', { disable: false }),
+                    UPDATE_ALIAS_TIMEOUT
+                )
+                setTimeout(() => updateShowAlias(), UPDATE_ALIAS_TIMEOUT)
                 this.resetForm()
 
                 dispatchNotification({
-                    message: this.$t('notifications.msig_creation_success'),
+                    message: this.$t('notifications.msig_creation_success', { address: msigAlias }),
                     type: 'success',
                 })
             } else {

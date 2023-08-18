@@ -437,6 +437,7 @@ export default class EditMultisigWallet extends Vue {
                 this.updateMultisigTxDetails()
                 await this.$store.dispatch('Signavault/updateTransaction')
                 setTimeout(() => updateShowAlias(), UPDATE_ALIAS_TIMEOUT)
+                this.$store.dispatch('fetchMultiSigAliases', { disable: false })
                 dispatchNotification({
                     message: this.$t('notifications.transfer_success_msg'),
                     type: 'success',
@@ -458,6 +459,7 @@ export default class EditMultisigWallet extends Vue {
             await this.getAliasInfos()
             this.updateInitialMultisigState()
             setTimeout(() => updateShowAlias(), UPDATE_ALIAS_TIMEOUT)
+            this.$store.dispatch('fetchMultiSigAliases', { disable: false })
         }
     }
 
@@ -515,11 +517,12 @@ export default class EditMultisigWallet extends Vue {
             return console.error('MultiSigTx::sign: Invalid wallet')
         if (!this.pendingSendMultisigTX) return console.error('MultiSigTx::sign: Invalid Tx')
         try {
+            const msigAlias = this.activeWallet?.getStaticAddress('P')
             await this.updateMultisigTxDetails()
             await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
             this.$store.dispatch('Signavault/updateTransaction')
             dispatchNotification({
-                message: this.$t('notifications.msig_edit_success'),
+                message: this.$t('notifications.msig_edit_success', { address: msigAlias }),
                 type: 'success',
             })
         } catch (e: any) {
@@ -614,7 +617,7 @@ input {
 .input-with-warning {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .warning {
