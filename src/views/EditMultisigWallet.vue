@@ -85,7 +85,9 @@
 
         <div class="alert-action_buttons">
             <div class="action_buttons" v-if="needSignatures() && alreadySigned()">
-                <button class="camino__negative--button" @click="abortEditMsig">Abort</button>
+                <button class="camino__negative--button" @click="abortEditMsig">
+                    {{ $t('edit_multisig.abort') }}
+                </button>
                 <button class="camino__primary--button" @click="signEditMsig" disabled>
                     {{
                         $t('edit_multisig.signed_edit_multisig', { numberOfSignatures, threshold })
@@ -94,14 +96,18 @@
             </div>
 
             <div class="action_buttons" v-else-if="needSignatures() && !alreadySigned()">
-                <button class="camino__negative--button" @click="abortEditMsig">Abort</button>
+                <button class="camino__negative--button" @click="abortEditMsig">
+                    {{ $t('edit_multisig.abort') }}
+                </button>
                 <button class="camino__primary--button" @click="signMultisigTx">
                     {{ $t('edit_multisig.sign_edit_multisig') }}
                 </button>
             </div>
 
             <div class="action_buttons" v-else-if="canExecuteMultisigTx()">
-                <button class="camino__negative--button" @click="abortEditMsig">Abort</button>
+                <button class="camino__negative--button" @click="abortEditMsig">
+                    {{ $t('edit_multisig.abort') }}
+                </button>
                 <button class="camino__primary--button" @click="signEditMsig">
                     {{ $t('edit_multisig.execute_edit_multisig') }}
                 </button>
@@ -114,7 +120,9 @@
             </div>
 
             <div class="action_buttons" v-else-if="mode === 'EDIT'">
-                <button class="camino__transparent--button" @click="cancelEditMsig">Cancel</button>
+                <button class="camino__transparent--button" @click="cancelEditMsig">
+                    {{ $t('edit_multisig.cancel') }}
+                </button>
                 <button
                     class="camino__primary--button"
                     @click="saveEditMsig"
@@ -166,12 +174,15 @@ export default class EditMultisigWallet extends Vue {
     addresses: { address: string; name: string }[] = []
     mode: 'EDIT' | 'DELETE' | 'VIEW' | 'SIGNING_DELETE' = 'VIEW'
     remainingFundsAddress: string = ''
-    initialMultisigState: any = {}
+    initialMultisigState: { multisigName: string; threshold: number; addresses: any[] } = {
+        multisigName: '',
+        threshold: 0,
+        addresses: [],
+    }
 
-    mounted() {
-        this.getAliasInfos().then(() => {
-            this.updateInitialMultisigState()
-        })
+    async mounted() {
+        await this.getAliasInfos()
+        await this.updateInitialMultisigState()
     }
 
     updateBalance(): void {
@@ -248,6 +259,7 @@ export default class EditMultisigWallet extends Vue {
     }
 
     get msigEdited(): boolean {
+        console.log('multisigEdited', this.multisigAddressNamesEdited)
         return (
             this.multisigName !== this.initialMultisigState.multisigName ||
             this.threshold !== this.initialMultisigState.threshold ||
@@ -270,11 +282,11 @@ export default class EditMultisigWallet extends Vue {
 
         if (this.pendingSendMultisigTX) {
             this.setAliasInfoFromPendingTx()
-            this.updateInitialMultisigState()
         } else {
             await this.setAliasInfoFromActiveWallet()
         }
 
+        this.updateInitialMultisigState()
         await this.assignSavedAddressNames()
     }
 
@@ -287,9 +299,9 @@ export default class EditMultisigWallet extends Vue {
         const utx = unsignedTx.getTransaction() as MultisigAliasTx
         const alias = utx.getMultisigAlias()
 
-        this.multisigName = alias.getMemo().toString()
-        this.threshold = alias.getOwners().getThreshold()
-        this.addresses = alias
+        this.multisigName = await alias.getMemo().toString()
+        this.threshold = await alias.getOwners().getThreshold()
+        this.addresses = await alias
             .getOwners()
             .getOutput()
             .getAddresses()
@@ -304,10 +316,7 @@ export default class EditMultisigWallet extends Vue {
 
         this.multisigName = Buffer.from(msigData.memo.replace('0x', ''), 'hex').toString()
         this.threshold = msigData.threshold
-        this.addresses = msigData.addresses.map((address) => ({
-            address,
-            name: '',
-        }))
+        this.addresses = msigData.addresses.map((address) => ({ address, name: '' }))
     }
 
     async assignSavedAddressNames() {
@@ -327,7 +336,6 @@ export default class EditMultisigWallet extends Vue {
         const localStorageAccountIndex = this.$store.state.Accounts.accountIndex
         let accounts = JSON.parse(localStorage.getItem('accounts') || '[]')
 
-        // Check if the account and multisignature property exist.
         if (
             accounts[localStorageAccountIndex] &&
             accounts[localStorageAccountIndex].multisignatures
@@ -336,9 +344,6 @@ export default class EditMultisigWallet extends Vue {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 -1
             )[0]
-
-            const msigAlias = this.activeWallet?.getStaticAddress('P')
-            const msigData = await ava.PChain().getMultisigAlias(msigAlias)
 
             if (lastMultisignature) return lastMultisignature.addresses
         }
@@ -420,6 +425,18 @@ export default class EditMultisigWallet extends Vue {
 
         const alias = this.activeWallet?.getStaticAddress('P')
 
+        // if only address name changed, update alias in local storage
+        if (this.multisigAddressNamesEdited) {
+            // update only local storage
+            this.updateMultisigAccountInLocalStorage()
+            this.mode = 'VIEW'
+            dispatchNotification({
+                message: this.$t('notifications.msig_edit_address_name_success'),
+                type: 'success',
+            })
+            return
+        }
+
         if (!this.pendingSendMultisigTX) {
             try {
                 const result = await WalletHelper.sendMultisigAliasTxUpdate(
@@ -442,9 +459,9 @@ export default class EditMultisigWallet extends Vue {
 
                 this.updateBalance()
                 this.updateMultisigTxDetails()
+                this.updateMultisigAccountInLocalStorage()
                 await this.$store.dispatch('Signavault/updateTransaction')
                 setTimeout(() => updateShowAlias(), UPDATE_ALIAS_TIMEOUT)
-                this.$store.dispatch('fetchMultiSigAliases', { disable: false })
                 dispatchNotification({
                     message: this.$t('notifications.transfer_success_msg'),
                     type: 'success',
@@ -452,6 +469,7 @@ export default class EditMultisigWallet extends Vue {
                 this.mode = 'VIEW'
             } catch (err) {
                 if (err instanceof SignatureError) {
+                    this.updateMultisigAccountInLocalStorage()
                     this.$store.dispatch('Signavault/updateTransaction')
                 } else {
                     console.error('Error sending multisig:', err)
@@ -463,10 +481,10 @@ export default class EditMultisigWallet extends Vue {
             }
         } else {
             await this.issueMultisigTx()
+            this.fetchMultisigAliases()
             await this.getAliasInfos()
             this.updateInitialMultisigState()
             setTimeout(() => updateShowAlias(), UPDATE_ALIAS_TIMEOUT)
-            this.$store.dispatch('fetchMultiSigAliases', { disable: false })
         }
     }
 
@@ -562,6 +580,98 @@ export default class EditMultisigWallet extends Vue {
             }
             return address
         })
+    }
+
+    get multisigAddressNamesEdited(): boolean {
+        const addressFields = this.addresses.map((item) => item.address)
+        const initialAddressesFields = this.initialMultisigState.addresses.map(
+            (item) => item.address
+        )
+
+        if (
+            this.multisigName !== this.initialMultisigState.multisigName ||
+            this.threshold !== this.initialMultisigState.threshold ||
+            JSON.stringify(addressFields) !== JSON.stringify(initialAddressesFields)
+        )
+            return false
+        else {
+            for (let i = 0; i < this.addresses.length; i++) {
+                if (this.addresses[i].name !== this.initialMultisigState.addresses[i].name) {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
+    async updateMultisigAccountInLocalStorage() {
+        try {
+            const msigAlias = this.activeWallet?.getStaticAddress('P')
+            const localStorageAccountIndex = this.$store.state.Accounts.accountIndex
+
+            if (localStorageAccountIndex === null || localStorageAccountIndex === undefined) {
+                throw new Error('account is not set in local storage')
+            }
+
+            let accounts = JSON.parse(localStorage.getItem('accounts') || '[]')
+            if (accounts[localStorageAccountIndex]) {
+                if (!accounts[localStorageAccountIndex].multisignatures)
+                    accounts[localStorageAccountIndex].multisignatures = []
+
+                // Filter out empty addresses
+                const filteredAddresses = this.addresses.filter(
+                    (addressObj) => addressObj.address.trim() !== ''
+                )
+
+                const multisignature = {
+                    alias: msigAlias,
+                    addresses: filteredAddresses,
+                }
+
+                const targetMultisignatures = accounts[localStorageAccountIndex].multisignatures
+
+                // Check if the multisignature with the given alias exists
+                const existingMultisigIndex = targetMultisignatures.findIndex(
+                    (m) => m.alias === msigAlias
+                )
+
+                // If it exists, replace it with the new multisignature object
+                if (existingMultisigIndex !== -1) {
+                    targetMultisignatures[existingMultisigIndex] = multisignature
+                } else {
+                    targetMultisignatures.push(multisignature)
+                }
+
+                accounts[localStorageAccountIndex].multisignatures = targetMultisignatures
+                localStorage.setItem('accounts', JSON.stringify(accounts))
+            } else {
+                console.error(`Account with index ${localStorageAccountIndex} does not exist.`)
+            }
+        } catch (error) {
+            console.error(
+                'An error occurred while updating multisig account in local storage: ',
+                error
+            )
+        }
+    }
+
+    async fetchMultisigAliases(): Promise<void> {
+        this.updateMultisigAccountInLocalStorage()
+
+        // Fetch multisig aliases after a delay
+        setTimeout(async () => {
+            const aliasesResponse = await this.$store.dispatch('fetchMultiSigAliases', {
+                disable: false,
+            })
+            let aliases = aliasesResponse.map((alias: string): string => 'P-' + alias)
+            const targetAlias = this.$store.state.activeWallet?.getStaticAddress('P')
+            if (this.$store.state.activeWallet?.type === 'multisig' && targetAlias) {
+                aliases = aliases.filter((alias: string) => alias !== targetAlias)
+            }
+
+            await this.$store.dispatch('addWalletsMultisig', { keys: aliases })
+        }, UPDATE_ALIAS_TIMEOUT)
     }
 }
 </script>

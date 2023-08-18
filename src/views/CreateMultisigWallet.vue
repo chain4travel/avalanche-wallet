@@ -208,8 +208,7 @@ export default class CreateMultisigWallet extends Vue {
             const localStorageAccountIndex = this.$store.state.Accounts.accountIndex
 
             if (localStorageAccountIndex === null || localStorageAccountIndex === undefined) {
-                console.error('localStorageAccountIndex is null or undefined.')
-                return
+                throw new Error('account is not set in local storage')
             }
 
             let accounts = JSON.parse(localStorage.getItem('accounts') || '[]')
@@ -242,48 +241,78 @@ export default class CreateMultisigWallet extends Vue {
     }
 
     async createWallet(): Promise<void> {
-        // @ts-ignore
-        let { dispatchNotification, updateShowAlias } = this.globalHelper()
-        const filteredAddresses = this.addresses
-            .filter((address) => address.address !== '')
-            .map((address) => address.address)
-
         try {
-            const result = await WalletHelper.sendMultisigAliasTxCreate(
-                this.activeWallet,
-                filteredAddresses,
-                this.multisigName,
-                Number(this.threshold)
-            )
+            // @ts-ignore
+            const { updateShowAlias } = this.globalHelper()
 
-            if (result) {
-                await this.addMultisigAccountToLocalStorage(result)
-                const msigAlias = await getMultisigAliasesFromTxId(result)
-                setTimeout(
-                    () => this.$store.dispatch('fetchMultiSigAliases', { disable: false }),
-                    UPDATE_ALIAS_TIMEOUT
-                )
+            // Filter and format addresses
+            const filteredAddresses = this.getFilteredAddresses()
+
+            // Send multisig alias creation transaction
+            const transactionResult = await this.sendMultisigAliasTxCreate(filteredAddresses)
+
+            // Handle transaction result
+            if (transactionResult) {
+                await this.fetchMultisigAliases(transactionResult)
                 setTimeout(() => updateShowAlias(), UPDATE_ALIAS_TIMEOUT)
-                this.resetForm()
-
-                dispatchNotification({
-                    message: this.$t('notifications.msig_creation_success', { address: msigAlias }),
-                    type: 'success',
-                })
+                this.showSuccessNotification(transactionResult)
             } else {
-                dispatchNotification({
-                    message: this.$t('notifications.msig_creation_failed'),
-                    type: 'error',
-                })
+                this.showErrorNotification()
             }
+
+            this.resetForm()
         } catch (e) {
             console.error(e)
-            dispatchNotification({
-                message: this.$t('notifications.msig_creation_failed'),
-                type: 'error',
-            })
-            return
+            this.showErrorNotification()
         }
+    }
+
+    getFilteredAddresses(): string[] {
+        return this.addresses
+            .filter((address) => address.address !== '')
+            .map((address) => address.address)
+    }
+
+    async sendMultisigAliasTxCreate(filteredAddresses: string[]): Promise<any> {
+        return WalletHelper.sendMultisigAliasTxCreate(
+            this.activeWallet,
+            filteredAddresses,
+            this.multisigName,
+            Number(this.threshold)
+        )
+    }
+
+    async fetchMultisigAliases(transactionResult: any): Promise<void> {
+        await this.addMultisigAccountToLocalStorage(transactionResult)
+
+        // Fetch multisig aliases after a delay
+        setTimeout(async () => {
+            const aliasesResponse = await this.$store.dispatch('fetchMultiSigAliases', {
+                disable: false,
+            })
+            const aliases = aliasesResponse.map((alias: string): string => 'P-' + alias)
+
+            await this.$store.dispatch('addWalletsMultisig', { keys: aliases })
+        }, UPDATE_ALIAS_TIMEOUT)
+    }
+
+    showSuccessNotification(transactionResult: any): void {
+        // @ts-ignore
+        const { dispatchNotification } = this.globalHelper()
+        const msigAlias = getMultisigAliasesFromTxId(transactionResult)
+        dispatchNotification({
+            message: this.$t('notifications.msig_creation_success', { address: msigAlias }),
+            type: 'success',
+        })
+    }
+
+    showErrorNotification(): void {
+        // @ts-ignore
+        const { dispatchNotification } = this.globalHelper()
+        dispatchNotification({
+            message: this.$t('notifications.msig_creation_failed'),
+            type: 'error',
+        })
     }
 }
 </script>
