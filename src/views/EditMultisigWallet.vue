@@ -160,7 +160,6 @@ import { AvaNetwork } from '@/js/AvaNetwork'
 import AvaAsset from '@/js/AvaAsset'
 import Alert from '@/components/Alert.vue'
 import CamInput from '@/components/CamInput.vue'
-import { InitialStates } from '@c4tplatform/caminojs/dist/apis/avm'
 
 const MAX_ADDRESS_COUNT = 128
 const UPDATE_ALIAS_TIMEOUT = 3000
@@ -284,43 +283,40 @@ export default class EditMultisigWallet extends Vue {
     async getAliasInfos() {
         this.mode = 'VIEW'
 
-        if (this.pendingSendMultisigTX) {
-            this.setAliasInfoFromPendingTx()
-        } else {
-            await this.setAliasInfoFromActiveWallet()
-        }
-
+        await this.setAliasInfoFromActiveWallet()
         this.updateInitialMultisigState()
         await this.assignSavedAddressNames()
     }
 
-    async setAliasInfoFromPendingTx() {
-        const hrp = ava.getHRP()
-        let unsignedTx = new UnsignedTx()
-        // @ts-ignore
-        unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
-
-        const utx = unsignedTx.getTransaction() as MultisigAliasTx
-        const alias = utx.getMultisigAlias()
-
-        this.multisigName = await alias.getMemo().toString()
-        this.threshold = await alias.getOwners().getThreshold()
-        this.addresses = await alias
-            .getOwners()
-            .getOutput()
-            .getAddresses()
-            .map((address) => {
-                return { address: bintools.addressToString(hrp, 'P', address), name: '' }
-            })
-    }
-
     async setAliasInfoFromActiveWallet() {
-        const msigAlias = this.activeWallet?.getStaticAddress('P')
-        const msigData = await ava.PChain().getMultisigAlias(msigAlias)
+        const hrp = ava.getHRP()
 
-        this.multisigName = Buffer.from(msigData.memo.replace('0x', ''), 'hex').toString()
-        this.threshold = msigData.threshold
-        this.addresses = msigData.addresses.map((address) => ({ address, name: '' }))
+        // Check if pendingSendMultisigTX exists
+        if (this.pendingSendMultisigTX) {
+            let unsignedTx = new UnsignedTx()
+            // @ts-ignore
+            unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
+
+            const utx = unsignedTx.getTransaction() as MultisigAliasTx
+            const alias = utx.getMultisigAlias()
+
+            this.multisigName = await alias.getMemo().toString()
+            this.threshold = await alias.getOwners().getThreshold()
+            this.addresses = await alias
+                .getOwners()
+                .getOutput()
+                .getAddresses()
+                .map((address) => {
+                    return { address: bintools.addressToString(hrp, 'P', address), name: '' }
+                })
+        } else {
+            const msigAlias = this.activeWallet?.getStaticAddress('P')
+            const msigData = await ava.PChain().getMultisigAlias(msigAlias)
+
+            this.multisigName = Buffer.from(msigData.memo.replace('0x', ''), 'hex').toString()
+            this.threshold = msigData.threshold
+            this.addresses = msigData.addresses.map((address) => ({ address, name: '' }))
+        }
     }
 
     async assignSavedAddressNames() {
@@ -430,7 +426,7 @@ export default class EditMultisigWallet extends Vue {
         const alias = this.activeWallet?.getStaticAddress('P')
 
         // if only address name changed, update alias in local storage
-        if (this.multisigAddressNamesEdited) {
+        if (this.multisigAddressNamesEdited && !this.pendingSendMultisigTX) {
             // update only local storage
             this.updateMultisigAccountInLocalStorage()
             this.mode = 'VIEW'
