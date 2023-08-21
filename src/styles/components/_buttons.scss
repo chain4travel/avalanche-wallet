@@ -133,11 +133,15 @@
     justify-content: center;
     align-items: center;
     gap: 6px;
-    /* flex: 1 0 0; */
     border-radius: 8px;
     background: #0085ff;
     width: fit-content;
     height: 40px;
+}
+
+.camino__primary--button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .camino__transparent--button {

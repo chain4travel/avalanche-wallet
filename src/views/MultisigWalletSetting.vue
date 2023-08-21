@@ -1,7 +1,7 @@
 <template>
     <div class="settings__container">
         <CreateMultisigWallet v-if="isSingleton()" />
-        <!-- <EditMultisigWallet v-else /> -->
+        <EditMultisigWallet v-else />
     </div>
 </template>
 
@@ -10,13 +10,13 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import { WalletType } from '@/js/wallets/types'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-// import EditMultisigWallet from './EditMultisigWallet.vue'
+import EditMultisigWallet from './EditMultisigWallet.vue'
 import CreateMultisigWallet from './CreateMultisigWallet.vue'
 
 @Component({
     components: {
         CreateMultisigWallet,
-        // EditMultisigWallet,
+        EditMultisigWallet,
     },
 })
 export default class MultisigWalletSetting extends Vue {

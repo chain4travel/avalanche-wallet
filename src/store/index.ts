@@ -213,6 +213,7 @@ export default new Vuex.Store({
                 let wallet = wallets[0]
                 await dispatch('removeWallet', wallet)
 
+                // @ts-ignore
                 let { dispatchNotification } = this.globalHelper()
                 dispatchNotification({
                     title: 'Key Removed',
@@ -337,6 +338,7 @@ export default new Vuex.Store({
 
             const wallets: MultisigWallet[] = []
             const staticAddresses = getters.staticAddresses('P') as string[]
+            state.wallets = state.wallets.filter((wallet) => wallet.type != 'multisig')
             for (const alias of keys as string[]) {
                 var response: MultisigAliasReply
                 try {
@@ -452,6 +454,7 @@ export default new Vuex.Store({
                 element.click()
                 document.body.removeChild(element)
             } catch (e) {
+                // @ts-ignore
                 let { dispatchNotification } = this.globalHelper()
                 dispatchNotification({
                     title: 'Export Wallet',

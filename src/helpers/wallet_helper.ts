@@ -753,6 +753,42 @@ class WalletHelper {
         let tx = await wallet.signP(unsignedTx)
         return await ava.PChain().issueTx(tx)
     }
+
+    static async sendMultisigAliasTxUpdate(
+        wallet: WalletType,
+        addresses: string[],
+        memo: string,
+        threshold: number,
+        multisigAliasAddress: string
+    ) {
+        const pchain = ava.PChain()
+
+        const multisigAliasParams: MultisigAliasParams = {
+            id: pchain.parseAddress(multisigAliasAddress),
+            memo: memo,
+            owners: new OutputOwners(
+                addresses.map((address: string) => pchain.parseAddress(address)),
+                new BN(0),
+                threshold
+            ),
+            auth: [[0, pchain.parseAddress(multisigAliasAddress)]],
+        }
+
+        const unsignedTx = await ava
+            .PChain()
+            .buildMultisigAliasTx(
+                wallet.platformUtxoset,
+                [[multisigAliasAddress], addresses],
+                [multisigAliasAddress],
+                multisigAliasParams,
+                undefined,
+                ZeroBN,
+                threshold
+            )
+
+        let tx = await wallet.signP(unsignedTx)
+        return await ava.PChain().issueTx(tx)
+    }
 }
 
 export { WalletHelper }
