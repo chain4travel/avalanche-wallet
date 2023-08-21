@@ -280,6 +280,7 @@ export default class EditMultisigWallet extends Vue {
 
     @Watch('activeWallet')
     @Watch('activeNetwork')
+    @Watch('pendingSendMultisigTX')
     async getAliasInfos() {
         this.mode = 'VIEW'
 
