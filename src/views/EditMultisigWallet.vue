@@ -312,6 +312,7 @@ export default class EditMultisigWallet extends Vue {
                 })
         } else {
             const msigAlias = this.activeWallet?.getStaticAddress('P')
+            if (!msigAlias) return
             const msigData = await ava.PChain().getMultisigAlias(msigAlias)
 
             this.multisigName = Buffer.from(msigData.memo.replace('0x', ''), 'hex').toString()
