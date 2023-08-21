@@ -143,23 +143,23 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator'
-import { WalletType } from '@/js/wallets/types'
 import { ava, bintools } from '@/AVA'
-import { BN } from '@c4tplatform/caminojs'
-import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
-import { SingletonWallet } from '@/js/wallets/SingletonWallet'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import { WalletHelper } from '../helpers/wallet_helper'
-import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
-import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
-import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
-import { MultisigAliasTx } from '@c4tplatform/caminojs/dist/apis/platformvm/multisigaliastx'
-import { SignatureError } from '@c4tplatform/caminojs/dist/common'
-import { AvaNetwork } from '@/js/AvaNetwork'
-import AvaAsset from '@/js/AvaAsset'
 import Alert from '@/components/Alert.vue'
 import CamInput from '@/components/CamInput.vue'
+import AvaAsset from '@/js/AvaAsset'
+import { AvaNetwork } from '@/js/AvaNetwork'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import { WalletType } from '@/js/wallets/types'
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
+import { BN } from '@c4tplatform/caminojs'
+import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { MultisigAliasTx } from '@c4tplatform/caminojs/dist/apis/platformvm/multisigaliastx'
+import { SignatureError } from '@c4tplatform/caminojs/dist/common'
+import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
+import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
+import { Component, Vue, Watch } from 'vue-property-decorator'
+import { WalletHelper } from '../helpers/wallet_helper'
 
 const MAX_ADDRESS_COUNT = 128
 const UPDATE_ALIAS_TIMEOUT = 3000
@@ -441,6 +441,12 @@ export default class EditMultisigWallet extends Vue {
 
         if (!this.pendingSendMultisigTX) {
             try {
+                let values = await ava.PChain().getMultisigAlias(alias)
+                let wallet = this.activeWallet as MultisigWallet
+                wallet.setKey(undefined, {
+                    addresses: values.addresses,
+                    threshold: values.threshold,
+                })
                 const result = await WalletHelper.sendMultisigAliasTxUpdate(
                     this.activeWallet as MultisigWallet,
                     filteredAddresses,
