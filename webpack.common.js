@@ -4,7 +4,16 @@ const { VueLoaderPlugin } = require('vue-loader')
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin')
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 const path = require('path')
-const deps = require('./package.json').dependencies
+const Dotenv = require('dotenv-webpack')
+const webpack = require('webpack')
+const childProcess = require('child_process')
+let GIT_COMMIT_HASH
+
+try {
+    GIT_COMMIT_HASH = childProcess.execSync('git rev-parse --short HEAD').toString().trim()
+} catch (e) {
+    GIT_COMMIT_HASH = 'N/A'
+}
 module.exports = {
     module: {
         rules: [
@@ -34,6 +43,11 @@ module.exports = {
         ],
     },
     resolve: {
+        fallback: {
+            fs: false,
+            tls: false,
+            net: false,
+        },
         extensions: ['.tsx', '.ts', '.vue', '.jsx', '.js', '.json'],
         alias: {
             vue: 'vue/dist/vue.min.js',
@@ -42,6 +56,10 @@ module.exports = {
     },
 
     plugins: [
+        new Dotenv(),
+        new webpack.DefinePlugin({
+            'process.env.GIT_COMMIT_HASH': JSON.stringify(GIT_COMMIT_HASH),
+        }),
         new VueLoaderPlugin(),
         new VuetifyLoaderPlugin(),
         new NodePolyfillPlugin(),
@@ -61,6 +79,8 @@ module.exports = {
                 './mountAccounts': './src/components/Access/mountAccounts.ts',
                 './mountKyesComponent': './src/components/wallet/manage/mountKyesComponent.ts',
                 './mountsaveKyesButton': './src/views/wallet/mountSaveKeysButton.ts',
+                './mountMultisigWalletSetting': './src/views/mountMultisigWalletSetting.ts',
+                './mountVersionComponent': './src/components/misc/mountVersion.ts',
             },
         }),
         new HtmlWebPackPlugin({

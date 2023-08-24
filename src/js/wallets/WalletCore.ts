@@ -2,19 +2,13 @@
 The base wallet class used for common functionality
 */
 import { ava, bintools } from '@/AVA'
-import { ChainIdType } from '@/constants'
-import { AvmImportChainType, ChainAlias } from '@/js/wallets/types'
+import { web3 } from '@/evm'
+import { ChainIdType, CrossChainsC, CrossChainsX, CrossChainsP } from '@/constants'
+import { chainIdFromAlias } from '@/helpers/helper'
+import { avmGetAllUTXOs, platformGetAllUTXOs } from '@/helpers/utxo_helper'
+import { estimateExportGasFee } from '@/helpers/gas_helper'
 
-import { BN } from '@c4tplatform/caminojs/dist'
-import {
-    chainIdFromAlias,
-    ExportChainsC,
-    ExportChainsP,
-    ExportChainsX,
-    UtxoHelper,
-    TxHelper,
-    GasHelper,
-} from '@c4tplatform/camino-wallet-sdk/dist'
+import { BN, Buffer as AvalancheBuffer } from '@c4tplatform/caminojs/dist'
 import {
     Tx as EVMTx,
     UnsignedTx as EVMUnsignedTx,
@@ -84,7 +78,7 @@ abstract class WalletCore {
 
     prepareSignP(tx: PlatformUnsignedTx): void {}
 
-    getStaticAddress(chainID: ChainAlias): string {
+    getStaticAddress(chainID: ChainIdType): string {
         const kp = this.getStaticKeyPair()
         if (kp) {
             return bintools.addressToString(ava.getHRP(), chainID, kp.getAddress())
@@ -99,12 +93,12 @@ abstract class WalletCore {
     onNetworkChange(): void {}
     async initialize() {}
 
-    async evmGetAtomicUTXOs(sourceChain: ExportChainsC) {
+    async evmGetAtomicUTXOs(sourceChain: CrossChainsC): Promise<EVMUTXOSet> {
         let addrs = [this.getEvmAddressBech()]
-        return await UtxoHelper.evmGetAtomicUTXOs(addrs, sourceChain)
+        return (await ava.CChain().getUTXOs(addrs, chainIdFromAlias(sourceChain))).utxos
     }
 
-    async createImportTxC(sourceChain: ExportChainsC, utxoSet: EVMUTXOSet, fee: BN) {
+    async createImportTxC(sourceChain: CrossChainsC, utxoSet: EVMUTXOSet, fee: BN) {
         let bechAddr = this.getEvmAddressBech()
         let hexAddr = this.getEvmAddress()
 
@@ -123,7 +117,12 @@ abstract class WalletCore {
      * @param fee Fee to use in nNative
      * @param utxoSet
      */
-    async importToCChain(sourceChain: ExportChainsC, fee: BN, utxoSet?: EVMUTXOSet) {
+    async importToCChain(
+        sourceChain: CrossChainsC,
+        fee: BN,
+        utxoSet?: EVMUTXOSet,
+        exportTxID?: string
+    ) {
         if (!utxoSet) {
             utxoSet = await this.evmGetAtomicUTXOs(sourceChain)
         }
@@ -135,6 +134,14 @@ abstract class WalletCore {
             throw new Error('Nothing to import.')
         }
 
+        if (exportTxID) {
+            const etxBuffer = bintools.cb58Decode(exportTxID)
+            utxoSet = utxoSet.filter(
+                [etxBuffer],
+                (utxo, b: AvalancheBuffer) => utxo.getTxID().compare(b) === 0
+            )
+        }
+
         const unsignedTxFee = await this.createImportTxC(sourceChain, utxoSet, fee)
         let tx = await this.signC(unsignedTxFee)
         let id = await ava.CChain().issueTx(tx)
@@ -142,7 +149,7 @@ abstract class WalletCore {
         return id
     }
 
-    async exportFromXChain(amt: BN, destinationChain: ExportChainsX, importFee?: BN) {
+    async exportFromXChain(amt: BN, destinationChain: CrossChainsX, importFee?: BN) {
         if (destinationChain === 'C' && !importFee)
             throw new Error('Exports to C chain must specify an import fee.')
 
@@ -163,26 +170,29 @@ abstract class WalletCore {
         let fromAddresses = this.getAllAddressesX()
         let changeAddress = this.getChangeAddressAvm()
         let utxos = this.getUTXOSet()
-        let exportTx = await TxHelper.buildAvmExportTransaction(
-            destinationChain,
-            utxos,
-            fromAddresses,
-            destinationAddr,
-            amtFee,
-            changeAddress
-        )
-
+        let exportTx = await ava
+            .XChain()
+            .buildExportTx(
+                utxos,
+                amtFee,
+                chainIdFromAlias(destinationChain),
+                [destinationAddr],
+                fromAddresses,
+                [changeAddress]
+            )
         const eTx = (exportTx.getTransaction() as unknown) as PlatformExportTx
         let tx = await this.signX(exportTx)
 
         return ava.XChain().issueTx(tx)
     }
 
-    async exportFromPChain(amt: BN, destinationChain: ExportChainsP, importFee?: BN) {
+    async exportFromPChain(amt: BN, destinationChain: CrossChainsP, importFee?: BN) {
         let utxoSet = this.getPlatformUTXOSet()
 
-        let pChangeAddr = this.getCurrentAddressPlatform()
         let fromAddrs = this.getAllAddressesP()
+        const signerAddrs = this.getSignerAddresses('P')
+
+        let pChangeAddr = this.getCurrentAddressPlatform()
 
         if (destinationChain === 'C' && !importFee)
             throw new Error('Exports to C chain must specify an import fee.')
@@ -201,15 +211,16 @@ abstract class WalletCore {
         let destinationAddr =
             destinationChain === 'C' ? this.getEvmAddressBech() : this.getCurrentAddressAvm()
 
-        const exportTx = await TxHelper.buildPlatformExportTransaction(
-            utxoSet,
-            fromAddrs,
-            destinationAddr,
-            amtFee,
-            pChangeAddr,
-            destinationChain
-        )
-
+        const exportTx = await ava
+            .PChain()
+            .buildExportTx(
+                utxoSet,
+                amtFee,
+                chainIdFromAlias(destinationChain),
+                [destinationAddr],
+                [fromAddrs, signerAddrs],
+                [pChangeAddr]
+            )
         let tx = await this.signP(exportTx)
         return await ava.PChain().issueTx(tx)
     }
@@ -220,7 +231,7 @@ abstract class WalletCore {
      * @param destinationChain `X` or `P`
      * @param fee Fee to use in the export transaction, given in nNative.
      */
-    async exportFromCChain(amt: BN, destinationChain: ExportChainsC, exportFee: BN) {
+    async exportFromCChain(amt: BN, destinationChain: CrossChainsC, exportFee: BN) {
         // Add import fee
         // X and P have the same fee
         let importFee = ava.XChain().getTxFee()
@@ -229,22 +240,27 @@ abstract class WalletCore {
         let hexAddr = this.getEvmAddress()
         let bechAddr = this.getEvmAddressBech()
 
-        let fromAddresses = [hexAddr]
-
         let destinationAddr =
             destinationChain === 'X'
                 ? this.getCurrentAddressAvm()
                 : this.getCurrentAddressPlatform()
 
-        let exportTx = await TxHelper.buildEvmExportTransaction(
-            fromAddresses,
-            destinationAddr,
-            amtFee,
-            bechAddr,
-            destinationChain,
-            exportFee
-        )
+        const nonce = await web3.eth.getTransactionCount(hexAddr)
 
+        const exportTx = await ava
+            .CChain()
+            .buildExportTx(
+                amtFee,
+                ava.getNetwork().X.avaxAssetID,
+                chainIdFromAlias(destinationChain),
+                hexAddr,
+                bechAddr,
+                [destinationAddr],
+                nonce,
+                undefined,
+                1,
+                exportFee
+            )
         let tx = await this.signC(exportTx)
         return ava.CChain().issueTx(tx)
     }
@@ -254,7 +270,7 @@ abstract class WalletCore {
      * @param destinationChain
      * @param amount
      */
-    async estimateExportFee(destinationChain: ExportChainsC, amount: BN): Promise<number> {
+    async estimateExportFee(destinationChain: CrossChainsC, amount: BN): Promise<number> {
         let hexAddr = this.getEvmAddress()
         let bechAddr = this.getEvmAddressBech()
 
@@ -263,26 +279,20 @@ abstract class WalletCore {
                 ? this.getCurrentAddressAvm()
                 : this.getCurrentAddressPlatform()
 
-        return GasHelper.estimateExportGasFee(
-            destinationChain,
-            hexAddr,
-            bechAddr,
-            destinationAddr,
-            amount
-        )
+        return estimateExportGasFee(destinationChain, hexAddr, bechAddr, destinationAddr, amount)
     }
 
-    async avmGetAtomicUTXOs(sourceChain: ExportChainsX) {
+    async avmGetAtomicUTXOs(sourceChain: CrossChainsX) {
         let addrs = this.getAllAddressesX()
-        return await UtxoHelper.avmGetAtomicUTXOs(addrs, sourceChain)
+        return avmGetAllUTXOs(addrs, chainIdFromAlias(sourceChain))
     }
 
-    async platformGetAtomicUTXOs(sourceChain: ExportChainsP) {
+    async platformGetAtomicUTXOs(sourceChain: CrossChainsP) {
         let addrs = this.getAllAddressesP()
-        return await UtxoHelper.platformGetAtomicUTXOs(addrs, sourceChain)
+        return platformGetAllUTXOs(addrs, chainIdFromAlias(sourceChain))
     }
 
-    async importToPlatformChain(sourceChain: ExportChainsP): Promise<string> {
+    async importToPlatformChain(sourceChain: CrossChainsP): Promise<string> {
         const utxoSet = await this.platformGetAtomicUTXOs(sourceChain)
 
         if (utxoSet.getAllUTXOs().length === 0) {
@@ -318,7 +328,7 @@ abstract class WalletCore {
         return ava.PChain().issueTx(tx)
     }
 
-    async importToXChain(sourceChain: AvmImportChainType) {
+    async importToXChain(sourceChain: CrossChainsX) {
         const utxoSet = await this.avmGetAtomicUTXOs(sourceChain)
 
         if (utxoSet.getAllUTXOs().length === 0) {
@@ -346,4 +356,5 @@ abstract class WalletCore {
         return await ava.XChain().issueTx(tx)
     }
 }
+
 export { WalletCore }

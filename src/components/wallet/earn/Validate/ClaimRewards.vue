@@ -62,19 +62,19 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
+import { Vue, Component, Prop } from 'vue-property-decorator'
 import ModalClaimReward from './ModalClaimReward.vue'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import { WalletHelper } from '../../../../helpers/wallet_helper'
 import { BN } from '@c4tplatform/caminojs'
 import AvaAsset from '@/js/AvaAsset'
 import Big from 'big.js'
-import { WalletType } from '@c4tplatform/camino-wallet-sdk'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import PendingMultisig from './PendingMultisig.vue'
 import Spinner from '@/components/misc/Spinner.vue'
-import * as SDK from '@c4tplatform/camino-wallet-sdk/dist'
 import { ava } from '@/AVA'
+import { bnToBigAvaxX } from '@/helpers/helper'
+import { WalletType } from '@/js/wallets/types'
 
 @Component({
     components: {
@@ -168,7 +168,7 @@ export default class ClaimRewards extends Vue {
     }
 
     get disabledButtonRewards() {
-        let rewardAmountInCam = parseFloat(SDK.bnToBigAvaxX(this.rewardAmount).toString())
+        let rewardAmountInCam = parseFloat(bnToBigAvaxX(this.rewardAmount).toString())
         if (rewardAmountInCam <= parseFloat(this.feeTx.toString())) {
             return true
         } else {
@@ -238,7 +238,7 @@ export default class ClaimRewards extends Vue {
     }
 
     get feeTx() {
-        return SDK.bnToBigAvaxX(ava.PChain().getTxFee())
+        return bnToBigAvaxX(ava.PChain().getTxFee())
     }
 }
 </script>

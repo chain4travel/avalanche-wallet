@@ -33,7 +33,7 @@ export default class Settings extends Vue {
     }
 }
 </script>
-<style scoped lang="scss">
+<style lang="scss">
 .settings__container {
     height: 100%;
     width: 100%;

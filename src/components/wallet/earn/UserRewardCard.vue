@@ -177,6 +177,7 @@ export default class UserRewardCard extends Vue {
     @Prop() alreadySigned!: boolean
     @Prop() disallowedClaim!: boolean
     @Prop() canExecuteMultisigTx!: boolean
+    @Prop() validatorClaim!: boolean
 
     get activeWallet(): MultisigWallet {
         return this.$store.state.activeWallet
@@ -312,7 +313,8 @@ export default class UserRewardCard extends Vue {
                 wallet,
                 this.depositTxID,
                 rewardOwner,
-                this.pendingRewards
+                this.pendingRewards,
+                this.validatorClaim
             )
                 .then((value) => {
                     if (!value) {
