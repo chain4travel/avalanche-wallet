@@ -1,51 +1,51 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+import Accounts from './modules/accounts/accounts'
 import Assets from './modules/assets/assets'
+import History from './modules/history/history'
+import Launch from './modules/launch/launch'
+import Ledger from './modules/ledger/ledger'
 import Network from './modules/network/network'
 import Notifications from './modules/notifications/notifications'
-import History from './modules/history/history'
 import Platform from './modules/platform/platform'
-import Ledger from './modules/ledger/ledger'
-import Accounts from './modules/accounts/accounts'
-import Launch from './modules/launch/launch'
 import Signavault from './modules/signavault/signavault'
 
 import {
-    RootState,
-    IssueBatchTxInput,
-    ImportKeyfileInput,
-    ExportWalletsInput,
     AccessWalletMultipleInput,
     AccessWalletMultipleInputParams,
+    ExportWalletsInput,
+    ImportKeyfileInput,
+    IssueBatchTxInput,
+    RootState,
 } from '@/store/types'
 
-import { INetwork, WalletType } from '@/js/wallets/types'
 import { AllKeyFileDecryptedTypes } from '@/js/IKeystore'
+import { INetwork, WalletType } from '@/js/wallets/types'
 
 Vue.use(Vuex)
 
 import { ava, bintools } from '@/AVA'
-import MnemonicWallet from '@/js/wallets/MnemonicWallet'
-import { LedgerWallet } from '@/js/wallets/LedgerWallet'
-import { SingletonWallet } from '@/js/wallets/SingletonWallet'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import {
-    extractKeysFromDecryptedFile,
     KEYSTORE_VERSION,
+    extractKeysFromDecryptedFile,
     makeKeyfile,
     readKeyFile,
 } from '@/js/Keystore'
+import { LedgerWallet } from '@/js/wallets/LedgerWallet'
+import MnemonicWallet from '@/js/wallets/MnemonicWallet'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 
 import { Buffer as BufferAvalanche } from '@c4tplatform/caminojs/dist'
 import { MultisigAliasReply } from '@c4tplatform/caminojs/dist/apis/platformvm'
 
-import { privateToAddress } from '@ethereumjs/util'
-import { updateFilterAddresses } from '../providers'
-import { getAvaxPriceUSD } from '@/helpers/price_helper'
-import createHash from 'create-hash'
-import router from '@/router'
 import { getMultisigAliases } from '@/explorer_api'
+import { getAvaxPriceUSD } from '@/helpers/price_helper'
+import router from '@/router'
+import { privateToAddress } from '@ethereumjs/util'
+import createHash from 'create-hash'
+import { updateFilterAddresses } from '../providers'
 
 export default new Vuex.Store({
     modules: {
@@ -213,6 +213,7 @@ export default new Vuex.Store({
                 let wallet = wallets[0]
                 await dispatch('removeWallet', wallet)
 
+                // @ts-ignore
                 let { dispatchNotification } = this.globalHelper()
                 dispatchNotification({
                     title: 'Key Removed',
@@ -301,6 +302,8 @@ export default new Vuex.Store({
                     const staticAddresses = getters['staticAddresses']('P')
                     const multisigAliases = await getMultisigAliases(staticAddresses)
                     if (!multisigAliases || multisigAliases.length === 0) {
+                        state.wallets = state.wallets.filter((wallet) => wallet.type !== 'multisig')
+                        state.multiSigAliases = []
                         return null
                     }
                     multisigAliases.forEach((alias: string) => {
@@ -335,6 +338,7 @@ export default new Vuex.Store({
 
             const wallets: MultisigWallet[] = []
             const staticAddresses = getters.staticAddresses('P') as string[]
+            state.wallets = state.wallets.filter((wallet) => wallet.type != 'multisig')
             for (const alias of keys as string[]) {
                 var response: MultisigAliasReply
                 try {
@@ -450,6 +454,7 @@ export default new Vuex.Store({
                 element.click()
                 document.body.removeChild(element)
             } catch (e) {
+                // @ts-ignore
                 let { dispatchNotification } = this.globalHelper()
                 dispatchNotification({
                     title: 'Export Wallet',

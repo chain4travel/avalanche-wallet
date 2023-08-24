@@ -115,19 +115,33 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import Dropdown from '@/components/misc/Dropdown.vue'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
 import AvaAsset from '@/js/AvaAsset'
-import { BN } from '@c4tplatform/caminojs/dist'
 import { ava } from '@/AVA'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import Spinner from '@/components/misc/Spinner.vue'
 import ChainCard from '@/components/wallet/earn/ChainTransfer/ChainCard.vue'
 import TxStateCard from '@/components/wallet/earn/ChainTransfer/TxState.vue'
 import { ChainSwapFormData, TxState } from '@/components/wallet/earn/ChainTransfer/types'
-import { ChainIdType } from '@/constants'
+import { ChainIdType, CrossChainsC, CrossChainsP, CrossChainsX } from '@/constants'
 
 import ChainSwapForm from '@/components/wallet/earn/ChainTransfer/Form.vue'
 
 import { WalletType } from '@/js/wallets/types'
-import * as SDK from '@c4tplatform/camino-wallet-sdk/dist'
+import {
+    BN,
+    Big,
+    avaxCtoX,
+    bnToBig,
+    bnToAvaxX,
+    bnToBigAvaxX,
+    bnToBigAvaxC,
+    bigToBN,
+} from '@/helpers/helper'
+import {
+    estimateExportGasFeeFromMockTx,
+    estimateImportGasFeeFromMockTx,
+    getBaseFeeRecommended,
+} from '@/helpers/gas_helper'
+import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 const IMPORT_DELAY = 5000 // in ms
 const BALANCE_DELAY = 2000 // in ms
@@ -208,7 +222,7 @@ export default class ChainTransfer extends Vue {
 
     get evmUnlocked(): BN {
         let balRaw = this.wallet.ethBalance
-        return SDK.avaxCtoX(balRaw)
+        return avaxCtoX(balRaw)
     }
 
     get balanceBN(): BN {
@@ -221,15 +235,15 @@ export default class ChainTransfer extends Vue {
         }
     }
 
-    get balanceBig(): SDK.Big {
-        return SDK.bnToBig(this.balanceBN, 9)
+    get balanceBig(): Big {
+        return bnToBig(this.balanceBN, 9)
     }
 
     get formAmtText() {
-        return SDK.bnToAvaxX(this.formAmt)
+        return bnToAvaxX(this.formAmt)
     }
 
-    get fee(): SDK.Big {
+    get fee(): Big {
         return this.exportFee.add(this.importFee)
     }
 
@@ -237,27 +251,27 @@ export default class ChainTransfer extends Vue {
         return this.importFeeBN.add(this.exportFeeBN)
     }
 
-    getFee(chain: ChainIdType, isExport: boolean): SDK.Big {
+    getFee(chain: ChainIdType, isExport: boolean): Big {
         if (chain === 'X') {
-            return SDK.bnToBigAvaxX(ava.XChain().getTxFee())
+            return bnToBigAvaxX(ava.XChain().getTxFee())
         } else if (chain === 'P') {
-            return SDK.bnToBigAvaxX(ava.PChain().getTxFee())
+            return bnToBigAvaxX(ava.PChain().getTxFee())
         } else {
             const fee = isExport
-                ? SDK.GasHelper.estimateExportGasFeeFromMockTx(
-                      this.targetChain as SDK.ExportChainsC,
+                ? estimateExportGasFeeFromMockTx(
+                      this.targetChain as CrossChainsC,
                       this.amt,
                       this.wallet.getEvmAddress(),
                       this.wallet.getCurrentAddressPlatform()
                   )
-                : SDK.GasHelper.estimateImportGasFeeFromMockTx(1, 1)
+                : estimateImportGasFeeFromMockTx(1, 1)
 
             const totFeeWei = this.baseFee.mul(new BN(fee))
-            return SDK.bnToBigAvaxC(totFeeWei)
+            return bnToBigAvaxC(totFeeWei)
         }
     }
 
-    get importFee(): SDK.Big {
+    get importFee(): Big {
         return this.getFee(this.targetChain, false)
     }
 
@@ -265,15 +279,15 @@ export default class ChainTransfer extends Vue {
      * Returns the import fee in nNative
      */
     get importFeeBN(): BN {
-        return SDK.bigToBN(this.importFee, 9)
+        return bigToBN(this.importFee, 9)
     }
 
-    get exportFee(): SDK.Big {
+    get exportFee(): Big {
         return this.getFee(this.sourceChain, true)
     }
 
     get exportFeeBN(): BN {
-        return SDK.bigToBN(this.exportFee, 9)
+        return bigToBN(this.exportFee, 9)
     }
 
     /**
@@ -315,7 +329,7 @@ export default class ChainTransfer extends Vue {
     }
 
     async updateBaseFee() {
-        this.baseFee = await SDK.GasHelper.getBaseFeeRecommended()
+        this.baseFee = await getBaseFeeRecommended()
     }
 
     async submit() {
@@ -339,32 +353,54 @@ export default class ChainTransfer extends Vue {
         let exportTxId
         this.exportState = TxState.started
 
-        switch (sourceChain) {
-            case 'X':
-                exportTxId = await wallet.exportFromXChain(
-                    amt,
-                    destinationChain as SDK.ExportChainsX,
-                    this.importFeeBN
-                )
-                break
-            case 'P':
-                exportTxId = await wallet.exportFromPChain(
-                    amt,
-                    destinationChain as SDK.ExportChainsP,
-                    this.importFeeBN
-                )
-                break
-            case 'C':
-                exportTxId = await wallet.exportFromCChain(
-                    amt,
-                    destinationChain as SDK.ExportChainsC,
-                    this.exportFeeBN
-                )
-                break
-        }
+        try {
+            switch (sourceChain) {
+                case 'X':
+                    exportTxId = await wallet.exportFromXChain(
+                        amt,
+                        destinationChain as CrossChainsX,
+                        this.importFeeBN
+                    )
+                    break
+                case 'P':
+                    exportTxId = await wallet.exportFromPChain(
+                        amt,
+                        destinationChain as CrossChainsP,
+                        this.importFeeBN
+                    )
+                    break
+                case 'C':
+                    exportTxId = await wallet.exportFromCChain(
+                        amt,
+                        destinationChain as CrossChainsC,
+                        this.exportFeeBN
+                    )
+                    break
+            }
 
-        this.exportId = exportTxId
-        this.waitExportStatus(exportTxId)
+            this.exportId = exportTxId
+            this.waitExportStatus(exportTxId)
+        } catch (e: any) {
+            // if (e instanceof SignatureError) {
+            //     this.$store.dispatch('Notifications/add', {
+            //         type: 'info',
+            //         title: 'Multisignature',
+            //         message: e.message,
+            //     })
+            //     setTimeout(() => {
+            //         this.$store.dispatch('Assets/updateUTXOs')
+            //         this.$store.dispatch('Signavault/updateTransaction').then(() => {
+            //             this.$store.dispatch('History/updateMultisigTransactionHistory')
+            //         })
+            //     }, 3000)
+            //     this.exportState = TxState.success
+            //     this.exportStatus = 'Recorded'
+            // } else {
+            //     this.exportState = TxState.failed
+            //     this.exportStatus = 'Failed'
+            //     throw e
+            // }
+        }
     }
 
     // STEP 2
@@ -424,17 +460,15 @@ export default class ChainTransfer extends Vue {
         let importTxId
         try {
             if (this.targetChain === 'P') {
-                importTxId = await wallet.importToPlatformChain(
-                    this.sourceChain as SDK.ExportChainsP
-                )
+                importTxId = await wallet.importToPlatformChain(this.sourceChain as CrossChainsP)
             } else if (this.targetChain === 'X') {
-                importTxId = await wallet.importToXChain(this.sourceChain as SDK.ExportChainsX)
+                importTxId = await wallet.importToXChain(this.sourceChain as CrossChainsX)
             } else {
-                //TODO: Import only the exported UTXO
-
                 importTxId = await wallet.importToCChain(
-                    this.sourceChain as SDK.ExportChainsC,
-                    this.importFeeBN
+                    this.sourceChain as CrossChainsC,
+                    this.importFeeBN,
+                    undefined,
+                    this.exportId
                 )
             }
         } catch (e) {

@@ -36,6 +36,7 @@ import { ChainIdType, ZeroBN } from '@/constants'
 import { bnToBig } from '@/helpers/helper'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
+import { MultisigAliasParams } from '@c4tplatform/caminojs/dist/apis/platformvm'
 class WalletHelper {
     static async getStake(wallet: WalletType): Promise<BN> {
         let addrs = wallet.getAllAddressesP()
@@ -538,14 +539,29 @@ class WalletHelper {
     static async buildDepositClaimTx(
         wallet: WalletType,
         depositTxID: string,
-        depositRewardOwner: OutputOwners,
-        claimAmount: BN
+        rewardOwner: OutputOwners,
+        claimAmount: BN,
+        claimValidator: boolean
     ) {
         const pAddressStrings = wallet.getAllAddressesP()
         const signerAddresses = wallet.getSignerAddresses('P')
 
         // For change address use first available on the platform chain
         const changeAddress = wallet.getChangeAddressPlatform()
+
+        const claimAmountParam = {
+            claimType: claimValidator
+                ? ClaimType.VALIDATOR_REWARD
+                : ClaimType.EXPIRED_DEPOSIT_REWARD,
+            amount: claimAmount,
+            owners: rewardOwner,
+            sigIdxs: [0],
+        } as ClaimAmountParams
+
+        if (depositTxID) {
+            claimAmountParam.id = bintools.cb58Decode(depositTxID)
+            claimAmountParam.claimType = ClaimType.ACTIVE_DEPOSIT_REWARD
+        }
 
         const unsignedTx = await ava
             .PChain()
@@ -556,15 +572,7 @@ class WalletHelper {
                 Buffer.alloc(0),
                 ZeroBN,
                 1,
-                [
-                    {
-                        id: bintools.cb58Decode(depositTxID),
-                        claimType: ClaimType.ACTIVE_DEPOSIT_REWARD,
-                        amount: claimAmount,
-                        owners: depositRewardOwner,
-                        sigIdxs: [0],
-                    } as ClaimAmountParams,
-                ]
+                [claimAmountParam]
             )
 
         try {
@@ -590,19 +598,22 @@ class WalletHelper {
         const rewardAddress = bintools.parseAddress(wallet.getPlatformRewardAddress(), 'P')
         const changeAddress = wallet.getChangeAddressPlatform()
 
-        const unsignedTx = await ava
-            .PChain()
-            .buildDepositTx(
-                wallet.platformUtxoset,
-                [pAddressStrings, signerAddresses],
-                [changeAddress],
-                depositID,
-                depositDuration,
-                new OutputOwners([rewardAddress], ZeroBN, 1),
-                Buffer.alloc(0),
-                ZeroBN,
-                depositAmount
-            )
+        const unsignedTx = await ava.PChain().buildDepositTx(
+            0, //UpgradeVersion
+            wallet.platformUtxoset,
+            [pAddressStrings, signerAddresses],
+            [changeAddress],
+            depositID,
+            depositDuration,
+            new OutputOwners([rewardAddress], ZeroBN, 1),
+            Buffer.alloc(20), // empty address
+            [],
+            [],
+            [],
+            Buffer.alloc(0),
+            ZeroBN,
+            depositAmount
+        )
         let tx = await wallet.signP(unsignedTx)
         return await ava.PChain().issueTx(tx)
     }
@@ -708,6 +719,75 @@ class WalletHelper {
             UTXOs,
             platformUTXOs,
         }
+    }
+
+    static async sendMultisigAliasTxCreate(
+        wallet: WalletType,
+        addresses: string[],
+        memo: string,
+        threshold: number
+    ) {
+        const pchain = ava.PChain()
+        const pAddressStrings = [wallet.getStaticAddress('P')]
+
+        const multisigAliasParams: MultisigAliasParams = {
+            memo: memo,
+            owners: new OutputOwners(
+                addresses.map((address: string) => pchain.parseAddress(address)),
+                new BN(0),
+                threshold
+            ),
+            auth: [],
+        }
+
+        const unsignedTx = await ava
+            .PChain()
+            .buildMultisigAliasTx(
+                wallet.platformUtxoset,
+                pAddressStrings,
+                pAddressStrings,
+                multisigAliasParams,
+                undefined,
+                ZeroBN
+            )
+        let tx = await wallet.signP(unsignedTx)
+        return await ava.PChain().issueTx(tx)
+    }
+
+    static async sendMultisigAliasTxUpdate(
+        wallet: WalletType,
+        addresses: string[],
+        memo: string,
+        threshold: number,
+        multisigAliasAddress: string
+    ) {
+        const pchain = ava.PChain()
+
+        const multisigAliasParams: MultisigAliasParams = {
+            id: pchain.parseAddress(multisigAliasAddress),
+            memo: memo,
+            owners: new OutputOwners(
+                addresses.map((address: string) => pchain.parseAddress(address)),
+                new BN(0),
+                threshold
+            ),
+            auth: [[0, pchain.parseAddress(multisigAliasAddress)]],
+        }
+
+        const unsignedTx = await ava
+            .PChain()
+            .buildMultisigAliasTx(
+                wallet.platformUtxoset,
+                [[multisigAliasAddress], addresses],
+                [multisigAliasAddress],
+                multisigAliasParams,
+                undefined,
+                ZeroBN,
+                threshold
+            )
+
+        let tx = await wallet.signP(unsignedTx)
+        return await ava.PChain().issueTx(tx)
     }
 }
 
