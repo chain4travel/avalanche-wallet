@@ -12,7 +12,7 @@
                         :errorMessage="$t('create_multisig.errors.msig_name')"
                         :disabled="mode !== 'EDIT' || pendingSendMultisigTX"
                     />
-                    <Alert variant="warning" v-if="!pendingSendMultisigTX">
+                    <Alert variant="warning" v-if="mode === 'EDIT'">
                         {{ $t('create_multisig.alert.wize_name') }}
                     </Alert>
                 </div>
@@ -65,6 +65,9 @@
 
                 <Alert variant="negative" v-if="multipleSameAddresses">
                     {{ $t('create_multisig.errors.same_address_twice') }}
+                </Alert>
+                <Alert variant="negative" v-if="mode === 'EDIT' && validAddressError">
+                    {{ $t('edit_multisig.errors.invalid_addresses') }}
                 </Alert>
             </div>
 
@@ -123,7 +126,7 @@
             </div>
 
             <div class="action_buttons" v-else-if="mode === 'EDIT'">
-                <button class="camino__transparent--button" @click="cancelEditMsig">
+                <button class="camino__transparent--button" @click="cancel">
                     {{ $t('edit_multisig.cancel') }}
                 </button>
                 <button
@@ -175,7 +178,7 @@ export default class EditMultisigWallet extends Vue {
     multisigName: string = ''
     threshold: number = 1
     addresses: { address: string; name: string }[] = []
-    mode: 'EDIT' | 'DELETE' | 'VIEW' | 'SIGNING_DELETE' = 'VIEW'
+    mode: 'EDIT' | 'DELETE' | 'VIEW' = 'VIEW'
     remainingFundsAddress: string = ''
     initialMultisigState: { multisigName: string; threshold: number; addresses: any[] } = {
         multisigName: '',
@@ -190,6 +193,16 @@ export default class EditMultisigWallet extends Vue {
 
     updateBalance(): void {
         this.$store.dispatch('updateBalances')
+    }
+
+    validAddress(address: string): boolean {
+        const hrp = ava.getHRP()
+
+        if (!address.includes(hrp)) return true
+
+        if (address.split('-')[0] !== 'P') return true
+
+        return false
     }
 
     get activeWallet(): SingletonWallet | MultisigWallet {
@@ -257,7 +270,8 @@ export default class EditMultisigWallet extends Vue {
             filledAddresses.length === 0 ||
             uniqueAddresses.size !== filledAddresses.length ||
             this.thresholdError ||
-            this.nameLengthError
+            this.nameLengthError ||
+            this.validAddressError
         )
     }
 
@@ -276,6 +290,16 @@ export default class EditMultisigWallet extends Vue {
             threshold: this.threshold,
             addresses: JSON.parse(JSON.stringify(this.addresses)),
         }
+    }
+
+    get validAddressError(): boolean {
+        const filledAddresses = this.addresses.filter((a) => a.address !== '')
+
+        for (const addressObj of filledAddresses) {
+            if (this.validAddress(addressObj.address)) return true
+        }
+
+        return false
     }
 
     @Watch('activeWallet')
@@ -368,7 +392,7 @@ export default class EditMultisigWallet extends Vue {
     }
 
     deleteMsig(): void {
-        this.mode = 'SIGNING_DELETE'
+        this.mode = 'DELETE'
     }
 
     startEditMsig(): void {
@@ -495,7 +519,7 @@ export default class EditMultisigWallet extends Vue {
         }
     }
 
-    async cancelEditMsig() {
+    async cancel() {
         await this.getAliasInfos()
         this.mode = 'VIEW'
     }
