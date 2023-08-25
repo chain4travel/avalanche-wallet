@@ -423,9 +423,13 @@ input {
 }
 
 .plus-button {
+    border: 2px solid var(--camino-success-color);
     font-size: 10px;
     width: 40px !important;
     height: 40px !important;
+    svg {
+        color: var(--camino-success-color);
+    }
 }
 
 .add-new-address {

@@ -797,9 +797,13 @@ input {
 }
 
 .plus-button {
+    border: 2px solid var(--camino-success-color);
     font-size: 10px;
     width: 40px !important;
     height: 40px !important;
+    svg {
+        color: var(--camino-success-color);
+    }
 }
 
 .add-new-address {
@@ -854,8 +858,12 @@ input {
 }
 
 .delete-button {
+    border: 2px solid var(--camino-error-color);
     width: 35px !important;
     height: 35px !important;
+    svg {
+        color: var(--camino-error-color);
+    }
 }
 .delete-button.mobile {
     display: none;
