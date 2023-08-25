@@ -974,7 +974,7 @@
         "co-owners": "Multisignature Co-Owners",
         "threshold": "Multisignature Threshold",
         "edit_multisig": "Edit Multisignature Wallet",
-        "disclamer": "Saving the multisignature wallet definition will incur a fee {fee} {symbol}",
+        "disclamer": "Saving the new multisignature wallet definition will incur a fee {fee} {symbol}",
         "save_edit_multisig": "Save Multisignature Wallet",
         "sign_edit_multisig": "Sign edited multisignature wallet",
         "execute_edit_multisig": "Execute transaction",
@@ -988,7 +988,8 @@
             "msig_name": "Multisignature name must be between 3 and 64 characters long",
             "threshold_exceeds_owners": "Threshold cannot exceed the number of owners",
             "multisig_name_too_long": "Multisignature name is too long. Please choose a shorter name.",
-            "same_address_twice": "The same P-Chain address should not appear more than once"
+            "same_address_twice": "The same P-Chain address should not appear more than once",
+            "invalid_addresses": "One or more addresses are invalid."
         }
     },
     "validator": {

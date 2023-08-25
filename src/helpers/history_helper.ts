@@ -101,7 +101,7 @@ function getLossNFT(tx: ITransactionData, wallet: WalletType): NFTSummaryResultD
         return false
     })
 
-    let nftsOuts = outputs.filter((output) => {
+    let nftsOuts = outputs?.filter((output) => {
         let type = output.outputType
         if (type === AVMConstants.NFTXFEROUTPUTID) return true
         return false
@@ -123,7 +123,7 @@ function getLossNFT(tx: ITransactionData, wallet: WalletType): NFTSummaryResultD
             }
 
             // Who did we lose it to?
-            for (var n = 0; i < nftsOuts.length; n++) {
+            for (var n = 0; i < nftsOuts?.length; n++) {
                 let nftOut = nftsOuts[n]
                 let doesMatch = nftOut.groupID === utxo.groupID && nftOut.assetID === utxo.assetID
                 let addrNotAdded = nftOut.addresses.filter((addr) => !loss.addresses.includes(addr))
@@ -156,13 +156,13 @@ function getGainNFT(tx: ITransactionData, wallet: WalletType): NFTSummaryResultD
         return false
     })
 
-    let nftsOuts = outputs.filter((output) => {
+    let nftsOuts = outputs?.filter((output) => {
         let type = output.outputType
         if (type === AVMConstants.NFTXFEROUTPUTID) return true
         return false
     })
 
-    for (var i = 0; i < nftsOuts.length; i++) {
+    for (var i = 0; i < nftsOuts?.length; i++) {
         let utxo = nftsOuts[i]
         let owners = utxo.addresses
         let assetID = utxo.assetID
@@ -223,7 +223,7 @@ function getLoss(tx: ITransactionData, wallet: WalletType): TokenSummaryResult {
 
             // Get who received this asset
             let receivers: string[] = []
-            outs.forEach((utxo) => {
+            outs?.forEach((utxo) => {
                 if (utxo.assetID === assetId) {
                     let outAddrs = utxo.addresses
                     // If not a wallet address and not added to receivers
