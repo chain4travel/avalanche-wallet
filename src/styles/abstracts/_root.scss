@@ -57,6 +57,8 @@ html[data-theme='day'] {
     --camino-negative-background: rgba(229, 67, 31, 0.05);
     --camino-warning-color: #334155;
     --camino-alert-color: #334155;
+    --camino-success-color: rgba(24, 183, 40, 1);
+    --camino-error-color: rgba(229, 67, 31, 1);
 }
 
 html[data-theme='night'] {
@@ -95,6 +97,8 @@ html[data-theme='night'] {
     --camino-negative-background: rgba(229, 67, 31, 0.05);
     --camino-warning-color: #cbd4e2;
     --camino-alert-color: #cbd4e2;
+    --camino-success-color: rgba(9, 222, 107, 1);
+    --camino-error-color: rgba(229, 67, 31, 1);
     --camino-slate-slate-950: #020617;
     --camino-slate-slate-600: #475569;
 }
