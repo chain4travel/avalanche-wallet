@@ -343,54 +343,6 @@ export default class CreateMultisigWallet extends Vue {
             })
         }
     }
-
-    getFilteredAddresses(): string[] {
-        return this.addresses
-            .filter((address) => address.address !== '')
-            .map((address) => address.address)
-    }
-
-    async sendMultisigAliasTxCreate(filteredAddresses: string[]): Promise<any> {
-        return WalletHelper.sendMultisigAliasTxCreate(
-            this.activeWallet,
-            filteredAddresses,
-            this.multisigName,
-            Number(this.threshold)
-        )
-    }
-
-    async fetchMultisigAliases(transactionResult: any): Promise<void> {
-        await this.addMultisigAccountToLocalStorage(transactionResult)
-
-        // Fetch multisig aliases after a delay
-        setTimeout(async () => {
-            const aliasesResponse = await this.$store.dispatch('fetchMultiSigAliases', {
-                disable: false,
-            })
-            const aliases = aliasesResponse.map((alias: string): string => 'P-' + alias)
-
-            await this.$store.dispatch('addWalletsMultisig', { keys: aliases })
-        }, UPDATE_ALIAS_TIMEOUT)
-    }
-
-    showSuccessNotification(transactionResult: any): void {
-        // @ts-ignore
-        const { dispatchNotification } = this.globalHelper()
-        const msigAlias = getMultisigAliasesFromTxId(transactionResult)
-        dispatchNotification({
-            message: this.$t('notifications.msig_creation_success', { address: msigAlias }),
-            type: 'success',
-        })
-    }
-
-    showErrorNotification(): void {
-        // @ts-ignore
-        const { dispatchNotification } = this.globalHelper()
-        dispatchNotification({
-            message: this.$t('notifications.msig_creation_failed'),
-            type: 'error',
-        })
-    }
 }
 </script>
 
