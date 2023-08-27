@@ -276,7 +276,6 @@ export default class EditMultisigWallet extends Vue {
     }
 
     get msigEdited(): boolean {
-        console.log('multisigEdited', this.multisigAddressNamesEdited)
         return (
             this.multisigName !== this.initialMultisigState.multisigName ||
             this.threshold !== this.initialMultisigState.threshold ||
@@ -499,8 +498,13 @@ export default class EditMultisigWallet extends Vue {
                     type: 'success',
                 })
                 this.mode = 'VIEW'
-            } catch (err) {
-                if (err instanceof SignatureError) {
+            } catch (err: any) {
+                if (err?.message.includes('insufficient balance')) {
+                    dispatchNotification({
+                        message: this.$t('notifications.insufficient_funds_edit'),
+                        type: 'error',
+                    })
+                } else if (err instanceof SignatureError) {
                     this.updateMultisigAccountInLocalStorage()
                     this.$store.dispatch('Signavault/updateTransaction')
                 } else {
@@ -583,6 +587,7 @@ export default class EditMultisigWallet extends Vue {
             })
         } catch (e: any) {
             console.error('MultiSigTx::sign: Error', e)
+            await this.getAliasInfos()
             dispatchNotification({
                 message: this.$t('notifications.msig_edit_failed'),
                 type: 'error',
