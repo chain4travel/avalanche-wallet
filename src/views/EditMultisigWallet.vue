@@ -499,8 +499,13 @@ export default class EditMultisigWallet extends Vue {
                     type: 'success',
                 })
                 this.mode = 'VIEW'
-            } catch (err) {
-                if (err instanceof SignatureError) {
+            } catch (err: any) {
+                if (err?.message.includes('insufficient balance')) {
+                    dispatchNotification({
+                        message: this.$t('notifications.insufficient_funds_edit'),
+                        type: 'error',
+                    })
+                } else if (err instanceof SignatureError) {
                     this.updateMultisigAccountInLocalStorage()
                     this.$store.dispatch('Signavault/updateTransaction')
                 } else {

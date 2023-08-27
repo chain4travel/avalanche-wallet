@@ -949,7 +949,9 @@
         "msig_creation_failed": "Something went wrong when trying to create the multisigture wallet",
         "msig_edit_success": "{address} has been edited",
         "msig_edit_failed": "Multisignature edit failed",
-        "msig_edit_address_name_success": "Multisig address names updated successfully"
+        "msig_edit_address_name_success": "Multisig address names updated successfully",
+        "insufficient_funds_add": "Not enough funds to add a multisignature wallet",
+        "insufficient_funds_edit": "Not enough funds to edit a multisignature wallet"
     },
     "create_multisig": {
         "title": "Multisignature Wallet",

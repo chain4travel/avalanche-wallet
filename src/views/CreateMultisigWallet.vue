@@ -256,14 +256,12 @@ export default class CreateMultisigWallet extends Vue {
                 await this.fetchMultisigAliases(transactionResult)
                 setTimeout(() => updateShowAlias(), UPDATE_ALIAS_TIMEOUT)
                 this.showSuccessNotification(transactionResult)
-            } else {
-                this.showErrorNotification()
-            }
+            } else this.showErrorNotification()
 
             this.resetForm()
-        } catch (e) {
+        } catch (e: any) {
             console.error(e)
-            this.showErrorNotification()
+            this.showErrorNotification(e)
         }
     }
 
@@ -306,13 +304,20 @@ export default class CreateMultisigWallet extends Vue {
         })
     }
 
-    showErrorNotification(): void {
+    showErrorNotification(e?: any): void {
         // @ts-ignore
         const { dispatchNotification } = this.globalHelper()
-        dispatchNotification({
-            message: this.$t('notifications.msig_creation_failed'),
-            type: 'error',
-        })
+        if (e?.message.includes('insufficient balance')) {
+            dispatchNotification({
+                message: this.$t('notifications.insufficient_funds_add'),
+                type: 'error',
+            })
+        } else {
+            dispatchNotification({
+                message: this.$t('notifications.msig_creation_failed'),
+                type: 'error',
+            })
+        }
     }
 }
 </script>
