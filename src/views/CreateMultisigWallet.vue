@@ -47,6 +47,9 @@
                 <Alert variant="negative" v-if="multupleSameAddresses">
                     {{ $t('create_multisig.errors.same_address_twice') }}
                 </Alert>
+                <Alert variant="negative" v-if="validAddressError">
+                    {{ $t('edit_multisig.errors.invalid_addresses') }}
+                </Alert>
             </div>
 
             <div class="input-container">
@@ -64,10 +67,7 @@
 
         <div class="action-buttons">
             <button
-                :class="[
-                    'camino__primary--button',
-                    { 'camino--button--disabled': disableMsigCreation },
-                ]"
+                class="camino__primary--button"
                 @click="createWallet"
                 :disabled="disableMsigCreation"
             >
@@ -149,12 +149,16 @@ export default class CreateMultisigWallet extends Vue {
             filledAddresses.length === 0 ||
             uniqueAddresses.size !== filledAddresses.length ||
             this.thresholdError ||
-            this.nameLengthError
+            this.nameLengthError ||
+            this.validAddressError
         )
     }
 
     get thresholdError() {
-        return this.threshold > this.addresses.length
+        const filledAddresses = this.addresses.filter((a) => a.address !== '')
+        const uniqueAddresses = new Set(filledAddresses.map((a) => a.address))
+
+        return this.threshold > uniqueAddresses.size
     }
 
     get nameLengthError() {
@@ -167,6 +171,26 @@ export default class CreateMultisigWallet extends Vue {
         const uniqueAddresses = new Set(filledAddresses.map((a) => a.address))
 
         return uniqueAddresses.size !== filledAddresses.length
+    }
+
+    get validAddressError(): boolean {
+        const filledAddresses = this.addresses.filter((a) => a.address !== '')
+
+        for (const addressObj of filledAddresses) {
+            if (this.validAddress(addressObj.address)) return true
+        }
+
+        return false
+    }
+
+    validAddress(address: string): boolean {
+        const hrp = ava.getHRP()
+
+        if (!address.includes(hrp)) return true
+
+        if (address.split('-')[0] !== 'P') return true
+
+        return false
     }
 
     formattedAmount(val: BN): string {

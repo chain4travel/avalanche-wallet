@@ -276,7 +276,6 @@ export default class EditMultisigWallet extends Vue {
     }
 
     get msigEdited(): boolean {
-        console.log('multisigEdited', this.multisigAddressNamesEdited)
         return (
             this.multisigName !== this.initialMultisigState.multisigName ||
             this.threshold !== this.initialMultisigState.threshold ||
@@ -588,6 +587,7 @@ export default class EditMultisigWallet extends Vue {
             })
         } catch (e: any) {
             console.error('MultiSigTx::sign: Error', e)
+            await this.getAliasInfos()
             dispatchNotification({
                 message: this.$t('notifications.msig_edit_failed'),
                 type: 'error',
