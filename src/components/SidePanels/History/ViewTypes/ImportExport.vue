@@ -11,6 +11,8 @@
     </div>
 </template>
 <script lang="ts">
+import { bintools } from '@/AVA'
+import { chainIdFromAlias, bnToBig } from '@/helpers/helper'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { ITransactionData } from '@/store/modules/history/types'
 import { ava } from '@/AVA'
@@ -52,19 +54,8 @@ export default class ImportExport extends Vue {
     // }
 
     get chainAlias() {
-        let chainId
-        if (this.isExport) {
-            chainId = this.fromChainId
-        } else {
-            chainId = this.destinationChainId
-        }
-
-        if (chainId === ava.PChain().getBlockchainID()) {
-            return 'P'
-        } else if (chainId === ava.XChain().getBlockchainID()) {
-            return 'X'
-        }
-        return chainId
+        let chainId = this.isExport ? this.fromChainId : this.destinationChainId
+        return chainIdFromAlias(chainId)
     }
 
     get amt(): BN {

@@ -82,7 +82,9 @@ export default class ModalClaimDepositReward extends Vue {
     @Prop({ required: true }) depositTxID!: string
     @Prop({ required: true }) amount!: BN
     @Prop({ required: true }) rewardOwner!: RewardOwner
+    @Prop() validatorClaim!: boolean
     @Prop() canExecuteMultisigTx!: boolean
+
     claimed: number = 0 // 0:false, 1:true, 2:pending
     confiremedClaimedAmount: string = ''
     amt: BN = this.amount
@@ -166,7 +168,13 @@ export default class ModalClaimDepositReward extends Vue {
         )
 
         if (!this.pendingSendMultisigTX) {
-            WalletHelper.buildDepositClaimTx(wallet, this.depositTxID, rewardOwner, this.amt)
+            WalletHelper.buildDepositClaimTx(
+                wallet,
+                this.depositTxID,
+                rewardOwner,
+                this.amt,
+                this.validatorClaim
+            )
                 .then((value) => {
                     if (!value) {
                         // multisg flow

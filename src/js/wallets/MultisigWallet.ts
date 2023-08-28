@@ -1,49 +1,49 @@
 import { ava, bintools } from '@/AVA'
-import { AxiosError } from 'axios'
-import { AvaWalletCore, ChainAlias, WalletNameType } from './types'
-import { ChainIdType } from '../../constants'
-import { WalletCore } from './WalletCore'
 import { BN, Buffer } from '@c4tplatform/caminojs/dist'
-import { PayloadBase, privateKeyStringToBuffer } from '@c4tplatform/caminojs/dist/utils'
 import {
     Tx as AVMTx,
-    UnsignedTx as AVMUnsignedTx,
     UTXO as AVMUTXO,
     UTXOSet as AVMUTXOSet,
+    UnsignedTx as AVMUnsignedTx,
 } from '@c4tplatform/caminojs/dist/apis/avm'
+import { Tx as EVMTx, UnsignedTx as EVMUnsignedTx } from '@c4tplatform/caminojs/dist/apis/evm'
 import {
+    KeyChain,
     KeyPair,
     Owner,
-    PlatformVMConstants,
-    Tx as PlatformTx,
     BaseTx as PlatformBaseTx,
-    UnsignedTx as PlatformUnsignedTx,
+    Tx as PlatformTx,
     UTXO as PlatformUTXO,
     UTXOSet as PlatformUTXOSet,
-    KeyChain,
+    UnsignedTx as PlatformUnsignedTx,
+    PlatformVMConstants,
 } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import {
     MultisigKeyChain,
     MultisigKeyPair,
     OutputOwners,
     SECP256k1KeyPair,
-    SignerKeyPair,
-    SignerKeyChain,
     SignatureError,
+    SignerKeyChain,
+    SignerKeyPair,
     StandardBaseTx,
     StandardTx,
     StandardUnsignedTx,
 } from '@c4tplatform/caminojs/dist/common'
-import { Tx as EVMTx, UnsignedTx as EVMUnsignedTx } from '@c4tplatform/caminojs/dist/apis/evm'
+import { PayloadBase, privateKeyStringToBuffer } from '@c4tplatform/caminojs/dist/utils'
+import { AxiosError } from 'axios'
+import { ChainIdType } from '../../constants'
+import { WalletCore } from './WalletCore'
+import { AvaWalletCore, ChainAlias, WalletNameType } from './types'
 
 import { ModelMultisigTx, SignaVault } from '@/signavault_api'
 
+import { ITransaction } from '@/components/wallet/transfer/types'
+import { WalletHelper } from '@/helpers/wallet_helper'
 import Erc20Token from '@/js/Erc20Token'
 import { Transaction } from '@ethereumjs/tx'
-import { ITransaction } from '@/components/wallet/transfer/types'
-import { buildUnsignedTransaction } from '../TxHelper'
 import createHash from 'create-hash'
-import { WalletHelper } from '@/helpers/wallet_helper'
+import { buildUnsignedTransaction } from '../TxHelper'
 
 const NotImplementedError = new Error('Not implemented in MultisigWwallet')
 
@@ -103,11 +103,16 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         return JSON.stringify(this.keyData)
     }
 
-    setKey(key: string): void {
-        this.keyData = JSON.parse(key)
-        // The JSON buffer is not our "AvalancheBuffer"
-        this.keyData.alias = Buffer.from(this.keyData.alias)
-        this.ethAddress = this.keyData.alias.toString('hex')
+    setKey(key?: string, updatedValues?: { addresses: string[]; threshold: number }): void {
+        if (updatedValues) {
+            this.keyData.owner.addresses = updatedValues.addresses
+            this.keyData.owner.threshold = updatedValues.threshold
+        } else if (key) {
+            this.keyData = JSON.parse(key)
+            // The JSON buffer is not our "AvalancheBuffer"
+            this.keyData.alias = Buffer.from(this.keyData.alias)
+            this.ethAddress = this.keyData.alias.toString('hex')
+        }
     }
 
     ownerAddresses(): Buffer[] {
