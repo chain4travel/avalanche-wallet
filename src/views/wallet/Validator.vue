@@ -100,29 +100,25 @@
     </div>
 </template>
 <script lang="ts">
-import 'reflect-metadata'
-import { Component, Vue, Watch } from 'vue-property-decorator'
+import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
+import RewardsNotAvailable from '@/components/wallet/earn/RewardsNotAvailable.vue'
 import AddValidator from '@/components/wallet/earn/Validate/AddValidator.vue'
-import { BN } from '@c4tplatform/caminojs/dist'
+import ClaimRewards from '@/components/wallet/earn/Validate/ClaimRewards.vue'
+import PendingMultisig from '@/components/wallet/earn/Validate/PendingMultisig.vue'
+import RegisterNode from '@/components/wallet/earn/Validate/RegisterNode.vue'
+import ValidatorInfo from '@/components/wallet/earn/Validate/ValidatorInfo.vue'
+import ValidatorPending from '@/components/wallet/earn/Validate/ValidatorPending.vue'
+import ValidatorSuspended from '@/components/wallet/earn/Validate/ValidatorSuspended.vue'
 import { bnToBig } from '@/helpers/helper'
-import Big from 'big.js'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
-import RegisterNode from '@/components/wallet/earn/Validate/RegisterNode.vue'
-import {
-    ADDRESSSTATECONSORTIUM,
-    ADDRESSSTATEKYCVERIFIED,
-    ADDRESSSTATEDEFERRED,
-} from '@c4tplatform/caminojs/dist/apis/platformvm/addressstatetx'
-import ValidatorInfo from '@/components/wallet/earn/Validate/ValidatorInfo.vue'
-import ValidatorSuspended from '@/components/wallet/earn/Validate/ValidatorSuspended.vue'
-import ClaimRewards from '@/components/wallet/earn/Validate/ClaimRewards.vue'
-import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import { WalletCore } from '@/js/wallets/WalletCore'
-import PendingMultisig from '@/components/wallet/earn/Validate/PendingMultisig.vue'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
-import ValidatorPending from '@/components/wallet/earn/Validate/ValidatorPending.vue'
-import RewardsNotAvailable from '@/components/wallet/earn/RewardsNotAvailable.vue'
+import { BN } from '@c4tplatform/caminojs/dist'
+import { AddressState } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import Big from 'big.js'
+import 'reflect-metadata'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 
 @Component({
     name: 'validator',
@@ -191,9 +187,9 @@ export default class Validator extends Vue {
     async evaluateCanRegisterNode() {
         const BN_ONE = new BN(1)
         const result = await WalletHelper.getAddressState(this.addresses[0])
-        this.isKycVerified = !result.and(BN_ONE.shln(ADDRESSSTATEKYCVERIFIED)).isZero()
-        this.isConsortiumMember = !result.and(BN_ONE.shln(ADDRESSSTATECONSORTIUM)).isZero()
-        this.validatorIsSuspended = !result.and(BN_ONE.shln(ADDRESSSTATEDEFERRED)).isZero()
+        this.isKycVerified = !result.and(BN_ONE.shln(AddressState.KYC_VERIFIED)).isZero()
+        this.isConsortiumMember = !result.and(BN_ONE.shln(AddressState.CONSORTIUM)).isZero()
+        this.validatorIsSuspended = !result.and(BN_ONE.shln(AddressState.NODE_DEFERRED)).isZero()
 
         try {
             this.nodeId = await WalletHelper.getRegisteredNode(this.addresses[0])
