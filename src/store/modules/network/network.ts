@@ -1,12 +1,12 @@
-import { Module } from 'vuex'
-import { RootState } from '@/store/types'
 import { NetworkState } from '@/store/modules/network/types'
+import { RootState } from '@/store/types'
+import { Module } from 'vuex'
 
 import { ava, infoApi } from '@/AVA'
-import { AvaNetwork } from '@/js/AvaNetwork'
-import { explorer_api } from '@/explorer_api'
-import { BN } from '@c4tplatform/caminojs/dist'
 import { web3 } from '@/evm'
+import { explorer_api } from '@/explorer_api'
+import { AvaNetwork } from '@/js/AvaNetwork'
+import { BN } from '@c4tplatform/caminojs/dist'
 import { setSocketNetwork } from '../../../providers'
 const network_module: Module<NetworkState, RootState> = {
     namespaced: true,
@@ -165,6 +165,7 @@ const network_module: Module<NetworkState, RootState> = {
                 if (rootState.activeWallet) {
                     rootState.activeWallet.initialize()
                 }
+                rootState.wallets = rootState.wallets.filter((wallet) => wallet.type !== 'multisig')
             }
 
             await dispatch('Assets/onNetworkChange', net, { root: true })
