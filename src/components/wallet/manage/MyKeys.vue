@@ -51,13 +51,13 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Watch } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 
-import KeyRow from '@/components/wallet/manage/KeyRow.vue'
-import RememberKey from '@/components/misc/RememberKey.vue'
-import { WalletType } from '@/js/wallets/types'
 import { bintools } from '@/AVA'
+import RememberKey from '@/components/misc/RememberKey.vue'
+import KeyRow from '@/components/wallet/manage/KeyRow.vue'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { WalletType } from '@/js/wallets/types'
 
 @Component({
     components: {
@@ -161,10 +161,20 @@ export default class MyKeys extends Vue {
     get activeWallet(): WalletType {
         return this.$store.state.activeWallet
     }
+    get activeNetworkStatus() {
+        return this.$store.state.Network.status
+    }
+    @Watch('activeNetworkStatus')
+    async handleNetowrkChanged() {
+        if (this.activeNetworkStatus === 'connected' && this.multiSigAliases.length > 0) {
+            this.imported = false
+        }
+    }
     @Watch('wallets.length')
     async onWalletsChange() {
-        if (this.wallets.length > 1)
+        if (this.wallets.length > 1) {
             await this.$store.dispatch('fetchMultiSigAliases', { disable: false })
+        }
     }
     get multiSigAliases(): string[] {
         return this.$store.getters.multiSigAliases
