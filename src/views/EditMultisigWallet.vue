@@ -504,7 +504,6 @@ export default class EditMultisigWallet extends Vue {
                     message: this.$t('notifications.transfer_success_msg'),
                     type: 'success',
                 })
-                this.loading = false
                 this.mode = 'VIEW'
             } catch (err: any) {
                 if (err?.message.includes('insufficient balance')) {
@@ -512,19 +511,18 @@ export default class EditMultisigWallet extends Vue {
                         message: this.$t('notifications.insufficient_funds_edit'),
                         type: 'error',
                     })
-                    this.loading = false
                 } else if (err instanceof SignatureError) {
                     this.updateMultisigAccountInLocalStorage()
                     this.$store.dispatch('Signavault/updateTransaction')
-                    this.loading = false
                 } else {
                     console.error('Error sending multisig:', err)
                     dispatchNotification({
                         message: this.$t('notifications.something_went_wrong'),
                         type: 'error',
                     })
-                    this.loading = false
                 }
+            } finally {
+                this.loading = false
             }
         } else {
             this.loading = true
