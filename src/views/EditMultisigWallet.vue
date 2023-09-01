@@ -76,7 +76,7 @@
             <div class="input-container">
                 <h3>{{ $t('edit_multisig.threshold') }}</h3>
                 <CamInput
-                    class="threshold-input"
+                    class="msig-threshold-input"
                     placeholder="Multisignature Threshold"
                     v-model.number="threshold"
                     :error="thresholdError"
