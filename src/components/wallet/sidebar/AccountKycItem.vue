@@ -1,7 +1,7 @@
 <template>
     <div v-if="!isLedger && wallet" style="width: 100%">
         <template v-if="type === 'kyc'">
-            <template v-if="kycStatus">
+            <template v-if="kycStatus && !isMultisig">
                 <button class="success_button">
                     <v-icon>mdi-check-decagram</v-icon>
                     {{ $t('kyc_process.kyc_verified') }}
@@ -20,7 +20,7 @@
             </template>
         </template>
         <template v-else>
-            <template v-if="kybStatus">
+            <template v-if="kybStatus && !isMultisig">
                 <button class="success_button">
                     <v-icon>mdi-check-decagram</v-icon>
                     {{ $t('kyc_process.kyb_verified') }}
@@ -41,10 +41,11 @@
     </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
-import KycModal from '@/components/modals/KycModal.vue'
-import { WalletType } from '@/js/wallets/types'
 import KybModal from '@/components/modals/KybModal.vue'
+import KycModal from '@/components/modals/KycModal.vue'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { WalletType } from '@/js/wallets/types'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 @Component({
     components: {
         KycModal,
@@ -66,6 +67,9 @@ export default class AccountKycItem extends Vue {
 
     get wallet(): WalletType | null {
         return this.$store.state.activeWallet
+    }
+    get isMultisig(): boolean {
+        return this.wallet instanceof MultisigWallet
     }
 
     get isLedger() {
