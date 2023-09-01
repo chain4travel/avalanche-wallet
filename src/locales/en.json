@@ -959,9 +959,9 @@
         "co-owners": "Multisignature Co-Owners",
         "threshold": "Multisignature Threshold",
         "create_multisig": "Create Multisignature Wallet",
-        "disclamer": "Saving the multisignature wallet definition will incur a fee {fee} {symbol}",
+        "disclamer": "Saving the multisignature wallet definition will incur a fee of {fee} {symbol}",
         "alert": {
-            "wize_name": "Please note this description will be public on the Camino Network. Choose wisely"
+            "wize_name": "Please be aware that this description will be publicly visible on the Camino Network. Choose your words carefully."
         },
         "errors": {
             "msig_name": "Multisignature name must be between 3 and 64 characters long",
@@ -976,7 +976,7 @@
         "co-owners": "Multisignature Co-Owners",
         "threshold": "Multisignature Threshold",
         "edit_multisig": "Edit Multisignature Wallet",
-        "disclamer": "Saving the new multisignature wallet definition will incur a fee {fee} {symbol}",
+        "disclamer": "Saving the new multisignature wallet definition will incur a fee of {fee} {symbol}",
         "save_edit_multisig": "Save Multisignature Wallet",
         "sign_edit_multisig": "Sign edited multisignature wallet",
         "execute_edit_multisig": "Execute transaction",
@@ -984,7 +984,7 @@
         "abort": "Abort",
         "cancel": "Cancel",
         "alert": {
-            "wize_name": "Please note this description will be public on the Camino Network. Choose wisely"
+            "wize_name": "Please be aware that this description will be publicly visible on the Camino Network. Choose your words carefully."
         },
         "errors": {
             "msig_name": "Multisignature name must be between 3 and 64 characters long",

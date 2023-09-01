@@ -115,7 +115,7 @@
                     @click.native="select"
                 >
                     <Spinner v-if="activating" class="spinner"></Spinner>
-                    <fa v-else icon="star"></fa>
+                    <img src="@/assets/logout.svg" style="height: 16px" alt="Logout" class="icon" />
                 </Tooltip>
                 <Tooltip v-if="canRemove()" :text="$t('keys.remove_key')" class="row_but circle">
                     <button @click.prevent="remove">
@@ -356,20 +356,29 @@ export default class KeyRow extends Vue {
     > * {
         margin: 0px 4px !important;
     }
+}
 
-    .text_buts {
-        display: flex;
-        flex-direction: column;
+.text_buts {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 
-        > button {
-            text-align: right;
-            font-size: 13px;
+    > button {
+        text-align: right;
+        font-size: 13px;
 
-            &:hover {
-                color: var(--secondary-color);
-            }
+        &:hover {
+            color: var(--secondary-color);
         }
     }
+}
+
+.icon {
+    filter: invert(0);
+}
+
+[data-theme='night'] .icon {
+    filter: invert(1);
 }
 
 .row_but {
@@ -387,6 +396,7 @@ export default class KeyRow extends Vue {
     display: flex;
     justify-content: center;
     align-self: center;
+    align-items: center;
 
     &:hover {
         background-color: var(--bg);
