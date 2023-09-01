@@ -436,13 +436,12 @@ input {
 }
 
 .circle {
-    border: var(--primary-border);
+    border: 2px solid var(--camino-slate-slate-600);
     cursor: pointer;
     justify-content: center;
     align-items: center;
     display: flex;
     border-radius: 100%;
-    border-width: 2px;
     padding: 10px;
 }
 
