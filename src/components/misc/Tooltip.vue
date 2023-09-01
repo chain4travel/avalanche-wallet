@@ -18,3 +18,9 @@ export default {
     },
 }
 </script>
+<style scoped lang="scss">
+button {
+    width: fit-content;
+    height: fit-content;
+}
+</style>
