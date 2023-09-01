@@ -616,6 +616,7 @@ export default class EditMultisigWallet extends Vue {
                 message: this.$t('notifications.msig_edit_success', { address: msigAlias }),
                 type: 'success',
             })
+            this.fetchMultisigAliases()
         } catch (e: any) {
             console.error('MultiSigTx::sign: Error', e)
             await this.getAliasInfos()
@@ -628,6 +629,16 @@ export default class EditMultisigWallet extends Vue {
         }
     }
 
+    async fetchMultisigAliases(): Promise<void> {
+        // Fetch multisig aliases after a delay
+        setTimeout(async () => {
+            const aliasesResponse = await this.$store.dispatch('fetchMultiSigAliases', {
+                disable: false,
+            })
+            const aliases = aliasesResponse.map((alias: string): string => 'P-' + alias)
+            await this.$store.dispatch('editWalletsMultisig', { keys: aliases })
+        }, 3000)
+    }
     async updateMultisigTxDetails() {
         const msigAlias = this.activeWallet?.getStaticAddress('P')
         const msigData = await ava.PChain().getMultisigAlias(msigAlias)
