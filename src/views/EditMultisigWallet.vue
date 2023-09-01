@@ -40,7 +40,7 @@
                         />
                         <CamInput
                             class="msig-address-name"
-                            :placeholder="index === 0 ? 'My Address' : `Owner ${index + 1} Name`"
+                            :placeholder="`Owner ${index + 1} Name`"
                             v-model="address.name"
                             :disabled="mode !== 'EDIT' || pendingSendMultisigTX"
                         />
