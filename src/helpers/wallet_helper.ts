@@ -756,8 +756,10 @@ class WalletHelper {
 
     static async sendMultisigAliasTxUpdate(
         wallet: WalletType,
+        initialAddresses: string[],
         addresses: string[],
         memo: string,
+        initialThreshold: number,
         threshold: number,
         multisigAliasAddress: string
     ) {
@@ -778,12 +780,12 @@ class WalletHelper {
             .PChain()
             .buildMultisigAliasTx(
                 wallet.platformUtxoset,
-                [[multisigAliasAddress], addresses],
+                [[multisigAliasAddress], initialAddresses],
                 [multisigAliasAddress],
                 multisigAliasParams,
                 undefined,
                 ZeroBN,
-                threshold
+                initialThreshold
             )
 
         let tx = await wallet.signP(unsignedTx)
