@@ -447,12 +447,19 @@ export default class EditMultisigWallet extends Vue {
         return isSigned
     }
 
+    getNonEmptyAddresses(addresses: { address: string; name: string }[] = []): string[] {
+        return addresses
+            .filter((address) => address.address.trim() !== '')
+            .map((address) => address.address)
+    }
+
     async saveEditMsig() {
         // @ts-ignore
         const { dispatchNotification, updateShowAlias } = this.globalHelper()
-        const filteredAddresses = this.addresses
-            .filter((address) => address.address !== '')
-            .map((address) => address.address)
+        const getNonEmptyAddresses = this.getNonEmptyAddresses(this.addresses)
+        const nonEmptyInitialAddresses = this.getNonEmptyAddresses(
+            this.initialMultisigState.addresses
+        )
 
         const alias = this.activeWallet?.getStaticAddress('P')
 
@@ -479,8 +486,10 @@ export default class EditMultisigWallet extends Vue {
                 })
                 const result = await WalletHelper.sendMultisigAliasTxUpdate(
                     this.activeWallet as MultisigWallet,
-                    filteredAddresses,
+                    nonEmptyInitialAddresses,
+                    getNonEmptyAddresses,
                     this.multisigName,
+                    this.initialMultisigState.threshold,
                     this.threshold,
                     alias
                 )
@@ -506,21 +515,7 @@ export default class EditMultisigWallet extends Vue {
                 })
                 this.mode = 'VIEW'
             } catch (err: any) {
-                if (err?.message.includes('insufficient balance')) {
-                    dispatchNotification({
-                        message: this.$t('notifications.insufficient_funds_edit'),
-                        type: 'error',
-                    })
-                } else if (err instanceof SignatureError) {
-                    this.updateMultisigAccountInLocalStorage()
-                    this.$store.dispatch('Signavault/updateTransaction')
-                } else {
-                    console.error('Error sending multisig:', err)
-                    dispatchNotification({
-                        message: this.$t('notifications.something_went_wrong'),
-                        type: 'error',
-                    })
-                }
+                this.handleMsigEditError(err)
             } finally {
                 this.loading = false
             }
@@ -531,6 +526,40 @@ export default class EditMultisigWallet extends Vue {
             this.loading = false
         }
     }
+
+    // ------------------------- MSIG EDIT ERROR HANDLING ------------------------- //
+    getErrorMessage(error: any): string {
+        if (error?.message.includes('insufficient balance'))
+            return 'notifications.insufficient_funds_edit'
+
+        return 'notifications.something_went_wrong'
+    }
+
+    handleMsigEditError(error: any) {
+        console.error('Error in saveEditMsig:', error)
+        // @ts-ignore
+        const { dispatchNotification } = this.globalHelper()
+
+        if (error instanceof SignatureError) {
+            this.updateMultisigAccountInLocalStorage()
+            this.$store.dispatch('Signavault/updateTransaction')
+            dispatchNotification({
+                message: this.$t('notifications.multisig_transaction_saved'),
+                type: 'success',
+            })
+        } else {
+            const errorMessage = this.getErrorMessage(error)
+
+            dispatchNotification({
+                message: this.$t(errorMessage),
+                type: 'error',
+            })
+        }
+
+        this.loading = false
+    }
+
+    // ------------------------------------------------------------------------- //
 
     async cancel() {
         await this.getAliasInfos()
@@ -639,6 +668,7 @@ export default class EditMultisigWallet extends Vue {
             await this.$store.dispatch('editWalletsMultisig', { keys: aliases })
         }, 3000)
     }
+
     async updateMultisigTxDetails() {
         const msigAlias = this.activeWallet?.getStaticAddress('P')
         const msigData = await ava.PChain().getMultisigAlias(msigAlias)
@@ -654,9 +684,8 @@ export default class EditMultisigWallet extends Vue {
             const savedAddress = savedAddresses.find(
                 (a: { address: string; name: string }) => a.address === address.address
             )
-            if (savedAddress) {
-                address.name = savedAddress.name
-            }
+            if (savedAddress) address.name = savedAddress.name
+
             return address
         })
     }
@@ -675,9 +704,8 @@ export default class EditMultisigWallet extends Vue {
             return false
         else {
             for (let i = 0; i < this.addresses.length; i++) {
-                if (this.addresses[i].name !== this.initialMultisigState.addresses[i].name) {
+                if (this.addresses[i].name !== this.initialMultisigState.addresses[i].name)
                     return true
-                }
             }
         }
 
@@ -689,9 +717,8 @@ export default class EditMultisigWallet extends Vue {
             const msigAlias = this.activeWallet?.getStaticAddress('P')
             const localStorageAccountIndex = this.$store.state.Accounts.accountIndex
 
-            if (localStorageAccountIndex === null || localStorageAccountIndex === undefined) {
+            if (localStorageAccountIndex === null || localStorageAccountIndex === undefined)
                 throw new Error('account is not set in local storage')
-            }
 
             let accounts = JSON.parse(localStorage.getItem('accounts') || '[]')
             if (accounts[localStorageAccountIndex]) {
@@ -717,17 +744,13 @@ export default class EditMultisigWallet extends Vue {
                 )
 
                 // If it exists, replace it with the new multisignature object
-                if (existingMultisigIndex !== -1) {
+                if (existingMultisigIndex !== -1)
                     targetMultisignatures[existingMultisigIndex] = multisignature
-                } else {
-                    targetMultisignatures.push(multisignature)
-                }
+                else targetMultisignatures.push(multisignature)
 
                 accounts[localStorageAccountIndex].multisignatures = targetMultisignatures
                 localStorage.setItem('accounts', JSON.stringify(accounts))
-            } else {
-                console.error(`Account with index ${localStorageAccountIndex} does not exist.`)
-            }
+            } else console.error(`Account with index ${localStorageAccountIndex} does not exist.`)
         } catch (error) {
             console.error(
                 'An error occurred while updating multisig account in local storage: ',
