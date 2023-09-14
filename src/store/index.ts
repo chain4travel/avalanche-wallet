@@ -371,7 +371,50 @@ export default new Vuex.Store({
             }
             return wallets
         },
+        async editWalletsMultisig(
+            { state, dispatch, getters },
+            { keys }
+        ): Promise<MultisigWallet[] | null> {
+            // Cannot add singleton wallets on ledger mode
+            if (state.activeWallet?.type === 'ledger') return null
 
+            const wallets: MultisigWallet[] = []
+            const staticAddresses = getters.staticAddresses('P') as string[]
+            for (const alias of keys as string[]) {
+                var response: MultisigAliasReply
+                try {
+                    // get owner from alias
+                    response = await ava.PChain().getMultisigAlias(alias)
+                } catch (e) {
+                    continue
+                }
+
+                const aliasBuffer = bintools.stringToAddress(alias)
+                const oldWallet = state.wallets.find((w) => {
+                    if (
+                        (w.type === 'multisig' &&
+                            (w as MultisigWallet).alias().compare(aliasBuffer)) === 0
+                    ) {
+                        return true
+                    }
+                    return false
+                })
+
+                if (oldWallet) {
+                    if (!response.addresses.some((address) => staticAddresses.includes(address)))
+                        // Check that we have at least one staticAddress in owner
+                        continue
+
+                    const wallet = new MultisigWallet(aliasBuffer, response.memo, response)
+                    wallet.accountHash = createHash('sha256').update(wallet.getKey()).digest()
+                    const indexOfOldWalelt = state.wallets.indexOf(oldWallet)
+                    state.wallets[indexOfOldWalelt] = wallet
+                    dispatch('activateWallet', state.wallets[indexOfOldWalelt])
+                    this.dispatch('updateMultisigWallets')
+                }
+            }
+            return wallets
+        },
         removeWallet({ state, dispatch, commit }, wallet: WalletType) {
             let index = state.wallets.indexOf(wallet)
             let wallets = [...state.wallets]
