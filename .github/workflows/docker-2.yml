@@ -53,6 +53,7 @@ jobs:
           repository: 'chain4travel/camino-suite'
           ref: 'refs/heads/suite-tagging'
           path: './camino-suite'
+          token: '${{ secrets.GIT_TAGS_TOKEN }}'
 
       - name: Create tag
         working-directory: ./camino-suite
