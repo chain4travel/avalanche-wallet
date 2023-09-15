@@ -51,7 +51,7 @@ jobs:
           submodules: recursive
           fetch-depth: 0
           repository: 'chain4travel/camino-suite'
-          ref: 'refs/heads/suite-c4t'
+          ref: 'refs/heads/suite-tagging'
           path: './camino-suite'
 
       - name: Create tag
