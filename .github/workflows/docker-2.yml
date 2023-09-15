@@ -1,0 +1,70 @@
+name: build-docker-image-2
+
+on:
+  push:
+    branches:
+      - suite-tagging
+
+
+env:
+  node_version: 16
+  module_docker_image: 'europe-west3-docker.pkg.dev/pwk-c4t-dev/camino-suite-apps/camino-suite-wallet'
+
+jobs:
+  build_docker:
+    name: Build Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Prepare Image Tag
+        id: setDefaults
+        run: |
+          DOCKER_IMAGE_NAME="europe-west3-docker.pkg.dev/pwk-c4t-dev/internal-camino-dev/camino-suite"
+
+          if [[ "${{ github.ref }}" == "refs/heads/c4t" ]]; then
+              echo "docker_image=$DOCKER_IMAGE_NAME:stage" >> $GITHUB_OUTPUT
+              echo "build_env=stage" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/suite-c4t" ]]; then
+              echo "docker_image=$DOCKER_IMAGE_NAME:stage" >> $GITHUB_OUTPUT
+              echo "build_env=stage" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+              echo "docker_image=$DOCKER_IMAGE_NAME:dev" >> $GITHUB_OUTPUT
+              echo "build_env=dev" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/suite" ]]; then
+              echo "docker_image=$DOCKER_IMAGE_NAME:dev" >> $GITHUB_OUTPUT
+              echo "build_env=dev" >> $GITHUB_OUTPUT 
+          else
+              echo "docker_image=$DOCKER_IMAGE_NAME:temp" >> $GITHUB_OUTPUT
+              echo "build_env=dev" >> $GITHUB_OUTPUT   
+          fi
+
+      - name: Cloud authentication
+        if: github.event_name == 'push'
+        id: auth
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          repository: 'chain4travel/camino-suite'
+          ref: 'refs/heads/suite-c4t'
+          path: './camino-suite'
+
+      - name: Create tag
+        working-directory: ./camino-suite
+        if: ${{ (github.ref  == 'refs/heads/suite-tagging') && (github.event_name == 'push')
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          CURRENT_TAG=$(git describe --abbrev=0 --tags)
+          if [[ $CURRENT_TAG == *"-rc"* ]]; then
+            TAG=$(echo "$CURRENT_TAG"|awk -F'-rc' -v OFS='-rc' '{$2=sprintf("%1d",++$2)}7')
+          fi
+          git tag -a $TAG -m "creat tag $TAG for staging"
+          git push --tags
+
+      
