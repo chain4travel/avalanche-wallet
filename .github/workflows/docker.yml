@@ -76,7 +76,6 @@ jobs:
           docker push ${{ steps.setDefaults.outputs.docker_image }}
           gcloud run deploy camino-suite-${{ steps.setDefaults.outputs.build_env }} --image ${{ steps.setDefaults.outputs.docker_image }} --region=europe-west1
 
-
       - name: checkout camino-suite
         if: ${{ (github.event_name == 'push') && (steps.setDefaults.outputs.build_env  == 'stage') }}
         uses: actions/checkout@v3
@@ -100,8 +99,7 @@ jobs:
           fi
           git tag -a $TAG -m "create tag $TAG for staging"
           git push --tags
-          echo "suite_tag=$TAG" >> $GITHUB_OUTPUT 
-
+          echo "suite_tag=$TAG" >> $GITHUB_OUTPUT
 
       - name: Create tag
         if: ${{ (github.event_name == 'push') && (steps.setDefaults.outputs.build_env  == 'stage') }}
