@@ -84,11 +84,12 @@ jobs:
           submodules: recursive
           fetch-depth: 0
           repository: 'chain4travel/camino-suite'
-          ref: 'refs/heads/suite-tagging'
+          ref: 'refs/heads/suite-c4t'
           path: './camino-suite'
           token: '${{ secrets.GIT_TAGS_TOKEN }}'
 
-      - name: Create tag
+      - name: Create suite tag
+        id: createTag
         if: ${{ (github.event_name == 'push') && (steps.setDefaults.outputs.build_env  == 'stage') }}
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
@@ -97,5 +98,15 @@ jobs:
           if [[ $CURRENT_TAG == *"-rc"* ]]; then
             TAG=$(echo "$CURRENT_TAG"|awk -F'-rc' -v OFS='-rc' '{$2=sprintf("%1d",++$2)}7')
           fi
-          git tag -a $TAG -m "creat tag $TAG for staging"
+          git tag -a $TAG -m "create tag $TAG for staging"
+          git push --tags
+          echo "suite_tag=$TAG" >> $GITHUB_OUTPUT 
+
+
+      - name: Create tag
+        if: ${{ (github.event_name == 'push') && (steps.setDefaults.outputs.build_env  == 'stage') }}
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git tag ${{ steps.createTag.outputs.suite_tag }}
           git push --tags
