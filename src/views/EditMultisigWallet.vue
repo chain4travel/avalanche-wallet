@@ -28,7 +28,9 @@
                             class="circle delete-button mobile"
                             v-if="mode === 'EDIT'"
                         >
-                            <fa icon="minus"></fa>
+                            <CamTooltipe :content="$t('edit_multisig.label.remove_owner')">
+                                <fa icon="minus"></fa>
+                            </CamTooltipe>
                         </button>
                     </div>
                     <div class="address-input">
@@ -50,16 +52,20 @@
                         class="circle delete-button desktop"
                         v-if="mode === 'EDIT'"
                     >
-                        <fa icon="minus"></fa>
+                        <CamTooltipe :content="$t('edit_multisig.label.remove_owner')">
+                            <fa icon="minus"></fa>
+                        </CamTooltipe>
                     </button>
                 </div>
 
                 <div class="add-new-address" v-if="addresses.length < 128 && mode === 'EDIT'">
                     <div class="circle number">{{ addresses.length + 1 }}</div>
                     <div class="add-new-address--button">
-                        <button @click="addAddress" class="circle plus-button">
-                            <fa icon="plus"></fa>
-                        </button>
+                        <CamTooltipe :content="$t('edit_multisig.label.add_owner')">
+                            <button @click="addAddress" class="circle plus-button">
+                                <fa icon="plus"></fa>
+                            </button>
+                        </CamTooltipe>
                     </div>
                 </div>
 
@@ -150,8 +156,9 @@
 <script lang="ts">
 import { ava, bintools } from '@/AVA'
 import Alert from '@/components/Alert.vue'
-import CamInput from '@/components/CamInput.vue'
 import CamBtn from '@/components/CamBtn.vue'
+import CamInput from '@/components/CamInput.vue'
+import CamTooltipe from '@/components/misc/CamTooltipe.vue'
 import AvaAsset from '@/js/AvaAsset'
 import { AvaNetwork } from '@/js/AvaNetwork'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
@@ -159,14 +166,13 @@ import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import { WalletType } from '@/js/wallets/types'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { BN } from '@c4tplatform/caminojs'
-import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { GetTxStatusResponse, UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { MultisigAliasTx } from '@c4tplatform/caminojs/dist/apis/platformvm/multisigaliastx'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { WalletHelper } from '../helpers/wallet_helper'
-import { GetTxStatusResponse } from '@c4tplatform/caminojs/dist/apis/platformvm'
 
 const MAX_ADDRESS_COUNT = 128
 const UPDATE_ALIAS_TIMEOUT = 3000
@@ -177,6 +183,7 @@ const MAX_NAME_BYTE_SIZE = 64
         Alert,
         CamInput,
         CamBtn,
+        CamTooltipe,
     },
 })
 export default class EditMultisigWallet extends Vue {
