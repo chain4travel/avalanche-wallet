@@ -950,8 +950,8 @@
         "msig_edit_success": "{address} has been edited",
         "msig_edit_failed": "Multisignature edit failed",
         "msig_edit_address_name_success": "Multisig address names updated successfully",
-        "insufficient_funds_add": "Not enough funds to add a multisignature wallet",
-        "insufficient_funds_edit": "Not enough funds to edit a multisignature wallet"
+        "insufficient_funds_add": "Not enough funds on P-Chain to add a multisignature wallet",
+        "insufficient_funds_edit": "Not enough funds on P-Chain to edit a multisignature wallet"
     },
     "create_multisig": {
         "title": "Multisignature Wallet",
@@ -959,7 +959,7 @@
         "co-owners": "Multisignature Co-Owners",
         "threshold": "Multisignature Threshold",
         "create_multisig": "Create Multisignature Wallet",
-        "disclamer": "Saving the multisignature wallet definition will incur a fee of {fee} {symbol}",
+        "disclamer": "Saving the multisignature wallet definition will incur a fee of {fee} {symbol} from P-Chain balance",
         "alert": {
             "wize_name": "Please be aware that this description will be publicly visible on the Camino Network. Choose your words carefully."
         },
@@ -983,6 +983,10 @@
         "signed_edit_multisig": "Signed {numberOfSignatures} out of {threshold} required signatures",
         "abort": "Abort",
         "cancel": "Cancel",
+        "label": {
+            "remove_owner": "Remove Owner",
+            "add_owner": "Add Owner"
+        },
         "alert": {
             "wize_name": "Please be aware that this description will be publicly visible on the Camino Network. Choose your words carefully."
         },
