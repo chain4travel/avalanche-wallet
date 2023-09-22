@@ -38,9 +38,11 @@
                 <div class="add-new-address" v-if="addresses.length < 128">
                     <div class="circle number">{{ addresses.length + 1 }}</div>
                     <div class="add-new-address--button">
-                        <button @click="addAddress" class="circle plus-button">
-                            <fa icon="plus"></fa>
-                        </button>
+                        <cam-tooltipe :content="$t('edit_multisig.label.add_owner')">
+                            <button @click="addAddress" class="circle plus-button">
+                                <fa icon="plus"></fa>
+                            </button>
+                        </cam-tooltipe>
                     </div>
                 </div>
 
@@ -80,19 +82,20 @@
     </div>
 </template>
 <script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator'
-import { WalletType } from '@/js/wallets/types'
 import { ava } from '@/AVA'
-import { BN } from '@c4tplatform/caminojs'
-import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
-import AvaAsset from '@/js/AvaAsset'
-import { SingletonWallet } from '@/js/wallets/SingletonWallet'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import { AvaNetwork } from '@/js/AvaNetwork'
-import { WalletHelper } from '../helpers/wallet_helper'
 import Alert from '@/components/Alert.vue'
 import CamInput from '@/components/CamInput.vue'
+import CamTooltipe from '@/components/misc/CamTooltipe.vue'
+import AvaAsset from '@/js/AvaAsset'
+import { AvaNetwork } from '@/js/AvaNetwork'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import { WalletType } from '@/js/wallets/types'
 import { getMultisigAliasesFromTxId } from '@/utils/multisig'
+import { BN } from '@c4tplatform/caminojs'
+import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
+import { Component, Vue, Watch } from 'vue-property-decorator'
+import { WalletHelper } from '../helpers/wallet_helper'
 
 const MAX_ADDRESS_COUNT = 128
 const UPDATE_ALIAS_TIMEOUT = 3000
@@ -102,6 +105,7 @@ const MAX_NAME_BYTE_SIZE = 64
     components: {
         Alert,
         CamInput,
+        CamTooltipe,
     },
 })
 export default class CreateMultisigWallet extends Vue {
