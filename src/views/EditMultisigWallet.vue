@@ -84,9 +84,9 @@
                 <CamInput
                     class="msig-threshold-input"
                     placeholder="Multisignature Threshold"
-                    v-model.number="threshold"
-                    :error="thresholdError"
-                    :errorMessage="$t('edit_multisig.errors.threshold_exceeds_owners')"
+                    v-model="threshold"
+                    :error="thresholdError !== ''"
+                    :errorMessage="getThresholdErrorMessage"
                     :disabled="mode !== 'EDIT' || pendingSendMultisigTX"
                 />
             </div>
@@ -173,6 +173,7 @@ import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { WalletHelper } from '../helpers/wallet_helper'
+import { TranslateResult } from 'vue-i18n'
 
 const MAX_ADDRESS_COUNT = 128
 const UPDATE_ALIAS_TIMEOUT = 3000
@@ -228,7 +229,22 @@ export default class EditMultisigWallet extends Vue {
     }
 
     get thresholdError() {
-        return this.threshold > this.addresses.length
+        const thresholdString = String(this.threshold)
+
+        if (isNaN(this.threshold) || /[a-zA-Z]/.test(thresholdString)) return 'invalid'
+        if (this.threshold <= 0) return 'nonpositive'
+
+        return this.threshold > this.addresses.length ? 'exceeds' : ''
+    }
+
+    get getThresholdErrorMessage(): TranslateResult {
+        if (this.thresholdError === 'invalid') {
+            return this.$t('edit_multisig.errors.invalid_threshold')
+        }
+        if (this.thresholdError === 'nonpositive') {
+            return this.$t('edit_multisig.errors.non_positive_threshold')
+        }
+        return this.$t('edit_multisig.errors.threshold_exceeds_owners')
     }
 
     get multipleSameAddresses(): boolean {
@@ -282,7 +298,7 @@ export default class EditMultisigWallet extends Vue {
             !this.threshold ||
             filledAddresses.length === 0 ||
             uniqueAddresses.size !== filledAddresses.length ||
-            this.thresholdError ||
+            this.thresholdError !== '' ||
             this.nameLengthError ||
             this.validAddressError
         )

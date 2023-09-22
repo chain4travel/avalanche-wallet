@@ -965,9 +965,11 @@
         },
         "errors": {
             "msig_name": "Multisignature name must be between 3 and 64 characters long",
-            "threshold_exceeds_owners": "Threshold cannot exceed the number of owners",
+            "threshold_exceeds_owners": "Threshold can not exceed the number of owners.",
             "multisig_name_too_long": "Multisignature name is too long. Please choose a shorter name.",
-            "same_address_twice": "The same P-Chain address should not appear more than once"
+            "same_address_twice": "The same P-Chain address should not appear more than once",
+            "non_positive_threshold": "Threshold must be at least 1.",
+            "invalid_threshold": "Threshold must only contain an integer number."
         }
     },
     "edit_multisig": {
@@ -992,10 +994,12 @@
         },
         "errors": {
             "msig_name": "Multisignature name must be between 3 and 64 characters long",
-            "threshold_exceeds_owners": "Threshold cannot exceed the number of owners",
+            "threshold_exceeds_owners": "Threshold can not exceed the number of owners.",
             "multisig_name_too_long": "Multisignature name is too long. Please choose a shorter name.",
             "same_address_twice": "The same P-Chain address should not appear more than once",
-            "invalid_addresses": "One or more addresses are invalid."
+            "invalid_addresses": "One or more addresses are invalid.",
+            "non_positive_threshold": "Threshold must be at least 1.",
+            "invalid_threshold": "Threshold must only contain an integer number."
         }
     },
     "validator": {

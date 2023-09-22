@@ -58,11 +58,11 @@
                 <div class="divider"></div>
                 <h3>{{ $t('create_multisig.threshold') }}</h3>
                 <CamInput
-                    v-model.number="threshold"
-                    :placeholder="$t('create_multisig.threshold')"
-                    :error="thresholdError"
-                    :errorMessage="$t('create_multisig.errors.threshold_exceeds_owners')"
                     class="msig-threshold-input"
+                    :placeholder="$t('create_multisig.threshold')"
+                    v-model="threshold"
+                    :error="thresholdError !== ''"
+                    :errorMessage="getThresholdErrorMessage"
                 />
             </div>
         </div>
@@ -96,6 +96,7 @@ import { BN } from '@c4tplatform/caminojs'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { WalletHelper } from '../helpers/wallet_helper'
+import { TranslateResult } from 'vue-i18n'
 
 const MAX_ADDRESS_COUNT = 128
 const UPDATE_ALIAS_TIMEOUT = 3000
@@ -152,7 +153,7 @@ export default class CreateMultisigWallet extends Vue {
             !this.threshold ||
             filledAddresses.length === 0 ||
             uniqueAddresses.size !== filledAddresses.length ||
-            this.thresholdError ||
+            this.thresholdError !== '' ||
             this.nameLengthError ||
             this.validAddressError
         )
@@ -161,8 +162,22 @@ export default class CreateMultisigWallet extends Vue {
     get thresholdError() {
         const filledAddresses = this.addresses.filter((a) => a.address !== '')
         const uniqueAddresses = new Set(filledAddresses.map((a) => a.address))
+        const thresholdString = String(this.threshold)
 
-        return this.threshold > uniqueAddresses.size
+        if (isNaN(this.threshold) || /[a-zA-Z]/.test(thresholdString)) return 'invalid'
+        if (this.threshold <= 0) return 'nonpositive'
+
+        return this.threshold > uniqueAddresses.size ? 'exceeds' : ''
+    }
+
+    get getThresholdErrorMessage(): TranslateResult {
+        if (this.thresholdError === 'invalid') {
+            return this.$t('edit_multisig.errors.invalid_threshold')
+        }
+        if (this.thresholdError === 'nonpositive') {
+            return this.$t('edit_multisig.errors.non_positive_threshold')
+        }
+        return this.$t('edit_multisig.errors.threshold_exceeds_owners')
     }
 
     get nameLengthError() {
