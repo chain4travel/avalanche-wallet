@@ -39,6 +39,7 @@
                             :placeholder="`Owner ${index + 1} Address`"
                             v-model="address.address"
                             :disabled="mode !== 'EDIT' || pendingSendMultisigTX"
+                            :error="!isValidAddress(address.address)"
                         />
                         <CamInput
                             class="msig-address-name"
@@ -137,7 +138,6 @@
                 </CamBtn>
                 <CamBtn
                     variant="primary"
-                    class="camino__primary--button"
                     @click="saveEditMsig"
                     :loading="loading"
                     :disabled="!msigEdited || disableMsigCreation"
@@ -174,6 +174,7 @@ import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { WalletHelper } from '../helpers/wallet_helper'
 import { TranslateResult } from 'vue-i18n'
+import { isValidPChainAddress } from '@/helpers/address_helper'
 
 const MAX_ADDRESS_COUNT = 128
 const UPDATE_ALIAS_TIMEOUT = 3000
@@ -209,14 +210,10 @@ export default class EditMultisigWallet extends Vue {
         this.$store.dispatch('updateBalances')
     }
 
-    validAddress(address: string): boolean {
-        const hrp = ava.getHRP()
+    isValidAddress(address: string): boolean {
+        if (!address) return true
 
-        if (!address.includes(hrp)) return true
-
-        if (address.split('-')[0] !== 'P') return true
-
-        return false
+        return isValidPChainAddress(address)
     }
 
     get activeWallet(): SingletonWallet | MultisigWallet {
@@ -229,12 +226,14 @@ export default class EditMultisigWallet extends Vue {
     }
 
     get thresholdError() {
+        const filledAddresses = this.addresses.filter((a) => a.address !== '')
+        const uniqueAddresses = new Set(filledAddresses.map((a) => a.address))
         const thresholdString = String(this.threshold)
 
         if (isNaN(this.threshold) || /[a-zA-Z]/.test(thresholdString)) return 'invalid'
         if (this.threshold <= 0) return 'nonpositive'
 
-        return this.threshold > this.addresses.length ? 'exceeds' : ''
+        return this.threshold > uniqueAddresses.size ? 'exceeds' : ''
     }
 
     get getThresholdErrorMessage(): TranslateResult {
@@ -324,7 +323,7 @@ export default class EditMultisigWallet extends Vue {
         const filledAddresses = this.addresses.filter((a) => a.address !== '')
 
         for (const addressObj of filledAddresses) {
-            if (this.validAddress(addressObj.address)) return true
+            if (!isValidPChainAddress(addressObj.address)) return true
         }
 
         return false

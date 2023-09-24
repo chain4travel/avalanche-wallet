@@ -10,6 +10,7 @@
                         :placeholder="$t('create_multisig.name')"
                         :error="nameLengthError"
                         :errorMessage="$t('create_multisig.errors.msig_name')"
+                        :disabled="showCreateButton"
                     />
                     <Alert variant="warning">
                         {{ $t('create_multisig.alert.wize_name') }}
@@ -22,20 +23,23 @@
                 <div v-for="(address, index) in addresses" :key="index" class="multisig_address">
                     <div class="circle number">{{ index + 1 }}</div>
                     <div class="address-input">
-                        <input
+                        <CamInput
                             class="full-width-input"
                             :placeholder="`Owner ${index + 1} Address`"
                             v-model="address.address"
+                            :error="!isValidAddress(address.address)"
+                            :disabled="showCreateButton"
                         />
-                        <input
+                        <CamInput
                             class="msig-address-name"
                             :placeholder="`Owner ${index + 1} Name`"
                             v-model="address.name"
+                            :disabled="showCreateButton"
                         />
                     </div>
                 </div>
 
-                <div class="add-new-address" v-if="addresses.length < 128">
+                <div class="add-new-address" v-if="addresses.length < 128 && !showCreateButton">
                     <div class="circle number">{{ addresses.length + 1 }}</div>
                     <div class="add-new-address--button">
                         <cam-tooltipe :content="$t('edit_multisig.label.add_owner')">
@@ -63,18 +67,28 @@
                     v-model="threshold"
                     :error="thresholdError !== ''"
                     :errorMessage="getThresholdErrorMessage"
+                    :disabled="showCreateButton"
                 />
             </div>
         </div>
 
         <div class="action-buttons">
             <button
+                v-if="showCreateButton === false"
                 class="camino__primary--button"
-                @click="createWallet"
+                @click="showCreateButton = true"
                 :disabled="disableMsigCreation"
             >
-                {{ $t('create_multisig.create_multisig') }}
+                {{ $t('create_multisig.confirm') }}
             </button>
+            <div style="display: flex; gap: 1rem" v-if="showCreateButton === true">
+                <CamBtn variant="primary" @click="createWallet" :disabled="disableMsigCreation">
+                    {{ $t('create_multisig.create_multisig') }}
+                </CamBtn>
+                <CamBtn variant="transparent" @click="showCreateButton = false">
+                    {{ $t('create_multisig.cancel') }}
+                </CamBtn>
+            </div>
             <Alert variant="warning">
                 {{ $t('create_multisig.disclamer', { fee: feeAmt, symbol: nativeAssetSymbol }) }}
             </Alert>
@@ -84,6 +98,7 @@
 <script lang="ts">
 import { ava } from '@/AVA'
 import Alert from '@/components/Alert.vue'
+import CamBtn from '@/components/CamBtn.vue'
 import CamInput from '@/components/CamInput.vue'
 import CamTooltipe from '@/components/misc/CamTooltipe.vue'
 import AvaAsset from '@/js/AvaAsset'
@@ -97,6 +112,7 @@ import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { WalletHelper } from '../helpers/wallet_helper'
 import { TranslateResult } from 'vue-i18n'
+import { isValidPChainAddress } from '@/helpers/address_helper'
 
 const MAX_ADDRESS_COUNT = 128
 const UPDATE_ALIAS_TIMEOUT = 3000
@@ -106,6 +122,7 @@ const MAX_NAME_BYTE_SIZE = 64
     components: {
         Alert,
         CamInput,
+        CamBtn,
         CamTooltipe,
     },
 })
@@ -116,6 +133,7 @@ export default class CreateMultisigWallet extends Vue {
         { address: '', name: '' },
     ]
     threshold: number = 1
+    showCreateButton: boolean = false
 
     get activeWallet(): SingletonWallet | MultisigWallet {
         return this.$store?.state?.activeWallet
@@ -196,20 +214,16 @@ export default class CreateMultisigWallet extends Vue {
         const filledAddresses = this.addresses.filter((a) => a.address !== '')
 
         for (const addressObj of filledAddresses) {
-            if (this.validAddress(addressObj.address)) return true
+            if (!isValidPChainAddress(addressObj.address)) return true
         }
 
         return false
     }
 
-    validAddress(address: string): boolean {
-        const hrp = ava.getHRP()
+    isValidAddress(address: string): boolean {
+        if (!address) return true
 
-        if (!address.includes(hrp)) return true
-
-        if (address.split('-')[0] !== 'P') return true
-
-        return false
+        return isValidPChainAddress(address)
     }
 
     formattedAmount(val: BN): string {
