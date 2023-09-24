@@ -79,14 +79,14 @@
                 @click="showCreateButton = true"
                 :disabled="disableMsigCreation"
             >
-                {{ $t('create_multisig.confirm') }}
+                {{ $t('create_multisig.create_multisig') }}
             </button>
             <div style="display: flex; gap: 1rem" v-if="showCreateButton === true">
-                <CamBtn variant="primary" @click="createWallet" :disabled="disableMsigCreation">
-                    {{ $t('create_multisig.create_multisig') }}
-                </CamBtn>
                 <CamBtn variant="transparent" @click="showCreateButton = false">
                     {{ $t('create_multisig.cancel') }}
+                </CamBtn>
+                <CamBtn variant="primary" @click="createWallet" :disabled="disableMsigCreation">
+                    {{ $t('create_multisig.confirm') }}
                 </CamBtn>
             </div>
             <Alert variant="warning">
@@ -257,6 +257,7 @@ export default class CreateMultisigWallet extends Vue {
             { address: '', name: '' },
         ]
         this.threshold = 1
+        this.showCreateButton = false
     }
 
     async addMultisigAccountToLocalStorage(TxId: string) {
