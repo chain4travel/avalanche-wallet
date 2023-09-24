@@ -8,7 +8,7 @@
             :class="{ error: error }"
             :disabled="disabled"
         />
-        <div class="validation-message" v-if="error">
+        <div class="validation-message" v-if="error && errorMessage">
             <svg
                 width="20"
                 height="20"
