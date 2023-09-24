@@ -42,11 +42,11 @@
                 <div class="add-new-address" v-if="addresses.length < 128 && !showCreateButton">
                     <div class="circle number">{{ addresses.length + 1 }}</div>
                     <div class="add-new-address--button">
-                        <cam-tooltipe :content="$t('edit_multisig.label.add_owner')">
+                        <CamTooltip :content="$t('edit_multisig.label.add_owner')">
                             <button @click="addAddress" class="circle plus-button">
                                 <fa icon="plus"></fa>
                             </button>
-                        </cam-tooltipe>
+                        </CamTooltip>
                     </div>
                 </div>
 
@@ -79,14 +79,14 @@
                 @click="showCreateButton = true"
                 :disabled="disableMsigCreation"
             >
-                {{ $t('create_multisig.confirm') }}
+                {{ $t('create_multisig.create_multisig') }}
             </button>
             <div style="display: flex; gap: 1rem" v-if="showCreateButton === true">
-                <CamBtn variant="primary" @click="createWallet" :disabled="disableMsigCreation">
-                    {{ $t('create_multisig.create_multisig') }}
-                </CamBtn>
                 <CamBtn variant="transparent" @click="showCreateButton = false">
                     {{ $t('create_multisig.cancel') }}
+                </CamBtn>
+                <CamBtn variant="primary" @click="createWallet" :disabled="disableMsigCreation">
+                    {{ $t('create_multisig.confirm') }}
                 </CamBtn>
             </div>
             <Alert variant="warning">
@@ -100,7 +100,7 @@ import { ava } from '@/AVA'
 import Alert from '@/components/Alert.vue'
 import CamBtn from '@/components/CamBtn.vue'
 import CamInput from '@/components/CamInput.vue'
-import CamTooltipe from '@/components/misc/CamTooltipe.vue'
+import CamTooltip from '@/components/misc/CamTooltip.vue'
 import AvaAsset from '@/js/AvaAsset'
 import { AvaNetwork } from '@/js/AvaNetwork'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
@@ -123,7 +123,7 @@ const MAX_NAME_BYTE_SIZE = 64
         Alert,
         CamInput,
         CamBtn,
-        CamTooltipe,
+        CamTooltip,
     },
 })
 export default class CreateMultisigWallet extends Vue {
@@ -257,6 +257,7 @@ export default class CreateMultisigWallet extends Vue {
             { address: '', name: '' },
         ]
         this.threshold = 1
+        this.showCreateButton = false
     }
 
     async addMultisigAccountToLocalStorage(TxId: string) {
