@@ -958,13 +958,15 @@
         "name": "Multisignature Name",
         "co-owners": "Multisignature Co-Owners",
         "threshold": "Multisignature Threshold",
+        "confirm": "Confirm",
         "create_multisig": "Create Multisignature Wallet",
+        "cancel": "Cancel",
         "disclamer": "Saving the multisignature wallet definition will incur a fee of {fee} {symbol} from P-Chain balance",
         "alert": {
             "wize_name": "Please be aware that this description will be publicly visible on the Camino Network. Choose your words carefully."
         },
         "errors": {
-            "msig_name": "Multisignature name must be between 3 and 64 characters long",
+            "msig_name": "Multisignature name must not exceed 64 characters.",
             "threshold_exceeds_owners": "Threshold can not exceed the number of owners.",
             "multisig_name_too_long": "Multisignature name is too long. Please choose a shorter name.",
             "same_address_twice": "The same P-Chain address should not appear more than once",
@@ -993,7 +995,7 @@
             "wize_name": "Please be aware that this description will be publicly visible on the Camino Network. Choose your words carefully."
         },
         "errors": {
-            "msig_name": "Multisignature name must be between 3 and 64 characters long",
+            "msig_name": "Multisignature name must not exceed 64 characters.",
             "threshold_exceeds_owners": "Threshold can not exceed the number of owners.",
             "multisig_name_too_long": "Multisignature name is too long. Please choose a shorter name.",
             "same_address_twice": "The same P-Chain address should not appear more than once",
