@@ -170,7 +170,6 @@ export default class MyKeys extends Vue {
             this.imported = false
         }
     }
-    @Watch('wallets.length')
     async onWalletsChange() {
         if (this.wallets.length > 1) {
             await this.$store.dispatch('fetchMultiSigAliases', { disable: false })
