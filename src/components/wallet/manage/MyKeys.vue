@@ -170,11 +170,6 @@ export default class MyKeys extends Vue {
             this.imported = false
         }
     }
-    async onWalletsChange() {
-        if (this.wallets.length > 1) {
-            await this.$store.dispatch('fetchMultiSigAliases', { disable: false })
-        }
-    }
     get multiSigAliases(): string[] {
         return this.$store.getters.multiSigAliases
     }
