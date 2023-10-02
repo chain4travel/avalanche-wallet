@@ -1,7 +1,6 @@
 <template>
-    <div class="msig-create--container">
-        <h1>{{ $t('create_multisig.title') }}</h1>
-        <div class="msig-create--form">
+    <div class="msig-create__container">
+        <div class="msig-create__form">
             <div class="input-container">
                 <h3>{{ $t('create_multisig.name') }}</h3>
                 <div class="input-with-warning">
@@ -383,7 +382,7 @@ export default class CreateMultisigWallet extends Vue {
 <style scoped lang="scss">
 @use '../styles/abstracts/mixins';
 .msig-create {
-    &--container {
+    &__container {
         margin-top: 4rem;
         margin-bottom: 4rem;
         height: 100%;
@@ -400,10 +399,11 @@ export default class CreateMultisigWallet extends Vue {
             padding: 16px 0px 0px 0px;
         }
     }
-    &--form {
+    &__form {
         gap: 16px;
         display: flex;
         flex-direction: column;
+        padding: 16px 0px;
     }
 }
 
