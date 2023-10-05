@@ -34,22 +34,58 @@
                 <div class="type_sel">
                     <label>{{ $t('studio.mint.type_col.label1') }}</label>
                     <p>{{ $t('studio.mint.type_col.desc') }}</p>
-                    <v-chip-group mandatory v-model="nftFormType">
-                        <v-chip value="generic" :disabled="isSuccess">
-                            {{ $t('studio.mint.type_col.types.generic') }}
-                        </v-chip>
-                        <v-chip value="custom" :disabled="isSuccess">
-                            {{ $t('studio.mint.type_col.types.custom') }}
-                        </v-chip>
-                    </v-chip-group>
+                    <div class="nft-type__contaiener">
+                        <div class="nft-type__item">
+                            <input
+                                type="radio"
+                                v-model="nftFormType"
+                                value="generic"
+                                :disabled="isSuccess"
+                            />
+                            <label>{{ $t('studio.mint.type_col.types.generic') }}</label>
+                        </div>
+                        <div class="nft-type__item">
+                            <input
+                                type="radio"
+                                v-model="nftFormType"
+                                value="custom"
+                                :disabled="isSuccess"
+                            />
+                            <label>{{ $t('studio.mint.type_col.types.custom') }}</label>
+                        </div>
+                    </div>
 
                     <template v-if="nftFormType === 'custom'">
                         <label>{{ $t('studio.mint.type_col.label2') }}</label>
-                        <v-chip-group mandatory v-model="nftType">
-                            <v-chip value="utf8" :disabled="isSuccess">UTF-8</v-chip>
-                            <v-chip value="url" :disabled="isSuccess">URL</v-chip>
-                            <v-chip value="json" :disabled="isSuccess">JSON</v-chip>
-                        </v-chip-group>
+                        <div class="nft-type__contaiener">
+                            <div class="nft-type__item">
+                                <input
+                                    type="radio"
+                                    v-model="nftType"
+                                    value="utf8"
+                                    :disabled="isSuccess"
+                                />
+                                <label>UTF-8</label>
+                            </div>
+                            <div class="nft-type__item">
+                                <input
+                                    type="radio"
+                                    v-model="nftType"
+                                    value="url"
+                                    :disabled="isSuccess"
+                                />
+                                <label>URL</label>
+                            </div>
+                            <div class="nft-type__item">
+                                <input
+                                    type="radio"
+                                    v-model="nftType"
+                                    value="json"
+                                    :disabled="isSuccess"
+                                />
+                                <label>JSON</label>
+                            </div>
+                        </div>
                     </template>
                 </div>
                 <p>
@@ -122,17 +158,17 @@
     </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
+import NftPayloadView from '@/components/misc/NftPayloadView/NftPayloadView.vue'
+import GenericForm from '@/components/wallet/studio/mint/forms/GenericForm.vue'
+import JsonForm from '@/components/wallet/studio/mint/forms/JsonForm.vue'
 import UrlForm from '@/components/wallet/studio/mint/forms/UrlForm.vue'
 import Utf8Form from '@/components/wallet/studio/mint/forms/Utf8Form.vue'
-import JsonForm from '@/components/wallet/studio/mint/forms/JsonForm.vue'
-import GenericForm from '@/components/wallet/studio/mint/forms/GenericForm.vue'
-import NftPayloadView from '@/components/misc/NftPayloadView/NftPayloadView.vue'
 
-import { NFTMintOutput, NFTTransferOutput, UTXO } from '@c4tplatform/caminojs/dist/apis/avm'
-import { NftFamilyDict } from '@/store/modules/assets/types'
 import { ava, bintools } from '@/AVA'
+import NftFamilyCardsPreview from '@/components/misc/NftFamilyCardsPreview.vue'
+import NftCard from '@/components/wallet/portfolio/NftCard.vue'
 import {
     GenericFormType,
     JsonFormType,
@@ -140,11 +176,11 @@ import {
     UrlFormType,
     UtfFormType,
 } from '@/components/wallet/studio/mint/types'
-import { PayloadBase, URLPayload, UTF8Payload, JSONPayload } from '@c4tplatform/caminojs/dist/utils'
-import Big from 'big.js'
 import { bnToBig } from '@/helpers/helper'
-import NftFamilyCardsPreview from '@/components/misc/NftFamilyCardsPreview.vue'
-import NftCard from '@/components/wallet/portfolio/NftCard.vue'
+import { NftFamilyDict } from '@/store/modules/assets/types'
+import { NFTMintOutput, NFTTransferOutput, UTXO } from '@c4tplatform/caminojs/dist/apis/avm'
+import { JSONPayload, PayloadBase, URLPayload, UTF8Payload } from '@c4tplatform/caminojs/dist/utils'
+import Big from 'big.js'
 
 type NftType = 'utf8' | 'url' | 'json'
 
@@ -398,6 +434,20 @@ export default class MintNft extends Vue {
     padding: 10px 0;
 }
 
+.nft-type__contaiener {
+    display: flex;
+    gap: 16px;
+    margin: 8px 0;
+    align-items: center;
+}
+.nft-type__contaiener .nft-type__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    label {
+        margin: 0;
+    }
+}
 .options {
     display: flex;
 
