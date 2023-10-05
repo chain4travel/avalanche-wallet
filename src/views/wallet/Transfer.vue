@@ -52,16 +52,15 @@
                             <h4>Memo (Optional)</h4>
                             <p class="confirm_val">{{ formMemo }}</p>
                         </template> -->
-                        <h4 v-if="memo || !isConfirm">{{ $t('transfer.memo') }}</h4>
+                        <h4>{{ $t('transfer.memo') }}</h4>
                         <textarea
                             :class="[
                                 'memo',
                                 { pending: !!pendingSendMultisigTX && formType === 'P' },
                             ]"
                             maxlength="256"
-                            placeholder="Memo"
+                            :placeholder="pendingSendMultisigTX ? '' : 'Memo'"
                             v-model="memo"
-                            v-if="memo || !isConfirm"
                             :disabled="isConfirm || (!!pendingSendMultisigTX && formType === 'P')"
                         ></textarea>
                     </div>
@@ -179,41 +178,41 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Watch } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 
-import TxList from '@/components/wallet/transfer/TxList.vue'
 import ModalAbortSigning from '@/components/wallet/earn/ModalAbortSigning.vue'
+import TxList from '@/components/wallet/transfer/TxList.vue'
 import Big from 'big.js'
 
 import NftList from '@/components/wallet/transfer/NftList.vue'
 
 //@ts-ignore
-import { QrInput } from '@c4tplatform/vue_components'
-import { ava, isValidAddress } from '../../AVA'
 import FaucetLink from '@/components/misc/FaucetLink.vue'
-import { ITransaction } from '@/components/wallet/transfer/types'
-import { UTXO } from '@c4tplatform/caminojs/dist/apis/avm'
-import { Buffer, BN } from '@c4tplatform/caminojs/dist'
+import FormC from '@/components/wallet/transfer/FormC.vue'
 import TxSummary from '@/components/wallet/transfer/TxSummary.vue'
-import { priceDict, IssueBatchTxInput } from '@/store/types'
-import { WalletType } from '@/js/wallets/types'
+import { ITransaction } from '@/components/wallet/transfer/types'
+import { ChainIdType } from '@/constants'
 import { bnToBig } from '@/helpers/helper'
 import { WalletHelper } from '@/helpers/wallet_helper'
+import { WalletType } from '@/js/wallets/types'
+import { IssueBatchTxInput, priceDict } from '@/store/types'
+import { BN, Buffer } from '@c4tplatform/caminojs/dist'
+import { UTXO } from '@c4tplatform/caminojs/dist/apis/avm'
+import { QrInput } from '@c4tplatform/vue_components'
 import * as bip39 from 'bip39'
-import FormC from '@/components/wallet/transfer/FormC.vue'
-import { ChainIdType } from '@/constants'
+import { ava, isValidAddress } from '../../AVA'
 
-import ChainInput from '@/components/wallet/transfer/ChainInput.vue'
-import AvaAsset from '../../js/AvaAsset'
 import { TxState } from '@/components/wallet/earn/ChainTransfer/types'
-import { SignatureError } from '@c4tplatform/caminojs/dist/common'
-import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
+import ChainInput from '@/components/wallet/transfer/ChainInput.vue'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { SignatureError } from '@c4tplatform/caminojs/dist/common'
+import AvaAsset from '../../js/AvaAsset'
 
+import { getTransactionSummary } from '@/helpers/history_helper'
 import { parse } from '@/store/modules/history/history_utils'
 import { ITransactionData } from '@/store/modules/history/types'
-import { getTransactionSummary } from '@/helpers/history_helper'
 
 @Component({
     components: {
