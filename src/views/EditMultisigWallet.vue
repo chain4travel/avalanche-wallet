@@ -1,7 +1,6 @@
 <template>
     <div class="msig-edit__container">
-        <h1>{{ $t('edit_multisig.title') }}</h1>
-        <div class="msig-create__form">
+        <div class="msig-edit__form">
             <div class="input-container">
                 <h3>{{ $t('create_multisig.name') }}</h3>
                 <div class="input-with-warning">
@@ -210,6 +209,7 @@ export default class EditMultisigWallet extends Vue {
     async mounted() {
         await this.getAliasInfos()
         await this.updateInitialMultisigState()
+        await this.$store.dispatch('Signavault/updateTransaction')
     }
 
     updateBalance(): void {
@@ -564,7 +564,6 @@ export default class EditMultisigWallet extends Vue {
     }
 
     handleMsigEditError(error: any) {
-        console.error('Error in saveEditMsig:', error)
         // @ts-ignore
         const { dispatchNotification } = this.globalHelper()
 
@@ -577,6 +576,7 @@ export default class EditMultisigWallet extends Vue {
             })
         } else {
             const errorMessage = this.getErrorMessage(error)
+            console.error('Error in saveEditMsig:', error)
 
             dispatchNotification({
                 message: this.$t(errorMessage),
@@ -813,6 +813,7 @@ export default class EditMultisigWallet extends Vue {
         gap: 16px;
         display: flex;
         flex-direction: column;
+        padding: 16px 0px;
     }
 }
 

@@ -115,7 +115,12 @@
                     @click.native="select"
                 >
                     <Spinner v-if="activating" class="spinner"></Spinner>
-                    <img src="@/assets/logout.svg" style="height: 16px" alt="Logout" class="icon" />
+                    <img
+                        src="@/assets/wallet-checkout.svg"
+                        style="height: 16px"
+                        alt="Logout"
+                        class="icon"
+                    />
                 </Tooltip>
                 <Tooltip v-if="canRemove()" :text="$t('keys.remove_key')" class="row_but circle">
                     <button @click.prevent="remove">
@@ -188,6 +193,7 @@ export default class KeyRow extends Vue {
     }
 
     get walletTitle() {
+        if (this.wallet.type === 'multisig') return this.wallet.getStaticAddress('P')
         return this.wallet.getBaseAddress()
     }
 
@@ -440,6 +446,10 @@ export default class KeyRow extends Vue {
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.v-icon {
+    color: white;
 }
 
 .v-icon.v-icon::after {
