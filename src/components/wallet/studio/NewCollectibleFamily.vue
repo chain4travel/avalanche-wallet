@@ -174,6 +174,7 @@ export default class NewCollectibleFamily extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .new_family {
     max-width: 100%;
     width: 340px;
@@ -187,7 +188,7 @@ form > div {
 label {
     margin-top: 6px;
     color: var(--primary-color-light);
-    font-size: 14px;
+    @include mixins.typography-caption;
     margin-bottom: 3px;
 }
 
@@ -196,7 +197,7 @@ input {
     background-color: var(--bg-light);
     color: var(--primary-color);
     padding: 6px 14px;
-    font-size: 13px;
+    @include mixins.typography-caption;
 }
 
 .symbol {

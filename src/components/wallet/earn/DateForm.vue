@@ -162,12 +162,12 @@ export default class DateForm extends Vue {
         overflow: hidden;
         background-color: var(--bg-light);
         color: var(--text-color);
-        font-family: 'Inter', sans-serif;
+        font-family: var(--primary-font);
         .vdatetime-popup__header {
             background-color: #0085ff;
         }
         .vdatetime-popup__header div {
-            font-family: 'ClashDisplay', sans-serif;
+            font-family: var(--primary-font);
         }
         .vdatetime-calendar__navigation--next svg path,
         .vdatetime-calendar__navigation--previous svg path {

@@ -93,7 +93,7 @@ button {
 }
 
 .token_row {
-    font-size: 13px;
+    @include mixins.typography-caption;
     padding: 8px 18px;
     display: grid;
     grid-template-columns: max-content max-content 1fr;
@@ -139,7 +139,7 @@ button {
     }
 
     .token_row {
-        font-size: 16px;
+        @include mixins.typography-body-2;
         border-bottom: 1px solid var(--bg-light);
         padding-top: 14px;
         padding-bottom: 14px;

@@ -136,10 +136,11 @@ export default class NftCol extends Vue {
 </script>
 
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .nft_col {
     margin-top: 10px;
     p {
-        font-size: 12px;
+        @include mixins.typography-caption;
         color: var(--primary-color-light);
     }
 }

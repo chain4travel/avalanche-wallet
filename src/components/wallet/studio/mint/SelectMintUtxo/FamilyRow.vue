@@ -96,6 +96,7 @@ export default class FamilyRow extends Vue {
 </script>
 
 <style scoped lang="scss">
+@use '../../../../../styles/abstracts/mixins';
 .family {
     margin-top: 24px;
     //border: 1px solid var(--bg-light);
@@ -134,7 +135,7 @@ export default class FamilyRow extends Vue {
     flex-direction: column;
     margin: 14px 0px;
     align-items: center;
-    font-size: 16px;
+    @include mixins.typography-body-2;
     transition-duration: 0.2s;
     padding: 6px 0;
     cursor: pointer;
@@ -151,12 +152,12 @@ export default class FamilyRow extends Vue {
     }
 
     .symbol {
-        font-size: 13px;
+        @include mixins.typography-caption;
     }
 
     .id {
         flex-grow: 1;
-        font-size: 13px;
+        @include mixins.typography-caption;
         text-align: right;
         opacity: 0.4;
         word-break: break-all;
@@ -170,7 +171,7 @@ export default class FamilyRow extends Vue {
 }
 
 .empty {
-    font-size: 12px;
+    @include mixins.typography-caption;
     text-align: center;
     flex-grow: 1;
     align-self: center;

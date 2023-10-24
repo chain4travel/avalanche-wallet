@@ -254,7 +254,7 @@ export default class CreateWallet extends Vue {
     h1 {
         margin-top: variables.$vertical-padding;
         text-align: left;
-        font-size: variables.$m-size;
+        @include mixins.typography-subtitle-1;
         font-weight: 400;
     }
 }
@@ -269,7 +269,7 @@ export default class CreateWallet extends Vue {
 
     > * {
         margin: 4px;
-        font-size: 0.8rem;
+        @include mixins.typography-caption;
     }
 
     p {
@@ -291,7 +291,7 @@ export default class CreateWallet extends Vue {
 
 .key_disp {
     margin: 30px auto;
-    font-size: 12px;
+    @include mixins.typography-caption;
 }
 
 a {
@@ -373,9 +373,7 @@ a {
     header {
         h1 {
             margin-top: 10px;
-            font-size: variables.$xl-size;
-            line-height: 1.25em;
-            font-weight: 400;
+            @include mixins.typography-headline-1;
         }
 
         p {
@@ -388,8 +386,7 @@ a {
 
         span {
             display: block;
-            font-size: variables.$s-size;
-            font-weight: 700;
+            @include mixins.typography-caption;
             text-transform: uppercase;
 
             &.label {
@@ -504,7 +501,7 @@ a {
 
         header {
             h1 {
-                font-size: variables.$xl-size-mobile;
+                @include mixins.typography-headline-4;
             }
         }
 

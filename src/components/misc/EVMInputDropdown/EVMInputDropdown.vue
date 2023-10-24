@@ -213,11 +213,12 @@ export default class EVMInputDropdown extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .evm_input_dropdown {
     display: grid;
     grid-template-columns: 1fr 90px;
     column-gap: 10px;
-    font-size: 15px;
+    @include mixins.typography-body-2;
 
     > div {
         border-radius: var(--border-radius-sm);
@@ -238,7 +239,7 @@ export default class EVMInputDropdown extends Vue {
 
 .col_big_in {
     text-align: right;
-    font-family: 'Inter';
+    font-family: var(--primary-font);
     display: flex;
     flex-direction: column;
 }
@@ -255,13 +256,13 @@ export default class EVMInputDropdown extends Vue {
 
 .bal {
     text-align: right;
-    font-family: 'Inter';
+    font-family: var(--primary-font);
     color: var(--primary-color-light);
 }
 
 .max_but {
     opacity: 0.4;
-    font-size: 13px;
+    @include mixins.typography-caption;
     &:hover {
         opacity: 1;
     }

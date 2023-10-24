@@ -124,7 +124,6 @@ export default class Studio extends Vue {
 
     .subtitle {
         margin-left: 0.5em;
-        /*font-size: 20px;*/
         color: var(--primary-color-light);
         font-weight: lighter;
     }

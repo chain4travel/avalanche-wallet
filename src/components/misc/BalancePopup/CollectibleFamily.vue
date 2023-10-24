@@ -128,7 +128,7 @@ $card_w: 80px;
     }
     .fam_title {
         color: var(--primary-color-light);
-        font-size: 12px;
+        @include mixins.typography-caption;
         margin-bottom: 8px !important;
     }
 

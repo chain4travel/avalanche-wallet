@@ -224,7 +224,7 @@ button {
     }
     .buts_right {
         button {
-            font-size: 11px;
+            @include mixins.typography-caption;
         }
     }
 }

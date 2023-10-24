@@ -85,7 +85,7 @@ export default {
 
     button {
         padding: 8px 24px;
-        font-size: 14px;
+        @include mixins.typography-caption;
         font-weight: bold;
         margin: 0px 5px;
         text-transform: uppercase;
@@ -107,7 +107,7 @@ export default {
     padding: 5px;
     display: flex;
     align-items: center;
-    font-size: 13px;
+    @include mixins.typography-caption;
     flex-basis: 420px;
     flex-shrink: 1;
     border: 1px solid transparent;
@@ -150,7 +150,7 @@ export default {
             flex-grow: 1;
             border-radius: 0px;
             margin: 0;
-            font-size: 12px;
+            @include mixins.typography-caption;
         }
     }
 
@@ -162,7 +162,7 @@ export default {
 @include mixins.medium-device {
     .header {
         button {
-            font-size: 13px;
+            @include mixins.typography-caption;
 
             &[active] {
                 border-bottom-width: 2px;

@@ -95,7 +95,7 @@ $logo_w: 38px;
 }
 
 .token_row {
-    font-size: 15px;
+    @include mixins.typography-body-2;
     display: grid;
     grid-template-columns: max-content max-content 1fr;
     column-gap: 12px;
@@ -134,7 +134,7 @@ $logo_w: 38px;
 
     p:last-of-type {
         color: var(--primary-color-light);
-        font-size: 13px;
+        @include mixins.typography-caption;
     }
 }
 

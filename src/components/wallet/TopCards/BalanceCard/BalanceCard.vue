@@ -381,6 +381,7 @@ export default class BalanceCard extends Vue {
 </script>
 
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .balance_card {
     display: grid;
     column-gap: 20px;
@@ -419,7 +420,7 @@ h4 {
     font-size: 2.4em;
     white-space: normal;
     /*font-weight: bold;*/
-    font-family: Inter !important;
+    font-family: var(--primary-font);
     span {
         float: left;
     }
@@ -434,7 +435,7 @@ h4 {
     width: max-content;
     background: var(--bg-light);
     color: var(--primary-color-light);
-    font-size: 13px;
+    @include mixins.typography-caption;
     padding: 1px 6px;
     border-radius: 3px;
     margin-right: 6px !important;
@@ -464,7 +465,7 @@ h4 {
     text-align: right;
 }
 .buts button {
-    font-size: 18px;
+    @include mixins.typography-body-1;
     margin: 0px 18px;
     margin-right: 0px;
     position: relative;
@@ -489,7 +490,7 @@ h4 {
     color: #fff;
     width: max-content;
     max-width: 100px;
-    font-size: 14px;
+    @include mixins.typography-caption;
     padding: 4px 8px;
     margin-bottom: 4px;
 }
@@ -512,18 +513,18 @@ h4 {
     }
 
     label {
-        font-size: 13px;
+        @include mixins.typography-caption;
         color: var(--primary-color-light);
     }
 }
 
 .breakdown_toggle {
-    font-size: 13px;
+    @include mixins.typography-caption;
     outline: none !important;
     margin-left: 12px;
     .v-icon {
         color: var(--primary-color);
-        font-size: 18px;
+        @include mixins.typography-body-1;
     }
 
     &:hover {

@@ -159,6 +159,7 @@ export default class UtxosBreakdownModal extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .utxos_breakdown_body {
     width: 90vw;
     height: 80vh;
@@ -179,7 +180,7 @@ table {
     padding: 0;
 }
 th {
-    font-size: 13px;
+    @include mixins.typography-caption;
     font-weight: bold;
     position: sticky;
     top: 0;

@@ -158,12 +158,13 @@ export default class UTXORow extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 tr {
-    font-size: 12px;
+    @include mixins.typography-caption;
 }
 
 td {
-    font-family: 'Inter';
+    font-family: var(--primary-font);
     padding: 0;
 }
 

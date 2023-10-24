@@ -188,7 +188,7 @@ $right_pad: 60px;
 
 .chain_warn {
     color: var(--primary-color-light);
-    font-size: 12px;
+    @include mixins.typography-caption;
     margin: 6px 0 !important;
 }
 
@@ -246,7 +246,7 @@ $right_pad: 60px;
     width: max-content;
     text-align: right;
     /*align-self: flex-end;*/
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
     margin-top: 10px;
     margin-bottom: 10px;
@@ -263,7 +263,7 @@ $right_pad: 60px;
     padding: 8px;
     border-radius: 0;
     color: var(--primary-color-light);
-    font-size: 14px;
+    @include mixins.typography-caption;
     opacity: 0.3;
     transition-duration: 0.2s;
 

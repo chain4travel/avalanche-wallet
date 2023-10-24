@@ -40,7 +40,7 @@ export default class MnemonicDisplay extends Vue {
     grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-gap: 6px;
     row-gap: 6px;
-    font-size: 12px;
+    @include mixins.typography-caption;
 }
 
 .word {

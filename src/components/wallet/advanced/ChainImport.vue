@@ -165,6 +165,7 @@ export default class ChainImport extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .v-btn {
     margin: 8px 0;
 }
@@ -181,7 +182,7 @@ export default class ChainImport extends Vue {
 }
 
 .tx_id {
-    font-size: 13px;
+    @include mixins.typography-caption;
     word-break: break-all;
 }
 </style>

@@ -80,6 +80,7 @@ export default class SignMessage extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 select,
 textarea,
 .signed {
@@ -91,7 +92,7 @@ select {
     width: 100%;
     color: var(--primary-color);
     cursor: pointer;
-    font-size: 13px;
+    @include mixins.typography-caption;
 
     &:hover {
         color: var(--primary-color);
@@ -106,7 +107,7 @@ label {
     display: block;
     text-align: left;
     color: var(--primary-color-light);
-    font-size: 12px;
+    @include mixins.typography-caption;
     margin-bottom: 20px;
     margin-top: 6px;
 }
@@ -114,18 +115,18 @@ label {
 textarea {
     width: 100%;
     resize: none;
-    font-size: 13px;
+    @include mixins.typography-caption;
     padding: 6px 12px;
     height: 80px;
 }
 
 .signed {
     word-break: break-all;
-    font-size: 12px;
+    @include mixins.typography-caption;
 }
 
 .warn {
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: var(--secondary-color);
 }
 

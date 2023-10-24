@@ -79,7 +79,8 @@ export default {
     },
 }
 </script>
-<style scoped>
+<style scoped lang="scss">
+@use '../../styles/abstracts/mixins';
 .curr_in[disabled] {
     opacity: 0.3;
     user-select: none;
@@ -89,7 +90,7 @@ export default {
     margin: 2px 0px;
     background-color: #413e44;
     display: flex;
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: #d2d2d2;
     align-items: center;
     min-height: 28px;

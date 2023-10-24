@@ -39,6 +39,7 @@ export default class Launch extends Vue {
 </script>
 
 <style scoped lang="scss">
+@use '../../styles/abstracts/mixins';
 h1 {
     font-weight: normal;
 }
@@ -50,7 +51,7 @@ form > div {
 label {
     margin-top: 6px;
     color: var(--primary-color-light);
-    font-size: 14px;
+    @include mixins.typography-caption;
     margin-bottom: 3px;
 }
 
@@ -59,6 +60,6 @@ input {
     background-color: var(--bg-light);
     color: var(--primary-color);
     padding: 6px 14px;
-    font-size: 13px;
+    @include mixins.typography-caption;
 }
 </style>

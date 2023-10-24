@@ -139,20 +139,20 @@
 import 'reflect-metadata'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import MnemonicPhraseModal from '@/components/modals/MnemonicPhraseModal.vue'
-import HdDerivationListModal from '@/components/modals/HdDerivationList/HdDerivationListModal.vue'
-import MnemonicWallet from '@/js/wallets/MnemonicWallet'
-import Tooltip from '@/components/misc/Tooltip.vue'
 import Spinner from '@/components/misc/Spinner.vue'
+import Tooltip from '@/components/misc/Tooltip.vue'
+import HdDerivationListModal from '@/components/modals/HdDerivationList/HdDerivationListModal.vue'
+import MnemonicPhraseModal from '@/components/modals/MnemonicPhraseModal.vue'
+import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 
 import ExportKeys from '@/components/modals/ExportKeys.vue'
-import PrivateKey from '@/components/modals/PrivateKey.vue'
-import { WalletNameType, WalletType } from '@/js/wallets/types'
-import { SingletonWallet } from '@/js/wallets/SingletonWallet'
-import MnemonicPhrase from '@/js/wallets/MnemonicPhrase'
-import { privateToPublic } from '@ethereumjs/util'
 import MultisigOwnersModal from '@/components/modals/MultisigOwnersModal.vue'
+import PrivateKey from '@/components/modals/PrivateKey.vue'
+import MnemonicPhrase from '@/js/wallets/MnemonicPhrase'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import { WalletNameType, WalletType } from '@/js/wallets/types'
+import { privateToPublic } from '@ethereumjs/util'
 
 @Component({
     components: {
@@ -333,7 +333,7 @@ export default class KeyRow extends Vue {
 @use '../../../styles/abstracts/mixins';
 
 .addressItem {
-    font-size: 12px;
+    @include mixins.typography-caption;
     /*display: grid;*/
     /*grid-template-columns: 1fr max-content;*/
     /*grid-gap: 15px;*/
@@ -369,9 +369,9 @@ export default class KeyRow extends Vue {
     flex-direction: column;
     gap: 6px;
 
-    > button {
-        text-align: right;
-        font-size: 13px;
+        > button {
+            text-align: right;
+            @include mixins.typography-caption;
 
         &:hover {
             color: var(--secondary-color);
@@ -389,7 +389,7 @@ export default class KeyRow extends Vue {
 
 .row_but {
     margin: 0 8px;
-    font-size: 16px;
+    @include mixins.typography-body-2;
 }
 
 .row_but.circle {
@@ -420,8 +420,7 @@ export default class KeyRow extends Vue {
     padding: 4px 8px;
 
     span {
-        font-size: 12px;
-        line-height: normal;
+        @include mixins.typography-caption;
     }
 }
 
@@ -502,7 +501,7 @@ export default class KeyRow extends Vue {
 
 .volatile_alert {
     color: var(--warning);
-    font-size: 15px;
+    @include mixins.typography-body-2;
     margin-left: 6px;
     margin-right: 6px;
 }

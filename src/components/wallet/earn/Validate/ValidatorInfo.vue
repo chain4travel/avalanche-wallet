@@ -187,7 +187,7 @@ export default class ValidatorInfo extends Vue {
 </script>
 <style scoped lang="scss">
 @use '../../../../styles/main';
-
+@use '../../../../styles/abstracts/mixins';
 .validator_card {
     display: grid;
     column-gap: 20px;
@@ -222,12 +222,12 @@ h4 {
     }
 
     label {
-        font-size: 18px;
+        @include mixins.typography-body-1;
         color: var(--primary-color);
     }
 
     .icon-mdi-camino {
-        font-size: 24px;
+        @include mixins.typography-subtitle-1;
         color: var(--primary-color);
     }
 }

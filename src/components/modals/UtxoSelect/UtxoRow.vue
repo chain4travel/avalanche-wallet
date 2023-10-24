@@ -89,11 +89,12 @@ export default class UtxoRow extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 tr {
     border-bottom: 1px solid var(--bg);
 }
 td {
-    font-size: 14px;
+    @include mixins.typography-caption;
     padding: 2px 0;
 }
 .date_col {
@@ -113,6 +114,6 @@ tr[locked] {
 
 .amt_col,
 .date_col {
-    font-family: 'Inter' sans-serif;
+    font-family: var(--primary-font);
 }
 </style>

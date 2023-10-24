@@ -101,7 +101,7 @@ img {
 .type {
     display: block;
     margin: 0px auto !important;
-    font-size: 12px;
+    @include mixins.typography-caption;
     background-color: var(--primary-color-light);
     color: var(--bg) !important;
     width: max-content;
@@ -114,7 +114,7 @@ img {
 .unknown {
     padding: 10px;
     p {
-        font-size: 0.8rem;
+        @include mixins.typography-caption;
         color: #999;
         margin: 0;
     }
@@ -128,7 +128,7 @@ img {
         color: var(--primary-color-light);
         background-color: var(--bg-light);
         text-decoration: none;
-        font-size: 0.9rem;
+        @include mixins.typography-caption;
         margin: 0px auto;
 
         &:hover {

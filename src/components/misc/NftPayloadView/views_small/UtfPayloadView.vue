@@ -40,6 +40,7 @@ export default class UtfPayloadView extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .utf_payload_view {
     height: 100%;
     width: 100%;
@@ -58,7 +59,7 @@ export default class UtfPayloadView extends Vue {
     }
 }
 p {
-    font-size: 13px;
+    @include mixins.typography-caption;
     color: var(--primary-color) !important;
 }
 

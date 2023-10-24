@@ -70,7 +70,7 @@ button {
     width: 100%;
     height: 100%;
     text-align: left;
-    font-size: 15px;
+    @include mixins.typography-body-2;
 
     svg {
         transition-duration: 0.2s;
@@ -100,7 +100,7 @@ button {
 
 @include mixins.mobile-device {
     button {
-        font-size: 13px;
+        @include mixins.typography-caption;
     }
 }
 </style>

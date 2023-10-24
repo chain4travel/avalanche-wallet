@@ -39,6 +39,7 @@ export default class Utf8Form extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../../styles/abstracts/mixins';
 textarea {
     width: 100%;
     height: 180px;
@@ -53,7 +54,7 @@ textarea {
 }
 .counter {
     text-align: right;
-    font-size: 13px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
     padding: 2px;
 }

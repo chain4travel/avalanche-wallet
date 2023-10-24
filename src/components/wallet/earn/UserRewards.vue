@@ -198,11 +198,19 @@ export default class UserRewards extends Vue {
 </script>
 <style scoped lang="scss">
 @use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
 .user_offers {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-auto-rows: auto;
     grid-gap: 1rem;
+}
+.user_rewards {
+    padding-bottom: 5vh;
+}
+
+.reward_row {
+    margin-bottom: 12px;
 }
 
 h3 {
@@ -216,7 +224,7 @@ h3 {
 label {
     margin-top: 6px;
     color: var(--primary-color-light);
-    font-size: 14px;
+    @include mixins.typography-caption;
     margin-bottom: 3px;
 }
 

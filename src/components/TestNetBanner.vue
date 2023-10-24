@@ -21,10 +21,11 @@ export default class TestNetBanner extends Vue {
 </script>
 <style scoped lang="scss">
 $h: 24px;
+@use '../styles/abstracts/mixins';
 .network_warning {
+    @include mixins.typography-caption;
     background-color: var(--secondary-color);
     color: #fff;
-    font-size: 13px;
     text-align: center;
     position: fixed;
     bottom: -$h;

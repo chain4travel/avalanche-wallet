@@ -229,9 +229,7 @@ export default class CurrencyInputDropdown extends Vue {
 .bigIn {
     width: 100%;
     border: none !important;
-    font-size: 15px;
-    font-family: 'Inter';
-    /*background-color: #303030;*/
+    @include mixins.typography-caption;
 }
 .pending {
     color: var(--primary-color-light) !important;
@@ -249,7 +247,6 @@ export default class CurrencyInputDropdown extends Vue {
     display: grid;
     grid-template-columns: 1fr 90px;
     background-color: transparent;
-    //font-size: 12px;
     width: 100%;
     outline: none;
     text-align: right;
@@ -272,7 +269,7 @@ input {
 
 .max_but {
     opacity: 0.4;
-    font-size: 13px;
+    @include mixins.typography-caption;
     &:hover {
         opacity: 1;
     }
@@ -288,7 +285,7 @@ input {
     display: grid;
     column-gap: 10px;
     grid-template-columns: 1fr 140px;
-    font-size: 14px;
+    @include mixins.typography-body-2;
     color: var(--primary-color-light);
     padding: 2px 0px;
 
@@ -306,14 +303,14 @@ input {
     }
 
     span {
-        font-family: 'Inter';
+        font-family: var(--primary-font);
         padding-left: 14px;
     }
 }
 
 .col_big_in {
     text-align: right;
-    font-family: 'Inter';
+    font-family: var(--primary-font);
     display: flex;
     flex-direction: column;
 }
@@ -321,9 +318,9 @@ input {
 .col_balance {
     padding-right: 14px;
     padding-top: 2px !important;
-    font-size: 15px;
+    @include mixins.typography-body-2;
     color: var(--primary-color-light);
-    font-family: 'Inter';
+    font-family: var(--primary-font);
     background-color: transparent;
 }
 
@@ -340,7 +337,7 @@ input {
     }
 
     .balance {
-        font-size: 12px;
+        @include mixins.typography-caption;
     }
 }
 </style>

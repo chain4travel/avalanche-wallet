@@ -61,6 +61,7 @@ export default class ValidatorPending extends Vue {
 </script>
 <style scoped lang="scss">
 @use '../../../../styles/main';
+@use '../../../../styles/abstracts/mixins';
 
 .refresh {
     width: 20px;
@@ -89,7 +90,7 @@ export default class ValidatorPending extends Vue {
 }
 
 .pending-validator {
-    font-size: 40px;
+    @include mixins.typography-headline-3;
     position: relative;
     left: 3%;
 }

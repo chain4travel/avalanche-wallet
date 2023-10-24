@@ -44,6 +44,7 @@ export default class HdEmptyAddressRow extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .list_row_empty {
     color: var(--primary-color-light);
 }
@@ -57,7 +58,7 @@ export default class HdEmptyAddressRow extends Vue {
     overflow: hidden;
     text-overflow: ellipsis;
     word-break: break-all;
-    font-family: 'Inter';
+    font-family: var(--primary-font);
     color: var(--primary-color-light);
 
     .verify {
@@ -65,7 +66,7 @@ export default class HdEmptyAddressRow extends Vue {
         cursor: pointer;
         color: var(--primary-color);
         transition: opacity 0.1s;
-        font-size: 11px;
+        @include mixins.typography-caption;
         padding: 2px 4px;
         background: var(--bg-light);
         user-select: none;

@@ -125,6 +125,7 @@ export default class ERCNftCard extends Vue {
 
 <style scoped lang="scss">
 @use 'nft_card';
+@use '../../../styles/abstracts/mixins';
 
 img {
     width: 100%;
@@ -136,10 +137,9 @@ img {
     background-color: #000;
     height: 100%;
     padding: 12px;
-    font-size: 12px;
+    @include mixins.typography-caption;
     word-break: break-all;
     color: #0f0;
-    font-family: 'Inter' !important;
 }
 
 .raw_toggle {

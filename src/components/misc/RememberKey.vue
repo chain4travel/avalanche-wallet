@@ -129,10 +129,11 @@ export default {
 
 <style lang="scss">
 @use '../../styles/abstracts/variables';
+@use '../../styles/abstracts/mixins';
 
 .remember {
     .v-label {
-        font-size: variables.$s-size !important;
+        @include mixins.typography-caption;
         color: var(--primary-color);
     }
 
@@ -150,6 +151,7 @@ export default {
 }
 </style>
 <style lang="scss" scoped>
+@use '../../styles/abstracts/mixins';
 .passwords {
     display: flex;
     flex-direction: column;
@@ -177,7 +179,7 @@ export default {
     text-align: left;
     color: var(--error);
     height: 16px;
-    font-size: 0.8rem;
+    @include mixins.typography-caption;
 }
 
 .expansion_panel {

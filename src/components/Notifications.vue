@@ -24,7 +24,8 @@ export default {
     },
 }
 </script>
-<style scoped>
+<style scoped lang="scss">
+@use '../styles/abstracts/mixins';
 .notifications {
     pointer-events: none;
     position: fixed;
@@ -43,11 +44,10 @@ export default {
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.4);
     background-color: var(--bg);
     max-width: 195px;
-    font-size: 13px !important;
+    @include mixins.typography-caption;
 }
 
 .notif_title {
-    /*font-size: 14px;*/
     color: var(--bg-light);
     font-weight: bold;
     padding: 6px 14px;

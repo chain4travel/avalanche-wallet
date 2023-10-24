@@ -23,6 +23,7 @@ export default class NetworkLoadingBlock extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../styles/abstracts/mixins';
 .network_loading {
     position: fixed;
     width: 100%;
@@ -54,6 +55,6 @@ export default class NetworkLoadingBlock extends Vue {
 
 .spinner {
     margin-bottom: 30px;
-    font-size: 24px;
+    @include mixins.typography-subtitle-1;
 }
 </style>

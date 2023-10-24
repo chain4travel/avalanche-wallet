@@ -86,19 +86,18 @@ export default class Modal extends Vue {
 }
 
 .modal_title {
-    font-size: 22px;
+    @include mixins.typography-subtitle-1;
     text-align: left;
     flex-grow: 1;
     margin: 0;
-    font-weight: lighter;
 }
 
 .modal_subtitle {
-    font-size: 14px;
+    @include mixins.typography-caption;
 }
 
 .modalClose {
-    font-size: 22px;
+    @include mixins.typography-subtitle-1;
     font-weight: lighter;
     opacity: 0.5;
     &:hover {

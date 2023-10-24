@@ -64,6 +64,7 @@ export default class ConfirmPage extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .confirmation {
     > div {
         background-color: var(--bg-light);
@@ -71,16 +72,16 @@ export default class ConfirmPage extends Vue {
         padding: 6px 14px;
 
         label {
-            font-size: 14px;
+            @include mixins.typography-caption;
             color: var(--primary-color-light);
         }
         p {
-            font-size: 18px;
+            @include mixins.typography-body-1;
         }
     }
 
     .err {
-        font-size: 14px;
+        @include mixins.typography-caption;
     }
 }
 </style>

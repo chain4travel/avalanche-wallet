@@ -151,6 +151,7 @@ export default class UtxoSelect extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .utxo_select_modal_body {
     width: 720px;
     max-width: 100%;
@@ -179,7 +180,7 @@ th {
     border-bottom: 1px solid var(--bg);
     position: sticky;
     top: 0;
-    font-size: 13px;
+    @include mixins.typography-caption;
 }
 
 .col_amt {

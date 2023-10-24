@@ -54,6 +54,7 @@ export default class JsonForm extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../../styles/abstracts/mixins';
 textarea,
 .editor {
     width: 100%;
@@ -75,7 +76,7 @@ textarea,
 }
 .counter {
     text-align: right;
-    font-size: 13px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
     padding: 2px;
 }

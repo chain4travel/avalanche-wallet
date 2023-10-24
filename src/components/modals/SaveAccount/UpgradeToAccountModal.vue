@@ -121,6 +121,7 @@ export default class UpgradeToAccountModal extends Vue {
 </script>
 
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .remember_modal {
     padding: 30px;
 }
@@ -133,7 +134,7 @@ form {
 }
 .cancel_but {
     color: var(--primary-color-light);
-    font-size: 0.8rem !important;
+    @include mixins.typography-caption;
     text-transform: none !important;
 }
 .password {

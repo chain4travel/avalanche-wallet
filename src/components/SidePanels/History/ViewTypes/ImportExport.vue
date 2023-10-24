@@ -110,10 +110,11 @@ export default class ImportExport extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .import_row {
     display: flex;
     justify-content: space-between;
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
 
     &[export] {
@@ -126,7 +127,7 @@ export default class ImportExport extends Vue {
 .amt {
     text-align: right;
     white-space: nowrap;
-    font-size: 15px;
+    @include mixins.typography-body-2;
     color: var(--success);
 }
 </style>

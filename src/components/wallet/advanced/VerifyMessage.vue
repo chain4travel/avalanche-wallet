@@ -90,20 +90,21 @@ export default class VerifyMessage extends Vue {
 }
 </script>
 <style lang="scss" scoped>
+@use '../../../styles/abstracts/mixins';
 textarea,
 input,
 .address {
     padding: 6px 12px;
     width: 100%;
     background-color: rgba(0, 0, 0, 0.1);
-    font-size: 13px;
+    @include mixins.typography-caption;
 }
 
 label {
     display: block;
     text-align: left;
     color: var(--primary-color-light);
-    font-size: 12px;
+    @include mixins.typography-caption;
     margin-bottom: 20px;
     margin-top: 6px;
 }

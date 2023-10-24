@@ -129,7 +129,7 @@ $logo_w: 38px;
     border-top: 1px solid var(--bg-light);
 }
 .token_row {
-    font-size: 15px;
+    @include mixins.typography-body-2;
     display: grid;
     grid-template-columns: max-content max-content 1fr;
     column-gap: 12px;
@@ -169,7 +169,7 @@ $logo_w: 38px;
 
 .col_name {
     p:last-of-type {
-        font-size: 13px;
+        @include mixins.typography-caption;
         color: var(--primary-color-light);
     }
 }

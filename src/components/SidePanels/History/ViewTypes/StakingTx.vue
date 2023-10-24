@@ -303,10 +303,11 @@ export default class StakingTx extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .data_row {
     display: flex;
     justify-content: space-between;
-    font-size: 12px;
+    @include mixins.typography-caption;
     column-gap: 1em;
     color: var(--primary-color-light);
 }
@@ -319,7 +320,7 @@ export default class StakingTx extends Vue {
 .amt {
     text-align: right;
     white-space: nowrap;
-    font-size: 15px;
+    @include mixins.typography-body-2;
     color: var(--info);
 }
 
@@ -346,8 +347,7 @@ export default class StakingTx extends Vue {
         text-align: center;
         position: relative;
         z-index: 2;
-        font-size: 12px;
-        line-height: 14px;
+        @include mixins.typography-caption;
         color: var(--primary-color);
     }
 }

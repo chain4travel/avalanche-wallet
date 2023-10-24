@@ -184,7 +184,7 @@ hr {
 
 .volatile_alert {
     color: var(--warning);
-    font-size: 15px;
+    @include mixins.typography-body-2;
     margin-right: 6px;
 }
 
@@ -202,7 +202,7 @@ hr {
     }
     .success_button {
         .v-icon {
-            font-size: 20px;
+            @include mixins.typography-subtitle-2;
             padding-right: 4px;
         }
     }

@@ -144,7 +144,7 @@ th {
     position: sticky;
     top: 0;
     padding: 2px 14px;
-    font-size: 14px;
+    @include mixins.typography-caption;
     background-color: var(--bg-wallet-light);
 }
 

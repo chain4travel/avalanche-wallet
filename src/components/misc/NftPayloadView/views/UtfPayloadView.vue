@@ -17,9 +17,10 @@ export default class UtfPayloadView extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 p {
     height: 100%;
-    font-size: 13px;
+    @include mixins.typography-caption;
     padding: 12px 24px;
     word-break: break-word;
     overflow: scroll;

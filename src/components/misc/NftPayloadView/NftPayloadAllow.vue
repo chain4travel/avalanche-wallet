@@ -26,6 +26,7 @@ export default class NftPayloadAllow extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .nft_allow {
     display: flex;
     flex-direction: column;
@@ -34,7 +35,7 @@ export default class NftPayloadAllow extends Vue {
     background-color: var(--bg-light);
 
     button {
-        font-size: 0.8em;
+        @include mixins.typography-caption;
         opacity: 0.5;
 
         &:hover {
