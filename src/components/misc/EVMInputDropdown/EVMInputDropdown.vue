@@ -167,7 +167,9 @@ export default class EVMInputDropdown extends Vue {
 
     get balance(): Big {
         if (this.token === 'native') {
-            return this.avaxBalance
+            let limit = new BN(this.gasLimit)
+            let fee = limit.mul(this.gasPrice)
+            return this.avaxBalance.sub(bnToBig(fee, this.denomination))
         }
         return this.token.balanceBig
     }
