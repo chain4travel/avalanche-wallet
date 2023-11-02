@@ -54,23 +54,23 @@
     </modal>
 </template>
 <script lang="ts">
-import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
-import AvaxInput from '@/components/misc/AvaxInput.vue'
-import Modal from '../../modals/Modal.vue'
-import { Buffer, BN } from '@c4tplatform/caminojs'
-import Big from 'big.js'
-import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
-import { WalletHelper } from '@/helpers/wallet_helper'
 import { ava, bintools } from '@/AVA'
-import AvaAsset from '@/js/AvaAsset'
-import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
+import AvaxInput from '@/components/misc/AvaxInput.vue'
 import { RewardOwner } from '@/components/misc/ValidatorList/types'
-import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { bnToBig } from '@/helpers/helper'
+import { WalletHelper } from '@/helpers/wallet_helper'
+import AvaAsset from '@/js/AvaAsset'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
+import { BN, Buffer } from '@c4tplatform/caminojs'
+import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { ClaimTx } from '@c4tplatform/caminojs/dist/apis/platformvm/claimtx'
+import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
+import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
+import Big from 'big.js'
+import 'reflect-metadata'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import Modal from '../../modals/Modal.vue'
 
 @Component({
     components: {
@@ -156,6 +156,12 @@ export default class ModalClaimDepositReward extends Vue {
         )
     }
 
+    async updateRewards() {
+        await this.$store.dispatch('Assets/updateUTXOs')
+        await this.$store.dispatch('History/updateTransactionHistory')
+        await this.$store.dispatch('Platform/updateAllDepositOffers')
+        await this.$store.dispatch('Platform/updateRewards')
+    }
     async confirmClaim() {
         const wallet = this.$store.state.activeWallet
         // @ts-ignore
@@ -175,7 +181,7 @@ export default class ModalClaimDepositReward extends Vue {
                 this.amt,
                 this.validatorClaim
             )
-                .then((value) => {
+                .then(async (value) => {
                     if (!value) {
                         // multisg flow
                         this.$store.dispatch('Platform/updateActiveDepositOffer')
@@ -192,10 +198,12 @@ export default class ModalClaimDepositReward extends Vue {
                     this.updateBalance()
                     this.$store.dispatch('Platform/updateActiveDepositOffer')
                     this.updateMultisigTxDetails()
-                    dispatchNotification({
-                        message: this.$t('notifications.transfer_success_msg'),
+                    this.updateRewards()
+                    this.helpers.dispatchNotification({
+                        message: `Claim Successful (TX: ${value})`,
                         type: 'success',
                     })
+
                     this.claimed = 1
                 })
                 .catch((err) => {
@@ -224,6 +232,7 @@ export default class ModalClaimDepositReward extends Vue {
                 type: 'success',
             })
             this.updateBalance()
+            this.updateRewards()
             this.$store.dispatch('Platform/updateActiveDepositOffer')
             this.$store.dispatch('Signavault/updateTransaction')
             this.claimed = 1
