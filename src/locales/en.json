@@ -492,6 +492,36 @@
             "earn_now": {
                 "title": "Saving Pools"
             },
+            "create": {
+                "offer_start": "Offer Start",
+                "offer_end": "Offer End",
+                "interrest_rate": "Interrest rate ( *1 000 000 )",
+                "min_amount": "Min Amount",
+                "total_max_amount": "Total Max Amount",
+                "min_duration": "Minimum Duration (Sec)",
+                "max_duration": "Maximum Duration (Sec)",
+                "unlock_duration": "Unlock Duration (Sec)",
+                "no_rewards_duration": "No Rewards Duration (Sec)",
+                "memo": "Title",
+                "flags": "Flags (Blocked:1)",
+                "total_max_reward_amount": "Total Max Reward Amount",
+                "owner_address": "Owner Address (optional)",
+                "submit": "Create Offer"
+            },
+            "offer": {
+                "title": "Active Saving Pools",
+                "reward": "Reward",
+                "pool_size": "Pool Size",
+                "pool_start": "Pool Start",
+                "pool_end": "Pool End",
+                "min_deposit": "Minimum Deposit",
+                "min_duration": "Minimum Duration",
+                "max_duration": "Maximum Duration",
+                "unlock_duration": "Unlock Duration",
+                "no_reward_duration": "NoReward Duration",
+                "balance": "Available for Deposit",
+                "deposit": "Deposit Now"
+            },
             "active_earning": {
                 "title": "My Rewards",
                 "lock_start": "Lock Start",
@@ -510,7 +540,11 @@
                 "signed": "Signed {nbSigners}/{threshold}",
                 "confirm_claim": "Confirm claim",
                 "pending_claim": "Confirm claiming rewards {nbSigners}/{threshold}",
-                "execute_claim": "Execute claim"
+                "execute_claim": "Execute claim",
+                "deposit_start": "Deposit Start",
+                "deposit_end": "Deposit End",
+                "deposit_amount": "Deposit Amount",
+                "deposited_amount": "Deposited Amount"
             },
             "claim_modal": {
                 "are_you_sure": "Are you sure you want to claim {amount} {symbol} rewards?",

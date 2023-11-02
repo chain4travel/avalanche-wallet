@@ -30,12 +30,12 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 
-import { BN } from '@c4tplatform/caminojs/dist'
 import DepositOffers from '@/components/wallet/earn/DepositOffers.vue'
 import UserRewards from '@/components/wallet/earn/UserRewards.vue'
 import { bnToBig } from '@/helpers/helper'
+import { BN } from '@c4tplatform/caminojs/dist'
 import Big from 'big.js'
 
 @Component({
@@ -99,7 +99,8 @@ export default class Earn extends Vue {
         try {
             this.loadingRefreshDepositRewards = true
             await Promise.all([
-                this.$store.dispatch('Platform/updateActiveDepositOffer'),
+                this.$store.dispatch('Platform/updateAllDepositOffers'),
+                this.$store.dispatch('Platform/updateRewards'),
                 this.$store.dispatch('Signavault/updateTransaction'),
             ])
         } catch (error) {
