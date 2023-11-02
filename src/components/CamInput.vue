@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
 export default class CamInput extends Vue {
@@ -44,7 +44,7 @@ export default class CamInput extends Vue {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .cam-input {
     display: flex;
     flex-direction: column;
