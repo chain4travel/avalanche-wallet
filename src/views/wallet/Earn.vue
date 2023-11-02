@@ -98,11 +98,14 @@ export default class Earn extends Vue {
     async refresh() {
         try {
             this.loadingRefreshDepositRewards = true
-            await Promise.all([
-                this.$store.dispatch('Platform/updateAllDepositOffers'),
-                this.$store.dispatch('Platform/updateRewards'),
-                this.$store.dispatch('Signavault/updateTransaction'),
-            ])
+            this.$store.dispatch('Assets/updateUTXOs').then(() => {
+                this.$store.dispatch('Platform/updateAllDepositOffers').then(async () => {
+                    await Promise.all([
+                        this.$store.dispatch('Platform/updateRewards'),
+                        this.$store.dispatch('Signavault/updateTransaction'),
+                    ])
+                })
+            })
         } catch (error) {
             console.error('Error refreshing deposit rewards:', error)
         } finally {

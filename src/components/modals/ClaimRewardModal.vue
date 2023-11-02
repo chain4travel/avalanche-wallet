@@ -108,7 +108,12 @@ export default class ModalClaimReward extends Vue {
     get nativeAssetSymbol(): string {
         return this.ava_asset?.symbol ?? ''
     }
-
+    async updateRewards() {
+        await this.$store.dispatch('Assets/updateUTXOs')
+        await this.$store.dispatch('History/updateTransactionHistory')
+        await this.$store.dispatch('Platform/updateAllDepositOffers')
+        await this.$store.dispatch('Platform/updateRewards')
+    }
     async confirmClaim() {
         const wallet: WalletType = this.$store.state.activeWallet
         const hrp = ava.getHRP()
@@ -132,6 +137,7 @@ export default class ModalClaimReward extends Vue {
                 msgTitle: 'Transaction',
                 msgText: `Claim Successful (TX: ${result})`,
             })
+            this.updateRewards()
         } catch (error) {
             if (error instanceof SignatureError) {
                 this.$store.dispatch('updateTransaction', {
@@ -142,11 +148,6 @@ export default class ModalClaimReward extends Vue {
                 })
             } else {
                 console.error(error)
-                this.$store.dispatch('Notifications/add', {
-                    type: 'error',
-                    title: 'Claim Failed',
-                    message: error,
-                })
                 this.claimed = false
                 return
             }

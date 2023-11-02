@@ -178,7 +178,7 @@ export default class ModalClaimDepositReward extends Vue {
                 wallet,
                 this.depositTxID,
                 rewardOwner,
-                this.amt,
+                this.amount,
                 this.validatorClaim
             )
                 .then(async (value) => {
@@ -194,7 +194,7 @@ export default class ModalClaimDepositReward extends Vue {
                         return this.updateMultisigTxDetails()
                     }
 
-                    this.confiremedClaimedAmount = this.formattedAmount(this.amt)
+                    this.confiremedClaimedAmount = this.formattedAmount(this.amount)
                     this.updateBalance()
                     this.$store.dispatch('Platform/updateActiveDepositOffer')
                     this.updateMultisigTxDetails()
@@ -255,7 +255,7 @@ export default class ModalClaimDepositReward extends Vue {
 
             const amount = claimAmounts[0].getAmount()
             this.confiremedClaimedAmount = bnToBig(new BN(amount), 9)?.toLocaleString()
-        } else this.confiremedClaimedAmount = this.formattedAmount(this.amt)
+        } else this.confiremedClaimedAmount = this.formattedAmount(this.amount)
     }
 }
 </script>

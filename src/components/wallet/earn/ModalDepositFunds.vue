@@ -415,6 +415,12 @@ export default class ModalDepositFunds extends Vue {
                         type: 'success',
                     })
                 })
+            } else {
+                let err = error as Error
+                this.helpers.dispatchNotification({
+                    message: err.message,
+                    type: 'error',
+                })
             }
         }
     }
