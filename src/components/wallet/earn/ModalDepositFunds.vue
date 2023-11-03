@@ -61,50 +61,59 @@
                     <div>
                         <form class="deposit_row">
                             <div class="deposit_inputs">
-                                <label>Deposit duration</label>
-                                <DateForm
-                                    v-if="!pendingDepositTX"
-                                    @change_end="setEndDate"
-                                    :maxEndDate="maxEndDate"
-                                    :minDurationMs="minDuration"
-                                    :maxDurationMs="maxDuration"
-                                    :defaultDurationMs="maxDuration"
-                                ></DateForm>
+                                <div class="deposit_inputs__element">
+                                    <label>Deposit duration</label>
+                                    <DateForm
+                                        v-if="!pendingDepositTX"
+                                        @change_end="setEndDate"
+                                        :maxEndDate="maxEndDate"
+                                        :minDurationMs="minDuration"
+                                        :maxDurationMs="maxDuration"
+                                        :defaultDurationMs="maxDuration"
+                                    ></DateForm>
+                                    <span v-if="!pendingTxduration" class="deposit_duration">
+                                        {{ formatDuration(duration) }}
+                                    </span>
+                                    <span v-else class="deposit_duration">
+                                        {{ formatDuration(pendingTxduration) }}
+                                    </span>
+                                </div>
                                 <!-- <span v-if="rewardOwner">{{ rewardOwner }}</span> -->
-                                <span v-if="!pendingTxduration" class="deposit_duration">
-                                    {{ formatDuration(duration) }}
-                                </span>
-                                <span v-else class="deposit_duration">
-                                    {{ formatDuration(pendingTxduration) }}
-                                </span>
-                                <label style="margin-top: 16px">Reward Owner</label>
-                                <CamInput
-                                    :placeholder="`Rewrad Owner`"
-                                    v-model="rewardOwner"
-                                    class="reward-input"
-                                />
+                                <div class="deposit_inputs__element">
+                                    <label>Reward Owner</label>
+                                    <CamInput
+                                        :placeholder="`Rewrad Owner`"
+                                        v-model="rewardOwner"
+                                        class="reward-input"
+                                        :error="rewardOwnerError"
+                                        :errorMessage="rewardOwnerError"
+                                        style="flex: 1"
+                                    />
+                                </div>
                                 <!-- <label style="margin-top: 16px">Deposit Owner</label>
                                 <CamInput
                                     :placeholder="`Deposit Owner`"
                                     v-model="depositOwner"
                                     class="reward-input"
                                 /> -->
-                                <label style="margin-top: 16px">
-                                    {{ $t('earn.rewards.active_earning.deposit_amount') }}
-                                </label>
-                                <AvaxInput
-                                    v-if="pendingTxamount"
-                                    :max="maxDepositAmount"
-                                    v-model="amt"
-                                    :initial="pendingTxamount * 1000000000"
-                                    :readonly="pendingDepositTX"
-                                ></AvaxInput>
-                                <AvaxInput v-else :max="maxDepositAmount" v-model="amt"></AvaxInput>
-                                <Alert
-                                    v-if="pendingDepositTX"
-                                    variant="info"
-                                    style="margin-top: 16px"
-                                >
+                                <div class="deposit_inputs__element">
+                                    <label>
+                                        {{ $t('earn.rewards.active_earning.deposit_amount') }}
+                                    </label>
+                                    <AvaxInput
+                                        v-if="pendingTxamount"
+                                        :max="maxDepositAmount"
+                                        v-model="amt"
+                                        :initial="pendingTxamount * 1000000000"
+                                        :readonly="pendingDepositTX"
+                                    ></AvaxInput>
+                                    <AvaxInput
+                                        v-else
+                                        :max="maxDepositAmount"
+                                        v-model="amt"
+                                    ></AvaxInput>
+                                </div>
+                                <Alert v-if="pendingDepositTX" variant="info">
                                     {{
                                         $t('earn.validate.pending_multisig.threshold', {
                                             value: sigValue,
@@ -112,7 +121,7 @@
                                         })
                                     }}
                                 </Alert>
-                                <Alert style="margin-top: 16px" v-if="SignStatus" variant="info">
+                                <Alert v-if="SignStatus" variant="info">
                                     {{ $t('earn.validate.pending_multisig.already_signed') }}
                                 </Alert>
                             </div>
@@ -196,9 +205,9 @@ import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { WalletType } from '@/js/wallets/types'
 import { BN } from '@c4tplatform/caminojs'
 import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm'
-import { SignatureError, ZeroBN } from '@c4tplatform/caminojs/dist/common'
+import { ZeroBN } from '@c4tplatform/caminojs/dist/common'
 import 'reflect-metadata'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import Modal from '../../modals/Modal.vue'
 
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
@@ -206,6 +215,7 @@ import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { ava, bintools } from '@/AVA'
 import CamInput from '@/components/CamInput.vue'
 import ModalAbortSigning from '@/components/wallet/earn/ModalAbortSigning.vue'
+import { isValidPChainAddress } from '@/helpers/address_helper'
 import { Buffer } from '@c4tplatform/caminojs/dist'
 import { DepositTx, UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
@@ -235,10 +245,16 @@ export default class ModalDepositFunds extends Vue {
     endDate: string = ''
     rewardOwner: string = ''
     depositOwner: string = ''
+    rewardOwnerError: string = ''
 
     $refs!: {
         modal: Modal
         modal_abort_signing: ModalAbortSigning
+    }
+
+    @Watch('rewardOwner')
+    onRewardOwnerChange() {
+        this.rewardOwnerError = isValidPChainAddress(this.rewardOwner) ? '' : 'Invalid address'
     }
     get activeWallet(): MultisigWallet {
         return this.$store.state.activeWallet
@@ -384,6 +400,14 @@ export default class ModalDepositFunds extends Vue {
         return `${(Number(val.toString()) / Number(ONEAVAX.toString())).toLocaleString()}`
     }
     async submitDeposit(): Promise<void> {
+        console.log({
+            rewardOwner: this.rewardOwner,
+            isValid: isValidPChainAddress(this.rewardOwner),
+        })
+        if (this.rewardOwner && !isValidPChainAddress(this.rewardOwner)) {
+            this.rewardOwnerError = 'Invalid address'
+            return
+        } else this.rewardOwnerError = ''
         const wallet: WalletType = this.$store.state.activeWallet
         try {
             const result = await WalletHelper.buildDepositTx(
@@ -633,6 +657,18 @@ form {
 }
 
 .deposit_inputs {
+    &__element {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: baseline;
+    }
+    span {
+        text-align: start;
+        width: 100%;
+    }
+    gap: 16px;
     margin-bottom: 16px;
     display: flex;
     flex-direction: column;

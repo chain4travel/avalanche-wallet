@@ -7,11 +7,13 @@
                         {{ $t('earn.rewards.create.memo').toString() }}
                     </label>
                     <CamInput
-                        class="form__container__element__input"
-                        :placeholder="`Memo`"
                         v-model="offer.memo"
+                        :placeholder="$t('earn.rewards.create.memo')"
+                        :error="nameLengthError"
+                        :errorMessage="$t('earn.rewards.errors.title')"
                     />
                 </div>
+
                 <div class="form__container__element">
                     <label class="form__container__element__label">
                         {{ $t('earn.rewards.create.offer_start') }}
@@ -24,6 +26,7 @@
                         @change_end="setStartDate"
                     ></DateForm>
                 </div>
+
                 <div class="form__container__element">
                     <label class="form__container__element__label">
                         {{ $t('earn.rewards.create.offer_end') }}
@@ -36,6 +39,7 @@
                         @change_end="setEndDate"
                     ></DateForm>
                 </div>
+
                 <div class="form__container__element">
                     <label class="form__container__element__label">
                         {{ $t('earn.rewards.create.min_amount') }}
@@ -43,14 +47,28 @@
                     <AvaxInput
                         v-model="offer.minAmount"
                         :initial="offer.minAmount"
+                        :max="maxDepositAmount"
                         :camInput="true"
+                        :error="minAmountError"
+                        :errorMessage="
+                            $t('earn.rewards.errors.min_amount', {
+                                minAmount: 0.001,
+                                symbol: nativeAssetSymbol,
+                            })
+                        "
                     ></AvaxInput>
                 </div>
+
                 <div class="form__container__element">
                     <label class="form__container__element__label">
                         {{ $t('earn.rewards.create.total_max_amount') }}
                     </label>
-                    <AvaxInput v-model="offer.totalMaxAmount" :camInput="true"></AvaxInput>
+                    <AvaxInput
+                        v-model="offer.totalMaxAmount"
+                        :initial="offer.totalMaxAmount"
+                        :max="maxDepositAmount"
+                        :camInput="true"
+                    ></AvaxInput>
                 </div>
 
                 <div class="form__container__element">
@@ -60,15 +78,12 @@
                     <CamInput
                         class="form__container__element__input"
                         :placeholder="`minDuration`"
-                        v-model.number="offer.minDuration"
-                    />
-                    <!-- <input
-                        class="form__container__element__input"
-                        type="number"
                         v-model="offer.minDuration"
-                        inputmode="numeric"
-                    /> -->
+                        :error="minDurationError"
+                        :errorMessage="`Min duration must be greater than 0`"
+                    />
                 </div>
+
                 <div class="form__container__element">
                     <label class="form__container__element__label">
                         {{ $t('earn.rewards.create.max_duration') }}
@@ -76,42 +91,34 @@
                     <CamInput
                         class="form__container__element__input"
                         :placeholder="`maxDuration`"
-                        v-model.number="offer.maxDuration"
-                    />
-                    <!-- <input
-                        class="form__container__element__input"
-                        type="number"
                         v-model="offer.maxDuration"
-                        inputmode="numeric"
-                    /> -->
+                        :error="maxDurationError"
+                        :errorMessage="`Max duration must be greater than min duration`"
+                    />
                 </div>
+
                 <div class="form__container__element">
                     <label class="form__container__element__label">
                         {{ $t('earn.rewards.create.unlock_duration') }}
                     </label>
                     <CamInput
-                        class="form__container__element__input"
-                        :placeholder="`unlockPeriodDuration`"
-                        v-model.number="offer.unlockPeriodDuration"
-                    />
-                    <!-- <input
-                        class="form__container__element__input"
-                        type="number"
                         v-model="offer.unlockPeriodDuration"
-                        inputmode="numeric"
-                    /> -->
+                        :placeholder="`unlockPeriodDuration`"
+                        :error="unlockDurationError"
+                        :errorMessage="`Unlock duration must be greater than 0`"
+                    />
                 </div>
+
                 <div class="form__container__element">
                     <label class="form__container__element__label">
                         {{ $t('earn.rewards.create.interrest_rate') }}
                     </label>
-                    <input
-                        class="form__container__element__input"
-                        type="number"
-                        :value="offer.interestRateNominator.toString(10)"
+                    <CamInput
+                        v-model="interestRateNominator"
                         v-on:input="setInterestRate"
-                        min="0"
-                        inputmode="numeric"
+                        :placeholder="`interestRateNominator`"
+                        :error="interestRateAndTotalMaxRewardAmountError"
+                        :errorMessage="`Interest rate must be 0 if total max reward amount is 0, and vice versa`"
                     />
                 </div>
                 <div class="form__container__element">
@@ -119,26 +126,24 @@
                         {{ $t('earn.rewards.create.no_rewards_duration') }}
                     </label>
                     <CamInput
-                        class="form__container__element__input"
-                        :placeholder="`noRewardsPeriodDuration`"
-                        v-model.number="offer.noRewardsPeriodDuration"
-                    />
-                    <!-- <input
-                        class="form__container__element__input"
-                        type="number"
                         v-model="offer.noRewardsPeriodDuration"
-                        inputmode="numeric"
-                    /> -->
+                        :placeholder="`noRewardsPeriodDuration`"
+                        :error="noRewardsPeriodDurationError"
+                        :errorMessage="`No rewards duration must be greater or equal to 0`"
+                    />
                 </div>
                 <div class="form__container__element">
                     <label class="form__container__element__label">
                         {{ $t('earn.rewards.create.total_max_reward_amount') }}
                     </label>
-                    <AvaxInput
-                        v-model="offer.totalMaxRewardAmount"
+                    <CamInput
+                        v-model="totalMaxRewardAmount"
+                        v-on:input="setTotalMaxRewardAmount"
+                        :placeholder="`totalMaxRewardAmount`"
                         :readonly="sunrisePhase === 0"
-                        :camInput="true"
-                    ></AvaxInput>
+                        :error="interestRateAndTotalMaxRewardAmountError"
+                        :errorMessage="`Interest rate must be 0 if total max reward amount is 0, and vice versa`"
+                    ></CamInput>
                 </div>
                 <div class="form__container__element">
                     <label class="form__container__element__label">
@@ -163,6 +168,8 @@
                         :placeholder="`ownerAddress`"
                         v-model.number="offer.ownerAddress"
                         :disabled="sunrisePhase === 0"
+                        :error="ownerAddressCheck()"
+                        :errorMessage="ownerAddressCheck()"
                     />
                     <!-- <input
                         class="form__container__element__input"
@@ -181,13 +188,25 @@
                         :key="index"
                         class="form__container__element__addresses"
                     >
-                        <!-- <div class="circle number">{{ index + 1 }}</div> -->
-                        <input
-                            class="form__container__element__input"
-                            v-model="address.address"
-                            style="margin-bottom: 8px"
-                        />
+                        <div class="addresses_container">
+                            <button @click="removeAddress(index)" class="circle delete-button">
+                                <CamTooltip
+                                    :content="$t('edit_multisig.label.remove_owner')"
+                                    placement="left"
+                                >
+                                    <fa icon="minus"></fa>
+                                </CamTooltip>
+                            </button>
+                            <!-- <div class="circle number">{{ index + 1 }}</div> -->
+                            <CamInput
+                                class="form__container__element__input"
+                                v-model="address.address"
+                            />
+                        </div>
                     </div>
+                    <Alert style="margin-top: 16px" variant="negative" v-if="validAddressError">
+                        {{ $t('edit_multisig.errors.invalid_addresses') }}
+                    </Alert>
                     <div class="form__container__element__new-addresses">
                         <button @click.prevent="addAddress" class="circle plus-button">
                             <fa icon="plus"></fa>
@@ -374,9 +393,22 @@
                 </div>
             </div>
             <div class="form__container__actions">
+                <div class="actions__container">
+                    <Alert v-if="hasExclusiveTotalMaxAmountOrReward" variant="negative">
+                        can only use either TotalMaxAmount or TotalMaxRewardAmount
+                    </Alert>
+                    <Alert v-if="isMinDurationLessThanNoRewardsPeriod" variant="negative">
+                        deposit offer minimum duration ({{ offer.minDuration }}) is less than
+                        no-rewards period duration ({{ offer.noRewardsPeriodDuration }})
+                    </Alert>
+                </div>
                 <template v-if="!pendingSendMultisigTX">
                     <div class="actions__container">
-                        <div class="actions__container__buttons">
+                        <Alert variant="warning">
+                            Creating this depositOffer will incurr a fee of
+                            {{ feeAmt }} {{ nativeAssetSymbol }}
+                        </Alert>
+                        <!-- <div class="actions__container__buttons">
                             <button
                                 v-if="$listeners['selectOffer']"
                                 :class="[
@@ -388,11 +420,17 @@
                             >
                                 {{ $t('earn.rewards.create.submit') }}
                             </button>
+                        </div> -->
+                        <div class="actions__container__buttons">
+                            <CamBtn
+                                v-if="$listeners['selectOffer']"
+                                variant="primary"
+                                @click.prevent="submitCreateOffer"
+                                :disabled="!formValid"
+                            >
+                                {{ $t('earn.rewards.create.submit') }}
+                            </CamBtn>
                         </div>
-                        <Alert variant="warning">
-                            Creating this depositOffer will incurr a fee of
-                            {{ feeAmt }} {{ nativeAssetSymbol }}
-                        </Alert>
                     </div>
                 </template>
                 <template v-else>
@@ -461,12 +499,17 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import DateForm from './DateForm.vue'
 
 import { ava, bintools } from '@/AVA'
+import CamBtn from '@/components/CamBtn.vue'
 import CamInput from '@/components/CamInput.vue'
 import ModalAbortSigning from '@/components/wallet/earn/ModalAbortSigning.vue'
+import { isValidPChainAddress } from '@/helpers/address_helper'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { AddDepositOfferTx, Offer, UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
+
+const MAX_NAME_BYTE_SIZE = 64
+
 @Component({
     components: {
         DateForm,
@@ -474,19 +517,25 @@ import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
         ModalAbortSigning,
         Alert,
         CamInput,
+        CamBtn,
     },
 })
 export default class CreateOfferForm extends Vue {
     @Prop() isSuite!: boolean
+    @Prop() maxDepositAmount!: BN
+
     addresses: { address: string }[] = [{ address: '' }]
+    // @ts-ignore
     helpers = this.globalHelper()
+    interestRateNominator = ZeroBN
+    totalMaxRewardAmount = ZeroBN
     offer: DepositOffer = {
         upgradeVersion: 1,
         id: '',
         interestRateNominator: ZeroBN,
         start: ZeroBN,
         end: ZeroBN,
-        minAmount: new BN(1000000000),
+        minAmount: new BN(1000000),
         totalMaxAmount: ZeroBN,
         depositedAmount: ZeroBN,
         minDuration: 1,
@@ -502,6 +551,118 @@ export default class CreateOfferForm extends Vue {
     pendingOffer: any = null
     $refs!: {
         modal_abort_signing: ModalAbortSigning
+    }
+    @Watch('interestRateNominator')
+    onInterestRateNominatorChange() {
+        this.offer.interestRateNominator = new BN(this.interestRateNominator)
+    }
+    @Watch('totalMaxRewardAmount')
+    onTotalMaxRewardAmountChange() {
+        this.offer.totalMaxRewardAmount = new BN(this.totalMaxRewardAmount)
+    }
+    ownerAddressCheck() {
+        if (!this.offer.ownerAddress) return ''
+        return !isValidPChainAddress(this.offer.ownerAddress as string) ||
+            this.offer.ownerAddress != this.wallet?.getStaticAddress('P')
+            ? 'Invalid address'
+            : ''
+    }
+
+    get hasExclusiveTotalMaxAmountOrReward() {
+        const hasTotalMaxAmount =
+            BN.isBN(this.offer.totalMaxAmount) && !this.offer.totalMaxAmount.isZero()
+        const hasTotalMaxRewardAmount =
+            BN.isBN(this.offer.totalMaxRewardAmount) && !this.offer.totalMaxRewardAmount.isZero()
+
+        return hasTotalMaxAmount && hasTotalMaxRewardAmount
+    }
+
+    get isMinDurationLessThanNoRewardsPeriod() {
+        return Number(this.offer.unlockPeriodDuration) < Number(this.offer.noRewardsPeriodDuration)
+    }
+
+    get nameLengthError() {
+        const bytes = new TextEncoder().encode(this.offer.memo)
+        return bytes.length > MAX_NAME_BYTE_SIZE || bytes.length === 0
+    }
+    get minAmountError() {
+        if (/[a-zA-Z]/.test(this.offer.minAmount.toString())) return true
+        return this.offer.minAmount.lt(new BN(1000000))
+    }
+
+    get maxAmountError() {
+        if (/[a-zA-Z]/.test(this.offer.totalMaxAmount.toString())) return true
+        return this.offer.totalMaxAmount.lt(this.offer.minAmount)
+    }
+
+    get minDurationError() {
+        const minDurationString = String(this.offer.minDuration)
+
+        return (
+            isNaN(this.offer.minDuration) ||
+            /[a-zA-Z]/.test(minDurationString) ||
+            this.offer.minDuration < 0 ||
+            /^0[0-9]/.test(minDurationString)
+        )
+    }
+
+    get maxDurationError() {
+        const maxDurationString = String(this.offer.maxDuration)
+
+        return (
+            isNaN(this.offer.maxDuration) ||
+            /[a-zA-Z]/.test(maxDurationString) ||
+            this.offer.maxDuration < 0 ||
+            /^0[0-9]/.test(maxDurationString) ||
+            this.offer.maxDuration < this.offer.minDuration
+        )
+    }
+
+    get unlockDurationError() {
+        const unlockDurationString = String(this.offer.unlockPeriodDuration)
+
+        return (
+            isNaN(this.offer.unlockPeriodDuration) ||
+            /[a-zA-Z]/.test(unlockDurationString) ||
+            this.offer.unlockPeriodDuration < 0 ||
+            /^0[0-9]/.test(unlockDurationString)
+        )
+    }
+
+    get noRewardsPeriodDurationError() {
+        const noRewardsPeriodDurationString = String(this.offer.noRewardsPeriodDuration)
+
+        return (
+            isNaN(this.offer.noRewardsPeriodDuration) ||
+            /[a-zA-Z]/.test(noRewardsPeriodDurationString) ||
+            this.offer.noRewardsPeriodDuration < 0 ||
+            /^0[0-9]/.test(noRewardsPeriodDurationString)
+        )
+    }
+
+    get totalMaxRewardAmountError() {
+        if (!BN.isBN(this.offer.totalMaxRewardAmount)) {
+            try {
+                this.offer.totalMaxRewardAmount = new BN(this.offer.totalMaxRewardAmount)
+            } catch (e) {
+                console.error('totalMaxRewardAmount is not a valid BN object:', e)
+                return true
+            }
+        }
+
+        if (/[a-zA-Z]/.test(this.offer.totalMaxRewardAmount.toString())) return true
+        return this.offer.totalMaxRewardAmount.lt(ZeroBN)
+    }
+
+    get interestRateAndTotalMaxRewardAmountError() {
+        // Ensure that the values are instances of BN and then compare
+        const interestRateNotZero =
+            BN.isBN(this.offer.interestRateNominator) && !this.offer.interestRateNominator.isZero()
+        const totalMaxRewardAmountNotZero =
+            BN.isBN(this.offer.totalMaxRewardAmount) && !this.offer.totalMaxRewardAmount.isZero()
+
+        // Error if only one of them is non-zero (XOR condition)
+        return interestRateNotZero !== totalMaxRewardAmountNotZero
     }
 
     get activeWallet(): MultisigWallet {
@@ -550,8 +711,17 @@ export default class CreateOfferForm extends Vue {
     }
 
     get formValid(): boolean {
-        if (this.offer.minDuration > this.offer.maxDuration) return false
-        if (this.offer.maxDuration <= 0) return false
+        if (
+            this.nameLengthError ||
+            this.minAmountError ||
+            this.minDurationError ||
+            this.maxDurationError ||
+            this.unlockDurationError ||
+            this.noRewardsPeriodDurationError ||
+            this.hasExclusiveTotalMaxAmountOrReward ||
+            this.isMinDurationLessThanNoRewardsPeriod
+        )
+            return false
         if (this.offer.start > this.offer.end) return false
         return true
     }
@@ -661,11 +831,23 @@ export default class CreateOfferForm extends Vue {
         }
         this.cancelCreateOffer()
     }
+    get validAddressError(): boolean {
+        const filledAddresses = this.addresses.filter((a) => a.address !== '')
+
+        for (const addressObj of filledAddresses) {
+            if (!isValidPChainAddress(addressObj.address)) return true
+        }
+
+        return false
+    }
     addAddress(): void {
         if (this.addresses.length >= 128) return
         this.addresses.push({ address: '' })
     }
-
+    removeAddress(index: number): void {
+        this.addresses.splice(index, 1)
+        if (this.addresses.length === 0) this.addAddress()
+    }
     async updateMultisigTxDetails() {
         await this.$store.dispatch('Assets/updateUTXOs')
         await this.$store.dispatch('Signavault/updateTransaction')
@@ -779,7 +961,17 @@ export default class CreateOfferForm extends Vue {
     }
 
     setInterestRate(ev: any) {
-        this.offer.interestRateNominator = new BN(ev.target.value)
+        if (ev && ev.target) {
+            const interestRateValue = ev.target.value
+            this.offer.interestRateNominator = new BN(interestRateValue)
+        }
+    }
+
+    setTotalMaxRewardAmount(ev: any) {
+        if (ev && ev.target) {
+            const totalMaxRewardAmountValue = ev.target.value
+            this.offer.totalMaxRewardAmount = new BN(totalMaxRewardAmountValue)
+        }
     }
 
     setFlags(ev: any) {
@@ -844,7 +1036,7 @@ input {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        gap: 4px;
+        gap: 1.25rem;
         align-self: stretch;
         &__label {
             color: var(--primary-color);
@@ -871,6 +1063,69 @@ input {
         display: flex;
         align-items: center;
         gap: 16px;
+    }
+}
+.cam-input {
+    width: 100%;
+}
+
+.addresses_container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.circle {
+    border: 2px solid var(--camino-slate-slate-600);
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    border-radius: 100%;
+    padding: 10px;
+}
+
+.number {
+    width: 35px !important;
+    height: 35px !important;
+    cursor: default;
+}
+
+.plus-button {
+    border: 2px solid var(--camino-success-color);
+    font-size: 10px;
+    width: 40px !important;
+    height: 40px !important;
+    svg {
+        color: var(--camino-success-color);
+    }
+}
+
+.delete-button {
+    border: 2px solid var(--camino-error-color);
+    width: 35px !important;
+    height: 35px !important;
+    svg {
+        color: var(--camino-error-color);
+    }
+}
+.delete-button.mobile {
+    display: none;
+}
+
+.delete-button.desktop {
+    display: flex;
+}
+
+@include mixins.mobile-device {
+    .delete-button.mobile {
+        display: flex;
+    }
+
+    .delete-button.desktop {
+        display: none;
     }
 }
 </style>

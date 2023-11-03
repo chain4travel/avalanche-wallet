@@ -11,6 +11,7 @@
                 v-if="$data.createOffer"
                 key="create"
                 @selectOffer="selectOffer"
+                :maxDepositAmount="maxDepositAmount"
             ></CreateOfferForm>
             <div class="user_offers" key="list">
                 <DepositOfferCard

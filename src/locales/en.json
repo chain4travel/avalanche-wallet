@@ -508,6 +508,10 @@
                 "owner_address": "Owner Address (optional)",
                 "submit": "Create Offer"
             },
+            "errors": {
+                "title": "Credit Offre title must be at least 64 characters long.",
+                "min_amount": "Minimum amount must be at least {minAmount} {symbol}."
+            },
             "offer": {
                 "title": "Active Saving Pools",
                 "reward": "Reward",
