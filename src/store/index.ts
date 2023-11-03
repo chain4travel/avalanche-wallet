@@ -462,6 +462,7 @@ export default new Vuex.Store({
                 dispatch('Accounts/updateKycStatus')
                 dispatch('updateBalances')
                 updateFilterAddresses()
+                dispatch('Platform/update')
                 dispatch('fetchMultiSigAliases', { disable: false })
             })
         },
@@ -595,13 +596,6 @@ export default new Vuex.Store({
                     dispatch('History/updateTransactionHistory')
                 }, 3000)
             }
-            if (options.msgType) {
-                dispatch('Notifications/add', {
-                    type: options.msgType,
-                    title: options.msgTitle,
-                    message: options.msgText,
-                })
-            }
         },
         updateBalances({ dispatch }) {
             dispatch('Assets/updateUTXOs').then(() =>
@@ -609,6 +603,7 @@ export default new Vuex.Store({
                     dispatch('History/updateTransactionHistory')
                 })
             )
+            dispatch('Platform/updateAddressStates')
         },
     },
 })

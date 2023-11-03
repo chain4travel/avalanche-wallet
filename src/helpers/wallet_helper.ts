@@ -1,42 +1,41 @@
 import { ava, bintools } from '@/AVA'
 import {
-    UTXO as PlatformUTXO,
-    UTXOSet as PlatformUTXOSet,
-} from '@c4tplatform/caminojs/dist/apis/platformvm/utxos'
-import {
-    UnsignedTx,
-    ClaimAmountParams,
-    ClaimType,
-} from '@c4tplatform/caminojs/dist/apis/platformvm'
-import { UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm/utxos'
-import { AmountOutput } from '@c4tplatform/caminojs/dist/apis/avm'
-import { WalletType } from '@/js/wallets/types'
-
-import { BN, Buffer } from '@c4tplatform/caminojs/dist'
-import {
     buildCreateNftFamilyTx,
-    buildEvmTransferErc20Tx,
     buildEvmTransferERCNftTx,
+    buildEvmTransferErc20Tx,
     buildEvmTransferNativeTx,
     buildMintNftTx,
 } from '@/js/TxHelper'
-import { PayloadBase } from '@c4tplatform/caminojs/dist/utils'
-import { ITransaction } from '@/components/wallet/transfer/types'
+import { WalletType } from '@/js/wallets/types'
+import { AmountOutput } from '@c4tplatform/caminojs/dist/apis/avm'
+import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 
+import { ITransaction } from '@/components/wallet/transfer/types'
+import { BN, Buffer } from '@c4tplatform/caminojs/dist'
+import { UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm/utxos'
+import {
+    ClaimAmountParams,
+    ClaimType,
+    DepositOffer,
+    UTXO as PlatformUTXO,
+    UTXOSet as PlatformUTXOSet,
+} from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { PayloadBase } from '@c4tplatform/caminojs/dist/utils'
+
+import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
+import { ChainIdType, ZeroBN } from '@/constants'
 import { web3 } from '@/evm'
-import Erc20Token from '@/js/Erc20Token'
+import { bnToBig } from '@/helpers/helper'
 import { getStakeForAddresses } from '@/helpers/utxo_helper'
 import ERCNftToken from '@/js/ERCNftToken'
-import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
-import { GetValidatorsResponse } from '@/store/modules/platform/types'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
-import { SignatureError } from '@c4tplatform/caminojs/dist/common'
-import { ChainIdType, ZeroBN } from '@/constants'
-import { bnToBig } from '@/helpers/helper'
-import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import Erc20Token from '@/js/Erc20Token'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import { GetValidatorsResponse } from '@/store/modules/platform/types'
 import { MultisigAliasParams } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { OutputOwners, SignatureError } from '@c4tplatform/caminojs/dist/common'
+import { ModelDepositOfferSig } from '@c4tplatform/signavaultjs'
 class WalletHelper {
     static async getStake(wallet: WalletType): Promise<BN> {
         let addrs = wallet.getAllAddressesP()
@@ -591,29 +590,71 @@ class WalletHelper {
         wallet: WalletType,
         depositID: string,
         depositDuration: number,
-        depositAmount: BN
+        depositAmount: BN,
+        restrictedOffer?: ModelDepositOfferSig,
+        depositOfferOwner?: string,
+        rewardOwner?: string,
+        depositOwner?: string
     ) {
         const pAddressStrings = wallet.getAllAddressesP()
         const signerAddresses = wallet.getSignerAddresses('P')
-        const rewardAddress = bintools.parseAddress(wallet.getPlatformRewardAddress(), 'P')
+        const depositOwnerAddress = bintools.parseAddress(
+            rewardOwner ? rewardOwner : wallet.getPlatformRewardAddress(),
+            'P'
+        )
+
+        const changeAddress = wallet.getChangeAddressPlatform()
+        const depositCreator = pAddressStrings[0]
+        const depositCreatorAuth: [number, string | Buffer][] = [[0, depositCreator]]
+        const unsignedTx = await ava
+            .PChain()
+            .buildDepositTx(
+                restrictedOffer ? 1 : 0,
+                wallet.platformUtxoset,
+                [pAddressStrings, signerAddresses],
+                [changeAddress],
+                depositID,
+                depositDuration,
+                new OutputOwners([depositOwnerAddress], ZeroBN, 1),
+                restrictedOffer ? depositCreator : Buffer.alloc(20),
+                restrictedOffer ? depositCreatorAuth : [],
+                restrictedOffer && restrictedOffer.signature
+                    ? [Buffer.from(restrictedOffer.signature, 'hex')]
+                    : [],
+                restrictedOffer && depositOfferOwner
+                    ? [[wallet.type === 'multisig' ? 1 : 0, depositOfferOwner]]
+                    : [],
+                Buffer.alloc(0),
+                ZeroBN,
+                depositAmount,
+                1,
+                rewardOwner ? [bintools.parseAddress(rewardOwner as string, 'P')] : [],
+                rewardOwner ? 1 : 0
+            )
+        let tx = await wallet.signP(unsignedTx)
+        return await ava.PChain().issueTx(tx)
+    }
+
+    static async buildAddDepositOfferTx(wallet: WalletType, offer: DepositOffer) {
+        const pAddressStrings = wallet.getAllAddressesP()
+        const signerAddresses = wallet.getSignerAddresses('P')
         const changeAddress = wallet.getChangeAddressPlatform()
 
-        const unsignedTx = await ava.PChain().buildDepositTx(
-            0, //UpgradeVersion
-            wallet.platformUtxoset,
-            [pAddressStrings, signerAddresses],
-            [changeAddress],
-            depositID,
-            depositDuration,
-            new OutputOwners([rewardAddress], ZeroBN, 1),
-            Buffer.alloc(20), // empty address
-            [],
-            [],
-            [],
-            Buffer.alloc(0),
-            ZeroBN,
-            depositAmount
-        )
+        const creatorAddress = pAddressStrings[0]
+        const creatorAuth: [number, Buffer | string][] = [[0, pAddressStrings[0]]]
+
+        const unsignedTx = await ava
+            .PChain()
+            .buildAddDepositOfferTx(
+                wallet.platformUtxoset,
+                [pAddressStrings, signerAddresses],
+                [changeAddress],
+                offer,
+                creatorAddress,
+                creatorAuth,
+                Buffer.alloc(0),
+                ZeroBN
+            )
         let tx = await wallet.signP(unsignedTx)
         return await ava.PChain().issueTx(tx)
     }
@@ -649,6 +690,14 @@ class WalletHelper {
         }
     }
 
+    static getTotalAmountFromUtxTest(utx: UnsignedTx): number {
+        let amount = 0
+        const tx = utx.getTransaction()
+
+        const output = tx.getOuts()[tx.getOuts().length - 1]?.getOutput() as AmountOutput
+        amount += Number(bnToBig(output?.getAmount(), 9)?.toString())
+        return amount
+    }
     static getTotalAmountFromUtx(utx: UnsignedTx, toAddress: string): number {
         let amount = 0
         const hrp = ava.getHRP()
@@ -756,10 +805,8 @@ class WalletHelper {
 
     static async sendMultisigAliasTxUpdate(
         wallet: WalletType,
-        initialAddresses: string[],
         addresses: string[],
         memo: string,
-        initialThreshold: number,
         threshold: number,
         multisigAliasAddress: string
     ) {
@@ -780,12 +827,12 @@ class WalletHelper {
             .PChain()
             .buildMultisigAliasTx(
                 wallet.platformUtxoset,
-                [[multisigAliasAddress], initialAddresses],
+                [[multisigAliasAddress], addresses],
                 [multisigAliasAddress],
                 multisigAliasParams,
                 undefined,
                 ZeroBN,
-                initialThreshold
+                threshold
             )
 
         let tx = await wallet.signP(unsignedTx)
@@ -794,3 +841,4 @@ class WalletHelper {
 }
 
 export { WalletHelper }
+export type { DepositOffer }

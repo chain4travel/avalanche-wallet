@@ -169,7 +169,9 @@ const network_module: Module<NetworkState, RootState> = {
             }
 
             await dispatch('Assets/onNetworkChange', net, { root: true })
-            dispatch('Assets/updateUTXOs', null, { root: true })
+            dispatch('Assets/updateUTXOs', null, { root: true }).then(() => {
+                dispatch('Platform/update', null, { root: true })
+            })
             dispatch('Platform/update', null, { root: true })
             dispatch('updateTxFee')
             dispatch('Accounts/updateKycStatus', null, { root: true })

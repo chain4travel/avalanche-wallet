@@ -1,23 +1,70 @@
-import {
-    DelegatorPendingRaw,
-    DelegatorRaw,
-    ValidatorPendingRaw,
-    ValidatorRaw,
-    DepositOfferRaw,
-    ActiveDeposit,
-} from '@/components/misc/ValidatorList/types'
 import { BN } from '@c4tplatform/caminojs/dist'
-import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
+import {
+    APIDeposit,
+    DepositOffer,
+    Owner,
+} from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
+import { ModelDepositOfferSig } from '@c4tplatform/signavaultjs'
+
+export type RewardOwner = Owner
 
 export interface PlatformState {
     validators: ValidatorRaw[]
     validatorsPending: ValidatorPendingRaw[]
-    delegatorsPending: DelegatorPendingRaw[]
     minStake: BN
     minStakeDelegation: BN
     currentSupply: BN
     depositOffers: DepositOffer[]
-    activeDepositOffer: ActiveDeposit[]
+    rewards: PlatformRewards
+    addressStates: BN
+    sunrisePhase: number
+    restrictedOffers?: ModelDepositOfferSig[]
+}
+
+export interface ValidatorRaw {
+    connection: boolean
+    endTime: string
+    nodeID: string
+    stakeAmount: string
+    startTime: string
+    uptime: string
+    delegationFee: string
+    delegators: DelegatorRaw[] | null
+    potentialReward: string
+    rewardOwner: ValidatorRewardOwner
+    txID: string
+}
+
+export interface DelegatorRaw {
+    endTime: string
+    nodeID: string
+    potentialReward: string
+    rewardOwner: ValidatorRewardOwner
+    stakeAmount: string
+    startTime: string
+    txID: string
+}
+
+export interface DelegatorPendingRaw {
+    startTime: string
+    endTime: string
+    stakeAmount: string
+    nodeID: string
+}
+
+export interface ValidatorPendingRaw {
+    startTime: string
+    endTime: string
+    stakeAmount: string
+    nodeID: string
+    delegationFee: string
+    connected: boolean
+}
+
+export interface ValidatorRewardOwner {
+    addresses: string[]
+    locktime: string
+    threshold: string
 }
 
 export interface GetValidatorsResponse {
@@ -46,10 +93,6 @@ export interface ValidatorDict {
     [nodeId: string]: ValidatorRaw
 }
 
-export interface GetAllDepositOffersResponse {
-    depositOffers: DepositOfferRaw[]
-}
-
 export interface ValidatorListItem {
     nodeID: string
     validatorStake: BN
@@ -60,4 +103,20 @@ export interface ValidatorListItem {
     endTime: Date
     uptime: number
     fee: number
+}
+
+export interface PlatformRewardTreasury {
+    type: 'deposit' | 'validator'
+    amountToClaim: BN
+    rewardOwner: Owner
+}
+
+export interface PlatformRewardDeposit {
+    amountToClaim: BN
+    deposit: APIDeposit
+}
+
+export interface PlatformRewards {
+    treasuryRewards: PlatformRewardTreasury[]
+    depositRewards: PlatformRewardDeposit[]
 }
