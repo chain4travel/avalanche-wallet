@@ -1,9 +1,9 @@
 <template>
     <div class="offer_row">
-        <h2 class="offer_title">{{ rewardTitle }}</h2>
+        <h3 class="offer_title">{{ rewardTitle }}</h3>
         <div class="offer_detail">
             <div class="progress">
-                <label>{{ $t('earn.offer.pool_size') }}:</label>
+                <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
                 <span>
                     <span class="success" :style="'width:' + progress"></span>
                 </span>
@@ -11,74 +11,108 @@
             </div>
             <div class="offer_detail_left">
                 <div>
-                    <label>{{ $t('earn.offer.pool_start') }}:</label>
+                    <label>{{ $t('earn.rewards.offer.pool_start') }}:</label>
                     <p class="reward">{{ formatDate(offer.start) }}</p>
                 </div>
                 <div>
-                    <label>{{ $t('earn.offer.pool_end') }}:</label>
+                    <label>{{ $t('earn.rewards.offer.pool_end') }}:</label>
                     <p class="reward">{{ formatDate(offer.end) }}</p>
                 </div>
                 <div>
-                    <label>{{ $t('earn.offer.min_deposit') }}:</label>
+                    <label>{{ $t('earn.rewards.offer.min_deposit') }}:</label>
                     <p class="reward">{{ cleanAvaxBN(offer.minAmount) }} CAM</p>
                 </div>
                 <div>
-                    <label>{{ $t('earn.offer.reward') }}:</label>
+                    <label>{{ $t('earn.rewards.offer.reward') }}:</label>
                     <p class="reward">{{ rewardPercent }} %</p>
                 </div>
             </div>
             <div class="offer_detail_right">
                 <div>
-                    <label>{{ $t('earn.offer.min_duration') }}:</label>
+                    <label>{{ $t('earn.rewards.offer.min_duration') }}:</label>
                     <p class="reward">
                         {{ formatDuration(offer.minDuration) }}
                     </p>
                 </div>
                 <div>
-                    <label>{{ $t('earn.offer.max_duration') }}:</label>
+                    <label>{{ $t('earn.rewards.offer.max_duration') }}:</label>
                     <p class="reward">
                         {{ formatDuration(offer.maxDuration) }}
                     </p>
                 </div>
                 <div>
-                    <label>{{ $t('earn.offer.unlock_duration') }}:</label>
+                    <label>{{ $t('earn.rewards.offer.unlock_duration') }}:</label>
                     <p class="reward">
                         {{ formatDuration(offer.unlockPeriodDuration) }}
                     </p>
                 </div>
                 <div>
-                    <label>{{ $t('earn.offer.no_reward_duration') }}:</label>
+                    <label>{{ $t('earn.rewards.offer.no_reward_duration') }}:</label>
                     <p class="reward">
                         {{ formatDuration(offer.noRewardsPeriodDuration) }}
                     </p>
                 </div>
             </div>
         </div>
-        <button
-            v-if="$listeners['selectOffer']"
-            class="claim_button button_primary"
-            @click="emitOffer"
-            :disabled="isDepositDisabled"
-        >
-            {{ $t('earn.offer.deposit') }}
-        </button>
+        <div class="button--container">
+            <!-- <button v-if="!isDepositDisabled" @click="openDepositFundsModal()">open modal</button> -->
+            <button
+                style="margin-top: 16px"
+                v-if="$listeners['selectOffer']"
+                :class="[
+                    'camino__primary--button',
+                    { 'camino--button--disabled': isDepositDisabled },
+                ]"
+                @click.prevent="openDepositFundsModal()"
+                :disabled="isDepositDisabled"
+            >
+                {{
+                    !pendingOfferID || offer.id !== pendingOfferID
+                        ? $t('earn.rewards.offer.deposit')
+                        : 'Sign depositing funds'
+                }}
+            </button>
+        </div>
+        <ModalDepositFunds
+            @selectOffer="emitOffer"
+            ref="modal_deposit_funds"
+            :title="rewardTitle"
+            :offer="offer"
+            @emitOffer="emitOffer"
+            :isDepositDisabled="isDepositDisabled"
+            :maxDepositAmount="maxDepositAmount"
+            @closeDepositFundsModal="closeDepositFundsModal"
+        />
     </div>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import { cleanAvaxBN, formatDuration } from '@/helpers/helper'
 import AvaAsset from '@/js/AvaAsset'
 
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { BN } from '@c4tplatform/caminojs/dist'
 import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
+import ModalDepositFunds from './ModalDepositFunds.vue'
 
-@Component
+import { bintools } from '@/AVA'
+import { WalletHelper } from '@/helpers/wallet_helper'
+import { Buffer } from '@c4tplatform/caminojs/dist'
+import { DepositTx, UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+@Component({
+    components: {
+        ModalDepositFunds,
+    },
+})
 export default class DepositOfferCard extends Vue {
     @Prop() offer!: DepositOffer
     @Prop() maxDepositAmount!: BN
 
+    $refs!: {
+        modal_deposit_funds: ModalDepositFunds
+    }
     get rewardTitle() {
         return Buffer.from(this.offer.memo.replace('0x', ''), 'hex').toString()
     }
@@ -93,6 +127,23 @@ export default class DepositOfferCard extends Vue {
         )
     }
 
+    get pendingDepositTX(): SignavaultTx | undefined {
+        return this.$store.getters['Signavault/transactions'].find(
+            (item: SignavaultTx) =>
+                item?.tx?.alias === this.$store.state.activeWallet?.getStaticAddress('P') &&
+                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'DepositTx'
+        )
+    }
+    get pendingOfferID(): string | undefined {
+        if (this.pendingDepositTX) {
+            let unsignedTx = new UnsignedTx()
+            unsignedTx.fromBuffer(Buffer.from(this.pendingDepositTX.tx?.unsignedTx, 'hex'))
+            const utx = unsignedTx.getTransaction() as DepositTx
+            return bintools.cb58Encode(utx.getDepositOfferID())
+        }
+        return undefined
+    }
+
     get ava_asset(): AvaAsset | null {
         let ava = this.$store.getters['Assets/AssetAVA']
         return ava
@@ -103,27 +154,30 @@ export default class DepositOfferCard extends Vue {
     }
 
     get isDepositDisabled(): boolean {
-        return true
-        // return this.maxDepositAmount.isZero()
+        return (
+            this.maxDepositAmount.isZero() ||
+            (!!this.pendingOfferID && this.offer.id !== this.pendingOfferID)
+        )
+    }
+
+    get amountLimit(): { nominator: BN; amount: BN } {
+        return this.offer.upgradeVersion === 0 || !this.offer.totalMaxAmount.isZero()
+            ? { nominator: this.offer.depositedAmount, amount: this.offer.totalMaxAmount }
+            : { nominator: this.offer.rewardedAmount, amount: this.offer.totalMaxRewardAmount }
     }
 
     get progress(): string {
-        return this.offer.totalMaxAmount.isZero()
+        const amt = this.amountLimit
+        return amt.amount.isZero()
             ? '0px'
-            : this.offer.depositedAmount
-                  .div(this.offer.totalMaxAmount)
-                  .mul(new BN(100))
-                  .toString() + '%'
+            : amt.nominator.div(amt.amount).mul(new BN(100)).toString() + '%'
     }
 
     get progressText(): string {
-        return this.offer.totalMaxAmount.isZero()
+        const amt = this.amountLimit
+        return amt.amount.isZero()
             ? 'No Limit'
-            : this.progress +
-                  '(' +
-                  cleanAvaxBN(this.offer.totalMaxAmount) +
-                  this.nativeAssetSymbol +
-                  ')'
+            : this.progress + '(' + cleanAvaxBN(amt.amount) + this.nativeAssetSymbol + ')'
     }
 
     emitOffer(): void {
@@ -149,6 +203,12 @@ export default class DepositOfferCard extends Vue {
     formatDuration(dur: number): string {
         return formatDuration(dur)
     }
+    openDepositFundsModal() {
+        this.$refs.modal_deposit_funds.open()
+    }
+    closeDepositFundsModal() {
+        this.$refs.modal_deposit_funds.close()
+    }
 }
 </script>
 <style scoped lang="scss">
@@ -167,7 +227,11 @@ export default class DepositOfferCard extends Vue {
 .offer_title {
     margin-bottom: 1rem;
 }
-
+.button--container {
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+}
 .progress {
     grid-column: span 2;
     display: grid;
@@ -179,7 +243,6 @@ export default class DepositOfferCard extends Vue {
         height: 4px;
         background-color: var(--bg);
         display: inline-block;
-        border-radius: var(--border-radius-sm);
     }
     .success {
         height: 100%;

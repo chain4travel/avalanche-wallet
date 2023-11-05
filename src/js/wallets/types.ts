@@ -108,7 +108,7 @@ export interface AvaWalletCore extends IAddressManager {
     estimateGas(to: string, amount: BN, token: Erc20Token): Promise<number>
 
     signX(unsignedTx: AVMUnsignedTx): Promise<AVMTx>
-    signP(unsignedTx: PlatformUnsignedTx): Promise<PlatformTx>
+    signP(unsignedTx: PlatformUnsignedTx, additionalSigners?: string[]): Promise<PlatformTx>
     signC(unsignedTx: EVMUnsignedTx): Promise<EVMTx>
     signEvm(tx: Transaction): Promise<Transaction>
     validate(

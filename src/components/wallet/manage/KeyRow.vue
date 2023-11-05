@@ -369,9 +369,9 @@ export default class KeyRow extends Vue {
     flex-direction: column;
     gap: 6px;
 
-        > button {
-            text-align: right;
-            @include mixins.typography-caption;
+    > button {
+        text-align: right;
+        @include mixins.typography-caption;
 
         &:hover {
             color: var(--secondary-color);

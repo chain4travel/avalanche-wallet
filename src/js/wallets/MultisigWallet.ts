@@ -8,6 +8,7 @@ import {
 } from '@c4tplatform/caminojs/dist/apis/avm'
 import { Tx as EVMTx, UnsignedTx as EVMUnsignedTx } from '@c4tplatform/caminojs/dist/apis/evm'
 import {
+    DepositTx,
     KeyChain,
     KeyPair,
     Owner,
@@ -446,7 +447,6 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         // This prepares signatureIndices in kexChain for signing.
         // Sign will provide them in a MultisigCredential structure to the node
         kcData.kc.buildSignatureIndices()
-
         const utx = new PlatformUnsignedTx()
         utx.fromBuffer(Buffer.from(tx.unsignedTx, 'hex'))
         const signedTx = utx.sign(kcData.kc)
@@ -454,7 +454,6 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
 
         const signedTxHash = Buffer.from(createHash('sha256').update(signedTxBytes).digest())
         const signature = signer.sign(signedTxHash)
-
         const sv = SignaVault()
         let { txID } = (
             await sv.issueMultisigTx({
@@ -477,7 +476,7 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         const signatureAliasTimestamp = signingKeyPair
             .sign(Buffer.from(createHash('sha256').update(Buffer.from(timestamp)).digest()))
             ?.toString('hex')
-        return sv.cancelMultisigTx(tx.id, {
+        return sv.cancelMultisigTx({
             timestamp: timestamp,
             signature: signatureAliasTimestamp,
             id: tx?.id,
@@ -536,6 +535,15 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
                     '|'
                 )
                 msKeyChain.addKey(new MultisigKeyPair(msKeyChain, key.getAddress(), signature))
+            })
+        }
+
+        // DepositTx has optional signatures for verifying DepositOwner
+        if (utx.getTransaction().getTxType() === PlatformVMConstants.DEPOSITTX) {
+            const sigs = (utx.getTransaction() as DepositTx).getOwnerSignatures()
+            sigs.forEach((v) => {
+                msKeyChain.addKey(new MultisigKeyPair(msKeyChain, v[0], v[1]))
+                metadata = metadata.concat(v[0].toString('hex'), '#', v[1].toString('hex'), '|')
             })
         }
 
