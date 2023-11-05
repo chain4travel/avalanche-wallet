@@ -505,11 +505,11 @@
                 "memo": "Title",
                 "flags": "Flags (Blocked:1)",
                 "total_max_reward_amount": "Total Max Reward Amount",
-                "owner_address": "Owner Address (optional)",
+                "owner_address": "Owner Address (If filled, only allowed addresses can see and deposit funds.)",
                 "submit": "Create Offer"
             },
             "errors": {
-                "title": "Credit Offre title must be at least 64 characters long.",
+                "title": "Offer title must be at least 64 characters long.",
                 "min_amount": "Minimum amount must be at least {minAmount} {symbol}."
             },
             "offer": {
