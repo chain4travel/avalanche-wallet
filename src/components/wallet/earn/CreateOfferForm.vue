@@ -1,6 +1,6 @@
 <template>
     <div class="create-offer__container">
-        <div class="create-offer__container__form">
+        <div v-if="!pendingCreateOfferMultisigTX" class="create-offer__container__form">
             <div class="create-offer__container__form__element full-width">
                 <label>{{ $t('earn.rewards.create.memo').toString() }}</label>
                 <cam-input
@@ -58,13 +58,6 @@
                     :initial="offer.totalMaxAmount"
                     :max="maxDepositAmount"
                     :camInput="true"
-                    :error="maxAmountError"
-                    :errorMessage="
-                        $t('earn.rewards.errors.min_amount', {
-                            minAmount: 0.001,
-                            symbol: nativeAssetSymbol,
-                        })
-                    "
                 ></AvaxInput>
             </div>
             <div class="create-offer__container__form__element">
@@ -87,8 +80,6 @@
                     class="input"
                     v-model="offer.unlockPeriodDuration"
                     :placeholder="`unlockPeriodDuration`"
-                    :error="unlockDurationError"
-                    :errorMessage="`Unlock duration must be greater than 0`"
                 />
             </div>
             <div class="create-offer__container__form__element">
@@ -141,7 +132,7 @@
                     inputmode="numeric"
                 />
             </div>
-            <div class="create-offer__container__form__element">
+            <div v-if="!isMultisigWallet" class="create-offer__container__form__element">
                 <label>
                     {{ $t('earn.rewards.create.owner_address') }}
                 </label>
@@ -177,16 +168,179 @@
                         </div>
                     </div>
                 </div>
+                <button @click.prevent="addAddress" class="circle plus-button">
+                    <fa icon="plus"></fa>
+                </button>
             </div>
-            <Alert style="margin-top: 16px" variant="negative" v-if="validAddressError">
-                {{ $t('edit_multisig.errors.invalid_addresses') }}
-            </Alert>
-            <button @click.prevent="addAddress" class="circle plus-button">
-                <fa icon="plus"></fa>
-            </button>
+        </div>
+        <div v-else class="create-offer__container__form">
+            <div class="create-offer__container__form__element full-width">
+                <label>{{ $t('earn.rewards.create.memo').toString() }}</label>
+                <cam-input
+                    class="input"
+                    v-model="pendingOffer.memo"
+                    :placeholder="$t('earn.rewards.create.memo')"
+                    :disabled="true"
+                />
+            </div>
+            <div class="create-offer__container__form__element">
+                <label>{{ $t('earn.rewards.create.offer_start') }}</label>
+                <DateForm
+                    class="input"
+                    :minDurationMs="minDuration"
+                    :maxDurationMs="maxDuration"
+                    :defaultDurationMs="defaultDuration"
+                    @change_end="setStartDate"
+                    :pendingTxDate="pendingOffer.start"
+                ></DateForm>
+            </div>
+            <div class="create-offer__container__form__element">
+                <label>{{ $t('earn.rewards.create.offer_end') }}</label>
+                <DateForm
+                    class="input"
+                    :minDurationMs="minDuration"
+                    :maxDurationMs="maxDuration"
+                    :defaultDurationMs="maxDuration"
+                    @change_end="setEndDate"
+                    :pendingTxDate="pendingOffer.end"
+                ></DateForm>
+            </div>
+            <div class="create-offer__container__form__element">
+                <label>{{ $t('earn.rewards.create.min_amount') }}</label>
+                <CamInput
+                    class="input"
+                    v-model="pendingOffer.minAmount"
+                    :disabled="true"
+                ></CamInput>
+            </div>
+            <div class="create-offer__container__form__element">
+                <label>
+                    {{ $t('earn.rewards.create.total_max_amount') }}
+                </label>
+                <CamInput
+                    class="input"
+                    v-model="pendingOffer.totalMaxAmount"
+                    :disabled="true"
+                ></CamInput>
+            </div>
+            <div class="create-offer__container__form__element">
+                <label>
+                    {{ $t('earn.rewards.create.min_duration') }}
+                </label>
+                <CamInput
+                    class="input"
+                    :placeholder="`minDuration`"
+                    :disabled="true"
+                    v-model="pendingOffer.minDuration"
+                />
+            </div>
+            <div class="create-offer__container__form__element">
+                <label>
+                    {{ $t('earn.rewards.create.max_duration') }}
+                </label>
+                <CamInput
+                    class="input"
+                    :placeholder="`maxDuration`"
+                    v-model="pendingOffer.maxDuration"
+                    :disabled="true"
+                />
+            </div>
+            <div class="create-offer__container__form__element">
+                <label>
+                    {{ $t('earn.rewards.create.unlock_duration') }}
+                </label>
+                <CamInput
+                    class="input"
+                    v-model="pendingOffer.unlockPeriodDuration"
+                    :placeholder="`unlockPeriodDuration`"
+                    :disabled="true"
+                />
+            </div>
+            <div class="create-offer__container__form__element">
+                <label>
+                    {{ $t('earn.rewards.create.no_rewards_duration') }}
+                </label>
+                <CamInput
+                    class="input"
+                    v-model="pendingOffer.noRewardsPeriodDuration"
+                    :placeholder="`noRewardsPeriodDuration`"
+                    :disabled="true"
+                />
+            </div>
+            <div class="create-offer__container__form__element">
+                <label>
+                    {{ $t('earn.rewards.create.interrest_rate') }}
+                </label>
+                <CamInput
+                    class="input"
+                    v-model="pendingOffer.interestRateNominator"
+                    :placeholder="`interestRateNominator`"
+                    :disabled="true"
+                />
+            </div>
+            <div class="create-offer__container__form__element">
+                <label>
+                    {{ $t('earn.rewards.create.total_max_reward_amount') }}
+                </label>
+                <CamInput
+                    class="input"
+                    v-model="pendingOffer.totalMaxRewardAmount"
+                    :placeholder="`totalMaxRewardAmount`"
+                    :disabled="true"
+                ></CamInput>
+            </div>
+            <div class="create-offer__container__form__element">
+                <label>
+                    {{ $t('earn.rewards.create.flags') }}
+                </label>
+                <input class="input" :value="pendingOffer.flags" :disabled="true" />
+            </div>
+            <div v-if="!isMultisigWallet" class="create-offer__container__form__element">
+                <label>
+                    {{ $t('earn.rewards.create.owner_address') }}
+                </label>
+                <CamInput
+                    class="input"
+                    :placeholder="`ownerAddress`"
+                    v-model.number="offer.ownerAddress"
+                    :disabled="sunrisePhase === 0"
+                    :error="ownerAddressCheck"
+                    :errorMessage="ownerAddressCheck"
+                />
+            </div>
+            <div v-if="!isMultisigWallet" class="create-offer__container__form__element full-width">
+                <label>Addresses allowed to deposit</label>
+                <div class="addresses_container input">
+                    <div v-for="(address, index) in addresses" :key="index">
+                        <div class="address_container">
+                            <button @click="removeAddress(index)" class="circle delete-button">
+                                <CamTooltip
+                                    :content="$t('edit_multisig.label.remove_owner')"
+                                    placement="left"
+                                >
+                                    <fa icon="minus"></fa>
+                                </CamTooltip>
+                            </button>
+                            <CamInput
+                                class="input"
+                                v-model="address.address"
+                                :disabled="
+                                    !offer.ownerAddress || ownerAddressCheck === 'Invalid address'
+                                "
+                            />
+                        </div>
+                    </div>
+                </div>
+                <button @click.prevent="addAddress" class="circle plus-button">
+                    <fa icon="plus"></fa>
+                </button>
+            </div>
         </div>
         <div class="create-offer__container__actions">
             <div class="create-offer__container__actions__aletrs">
+                <Alert style="margin-top: 16px" variant="negative" v-if="validAddressError">
+                    {{ $t('edit_multisig.errors.invalid_addresses') }}
+                </Alert>
                 <Alert v-if="hasExclusiveTotalMaxAmountOrReward" variant="negative">
                     can only use either TotalMaxAmount or TotalMaxRewardAmount
                 </Alert>
@@ -214,20 +368,48 @@
                 </Alert>
             </div>
             <div class="create-offer__container__actions__buttons">
-                <CamBtn
-                    v-if="$listeners['selectOffer']"
-                    variant="primary"
-                    @click.prevent="submitCreateOffer"
-                    :disabled="!formValid"
-                >
-                    {{ $t('earn.rewards.create.submit') }}
-                </CamBtn>
+                <template v-if="!pendingCreateOfferMultisigTX">
+                    <CamBtn
+                        v-if="$listeners['selectOffer']"
+                        variant="primary"
+                        @click.prevent="submitCreateOffer"
+                        :disabled="!formValid"
+                    >
+                        {{ $t('earn.rewards.create.submit') }}
+                    </CamBtn>
+                </template>
+                <template v-else>
+                    <CamBtn variant="negative" :onClick="openAbortModal">
+                        {{ $t('transfer.multisig.abort_transaction') }}
+                    </CamBtn>
+                    <CamBtn
+                        v-if="canExecuteMultisigTx"
+                        variant="primary"
+                        :onClick="issueMultisigTx"
+                    >
+                        {{ $t('transfer.multisig.execute_transaction') }}
+                    </CamBtn>
+                    <CamBtn
+                        v-else
+                        variant="primary"
+                        :onClick="signMultisigTx"
+                        :disabled="disableSignButton()"
+                    >
+                        {{ $t('transfer.multisig.sign_transaction') }}
+                    </CamBtn>
+                    <ModalAbortSigning
+                        ref="modal_abort_signing"
+                        :title="$t('transfer.multisig.abort_transaction')"
+                        :modalText="$t('earn.rewards.abort_modal.message')"
+                        @cancelTx="cancelMultisigTx"
+                    />
+                </template>
             </div>
         </div>
     </div>
 </template>
 <script lang="ts">
-import { ava } from '@/AVA'
+import { ava, bintools } from '@/AVA'
 import Alert from '@/components/Alert.vue'
 import CamBtn from '@/components/CamBtn.vue'
 import CamInput from '@/components/CamInput.vue'
@@ -236,30 +418,38 @@ import { DAY_MS, ZeroBN } from '@/constants'
 import { isValidPChainAddress } from '@/helpers/address_helper'
 import { bnToBig } from '@/helpers/helper'
 import AvaAsset from '@/js/AvaAsset'
-import { BN } from '@c4tplatform/caminojs'
-import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { BN, Buffer } from '@c4tplatform/caminojs/dist'
+import {
+    AddDepositOfferTx,
+    DepositOffer,
+    Offer,
+    UnsignedTx,
+} from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 const MAX_TITLE_BYTE_SIZE = 64
 
+import ModalAbortSigning from '@/components/wallet/earn/ModalAbortSigning.vue'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { WalletType } from '@/js/wallets/types'
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 import DateForm from './DateForm.vue'
 
 @Component({
-    components: { CamInput, CamBtn, Alert, DateForm, AvaxInput },
+    components: { CamInput, CamBtn, Alert, DateForm, AvaxInput, ModalAbortSigning },
 })
 export default class CreateOfferForm extends Vue {
     @Prop() maxDepositAmount!: BN
     interestRateNominator = ZeroBN
     totalMaxRewardAmount = ZeroBN
+    pendingOffer: any = { memo: '' }
     // @ts-ignore
     helpers = this.globalHelper()
     addresses: { address: string }[] = [{ address: '' }]
-    offer: DepositOffer = {
+    offer: DepositOffer | any = {
         upgradeVersion: 1,
         id: '',
         interestRateNominator: ZeroBN,
@@ -284,13 +474,7 @@ export default class CreateOfferForm extends Vue {
         return bytes.length > MAX_TITLE_BYTE_SIZE || bytes.length === 0
     }
     get minAmountError() {
-        // if (/[a-zA-Z]/.test(this.offer.minAmount.toString())) return true
         return this.offer.minAmount.lt(new BN(1000000))
-    }
-    get maxAmountError() {
-        return false
-        // if (/[a-zA-Z]/.test(this.offer.totalMaxAmount.toString())) return true
-        // return this.offer.totalMaxAmount.lt(this.offer.minAmount)
     }
     get minDurationError() {
         const minDurationString = String(this.offer.minDuration)
@@ -394,7 +578,6 @@ export default class CreateOfferForm extends Vue {
         if (this.offer.ownerAddress === '') this.offer.ownerAddress = undefined
         const wallet: WalletType = this.$store.state.activeWallet
         let addresses = this.addresses.filter((a) => a.address !== '')
-        this.printOffer()
         try {
             const result = await WalletHelper.buildAddDepositOfferTx(wallet, this.offer)
             this.offer = this.offer
@@ -425,7 +608,84 @@ export default class CreateOfferForm extends Vue {
             }
         }
         this.cancelCreateOffer()
-        this.printOffer()
+    }
+    async updateMultisigTxDetails() {
+        await this.$store.dispatch('Assets/updateUTXOs')
+        await this.$store.dispatch('Signavault/updateTransaction')
+    }
+    async signMultisigTx() {
+        if (!this.wallet || !(this.wallet instanceof MultisigWallet))
+            return console.debug('MultiSigTx::sign: Invalid wallet')
+        if (!this.pendingCreateOfferMultisigTX) return console.debug('MultiSigTx::sign: Invalid Tx')
+        try {
+            await this.wallet.addSignatures(this.pendingCreateOfferMultisigTX?.tx)
+            this.helpers.dispatchNotification({
+                message: 'Your signature saved successfully!',
+                type: 'success',
+            })
+            this.$store.dispatch('Signavault/updateTransaction')
+        } catch (e: any) {
+            this.helpers.dispatchNotification({
+                message: 'Your signature is not saved.',
+                type: 'error',
+            })
+        }
+    }
+    async issueMultisigTx() {
+        if (!this.wallet || !(this.wallet instanceof MultisigWallet))
+            return console.log('MultiSigTx::sign: Invalid wallet')
+        if (!this.pendingCreateOfferMultisigTX) return console.log('MultiSigTx::sign: Invalid Tx')
+        try {
+            let txID = await this.wallet.issueExternal(this.pendingCreateOfferMultisigTX?.tx)
+            this.$store.dispatch('Assets/updateUTXOs')
+            this.$store.dispatch('Signavault/updateTransaction').then(() => {
+                this.$store.dispatch('updateBalances')
+                this.helpers.dispatchNotification({
+                    message: `Create Offer Successful (TX: ${txID})`,
+                    type: 'success',
+                })
+            })
+            this.updateMultisigTxDetails()
+        } catch (e: any) {
+            let err = e as Error
+            this.helpers.dispatchNotification({
+                message: err.message,
+                type: 'error',
+            })
+        }
+    }
+    async cancelMultisigTx() {
+        try {
+            const wallet = this.wallet as MultisigWallet
+            if (this.pendingCreateOfferMultisigTX) {
+                // cancel from the wallet
+                await wallet.cancelExternal(this.pendingCreateOfferMultisigTX?.tx)
+                this.helpers.dispatchNotification({
+                    message: this.$t('transfer.multisig.transaction_aborted'),
+                    type: 'success',
+                })
+                this.updateMultisigTxDetails()
+            }
+        } catch (err) {
+            console.log(err)
+            this.helpers.dispatchNotification({
+                message: this.$t('transfer.multisig.cancel_transaction_failed'),
+                type: 'error',
+            })
+        }
+    }
+    openAbortModal() {
+        this.$refs.modal_abort_signing.open()
+    }
+    disableSignButton(): boolean {
+        let isSigned = false
+        const wallet = this.wallet as MultisigWallet
+        this.txOwners.forEach((owner) => {
+            if (wallet.wallets.find((w) => w?.getAllAddressesP()?.[0] === owner.address)) {
+                if (owner.signature) isSigned = true
+            }
+        })
+        return isSigned
     }
     formattedAmount(val: BN): string {
         return `${(Number(val.toString()) / Number(ONEAVAX.toString())).toLocaleString()}`
@@ -463,6 +723,25 @@ export default class CreateOfferForm extends Vue {
         if (this.addresses.length === 0) this.addAddress()
     }
     /* computed */
+    get pendingCreateOfferMultisigTX(): SignavaultTx | undefined {
+        return this.$store.getters['Signavault/transactions'].find(
+            (item: SignavaultTx) =>
+                item?.tx?.alias === this.wallet?.getStaticAddress('P') &&
+                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'AddDepositOfferTx'
+        )
+    }
+    get canExecuteMultisigTx(): boolean {
+        let signers = 0
+        let threshold = this.pendingCreateOfferMultisigTX?.tx?.threshold
+        this.txOwners.forEach((owner) => {
+            if (owner.signature) signers++
+        })
+        if (threshold) return signers >= threshold
+        return false
+    }
+    get txOwners() {
+        return this.pendingCreateOfferMultisigTX?.tx?.owners ?? []
+    }
     get wallet(): WalletType {
         return this.$store.state.activeWallet
     }
@@ -492,6 +771,9 @@ export default class CreateOfferForm extends Vue {
         return this.wallet instanceof MultisigWallet
     }
     /* lifecycle */
+    async mounted() {
+        await this.$store.dispatch('Signavault/updateTransaction')
+    }
     /* watchers */
     @Watch('interestRateNominator')
     onInterestRateNominatorChange() {
@@ -501,8 +783,51 @@ export default class CreateOfferForm extends Vue {
     onTotalMaxRewardAmountChange() {
         this.offer.totalMaxRewardAmount = new BN(this.totalMaxRewardAmount)
     }
-    /* filters */
+    @Watch('pendingCreateOfferMultisigTX')
+    getPandingCreateOfferTxData() {
+        if (this.pendingCreateOfferMultisigTX) {
+            let unsignedTx = new UnsignedTx()
+            unsignedTx.fromBuffer(
+                Buffer.from(this.pendingCreateOfferMultisigTX.tx?.unsignedTx, 'hex')
+            )
+            const utx = unsignedTx.getTransaction() as AddDepositOfferTx
+            let offer = utx.getDepositOffer() as Offer
+            this.pendingOffer = {
+                interestRateNominator: bintools
+                    .fromBufferToBN(offer.getInterestRateNominator())
+                    .toString(10),
+                minAmount: bnToBig(bintools.fromBufferToBN(offer.getMinAmount()), 9).toString(),
+                totalMaxAmount: bnToBig(
+                    bintools.fromBufferToBN(offer.getTotalMaxAmount()),
+                    9
+                ).toString(),
+                minDuration: Number(bnToBig(bintools.fromBufferToBN(offer.getMinDuration()))),
+                maxDuration: Number(bnToBig(bintools.fromBufferToBN(offer.getMaxDuration()))),
+                unlockPeriodDuration: Number(
+                    bnToBig(bintools.fromBufferToBN(offer.getUnlockPeriodDuration()))
+                ),
+                noRewardsPeriodDuration: Number(
+                    bnToBig(bintools.fromBufferToBN(offer.getNoRewardsPeriodDuration()))
+                ),
+                flags: bintools.fromBufferToBN(offer.getFlags()).toString(10),
+                totalMaxRewardAmount: bintools.fromBufferToBN(offer.getTotalMaxRewardAmount()),
+                memo: offer.getMemo().toString(),
+                ownerAddress: bintools.addressToString(ava.getHRP(), 'P', offer.getOwnerAddress()),
+                start: new Date(
+                    Number(bnToBig(bintools.fromBufferToBN(offer.getStart()))) * 1000
+                ).toISOString(),
+                end: new Date(
+                    Number(bnToBig(bintools.fromBufferToBN(offer.getEnd()))) * 1000
+                ).toISOString(),
+            }
+            if (this.pendingOffer.ownerAddress === ava.PChain().addressFromBuffer(Buffer.alloc(20)))
+                this.pendingOffer.ownerAddress = ''
+        }
+    }
     /* refs */
+    $refs!: {
+        modal_abort_signing: ModalAbortSigning
+    }
     /* utiils */
     clearOffer() {
         this.offer = {
@@ -526,24 +851,6 @@ export default class CreateOfferForm extends Vue {
         this.setTotalMaxRewardAmount({ target: { value: 0 } })
         this.setStartDate(new Date().toISOString())
         this.setEndDate(new Date().toISOString())
-    }
-    printOffer() {
-        let Offer = {
-            interestRateNominator: Number(bnToBig(this.offer.interestRateNominator)),
-            minAmount: Number(bnToBig(this.offer.minAmount, 9)),
-            totalMaxAmount: Number(bnToBig(this.offer.totalMaxAmount, 9)),
-            minDuration: this.offer.minDuration,
-            maxDuration: this.offer.maxDuration,
-            unlockPeriodDuration: this.offer.unlockPeriodDuration,
-            noRewardsPeriodDuration: this.offer.noRewardsPeriodDuration,
-            flags: Number(bnToBig(this.offer.flags)),
-            totalMaxRewardAmount: Number(bnToBig(this.offer.totalMaxRewardAmount)),
-            memo: this.offer.memo,
-            ownerAddress: this.offer.ownerAddress,
-            start: new Date(Number(bnToBig(this.offer.start)) * 1000),
-            end: new Date(Number(bnToBig(this.offer.end)) * 1000),
-        }
-        console.log(Offer)
     }
 }
 </script>
@@ -591,12 +898,15 @@ export default class CreateOfferForm extends Vue {
             gap: 16px;
         }
         &__buttons {
+            display: flex;
+            gap: 16px;
         }
     }
     .addresses_container {
         display: flex;
         flex-direction: column;
         gap: 16px;
+        margin-bottom: 16px;
     }
     .address_container {
         display: flex;
