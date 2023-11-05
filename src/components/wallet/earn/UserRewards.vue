@@ -77,7 +77,7 @@ label {
     margin-bottom: 3px;
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .user_offers {
         display: grid;
         grid-template-rows: repeat(1, 1fr);
