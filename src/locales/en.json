@@ -498,18 +498,18 @@
                 "interrest_rate": "Interrest rate ( *1 000 000 )",
                 "min_amount": "Min Amount",
                 "total_max_amount": "Total Max Amount",
-                "min_duration": "Minimum Duration (Sec)",
-                "max_duration": "Maximum Duration (Sec)",
-                "unlock_duration": "Unlock Duration (Sec)",
-                "no_rewards_duration": "No Rewards Duration (Sec)",
+                "min_duration": "Minimum Duration (Day)",
+                "max_duration": "Maximum Duration (Day)",
+                "unlock_duration": "Unlock Duration (Day)",
+                "no_rewards_duration": "No Rewards Duration (Day)",
                 "memo": "Title",
                 "flags": "Flags (Blocked:1)",
                 "total_max_reward_amount": "Total Max Reward Amount",
-                "owner_address": "Owner Address (optional)",
+                "owner_address": "Owner Address (If filled, only allowed addresses can see and deposit funds.)",
                 "submit": "Create Offer"
             },
             "errors": {
-                "title": "Credit Offre title must be at least 64 characters long.",
+                "title": "Offer title must be at least 64 characters long.",
                 "min_amount": "Minimum amount must be at least {minAmount} {symbol}."
             },
             "offer": {
