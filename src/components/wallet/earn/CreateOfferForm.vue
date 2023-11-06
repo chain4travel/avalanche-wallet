@@ -459,7 +459,7 @@ export default class CreateOfferForm extends Vue {
         totalMaxAmount: ZeroBN,
         depositedAmount: ZeroBN,
         minDuration: 1,
-        maxDuration: 86400,
+        maxDuration: 2,
         unlockPeriodDuration: 1,
         noRewardsPeriodDuration: 0,
         memo: '',
@@ -577,9 +577,16 @@ export default class CreateOfferForm extends Vue {
     async submitCreateOffer() {
         if (this.offer.ownerAddress === '') this.offer.ownerAddress = undefined
         const wallet: WalletType = this.$store.state.activeWallet
+        let offer = {
+            ...this.offer,
+            minDuration: this.offer.minDuration * 24 * 60 * 60,
+            maxDuration: this.offer.maxDuration * 24 * 60 * 60,
+            unlockPeriodDuration: this.offer.unlockPeriodDuration * 24 * 60 * 60,
+            noRewardsPeriodDuration: this.offer.noRewardsPeriodDuration * 24 * 60 * 60,
+        }
         let addresses = this.addresses.filter((a) => a.address !== '')
         try {
-            const result = await WalletHelper.buildAddDepositOfferTx(wallet, this.offer)
+            const result = await WalletHelper.buildAddDepositOfferTx(wallet, offer)
             this.offer = this.offer
             this.clearOffer()
             this.$store.dispatch('Platform/addAllowedAddresses', {
@@ -837,7 +844,7 @@ export default class CreateOfferForm extends Vue {
             totalMaxAmount: ZeroBN,
             depositedAmount: ZeroBN,
             minDuration: 1,
-            maxDuration: 86400,
+            maxDuration: 2,
             unlockPeriodDuration: 1,
             noRewardsPeriodDuration: 0,
             memo: '',
@@ -849,8 +856,6 @@ export default class CreateOfferForm extends Vue {
         this.setInterestRate({ target: { value: 0 } })
         this.setFlags({ target: { value: 0 } })
         this.setTotalMaxRewardAmount({ target: { value: 0 } })
-        this.setStartDate(new Date().toISOString())
-        this.setEndDate(new Date().toISOString())
     }
 }
 </script>

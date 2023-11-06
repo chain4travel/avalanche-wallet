@@ -205,7 +205,7 @@ import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { WalletType } from '@/js/wallets/types'
 import { BN } from '@c4tplatform/caminojs'
 import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm'
-import { ZeroBN } from '@c4tplatform/caminojs/dist/common'
+import { SignatureError, ZeroBN } from '@c4tplatform/caminojs/dist/common'
 import 'reflect-metadata'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import Modal from '../../modals/Modal.vue'
@@ -400,10 +400,6 @@ export default class ModalDepositFunds extends Vue {
         return `${(Number(val.toString()) / Number(ONEAVAX.toString())).toLocaleString()}`
     }
     async submitDeposit(): Promise<void> {
-        console.log({
-            rewardOwner: this.rewardOwner,
-            isValid: isValidPChainAddress(this.rewardOwner),
-        })
         if (this.rewardOwner && !isValidPChainAddress(this.rewardOwner)) {
             this.rewardOwnerError = 'Invalid address'
             return
