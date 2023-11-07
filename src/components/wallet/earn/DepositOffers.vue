@@ -1,7 +1,7 @@
 <template>
-    <div v-if="hasOffers">
+    <div>
         <h1 class="create-offer-header" v-if="isSuite">Create new DepositOffer</h1>
-        <h4 class="balance">
+        <h4 v-if="isSuite || hasOffers" class="balance">
             {{ $t('earn.offer.balance') }}: {{ cleanAvaxBN(maxDepositAmount) }}
             {{ nativeAssetSymbol }}
         </h4>
@@ -13,19 +13,21 @@
                 @selectOffer="selectOffer"
                 :maxDepositAmount="maxDepositAmount"
             ></CreateOfferForm>
-            <div class="user_offers" key="list">
-                <DepositOfferCard
-                    v-for="(o, i) in platformOffers"
-                    :key="'o' + i"
-                    :offer="o"
-                    :maxDepositAmount="maxDepositAmount"
-                    @selectOffer="selectOffer"
-                    class="reward_card"
-                ></DepositOfferCard>
+            <div v-if="hasOffers">
+                <div class="user_offers" key="list">
+                    <DepositOfferCard
+                        v-for="(o, i) in platformOffers"
+                        :key="'o' + i"
+                        :offer="o"
+                        :maxDepositAmount="maxDepositAmount"
+                        @selectOffer="selectOffer"
+                        class="reward_card"
+                    ></DepositOfferCard>
+                </div>
             </div>
+            <div v-else class="empty">No Active Saving Pool</div>
         </transition>
     </div>
-    <div v-else class="empty">No Active Saving Pool</div>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
