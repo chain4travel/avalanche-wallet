@@ -119,6 +119,7 @@ import { AddressState } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import Big from 'big.js'
 import 'reflect-metadata'
 import { Component, Vue, Watch } from 'vue-property-decorator'
+import { AvaNetwork } from '@/js/AvaNetwork'
 
 @Component({
     name: 'validator',
@@ -157,6 +158,10 @@ export default class Validator extends Vue {
         )
     }
 
+    get activeNetwork(): null | AvaNetwork {
+        return this.$store?.state?.Network?.selectedNetwork
+    }
+
     verifyValidatorIsReady(val: ValidatorRaw) {
         this.nodeInfo = val
     }
@@ -182,6 +187,7 @@ export default class Validator extends Vue {
         clearInterval(this.intervalID)
     }
 
+    @Watch('activeNetwork')
     @Watch('$store.state.networkName')
     @Watch('$store.state.activeWallet')
     async evaluateCanRegisterNode() {

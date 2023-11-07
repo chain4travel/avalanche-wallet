@@ -21,6 +21,7 @@
                 :disabled_assets="disabled_assets"
                 v-model="asset_now"
                 :disabled="disabled"
+                :chain-id="chainId"
             ></BalanceDropdown>
             <div class="col_balance">
                 <p>
