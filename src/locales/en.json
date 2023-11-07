@@ -509,7 +509,7 @@
                 "submit": "Create Offer"
             },
             "errors": {
-                "title": "Offer title must be at least 64 characters long.",
+                "title": "Offer title should not exceed 64 characters.",
                 "min_amount": "Minimum amount must be at least {minAmount} {symbol}."
             },
             "offer": {

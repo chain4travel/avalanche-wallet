@@ -471,7 +471,7 @@ export default class CreateOfferForm extends Vue {
     /* errors */
     get nameLengthError() {
         const bytes = new TextEncoder().encode(this.offer.memo)
-        return bytes.length > MAX_TITLE_BYTE_SIZE || bytes.length === 0
+        return bytes.length > MAX_TITLE_BYTE_SIZE
     }
     get minAmountError() {
         return this.offer.minAmount.lt(new BN(1000000))
