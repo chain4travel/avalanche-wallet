@@ -32,6 +32,7 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@use '../../styles/abstracts/mixins';
 .copyBut {
     display: flex;
     width: max-content;
@@ -68,6 +69,6 @@ button {
     color: var(--primary-color);
     width: 20px;
     height: 20px;
-    font-size: 22px;
+    @include mixins.typography-subtitle-1;
 }
 </style>

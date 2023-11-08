@@ -132,6 +132,7 @@ export default class AddKeyFile extends Vue {
 </style>
 <style scoped lang="scss">
 @use '../../../styles/abstracts/variables';
+@use '../../../styles/abstracts/mixins';
 .add_key_file {
     padding: 14px 0;
 }
@@ -143,14 +144,14 @@ export default class AddKeyFile extends Vue {
 }
 
 label {
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: variables.$primary-color-light;
 }
 
 .err {
     color: var(--error);
     margin: 4px 0px;
-    font-size: 12px;
+    @include mixins.typography-caption;
 }
 </style>
 <style lang="scss">

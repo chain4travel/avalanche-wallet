@@ -661,7 +661,7 @@ input {
 }
 
 .desc {
-    font-size: 13px;
+    @include mixins.typography-caption;
     margin-bottom: 8px !important;
     color: var(--primary-color-light);
 }
@@ -673,7 +673,7 @@ h4 {
 label {
     margin-top: 6px;
     color: var(--primary-color-light);
-    font-size: 14px;
+    @include mixins.typography-caption;
     margin-bottom: 3px;
 }
 
@@ -708,13 +708,13 @@ label {
         margin-bottom: 14px;
 
         p {
-            font-size: 24px;
+            @include mixins.typography-subtitle-1;
         }
     }
 
     .err {
         margin: 14px 0 !important;
-        font-size: 14px;
+        @include mixins.typography-caption;
     }
 }
 
@@ -725,7 +725,7 @@ label {
     }
 
     .tx_id {
-        font-size: 13px;
+        @include mixins.typography-caption;
         color: var(--primary-color-light);
         word-break: break-all;
         margin: 14px 0 !important;
@@ -747,7 +747,7 @@ label {
 
 .reward_tabs {
     margin-bottom: 8px;
-    font-size: 13px;
+    @include mixins.typography-caption;
 
     button {
         color: var(--primary-color-light);
@@ -773,7 +773,7 @@ label {
     .status_icon {
         align-items: center;
         display: flex;
-        font-size: 24px;
+        @include mixins.typography-subtitle-1;
     }
 }
 

@@ -120,6 +120,7 @@ export default class Account extends Vue {
 <style scoped lang="scss">
 @use '../../styles/main';
 @use '../../styles/abstracts/variables';
+@use '../../styles/abstracts/mixins';
 .pass {
     text-align: center;
     background-color: var(--bg-light) !important;
@@ -158,7 +159,7 @@ form {
 }
 .file_in {
     margin: 30px auto 10px;
-    font-size: 13px;
+    @include mixins.typography-caption;
     border: none !important;
     background-color: var(--bg-light) !important;
     /*min-width: 200px*/
@@ -175,7 +176,7 @@ a {
     margin: 12px 0;
 }
 .err {
-    font-size: 13px;
+    @include mixins.typography-caption;
     color: var(--error);
     margin: 14px 0px !important;
 }

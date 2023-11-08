@@ -127,7 +127,7 @@ export default class TransactionHistoryPanel extends Vue {
         /*background-color: var(--primary-color);*/
         /*color: #fff !important;*/
         padding: 4px 18px;
-        font-size: 12px;
+        @include mixins.typography-caption;
     }
 }
 
@@ -143,7 +143,7 @@ export default class TransactionHistoryPanel extends Vue {
 }
 
 .empty {
-    font-size: 12px;
+    @include mixins.typography-caption;
     text-align: center;
     padding: 30px;
 }
@@ -158,7 +158,7 @@ export default class TransactionHistoryPanel extends Vue {
 .warn {
     background-color: var(--bg-light);
     text-align: center;
-    font-size: 12px;
+    @include mixins.typography-caption;
     font-weight: bold;
     padding: 15px;
     border-radius: var(--border-radius-sm);

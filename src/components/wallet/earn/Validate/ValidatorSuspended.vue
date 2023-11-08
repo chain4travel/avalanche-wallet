@@ -21,7 +21,7 @@ export default class ValidatorSuspended extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../../styles/main';
+@use '../../../../styles/abstracts/mixins';
 
 .validator_card {
     display: grid;
@@ -53,7 +53,7 @@ h4 {
     }
 
     label {
-        font-size: 13px;
+        @include mixins.typography-caption;
         color: var(--primary-color-light);
     }
 

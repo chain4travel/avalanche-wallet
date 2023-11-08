@@ -158,7 +158,7 @@ export default class Fungibles extends Vue {
 
 .search {
     height: 20px;
-    font-size: 15px;
+    @include mixins.typography-body-2;
     display: flex;
     align-items: center;
     margin-bottom: 30px;
@@ -176,7 +176,7 @@ export default class Fungibles extends Vue {
 
 .headers {
     border-bottom: 1px solid var(--bg-light);
-    font-size: 12px;
+    @include mixins.typography-caption;
     padding: 12px 0;
     color: var(--primary-color-light);
     font-weight: bold;

@@ -69,7 +69,7 @@ img {
 
 .balance_col {
     text-align: right;
-    font-size: 18px;
+    @include mixins.typography-body-1;
 
     span {
         color: var(--primary-color-light) !important;
@@ -80,7 +80,7 @@ img {
     padding-left: 15px;
 
     span {
-        font-size: 12px;
+        @include mixins.typography-caption;
         color: var(--secondary-color);
     }
 }

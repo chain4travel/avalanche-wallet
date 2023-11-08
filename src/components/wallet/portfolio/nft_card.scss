@@ -1,3 +1,4 @@
+@use "../../../styles/abstracts//mixins";
 .nft_card {
     height: 100%;
     position: relative;
@@ -14,8 +15,7 @@ $countW: 28px;
     width: $countW;
     height: $countW;
     border-radius: $countW;
-    line-height: $countW;
-    font-size: 12px;
+    @include mixins.typography-caption;
     text-align: center;
     background-color: var(--primary-color);
     //border: 1px solid var(--bg-wallet);
@@ -39,7 +39,7 @@ $countW: 28px;
 }
 .nft_info {
     border-top: 2px solid var(--bg-light);
-    font-size: 12px;
+    @include mixins.typography-caption;
 
     > * {
         padding: 8px 12px;

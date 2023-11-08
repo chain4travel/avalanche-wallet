@@ -85,13 +85,11 @@ export default {
     text-align: left;
     flex-grow: 1;
     margin: 0;
-    font-size: 14px;
-    font-family: 'Inter';
+    @include mixins.typography-caption;
 }
 
 .balance {
-    font-size: 24px !important;
-    font-family: Inter !important;
+    @include mixins.typography-subtitle-1;
 }
 
 .top_card .buts {
@@ -99,7 +97,7 @@ export default {
     text-align: right;
 }
 .top_card .buts button {
-    font-size: 18px;
+    @include mixins.typography-body-1;
     margin: 0px 18px;
     margin-right: 0px;
     position: relative;

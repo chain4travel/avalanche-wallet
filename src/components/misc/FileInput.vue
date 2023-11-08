@@ -75,7 +75,7 @@ export default class FileInput extends Vue {
     border-radius: 6px;
     max-width: 100%;
     border-color: variables.$primary-color;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--primary-font);
     font-weight: 700;
     text-transform: uppercase !important;
 }

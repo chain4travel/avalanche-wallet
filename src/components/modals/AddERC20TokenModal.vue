@@ -158,14 +158,14 @@ export default class AddERC20TokenModal extends Vue {
     }
 
     label {
-        font-size: 13px;
+        @include mixins.typography-caption;
     }
     input {
         width: 100%;
         background-color: var(--bg-light);
         padding: 14px 24px;
         border-radius: 3px;
-        font-size: 14px;
+        @include mixins.typography-caption;
         color: var(--primary-color);
     }
 }

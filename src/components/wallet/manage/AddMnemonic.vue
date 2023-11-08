@@ -93,6 +93,7 @@ export default class AddMnemonic extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .add_mnemonic {
     /*background-color: #e7e7ea;*/
     padding: 14px 0;
@@ -114,6 +115,6 @@ textarea {
 
 .err {
     color: var(--error);
-    font-size: 14px;
+    @include mixins.typography-caption;
 }
 </style>

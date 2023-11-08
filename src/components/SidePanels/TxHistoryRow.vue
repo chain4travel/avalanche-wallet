@@ -128,13 +128,13 @@ export default class TxHistoryRow extends Vue {
     justify-content: space-between;
     align-items: center;
     p {
-        font-size: 15px;
+        @include mixins.typography-body-2;
     }
 
     .v-btn {
         float: right;
         opacity: 0.4;
-        font-size: 14px;
+        @include mixins.typography-caption;
         padding: 0px !important;
         width: auto;
 
@@ -145,7 +145,7 @@ export default class TxHistoryRow extends Vue {
 }
 
 .from {
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
     word-break: keep-all;
     overflow: hidden;
@@ -157,7 +157,7 @@ export default class TxHistoryRow extends Vue {
 .memo {
     overflow-wrap: break-word;
     word-break: break-word;
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: variables.$primary-color-light;
     display: grid;
     grid-template-columns: max-content 1fr;
@@ -203,7 +203,7 @@ export default class TxHistoryRow extends Vue {
         grid-template-columns: 24px 1fr;
     }
     .time {
-        font-size: 14px;
+        @include mixins.typography-caption;
         text-align: left;
     }
 }

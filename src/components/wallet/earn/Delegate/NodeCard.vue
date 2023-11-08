@@ -140,7 +140,7 @@ export default class NodeCard extends Vue {
 .node_id {
     word-break: break-all;
     //width: max-content;
-    font-size: 13px;
+    @include mixins.typography-caption;
     padding: 6px 14px;
     background-color: var(--bg-light);
     border-bottom: 2px solid var(--bg);
@@ -152,10 +152,10 @@ export default class NodeCard extends Vue {
     column-gap: 14px;
 }
 label {
-    font-size: 13px;
+    @include mixins.typography-caption;
 }
 p {
-    font-size: 15px;
+    @include mixins.typography-body-2;
     color: var(--primary-color-light);
 }
 
@@ -163,7 +163,7 @@ p {
     display: grid;
     grid-template-columns: 1fr 1fr;
     p {
-        font-size: 13px;
+        @include mixins.typography-caption;
     }
 }
 

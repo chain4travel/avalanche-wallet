@@ -52,7 +52,7 @@ export default class MultisigOwnerRow extends Vue {
 @use '../../../styles/abstracts/mixins';
 
 .addressItem {
-    font-size: 12px;
+    @include mixins.typography-caption;
     overflow: auto;
     padding: 4px 8px;
 
@@ -61,8 +61,7 @@ export default class MultisigOwnerRow extends Vue {
         overflow: auto;
     }
     span {
-        font-size: 12px;
-        line-height: normal;
+        @include mixins.typography-caption;
     }
 }
 

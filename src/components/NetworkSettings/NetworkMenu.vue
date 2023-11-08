@@ -240,7 +240,7 @@ export default class NetworkMenu extends Vue {
     }
 
     button {
-        font-size: 12px;
+        @include mixins.typography-caption;
         padding: 3px 14px;
         border-radius: var(--border-radius-sm);
     }

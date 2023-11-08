@@ -391,11 +391,12 @@ export default class MintNft extends Vue {
 }
 </script>
 <style lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .mint_form {
     label {
         margin-top: 6px;
         color: var(--primary-color);
-        font-size: 14px;
+        @include mixins.typography-caption;
         margin-bottom: 3px;
     }
 
@@ -408,7 +409,7 @@ export default class MintNft extends Vue {
         background-color: var(--bg-light);
         padding: 8px 12px;
         display: block;
-        font-size: 14px;
+        @include mixins.typography-caption;
         color: var(--primary-color);
     }
 
@@ -422,7 +423,7 @@ export default class MintNft extends Vue {
 
         > p {
             margin-top: 30px !important;
-            font-size: 14px;
+            @include mixins.typography-caption;
         }
     }
 }
@@ -467,11 +468,11 @@ export default class MintNft extends Vue {
             background-color: var(--bg-light);
         }
         .option_title {
-            font-size: 13px;
+            @include mixins.typography-caption;
             font-weight: bold;
         }
         .option_desc {
-            font-size: 12px;
+            @include mixins.typography-caption;
         }
     }
 }
@@ -483,7 +484,7 @@ export default class MintNft extends Vue {
 
     button {
         //position: absolute;
-        font-size: 13px;
+        @include mixins.typography-caption;
         //right: 12px;
         //top: 6px;
         color: var(--secondary-color);
@@ -531,13 +532,13 @@ $col_pad: 24px;
 
     p {
         align-self: center;
-        font-size: 13px;
+        @include mixins.typography-caption;
         color: var(--primary-color-light);
     }
 }
 .fee {
     margin-top: 14px;
-    font-size: 13px;
+    @include mixins.typography-caption;
     p > span {
         margin-left: 35px;
     }

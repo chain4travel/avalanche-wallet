@@ -3,7 +3,7 @@
         <div class="input_group">
             <h4 v-if="isSource">{{ $t('cross_chain.card.source') }}</h4>
             <h4 v-else>{{ $t('cross_chain.card.destination') }}</h4>
-            <p style="font-size: 3em" class="chain_alias">{{ chain }}</p>
+            <p style="font-size: 32px" class="chain_alias">{{ chain }}</p>
         </div>
         <div>
             <div class="input_group">
@@ -106,7 +106,7 @@ export default class ChainCard extends Vue {
 label {
     text-align: left;
     color: var(--primary-color-light);
-    font-size: 13px;
+    @include mixins.typography-caption;
 }
 
 .chain_card {
@@ -124,7 +124,7 @@ label {
 }
 
 p {
-    font-size: 14px;
+    @include mixins.typography-caption;
     word-break: break-all;
 }
 

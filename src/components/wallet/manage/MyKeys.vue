@@ -177,6 +177,7 @@ export default class MyKeys extends Vue {
 </script>
 
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .container {
     background-color: var(--bg-light);
     padding: 15px;
@@ -215,7 +216,7 @@ hr {
     margin: 12px 0;
 }
 .label {
-    font-size: 13px;
+    @include mixins.typography-caption;
     color: #999;
     font-weight: bold;
     padding: 2px 10px;

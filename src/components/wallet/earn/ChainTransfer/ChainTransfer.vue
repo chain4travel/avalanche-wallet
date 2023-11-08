@@ -632,7 +632,7 @@ export default class ChainTransfer extends Vue {
 }
 
 .chain {
-    font-size: 32px;
+    @include mixins.typography-headline-4;
     text-align: center;
     justify-content: center;
 }
@@ -712,13 +712,13 @@ h2 {
 
         p {
             word-break: break-all;
-            font-size: 13px;
+            @include mixins.typography-caption;
         }
     }
 
     label {
         font-weight: bold;
-        font-size: 12px;
+        @include mixins.typography-caption;
     }
 
     /*.status_icon{*/
@@ -745,7 +745,7 @@ h2 {
 
 .fees p {
     text-align: left;
-    font-size: 13px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
 }
 

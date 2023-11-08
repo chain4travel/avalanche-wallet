@@ -63,10 +63,11 @@ export default class BaseTxNFTOutput extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .amount {
     text-align: right;
     white-space: nowrap;
-    font-size: 15px;
+    @include mixins.typography-body-2;
     color: #d04c4c;
 
     &[profit] {

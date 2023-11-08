@@ -103,6 +103,7 @@ export default class LedgerBlock extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../styles/abstracts/mixins';
 .ledger_block {
     pointer-events: none;
     padding: 30px;
@@ -110,8 +111,7 @@ export default class LedgerBlock extends Vue {
 }
 
 .message .title {
-    line-height: 1rem;
-    font-size: 0.8rem !important;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
 }
 
@@ -135,7 +135,7 @@ export default class LedgerBlock extends Vue {
     padding: 6px;
     margin-top: 2px;
     margin-bottom: 8px;
-    font-size: 1rem;
+    @include mixins.typography-body-2;
 }
 
 .spinner {

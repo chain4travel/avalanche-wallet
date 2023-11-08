@@ -18,17 +18,17 @@ export default {
     },
 }
 </script>
-<style scoped>
+<style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 li p {
     margin: 0;
     padding-left: 10px;
 }
 
 .add_title {
-    font-size: 12px;
-    font-weight: bold;
+    @include mixins.typography-caption;
 }
 .add_val {
-    font-size: 14px;
+    @include mixins.typography-caption;
 }
 </style>

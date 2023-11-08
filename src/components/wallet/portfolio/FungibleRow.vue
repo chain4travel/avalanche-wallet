@@ -126,7 +126,7 @@ export default class FungibleRow extends Vue {
     }
 
     .balance_col {
-        font-size: 18px;
+        @include mixins.typography-body-1;
         text-align: right;
     }
 
@@ -185,7 +185,7 @@ $icon_w: 40px;
 
 .name_col {
     span {
-        font-size: 12px;
+        @include mixins.typography-caption;
         color: var(--secondary-color);
     }
 }
@@ -197,9 +197,9 @@ $icon_w: 40px;
 
     .balance_col {
         span {
-            font-size: 15px;
+            @include mixins.typography-body-2;
         }
-        font-size: 15px;
+        @include mixins.typography-body-2;
     }
     .send_col {
         img {
@@ -208,7 +208,7 @@ $icon_w: 40px;
     }
 
     .name_col {
-        font-size: 14px;
+        @include mixins.typography-caption;
     }
 
     $icon_w: 30px;

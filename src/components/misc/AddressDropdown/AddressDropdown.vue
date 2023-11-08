@@ -128,7 +128,8 @@ export default {
     },
 }
 </script>
-<style scoped>
+<style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .address_dropdown {
     position: relative;
     border: 1px solid #fafafa;
@@ -163,17 +164,15 @@ export default {
 }
 .display p {
     margin: 0;
-    font-size: 14px;
+    @include mixins.typography-caption;
 }
 
 .display .chip {
     user-select: none;
     display: inline-block;
-    font-size: 14px;
+    @include mixins.typography-caption;
     background-color: #61c395;
     color: #fff;
-    font-weight: bold;
-    letter-spacing: 0.8px;
     margin: 3px;
     padding: 5px 15px;
     border-radius: 8px;
@@ -218,11 +217,10 @@ li p {
 }
 
 .add_title {
-    font-size: 12px;
-    font-weight: bold;
+    @include mixins.typography-caption;
 }
 .add_val {
-    font-size: 14px;
+    @include mixins.typography-caption;
 }
 
 .select_all {

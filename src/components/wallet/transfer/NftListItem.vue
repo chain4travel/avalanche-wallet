@@ -105,6 +105,7 @@ export default class NftListItem extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 $remove_w: 24px;
 .removeBut {
     position: absolute;
@@ -116,7 +117,7 @@ $remove_w: 24px;
     background-color: var(--bg-light);
     color: var(--primary-color-light);
     border: 3px solid var(--bg);
-    font-size: 12px;
+    @include mixins.typography-caption;
     border-radius: $remove_w;
 
     &:hover {
@@ -134,13 +135,13 @@ $remove_w: 24px;
     z-index: 2;
     align-items: center;
     //border-radius: var(--border-radius-sm);
-    font-size: 12px;
+    @include mixins.typography-caption;
     background-color: var(--primary-color);
     color: var(--bg) !important;
     display: flex;
 
     label {
-        font-size: 11px;
+        @include mixins.typography-caption;
         display: block;
         font-weight: bold;
         text-align: right;
@@ -149,7 +150,7 @@ $remove_w: 24px;
 
     p {
         color: var(--bg) !important;
-        font-size: 12px;
+        @include mixins.typography-caption;
     }
 
     > input {

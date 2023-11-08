@@ -61,7 +61,7 @@ export default class UTXOSelect extends Vue {
     display: flex;
     margin: 4px 0;
     button {
-        font-size: 13px;
+        @include mixins.typography-caption;
         padding: 4px 8px;
         background-color: var(--bg-light);
         &[selected] {

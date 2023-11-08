@@ -107,7 +107,7 @@ export default class BalancePopup extends Vue {
     height: 100%;
 }
 .desc {
-    font-size: 0.8rem;
+    @include mixins.typography-caption;
     padding: 3px 15px;
     background-color: var(--primary-color);
     color: var(--bg);
@@ -147,7 +147,7 @@ export default class BalancePopup extends Vue {
     display: grid;
     column-gap: 15px;
     grid-template-columns: 48px 1fr max-content;
-    font-size: 0.8rem;
+    @include mixins.typography-caption;
     transition-duration: 0.2s;
     cursor: pointer;
     user-select: none;
@@ -194,12 +194,12 @@ export default class BalancePopup extends Vue {
     }
 
     .desc {
-        font-size: 1.2rem;
+        @include mixins.typography-body-1;
     }
 
     .bal_row {
         padding: 12px 14px;
-        font-size: 0.9rem;
+        @include mixins.typography-caption;
     }
 }
 </style>

@@ -144,8 +144,7 @@ export default class AvaxInput extends Vue {
 
     .amt_in {
         color: var(--primary-color);
-        font-size: 14px;
-        font-family: 'Inter';
+        @include mixins.typography-body-2;
         flex-grow: 1;
         flex-shrink: 1;
         display: block;
@@ -169,7 +168,7 @@ export default class AvaxInput extends Vue {
 .balance {
     display: grid;
     column-gap: 10px;
-    font-size: 14px;
+    @include mixins.typography-body-2;
     color: var(--primary-color-light);
     padding: 2px 0px;
 
@@ -188,7 +187,7 @@ export default class AvaxInput extends Vue {
     }
 
     span {
-        font-family: 'Inter';
+        font-family: var(--primary-font);
         padding-left: 14px;
     }
 }
@@ -219,7 +218,7 @@ export default class AvaxInput extends Vue {
 }
 
 .max_but {
-    font-size: 13px;
+    @include mixins.typography-caption;
     opacity: 0.4;
     &:hover {
         opacity: 1;
@@ -242,7 +241,7 @@ export default class AvaxInput extends Vue {
 
 @include mixins.mobile-device {
     .balance {
-        font-size: 12px;
+        @include mixins.typography-caption;
     }
 }
 </style>

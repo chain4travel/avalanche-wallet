@@ -171,6 +171,7 @@ export default class Form extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .swap_form {
     > div {
         flex-direction: column;
@@ -182,9 +183,8 @@ export default class Form extends Vue {
 }
 label {
     color: var(--primary-color);
-    font-size: 15px;
+    @include mixins.typography-body-2;
     font-weight: bold;
-    font-family: 'Inter', sans-serif;
     margin-bottom: 4px !important;
 }
 
@@ -195,7 +195,7 @@ select {
     border: 1px solid transparent;
     border-radius: var(--border-radius-sm);
     padding: 16px 12px;
-    font-size: 14px;
+    @include mixins.typography-caption;
     outline: none;
     transition-duration: 0.1s;
     cursor: pointer;
@@ -210,7 +210,7 @@ select {
 }
 
 .balance {
-    font-size: 13px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
     span {
         float: right;
@@ -228,7 +228,7 @@ select {
 
 .ledger_warn {
     color: var(--info);
-    font-size: 13px;
+    @include mixins.typography-caption;
     margin-bottom: 4px !important;
 }
 </style>

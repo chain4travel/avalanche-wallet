@@ -81,7 +81,7 @@ export default class BaseTxOutput extends Vue {
 .amount {
     text-align: right;
     white-space: nowrap;
-    font-size: 15px;
+    @include mixins.typography-body-2;
     color: #d04c4c;
 
     &.profit {
@@ -102,9 +102,7 @@ export default class BaseTxOutput extends Vue {
         overflow: hidden;
         color: var(--primary-color-light);
         white-space: nowrap;
-        font-size: 12px;
-        line-height: 12px;
-        font-family: 'Inter';
+        @include mixins.typography-caption;
         text-overflow: ellipsis;
     }
 
@@ -113,13 +111,13 @@ export default class BaseTxOutput extends Vue {
     }
 }
 label {
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
 }
 
 @include mixins.medium-device {
     .amount {
-        font-size: 13px;
+        @include mixins.typography-caption;
     }
 }
 </style>

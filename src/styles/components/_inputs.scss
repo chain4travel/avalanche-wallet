@@ -1,3 +1,4 @@
+@use "../abstracts/mixins";
 .v-input--selection-controls__ripple {
     color: var(--secondary-color) !important;
 }
@@ -71,7 +72,7 @@
 .qr_input, .alias_input {
     background-color: var(--bg-light) !important;
     color: var(--primary-color) !important;
-    font-size: 13px;
+    @include mixins.typography-caption;
     border-radius: var(--border-radius-sm);
 
     @include highlight-border;

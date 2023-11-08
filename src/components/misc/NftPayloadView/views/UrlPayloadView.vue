@@ -59,6 +59,7 @@ export default class UrlPayloadView extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .url_payload_view {
     //border-radius: 14px;
     //overflow: hidden;
@@ -86,17 +87,17 @@ video {
     text-align: center;
     padding: 12px;
     word-break: break-all;
-    font-size: 13px;
+    @include mixins.typography-caption;
     span {
         color: var(--primary-color-light);
-        font-size: 13px;
+        @include mixins.typography-caption;
     }
 }
 
 .warn {
     color: var(--secondary-color);
     word-break: normal;
-    font-size: 1.2em;
+    @include mixins.typography-body-2;
     font-weight: bold;
     opacity: 0.6;
 }

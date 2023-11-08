@@ -63,6 +63,7 @@ export default class JsonPayloadView extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .json_payload_view {
     overflow: scroll;
 }
@@ -72,15 +73,14 @@ textarea {
     width: 100%;
     height: 100%;
     min-height: 140px;
-    font-size: 12px !important;
+    @include mixins.typography-caption;
     background-color: #000 !important;
-    font-family: 'Inter' !important;
     color: #0f0 !important;
     resize: none;
     border: none !important;
 }
 p {
-    font-size: 13px;
+    @include mixins.typography-caption;
     padding: 12px 24px;
     word-break: break-word;
     overflow: scroll;

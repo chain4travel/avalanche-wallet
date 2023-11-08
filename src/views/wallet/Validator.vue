@@ -346,9 +346,7 @@ export default class Validator extends Vue {
 
     .subtitle {
         margin-left: 0.5em;
-        /*font-size: 20px;*/
         color: var(--primary-color-light);
-        font-weight: lighter;
     }
 
     span {
@@ -415,7 +413,7 @@ span {
 }
 
 .cancel {
-    font-size: 13px;
+    @include mixins.typography-caption;
     color: var(--secondary-color);
     justify-self: flex-end;
 }

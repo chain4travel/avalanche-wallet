@@ -52,6 +52,7 @@ export default class ERCNftRow extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .family_row {
     display: flex !important;
     flex-direction: column;
@@ -62,7 +63,7 @@ p {
 
 .name {
     color: var(--primary-color-light);
-    font-size: 13px;
+    @include mixins.typography-caption;
 }
 
 .title_row {

@@ -36,7 +36,7 @@ export default class PublicKey extends Vue {
 </script>
 <style scoped lang="scss">
 .singleton_modal_body {
-    width: 520px;
+    width: 600px;
     max-width: 100%;
     padding: 10px 0px 0px 0px;
     display: flex;
@@ -53,7 +53,7 @@ export default class PublicKey extends Vue {
         color: var(--primary-color);
         width: 18px;
         height: 18px;
-        font-size: 22px;
+        @include mixins.typography-subtitle-1;
     }
 }
 .copy_but {
