@@ -42,7 +42,7 @@
         </div>
         <div class="confirmation_val" v-else>
             <label>{{ $t('earn.transfer.amount') }}</label>
-            <p>{{ formAmtText }} {{ nativeAssetSymbol }}</p>
+            <p style="border-radius: 6px">{{ formAmtText }} {{ nativeAssetSymbol }}</p>
         </div>
     </div>
 </template>

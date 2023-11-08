@@ -8,6 +8,7 @@
             @select="onselect"
             :assets="assetArray"
             :disabled-ids="disabledIds"
+            :chain-id="chainId"
         ></AvmTokenSelect>
     </div>
 </template>
@@ -18,6 +19,7 @@ import { Vue, Component, Prop, Ref, Model } from 'vue-property-decorator'
 import BalancePopup from '@/components/misc/BalancePopup/BalancePopup.vue'
 import AvaAsset from '@/js/AvaAsset'
 import AvmTokenSelect from '@/components/modals/AvmTokenSelect.vue'
+import { ChainIdType } from '@/constants'
 
 @Component({
     components: {
@@ -31,6 +33,7 @@ export default class BalanceDropdown extends Vue {
     @Prop({ default: () => [] }) disabled_assets!: AvaAsset[]
     @Prop({ default: false }) disabled!: boolean
     @Model('change', { type: AvaAsset }) readonly asset!: AvaAsset
+    @Prop() chainId!: ChainIdType
 
     get assetArray(): AvaAsset[] {
         return this.$store.getters['Assets/walletAssetsArray']

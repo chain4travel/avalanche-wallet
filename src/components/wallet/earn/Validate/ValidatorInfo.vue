@@ -35,7 +35,8 @@
                     <div>
                         <Tooltip style="display: inline-block" :text="$t('validator.info.up_time')">
                             <v-icon class="icon-mdi-camino">mdi-arrow-up-bold</v-icon>
-                            <label>{{ upTime.toFixed() }} %</label>
+                            <label v-if="initialized">{{ upTime.toFixed() }} %</label>
+                            <Spinner v-else />
                         </Tooltip>
                     </div>
                     <div>
@@ -77,7 +78,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import Spinner from '@/components/misc/Spinner.vue'
 import moment from 'moment'
 import { ava } from '@/AVA'
@@ -85,6 +86,8 @@ import { BN } from '@c4tplatform/caminojs'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
 import Tooltip from '@/components/misc/Tooltip.vue'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
+import { AvaNetwork } from '@/js/AvaNetwork'
+import axios from 'axios'
 
 @Component({
     name: 'validator_info',
@@ -106,6 +109,8 @@ export default class ValidatorInfo extends Vue {
     txID: string = ''
 
     loading: boolean = true
+    nodeVersion: string = ''
+    initialized: boolean = false
 
     mounted() {
         this.getInformationValidator()
@@ -120,8 +125,83 @@ export default class ValidatorInfo extends Vue {
         return ava.getNetwork().P.minStake
     }
 
-    getInformationValidator() {
+    get activeNetwork(): null | AvaNetwork {
+        return this.$store?.state?.Network?.selectedNetwork
+    }
+
+    async fetchNodeVersion() {
+        if (this.activeNetwork && this.activeNetwork.url) {
+            await axios
+                .post(this.activeNetwork.url + '/ext/info', {
+                    jsonrpc: '2.0',
+                    id: 1,
+                    method: 'info.getNodeVersion',
+                })
+                .then((res) => {
+                    const data = res.data
+                    if (data && data.result && data.result.gitVersion) {
+                        this.nodeVersion = data.result.gitVersion.slice(1) // remove v
+                    }
+                })
+                .finally(() => {
+                    this.initialized = true
+                })
+        }
+    }
+
+    checkNodeVersionFlag(targetVersion: string): boolean {
+        if (!this.initialized) {
+            throw new Error('Provider not initialized yet')
+        }
+
+        if (!this.nodeVersion) {
+            throw new Error('Node version not exists, function uncallable')
+        }
+
+        const versionRegex = /^\d+\.\d+\.\d+(-rc\d+)?$/
+        if (!versionRegex.test(targetVersion)) {
+            throw new Error(
+                `Invalid version format: ${targetVersion}. Correct version is of type major.minor.path e.g 1.2.3-rc2`
+            )
+        }
+
+        const [coreTargetVersion, targetVariant] = targetVersion.split('-')
+        const [coreNodeVersion, nodeVariant] = this.nodeVersion.split('-')
+
+        const [targetMajor, targetMinor, targetPatch] = coreTargetVersion.split('.').map(Number)
+        const [nodeMajor, nodeMinor, nodePatch] = coreNodeVersion.split('.').map(Number)
+
+        if (targetMajor !== nodeMajor) {
+            return targetMajor < nodeMajor
+        }
+
+        if (targetMinor !== nodeMinor) {
+            return targetMinor < nodeMinor
+        }
+
+        if (targetPatch !== nodePatch) {
+            return targetPatch < nodePatch
+        }
+
+        if (nodeVariant) {
+            return targetVariant <= nodeVariant
+        }
+
+        return true
+    }
+
+    formatUptime(uptime: string): number {
+        const versionFlag = this.checkNodeVersionFlag('0.4.10-rc3')
+        const value = versionFlag
+            ? Math.round(parseFloat(uptime))
+            : Math.round(parseFloat(uptime) * 100)
+
+        return value
+    }
+
+    async getInformationValidator() {
         try {
+            await this.fetchNodeVersion()
             this.loading = true
             let today = moment()
 
@@ -131,7 +211,7 @@ export default class ValidatorInfo extends Vue {
             this.endTime = moment(new Date(parseInt(this.nodeInfo.endTime) * 1000)).format(
                 'MMMM Do YYYY, h:mm:ss a'
             )
-            this.upTime = parseFloat(this.nodeInfo.uptime) * 100
+            this.upTime = this.formatUptime(this.nodeInfo.uptime)
 
             var reaminingValidationDuration = moment.duration(
                 moment(new Date(parseInt(this.nodeInfo.endTime) * 1000)).diff(today)

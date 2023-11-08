@@ -91,6 +91,8 @@ $countW: 18px;
 }
 
 .nft_card {
+    display: flex;
+    justify-content: center;
     height: 35px !important;
     width: 35px !important;
     background-color: var(--bg-light);
