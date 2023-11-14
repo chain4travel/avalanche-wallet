@@ -106,16 +106,21 @@ async function getAliasChains() {
 }
 
 async function getMultisigAliases(ownersAddresses: string[]): Promise<string[]> {
-    let res = await explorer_api.get(`/v2/multisigalias/${ownersAddresses.join(',')}`)
-    return res.data.alias
+    try {
+        let res = await explorer_api.get(`/v2/multisigalias/${ownersAddresses.join(',')}`)
+        return res.data.alias
+    } catch (e) {
+        console.log(e)
+        return []
+    }
 }
 
 export {
     explorer_api,
-    getAddressHistory,
-    getAddressDetailX,
-    isAddressUsedX,
     getAddressChains,
+    getAddressDetailX,
+    getAddressHistory,
     getAliasChains,
     getMultisigAliases,
+    isAddressUsedX,
 }

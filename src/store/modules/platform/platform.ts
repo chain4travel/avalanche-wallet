@@ -202,75 +202,90 @@ const platform_module: Module<PlatformState, RootState> = {
                 timestamp: number
             }
         ) => {
-            const wallet = rootState.activeWallet
-            const addressString = wallet?.getStaticAddress('P')
-            let shortIDAddresses = allowedAddresses.map((elem) => {
-                return bintools.cb58Encode(ava.PChain().parseAddress(elem.address))
-            })
-            if (!wallet || !addressString) return
-            let signer: SECP256k1KeyPair | undefined = wallet?.getStaticKeyPair()
-            let signatures = allowedAddresses.map((elem) => {
-                const msgHashed: Buffer = Buffer.from(
-                    createHash('sha256')
-                        .update(
-                            Buffer.concat([
-                                bintools.cb58Decode(depositOfferID),
-                                ava.PChain().parseAddress(elem.address),
-                            ])
-                        )
-                        .digest()
-                )
-                return signer?.sign(msgHashed).toString('hex')
-            })
-            const result = await SignaVaultDepositOfferApi().addSignature({
-                addresses: shortIDAddresses,
-                depositOfferID: depositOfferID,
-                signatures: signatures as string[],
-                timestamp,
-            })
+            try {
+                const wallet = rootState.activeWallet
+                const addressString = wallet?.getStaticAddress('P')
+                let shortIDAddresses = allowedAddresses.map((elem) => {
+                    return bintools.cb58Encode(ava.PChain().parseAddress(elem.address))
+                })
+                if (!wallet || !addressString) return
+                let signer: SECP256k1KeyPair | undefined = wallet?.getStaticKeyPair()
+                let signatures = allowedAddresses.map((elem) => {
+                    const msgHashed: Buffer = Buffer.from(
+                        createHash('sha256')
+                            .update(
+                                Buffer.concat([
+                                    bintools.cb58Decode(depositOfferID),
+                                    ava.PChain().parseAddress(elem.address),
+                                ])
+                            )
+                            .digest()
+                    )
+                    return signer?.sign(msgHashed).toString('hex')
+                })
+                const result = await SignaVaultDepositOfferApi().addSignature({
+                    addresses: shortIDAddresses,
+                    depositOfferID: depositOfferID,
+                    signatures: signatures as string[],
+                    timestamp,
+                })
+            } catch (e) {
+                let error = e as Error
+                console.error('Error:', error.message)
+            }
         },
         async updateRestrictedOffers({ state, rootState }) {
-            const wallet = rootState.activeWallet
-            const addressString = wallet?.getStaticAddress('P')
-            if (!wallet || !addressString) return
-            const address = ava.PChain().parseAddress(addressString)
-            let signer: SECP256k1KeyPair | undefined = wallet?.getStaticKeyPair()
-            const timestamp = Math.floor(Date.now() / 1000).toString()
-            const hashedMessage = Buffer.from(
-                createHash('sha256')
-                    .update(Buffer.concat([address, Buffer.from(timestamp)]))
-                    .digest()
-            )
-            const signatureTimestamp = signer?.sign(hashedMessage).toString('hex')
-            const result = await SignaVaultDepositOfferApi().getSignatures(
-                bintools.cb58Encode(address),
-                signatureTimestamp as string,
-                timestamp,
-                'false'
-            )
-            state.restrictedOffers = result.data
+            try {
+                const wallet = rootState.activeWallet
+                const addressString = wallet?.getStaticAddress('P')
+                if (!wallet || !addressString) return
+                const address = ava.PChain().parseAddress(addressString)
+                let signer: SECP256k1KeyPair | undefined = wallet?.getStaticKeyPair()
+                const timestamp = Math.floor(Date.now() / 1000).toString()
+                const hashedMessage = Buffer.from(
+                    createHash('sha256')
+                        .update(Buffer.concat([address, Buffer.from(timestamp)]))
+                        .digest()
+                )
+                const signatureTimestamp = signer?.sign(hashedMessage).toString('hex')
+                const result = await SignaVaultDepositOfferApi().getSignatures(
+                    bintools.cb58Encode(address),
+                    signatureTimestamp as string,
+                    timestamp,
+                    'false'
+                )
+                state.restrictedOffers = result.data
+            } catch (e) {
+                let error = e as Error
+                console.error('Error:', error.message)
+            }
         },
         getRestrictedOffers: async ({ state, rootState }) => {
-            const wallet = rootState.activeWallet
-            const signer =
-                wallet instanceof MultisigWallet
-                    ? wallet?.wallets[0].getStaticKeyPair()
-                    : wallet?.getStaticKeyPair()
-            const addressString = wallet?.getStaticAddress('P')
-            if (!signer || !addressString) return
-            const timestamp = Math.floor(Date.now() / 1000).toString()
-            const a = ava.PChain().parseAddress(addressString)
-            const t = Buffer.from(timestamp)
-            const signature: Buffer = Buffer.concat([a, t])
-            const hashedMessage = Buffer.from(createHash('sha256').update(signature).digest())
-            const signatureAliasTimestamp = signer.sign(hashedMessage).toString('hex')
-            const result = await SignaVaultDepositOfferApi().getSignatures(
-                bintools.cb58Encode(a),
-                signatureAliasTimestamp,
-                timestamp,
-                wallet?.type === 'multisig' ? 'true' : 'false'
-            )
-            state.restrictedOffers = result.data
+            try {
+                const wallet = rootState.activeWallet
+                const signer =
+                    wallet instanceof MultisigWallet
+                        ? wallet?.wallets[0].getStaticKeyPair()
+                        : wallet?.getStaticKeyPair()
+                const addressString = wallet?.getStaticAddress('P')
+                if (!signer || !addressString) return
+                const timestamp = Math.floor(Date.now() / 1000).toString()
+                const a = ava.PChain().parseAddress(addressString)
+                const t = Buffer.from(timestamp)
+                const signature: Buffer = Buffer.concat([a, t])
+                const hashedMessage = Buffer.from(createHash('sha256').update(signature).digest())
+                const signatureAliasTimestamp = signer.sign(hashedMessage).toString('hex')
+                const result = await SignaVaultDepositOfferApi().getSignatures(
+                    bintools.cb58Encode(a),
+                    signatureAliasTimestamp,
+                    timestamp,
+                    wallet?.type === 'multisig' ? 'true' : 'false'
+                )
+                state.restrictedOffers = result.data
+            } catch (e) {
+                let error = e as Error
+                console.error('Error:', error.message)
+            }
         },
     },
     getters: {
