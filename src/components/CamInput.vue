@@ -43,8 +43,14 @@ export default class CamInput extends Vue {
     }
 }
 </script>
-
 <style scoped lang="scss">
+.v-application .error {
+    background-color: transparent !important;
+    border: 1px solid var(--camino-slate-slate-600);
+    &:disabled {
+        border: 1px solid var(--camino-slate-slate-600) !important;
+    }
+}
 .cam-input {
     display: flex;
     flex-direction: column;

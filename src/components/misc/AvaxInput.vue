@@ -72,7 +72,6 @@ export default class AvaxInput extends Vue {
     })
     max?: BN | null
     @Prop() initial?: BN
-
     @Prop() balance?: Big | null
     @Prop() alias?: string
     @Prop() readonly?: boolean
@@ -86,7 +85,10 @@ export default class AvaxInput extends Vue {
         //@ts-ignore
         this.$refs.amt_in.maxout()
     }
-
+    reset() {
+        //@ts-ignore
+        this.$refs.amt_in.clear()
+    }
     amount_in(val: BN) {
         this.$emit('change', val)
     }
@@ -215,6 +217,10 @@ export default class AvaxInput extends Vue {
 .ticker {
     border-radius: var(--border-radius-sm);
     padding: 10px 12px;
+    border: 1px solid var(--camino-slate-slate-600);
+    &:disabled {
+        border: 1px solid var(--camino-slate-slate-600) !important;
+    }
 }
 
 .max_but {
