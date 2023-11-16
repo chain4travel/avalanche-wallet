@@ -44,10 +44,10 @@ export default {
     bottom: 150%;
     left: 50%;
     transform: translateX(-50%);
-    white-space: nowrap;
     display: none;
     font-size: 14px;
     line-height: 22px;
+    z-index: 1;
 }
 
 .tooltip-content:after {
@@ -69,7 +69,8 @@ export default {
     top: 50%;
     left: 240%;
     transform: translateY(-50%);
-    white-space: nowrap;
+    width: max-content;
+    max-width: 300px;
     bottom: auto;
 }
 
@@ -88,6 +89,8 @@ export default {
 .tooltip[placement='bottom'] .tooltip-content {
     top: 180%;
     left: 50%;
+    width: max-content;
+    max-width: 300px;
     transform: translateX(-50%);
     bottom: auto;
 }
@@ -106,6 +109,8 @@ export default {
     right: 250%;
     left: auto;
     top: 50%;
+    width: max-content;
+    max-width: 300px;
     transform: translateY(-50%);
     bottom: auto;
 }

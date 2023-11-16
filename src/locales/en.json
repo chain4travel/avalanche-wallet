@@ -525,7 +525,14 @@
             },
             "errors": {
                 "title": "Offer title should not exceed 256 characters.",
-                "min_amount": "Minimum amount must be at least {minAmount} {symbol}."
+                "min_amount": "Minimum amount must be at least {minAmount} {symbol}.",
+                "has_exclusive_total_max_amount_or_reward": "can only use either TotalMaxAmount or TotalMaxRewardAmount",
+                "is_max_reward_amount_and_interest_rate_is_zero": "Interest rate must be 0 if total max reward amount is 0, and vice versa",
+                "is_min_duration_less_than_no_rewards_period": "deposit offer minimum duration ({minDuration}) is less than no-rewards period duration ({noRewardsPeriodDuration})",
+                "is_min_duration_less_than_unlock_period": "deposit offer minimum duration ({minDuration}) is less than vesting period duration ({unlockPeriodDuration})",
+                "is_max_diration_less_than_min_duration": "deposit offer max duration ({maxDuration}) is less than minimum duration ({minDuration})",
+                "is_min_duration_equal_to_zero": "deposit offer has zero minimum duration",
+                "is_start_date_greater_than_end_date": " deposit offer start date is greater than end date"
             },
             "offer": {
                 "title": "Active Saving Pools",

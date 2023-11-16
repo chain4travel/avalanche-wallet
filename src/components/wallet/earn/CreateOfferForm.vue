@@ -86,8 +86,8 @@
                 v-model="selectedTab"
                 :mobile-breakpoint="900"
             >
-                <v-tab key="mnemonic">Max Amount</v-tab>
-                <v-tab key="keystore">Interest</v-tab>
+                <v-tab key="max_amount">Max Amount</v-tab>
+                <v-tab key="interest">Interest</v-tab>
                 <v-tab-item>
                     <div class="create-offer__container__form__element">
                         <div>
@@ -129,8 +129,6 @@
                             v-model="interestRateNominator"
                             v-on:input="setInterestRate"
                             :placeholder="`interestRateNominator`"
-                            :error="interestRateAndTotalMaxRewardAmountError"
-                            :errorMessage="`Interest rate must be 0 if total max reward amount is 0, and vice versa`"
                         />
                     </div>
                     <div class="create-offer__container__form__element">
@@ -151,8 +149,6 @@
                             v-on:input="setTotalMaxRewardAmount"
                             :placeholder="`totalMaxRewardAmount`"
                             :readonly="sunrisePhase === 0"
-                            :error="interestRateAndTotalMaxRewardAmountError"
-                            :errorMessage="`Interest rate must be 0 if total max reward amount is 0, and vice versa`"
                         ></CamInput>
                     </div>
                 </v-tab-item>
@@ -344,24 +340,80 @@
                     :disabled="true"
                 ></CamInput>
             </div>
-            <div class="create-offer__container__form__element">
-                <div>
-                    <label>
-                        {{ $t('earn.rewards.create.total_max_amount') }}
-                    </label>
-                    <cam-tooltip
-                        :content="$t('earn.rewards.descriptions.max_amount')"
-                        placement="right"
-                    >
-                        <fa icon="question-circle"></fa>
-                    </cam-tooltip>
-                </div>
-                <CamInput
-                    class="input"
-                    v-model="pendingOffer.totalMaxAmount"
-                    :disabled="true"
-                ></CamInput>
-            </div>
+            <v-tabs
+                class="create-offer__container__form__element tabs"
+                height="38"
+                :grow="true"
+                :show-arrows="false"
+                :centered="true"
+                v-model="selectedTab"
+                :mobile-breakpoint="900"
+                :disabled="true"
+                :aria-disabled="true"
+            >
+                <v-tab :disabled="true" key="max_amount">Max Amount</v-tab>
+                <v-tab :disabled="true" key="interest">Interest</v-tab>
+                <v-tab-item>
+                    <div class="create-offer__container__form__element">
+                        <div>
+                            <label>
+                                {{ $t('earn.rewards.create.total_max_amount') }}
+                            </label>
+                            <cam-tooltip
+                                :content="$t('earn.rewards.descriptions.max_amount')"
+                                placement="right"
+                            >
+                                <fa icon="question-circle"></fa>
+                            </cam-tooltip>
+                        </div>
+                        <CamInput
+                            class="input"
+                            v-model="pendingOffer.totalMaxAmount"
+                            :disabled="true"
+                        ></CamInput>
+                    </div>
+                </v-tab-item>
+                <v-tab-item>
+                    <div class="create-offer__container__form__element">
+                        <div>
+                            <label>
+                                {{ $t('earn.rewards.create.interrest_rate') }}
+                            </label>
+                            <cam-tooltip
+                                :content="$t('earn.rewards.descriptions.interest_rate')"
+                                placement="right"
+                            >
+                                <fa icon="question-circle"></fa>
+                            </cam-tooltip>
+                        </div>
+                        <CamInput
+                            class="input"
+                            v-model="pendingOffer.interestRateNominator"
+                            :placeholder="`interestRateNominator`"
+                            :disabled="true"
+                        />
+                    </div>
+                    <div class="create-offer__container__form__element">
+                        <div>
+                            <label>
+                                {{ $t('earn.rewards.create.total_max_reward_amount') }}
+                            </label>
+                            <cam-tooltip
+                                :content="$t('earn.rewards.descriptions.total_max_reward_amount')"
+                                placement="right"
+                            >
+                                <fa icon="question-circle"></fa>
+                            </cam-tooltip>
+                        </div>
+                        <CamInput
+                            class="input"
+                            v-model="pendingOffer.totalMaxRewardAmount"
+                            :placeholder="`totalMaxRewardAmount`"
+                            :disabled="true"
+                        ></CamInput>
+                    </div>
+                </v-tab-item>
+            </v-tabs>
             <div class="create-offer__container__form__element">
                 <div>
                     <label>
@@ -436,76 +488,61 @@
                     :disabled="true"
                 />
             </div>
-            <div class="create-offer__container__form__element">
-                <div>
-                    <label>
-                        {{ $t('earn.rewards.create.interrest_rate') }}
-                    </label>
-                    <cam-tooltip
-                        :content="$t('earn.rewards.descriptions.interest_rate')"
-                        placement="right"
-                    >
-                        <fa icon="question-circle"></fa>
-                    </cam-tooltip>
-                </div>
-                <CamInput
-                    class="input"
-                    v-model="pendingOffer.interestRateNominator"
-                    :placeholder="`interestRateNominator`"
-                    :disabled="true"
-                />
-            </div>
-            <div class="create-offer__container__form__element">
-                <div>
-                    <label>
-                        {{ $t('earn.rewards.create.total_max_reward_amount') }}
-                    </label>
-                    <cam-tooltip
-                        :content="$t('earn.rewards.descriptions.total_max_reward_amount')"
-                        placement="right"
-                    >
-                        <fa icon="question-circle"></fa>
-                    </cam-tooltip>
-                </div>
-                <CamInput
-                    class="input"
-                    v-model="pendingOffer.totalMaxRewardAmount"
-                    :placeholder="`totalMaxRewardAmount`"
-                    :disabled="true"
-                ></CamInput>
-            </div>
-            <!-- <div class="create-offer__container__form__element">
-                <label>
-                    {{ $t('earn.rewards.create.flags') }}
-                </label>
-                <input class="input" :value="pendingOffer.flags" :disabled="true" />
-            </div> -->
         </div>
         <div class="create-offer__container__actions">
             <div class="create-offer__container__actions__aletrs">
+                <template v-if="pendingCreateOfferMultisigTX">
+                    <Alert variant="info">
+                        {{
+                            $t('earn.validate.pending_multisig.threshold', {
+                                value: sigValue,
+                                threshold: pendingCreateOfferMultisigTX?.tx.threshold,
+                            })
+                        }}
+                    </Alert>
+                    <Alert v-if="SignStatus" variant="info">
+                        {{ $t('earn.validate.pending_multisig.already_signed') }}
+                    </Alert>
+                </template>
                 <Alert style="margin-top: 16px" variant="negative" v-if="validAddressError">
                     {{ $t('edit_multisig.errors.invalid_addresses') }}
                 </Alert>
                 <Alert v-if="hasExclusiveTotalMaxAmountOrReward" variant="negative">
-                    can only use either TotalMaxAmount or TotalMaxRewardAmount
+                    {{ $t('earn.rewards.errors.has_exclusive_total_max_amount_or_reward') }}
+                </Alert>
+                <Alert v-if="isMaxRewardAmountAndInterestRateIsZero" variant="negative">
+                    {{ $t('earn.rewards.errors.is_max_reward_amount_and_interest_rate_is_zero') }}
                 </Alert>
                 <Alert v-if="isMinDurationLessThanNoRewardsPeriod" variant="negative">
-                    deposit offer minimum duration ({{ offer.minDuration }}) is less than no-rewards
-                    period duration ({{ offer.noRewardsPeriodDuration }})
+                    {{
+                        $t('earn.rewards.errors.is_min_duration_less_than_no_rewards_period', {
+                            minDuration: offer.minDuration,
+                            noRewardsPeriodDuration: offer.noRewardsPeriodDuration,
+                        })
+                    }}
                 </Alert>
+
                 <Alert v-if="isMinDurationLessThanUnlockPeriod" variant="negative">
-                    deposit offer minimum duration ({{ offer.minDuration }}) is less than unlock
-                    period duration ({{ offer.unlockPeriodDuration }})
+                    {{
+                        $t('earn.rewards.errors.is_min_duration_less_than_unlock_period', {
+                            minDuration: offer.minDuration,
+                            unlockPeriodDuration: offer.unlockPeriodDuration,
+                        })
+                    }}
                 </Alert>
                 <Alert v-if="isMaxDirationLessThanMinDuration" variant="negative">
-                    deposit offer max duration ({{ offer.maxDuration }}) is less than minimum
-                    duration ({{ offer.minDuration }})
+                    {{
+                        $t('earn.rewards.errors.is_max_diration_less_than_min_duration', {
+                            minDuration: offer.minDuration,
+                            maxDuration: offer.maxDuration,
+                        })
+                    }}
                 </Alert>
                 <Alert v-if="isMinDurationEqualtoZero" variant="negative">
-                    deposit offer has zero minimum duration
+                    {{ $t('earn.rewards.errors.is_min_duration_equal_to_zero') }}
                 </Alert>
                 <Alert v-if="isStartDateGreaterThanEndDate" variant="negative">
-                    deposit offer start date is greater than end date
+                    {{ $t('earn.rewards.errors.is_start_date_greater_than_end_date') }}
                 </Alert>
                 <Alert variant="warning">
                     Creating this depositOffer will incurr a fee of
@@ -676,6 +713,13 @@ export default class CreateOfferForm extends Vue {
     get isMinDurationLessThanNoRewardsPeriod() {
         return Number(this.offer.minDuration) < Number(this.offer.noRewardsPeriodDuration)
     }
+    get isMaxRewardAmountAndInterestRateIsZero() {
+        const interestRateNominator = new BN(this.interestRateNominator)
+        const totalMaxRewardAmount = new BN(this.totalMaxRewardAmount)
+        if (interestRateNominator.isZero() && !totalMaxRewardAmount.isZero()) return true
+        else if (!interestRateNominator.isZero() && totalMaxRewardAmount.isZero()) return true
+        return false
+    }
     // deposit offer minimum duration (86400) is less than unlock period duration (864002)
     get isMinDurationLessThanUnlockPeriod() {
         return Number(this.offer.minDuration) < Number(this.offer.unlockPeriodDuration)
@@ -711,7 +755,18 @@ export default class CreateOfferForm extends Vue {
     }
     /* validation */
     get formValid(): boolean {
-        if (this.offer.start > this.offer.end) return false
+        if (
+            this.offer.start > this.offer.end ||
+            this.hasExclusiveTotalMaxAmountOrReward ||
+            this.isMaxRewardAmountAndInterestRateIsZero ||
+            this.isMinDurationLessThanNoRewardsPeriod ||
+            this.isMinDurationLessThanUnlockPeriod ||
+            this.isMaxDirationLessThanMinDuration ||
+            this.isMinDurationEqualtoZero ||
+            this.isStartDateGreaterThanEndDate ||
+            this.minAmountError
+        )
+            return false
         return true
     }
 
@@ -893,6 +948,23 @@ export default class CreateOfferForm extends Vue {
     get txOwners() {
         return this.pendingCreateOfferMultisigTX?.tx?.owners ?? []
     }
+    get sigValue() {
+        return this.pendingCreateOfferMultisigTX?.tx.owners?.filter((owner) => !!owner.signature)
+            ?.length
+    }
+    get SignStatus(): boolean {
+        let isSigned = false
+        this.txOwners.forEach((owner) => {
+            if (
+                (this.wallet as MultisigWallet).wallets.find(
+                    (w) => w?.getAllAddressesP()?.[0] === owner.address
+                )
+            ) {
+                if (owner.signature) isSigned = true
+            }
+        })
+        return isSigned
+    }
     get wallet(): WalletType {
         return this.$store.state.activeWallet
     }
@@ -955,20 +1027,25 @@ export default class CreateOfferForm extends Vue {
             this.pendingOffer = {
                 interestRateNominator: bintools
                     .fromBufferToBN(offer.getInterestRateNominator())
+                    .div(new BN(10000))
                     .toString(10),
                 minAmount: bnToBig(bintools.fromBufferToBN(offer.getMinAmount()), 9).toString(),
                 totalMaxAmount: bnToBig(
                     bintools.fromBufferToBN(offer.getTotalMaxAmount()),
                     9
                 ).toString(),
-                minDuration: Number(bnToBig(bintools.fromBufferToBN(offer.getMinDuration()))),
-                maxDuration: Number(bnToBig(bintools.fromBufferToBN(offer.getMaxDuration()))),
-                unlockPeriodDuration: Number(
-                    bnToBig(bintools.fromBufferToBN(offer.getUnlockPeriodDuration()))
-                ),
-                noRewardsPeriodDuration: Number(
-                    bnToBig(bintools.fromBufferToBN(offer.getNoRewardsPeriodDuration()))
-                ),
+                minDuration:
+                    Number(bnToBig(bintools.fromBufferToBN(offer.getMinDuration()))) /
+                    (24 * 60 * 60),
+                maxDuration:
+                    Number(bnToBig(bintools.fromBufferToBN(offer.getMaxDuration()))) /
+                    (24 * 60 * 60),
+                unlockPeriodDuration:
+                    Number(bnToBig(bintools.fromBufferToBN(offer.getUnlockPeriodDuration()))) /
+                    (24 * 60 * 60),
+                noRewardsPeriodDuration:
+                    Number(bnToBig(bintools.fromBufferToBN(offer.getNoRewardsPeriodDuration()))) /
+                    (24 * 60 * 60),
                 flags: bintools.fromBufferToBN(offer.getFlags()).toString(10),
                 totalMaxRewardAmount: bintools.fromBufferToBN(offer.getTotalMaxRewardAmount()),
                 memo: offer.getMemo().toString(),
@@ -980,6 +1057,7 @@ export default class CreateOfferForm extends Vue {
                     Number(bnToBig(bintools.fromBufferToBN(offer.getEnd()))) * 1000
                 ).toISOString(),
             }
+            this.selectedTab = this.pendingOffer.totalMaxAmount === '0' ? 1 : 0
             if (this.pendingOffer.ownerAddress === ava.PChain().addressFromBuffer(Buffer.alloc(20)))
                 this.pendingOffer.ownerAddress = ''
         }
@@ -1042,6 +1120,9 @@ export default class CreateOfferForm extends Vue {
             display: flex;
             flex-wrap: wrap;
         }
+    }
+    .v-window {
+        overflow: visible;
     }
 }
 </style>
