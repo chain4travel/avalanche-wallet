@@ -1,7 +1,7 @@
 <template>
     <div>
         <h1 class="create-offer-header" v-if="isSuite">Create new DepositOffer</h1>
-        <h4 v-if="isSuite || hasOffers" class="balance">
+        <h4 v-if="!isSuite && hasOffers" class="balance">
             {{ $t('earn.offer.balance') }}: {{ cleanAvaxBN(maxDepositAmount) }}
             {{ nativeAssetSymbol }}
         </h4>
@@ -31,7 +31,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import CreateOfferForm from '@/components/wallet/earn/CreateOfferForm.vue'
 import DepositForm from '@/components/wallet/earn/DepositForm.vue'
@@ -56,11 +56,18 @@ import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfa
 })
 export default class DepositOffers extends Vue {
     @Prop() isSuite?: boolean
+    @Prop() navigate?: (path: string) => void
+
+    // @ts-ignore
     helpers = this.globalHelper()
     async beforeMount() {
         if (this.isSuite) {
             this.addOffer()
         }
+    }
+    @Watch('canAddOffers')
+    checkNetwork() {
+        if (this.navigate && !this.canAddOffers) this.navigate('/')
     }
 
     get platformOffers(): DepositOffer[] {

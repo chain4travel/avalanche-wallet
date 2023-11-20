@@ -593,13 +593,13 @@ class WalletHelper {
         depositAmount: BN,
         restrictedOffer?: ModelDepositOfferSig,
         depositOfferOwner?: string,
-        rewardOwner?: string,
-        depositOwner?: string
+        depositOwner?: string,
+        rewardOwner?: string
     ) {
         const pAddressStrings = wallet.getAllAddressesP()
         const signerAddresses = wallet.getSignerAddresses('P')
         const depositOwnerAddress = bintools.parseAddress(
-            rewardOwner ? rewardOwner : wallet.getPlatformRewardAddress(),
+            depositOwner ? depositOwner : wallet.getPlatformRewardAddress(),
             'P'
         )
 
@@ -628,8 +628,8 @@ class WalletHelper {
                 ZeroBN,
                 depositAmount,
                 1,
-                rewardOwner ? [bintools.parseAddress(rewardOwner as string, 'P')] : [],
-                rewardOwner ? 1 : 0
+                depositOwner ? [bintools.parseAddress(depositOwner as string, 'P')] : [],
+                depositOwner ? 1 : 0
             )
         let tx = await wallet.signP(unsignedTx)
         return await ava.PChain().issueTx(tx)

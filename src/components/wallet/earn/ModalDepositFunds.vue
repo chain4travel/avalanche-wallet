@@ -79,7 +79,7 @@
                                     </span>
                                 </div>
                                 <!-- <span v-if="rewardOwner">{{ rewardOwner }}</span> -->
-                                <div class="deposit_inputs__element">
+                                <!-- <div class="deposit_inputs__element">
                                     <label>Reward Owner</label>
                                     <CamInput
                                         :placeholder="`Rewrad Owner`"
@@ -87,6 +87,17 @@
                                         class="reward-input"
                                         :error="rewardOwnerError"
                                         :errorMessage="rewardOwnerError"
+                                        style="flex: 1"
+                                    />
+                                </div> -->
+                                <div class="deposit_inputs__element">
+                                    <label>Deposit Owner</label>
+                                    <CamInput
+                                        :placeholder="`Deposit Owner`"
+                                        v-model="depositOwner"
+                                        class="reward-input"
+                                        :error="depositOwnerError"
+                                        :errorMessage="depositOwnerError"
                                         style="flex: 1"
                                     />
                                 </div>
@@ -246,15 +257,16 @@ export default class ModalDepositFunds extends Vue {
     rewardOwner: string = ''
     depositOwner: string = ''
     rewardOwnerError: string = ''
+    depositOwnerError: string = ''
 
     $refs!: {
         modal: Modal
         modal_abort_signing: ModalAbortSigning
     }
 
-    @Watch('rewardOwner')
-    onRewardOwnerChange() {
-        this.rewardOwnerError = isValidPChainAddress(this.rewardOwner) ? '' : 'Invalid address'
+    @Watch('depositOwner')
+    onDepositOwnerChange() {
+        this.depositOwnerError = isValidPChainAddress(this.depositOwner) ? '' : 'Invalid address'
     }
     get activeWallet(): MultisigWallet {
         return this.$store.state.activeWallet
@@ -400,10 +412,10 @@ export default class ModalDepositFunds extends Vue {
         return `${(Number(val.toString()) / Number(ONEAVAX.toString())).toLocaleString()}`
     }
     async submitDeposit(): Promise<void> {
-        if (this.rewardOwner && !isValidPChainAddress(this.rewardOwner)) {
-            this.rewardOwnerError = 'Invalid address'
+        if (this.depositOwner && !isValidPChainAddress(this.depositOwner)) {
+            this.depositOwnerError = 'Invalid address'
             return
-        } else this.rewardOwnerError = ''
+        } else this.depositOwnerError = ''
         const wallet: WalletType = this.$store.state.activeWallet
         try {
             const result = await WalletHelper.buildDepositTx(
@@ -413,11 +425,10 @@ export default class ModalDepositFunds extends Vue {
                 this.amt,
                 this.$store.getters['Platform/isDepositOfferRestricted'](this.offer.id),
                 this.offer.ownerAddress,
-                this.rewardOwner,
-                this.depositOwner
+                this.depositOwner,
+                this.rewardOwner
             )
             let { dispatchNotification } = this.helpers
-            this.rewardOwner = ''
             await this.$store.dispatch('Assets/updateUTXOs')
             await this.$store.dispatch('Platform/update')
             dispatchNotification({
@@ -508,6 +519,7 @@ export default class ModalDepositFunds extends Vue {
     }
     cancelDeposit() {
         this.$emit('closeDepositFundsModal')
+        this.depositOwner = ''
     }
     formatDate(date: BN): string {
         const jsDate = new Date(date.toNumber() * 1000)

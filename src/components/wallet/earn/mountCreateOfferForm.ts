@@ -14,7 +14,10 @@ import DepositOffer from './DepositOffers.vue'
 Vue.use(VueMeta)
 Vue.use(BootstrapVue)
 Vue.component('datetime', Datetime)
-export const mountCreateOfferForm = (el: string, props?: { isSuite: boolean }) => {
+export const mountCreateOfferForm = (
+    el: string,
+    props?: { isSuite: boolean; navigate: (path: string) => {} }
+) => {
     const context = {
         props: props,
     }

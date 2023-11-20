@@ -492,10 +492,25 @@
             "earn_now": {
                 "title": "Saving Pools"
             },
+            "descriptions": {
+                "title": "The title of the deposit offer shown in the Wallet earn section.",
+                "offer_start": "Start-time at which this offer becomes available to be used to deposit funds.",
+                "offer_end": "End-time at which this offer becomes unavailable.",
+                "min_amount": "Minimum amount that can be deposited in one deposit.",
+                "max_amount": "Maximum amount that can be deposited with this offer in total (across all deposits).",
+                "interest_rate": "Annual reward of the deposited funds in percent.",
+                "total_max_reward_amount": "Maximum amount that can be rewarded for all deposits created with this offer in total",
+                "minimum_duration": "The minimum duration which can be picked when creating a deposit based on this offer. In most cases this is identical to 'Maximum Duration' - especially in combination with 'Vesting period' and/or 'Period without rewards' this field should not be different to 'Maximum Duration'.",
+                "maximum_duration": "The maximum duration which can be picked when creating a deposit based on this offer.",
+                "vesting_period": "The period of time in which a gradual undeposit of the tokens is happening. This duration is inside the duration of the deposit at the end. For instance, a deposit of 100 days and 10 days in this field will apply starting at day 90 of the deposit.",
+                "period_without_rewards": "The period of time in which no rewards are being accumulated. This duration is inside the duration of the deposit at the end. For instance, a deposit of 100 days and 10 days in this field will apply starting at day 90 of the deposit.",
+                "Flags": "",
+                "restricted": "If selected, only allowed addresses can see this deposit offer in the Wallet and use it to deposit funds. Caution: If the deposit offer is not restricted, everyone on the network can use it to deposit funds!"
+            },
             "create": {
                 "offer_start": "Offer Start",
                 "offer_end": "Offer End",
-                "interrest_rate": "Interrest rate ( *1 000 000 )",
+                "interrest_rate": "Interest rate",
                 "min_amount": "Min Amount",
                 "total_max_amount": "Total Max Amount",
                 "min_duration": "Minimum Duration (Day)",
@@ -509,8 +524,15 @@
                 "submit": "Create Offer"
             },
             "errors": {
-                "title": "Offer title should not exceed 64 characters.",
-                "min_amount": "Minimum amount must be at least {minAmount} {symbol}."
+                "title": "Offer title should not exceed 256 characters.",
+                "min_amount": "Minimum amount must be at least {minAmount} {symbol}.",
+                "has_exclusive_total_max_amount_or_reward": "can only use either TotalMaxAmount or TotalMaxRewardAmount",
+                "is_max_reward_amount_and_interest_rate_is_zero": "Interest rate must be 0 if total max reward amount is 0, and vice versa",
+                "is_min_duration_less_than_no_rewards_period": "deposit offer minimum duration ({minDuration}) is less than no-rewards period duration ({noRewardsPeriodDuration})",
+                "is_min_duration_less_than_unlock_period": "deposit offer minimum duration ({minDuration}) is less than vesting period duration ({unlockPeriodDuration})",
+                "is_max_diration_less_than_min_duration": "deposit offer max duration ({maxDuration}) is less than minimum duration ({minDuration})",
+                "is_min_duration_equal_to_zero": "deposit offer has zero minimum duration",
+                "is_start_date_greater_than_end_date": " deposit offer start date is greater than end date"
             },
             "offer": {
                 "title": "Active Saving Pools",
