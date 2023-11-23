@@ -3,14 +3,6 @@
         <Spinner v-if="loading" class="spinner-color"></Spinner>
 
         <div v-if="!loading" class="validator_child_card">
-            <div class="refresh_div">
-                <div class="refresh">
-                    <Spinner v-if="loading" class="spinner"></Spinner>
-                    <button v-else @click="refresh">
-                        <v-icon>mdi-refresh</v-icon>
-                    </button>
-                </div>
-            </div>
             <div class="validator_info">
                 <div class="alt_validator_info">
                     <div class="space-div"></div>
@@ -274,7 +266,9 @@ export default class ValidatorInfo extends Vue {
 }
 
 .validator_child_card {
-    height: 100%;
+    gap: 1rem;
+    display: flex;
+    flex-direction: column;
 }
 
 h4 {
@@ -317,9 +311,9 @@ h4 {
     border-radius: var(--border-radius-sm);
     color: var(--primary-color-light);
     background-color: var(--bg-light);
-    padding: 6px 14px;
+    padding: 10px 14px;
     white-space: nowrap;
-    width: 70%;
+    width: 100%;
 }
 
 .disabled_input:focus-visible {
@@ -331,7 +325,6 @@ h4 {
 }
 
 .amt_in {
-    width: 70%;
     pointer-events: none;
 }
 

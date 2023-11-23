@@ -322,8 +322,7 @@ class WalletHelper {
             const tx = await wallet.signP(unsignedTx, undefined, endTxTime)
             return await ava.PChain().issueTx(tx)
         } catch (err) {
-            console.error(err)
-            return
+            throw err
         }
     }
 

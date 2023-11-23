@@ -13,6 +13,12 @@
             <h1 v-else :class="depositAndBond ? '' : 'wrong_network'">
                 {{ $t('validator.info.validator_running') }}
             </h1>
+            <div class="refresh" v-if="(tab = 'opt-validator')">
+                <Spinner v-if="loading" class="spinner"></Spinner>
+                <button v-else @click="refresh">
+                    <v-icon>mdi-refresh</v-icon>
+                </button>
+            </div>
         </div>
         <transition name="fade" mode="out-in">
             <div>
@@ -120,6 +126,7 @@ import Big from 'big.js'
 import 'reflect-metadata'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { AvaNetwork } from '@/js/AvaNetwork'
+import Spinner from '@/components/misc/Spinner.vue'
 
 @Component({
     name: 'validator',
@@ -132,6 +139,7 @@ import { AvaNetwork } from '@/js/AvaNetwork'
         PendingMultisig,
         ValidatorPending,
         RewardsNotAvailable,
+        Spinner,
     },
 })
 export default class Validator extends Vue {
@@ -147,6 +155,10 @@ export default class Validator extends Vue {
     loadingRefreshRegisterNode: boolean = false
     tab: string = 'opt-validator'
     pendingValidator: ValidatorRaw | null = null
+    loading: boolean = false
+
+    // @ts-ignore
+    helpers = this.globalHelper()
 
     get multisigPendingNodeTx(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
@@ -309,9 +321,12 @@ export default class Validator extends Vue {
 
     async refresh() {
         this.loadingRefreshRegisterNode = true
+        this.loading = true
+        this.$store.dispatch('updateBalances')
         await this.evaluateCanRegisterNode()
         await this.updateValidators()
         await this.$store.dispatch('Signavault/updateTransaction')
+        this.loading = false
         this.loadingRefreshRegisterNode = false
     }
 
@@ -327,6 +342,33 @@ export default class Validator extends Vue {
     height: auto;
     overflow: auto !important;
 } */
+
+.refresh {
+    max-width: 30px;
+    max-width: 30px;
+    margin-left: auto;
+    position: absolute;
+    top: 11px;
+    right: 0;
+    .v-icon {
+        color: var(--primary-color);
+    }
+
+    button {
+        padding: 0 !important;
+        margin: 0 !important;
+        outline: none !important;
+    }
+    img {
+        object-fit: contain;
+        width: 100%;
+    }
+
+    .spinner {
+        color: var(--primary-color) !important;
+    }
+}
+
 .earn_page {
     display: grid;
     grid-template-rows: max-content 1fr;
@@ -334,9 +376,11 @@ export default class Validator extends Vue {
 
 .header {
     margin-bottom: 1rem;
+    position: relative;
 
     h1 {
         font-weight: normal;
+        margin-right: 30px;
     }
 
     display: flex;

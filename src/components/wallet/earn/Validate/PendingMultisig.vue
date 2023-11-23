@@ -1,14 +1,6 @@
 <template>
     <div style="word-break: break-all">
-        <div class="refresh_div">
-            <div class="refresh">
-                <Spinner v-if="loading" class="spinner"></Spinner>
-                <button v-else @click="refresh">
-                    <v-icon>mdi-refresh</v-icon>
-                </button>
-            </div>
-        </div>
-
+        <br />
         <div class="container">
             <div v-if="!!claimTxDetails" class="transaction_details">
                 <h4>{{ $t('validator.transaction_reward.title') }}</h4>
@@ -61,62 +53,66 @@
                 </div>
             </div>
             <div class="signatures">
-                <div class="signer_row" v-for="owner in txOwners" :key="owner.address">
-                    <fa v-if="!!owner.signature" class="success_status" icon="check-circle"></fa>
-                    <div v-else class="dashed_circle"></div>
-                    <div>
-                        <p class="body_text">{{ owner.address }}</p>
-                        <p v-if="!!owner.signature" class="success_status">
-                            ({{ $t('earn.validate.pending_multisig.signed') }})
-                        </p>
-                        <p v-else class="pending_status">
-                            ({{ $t('earn.validate.pending_multisig.pending') }})
-                        </p>
+                <div class="signatures_container">
+                    <div class="signer_row" v-for="owner in txOwners" :key="owner.address">
+                        <fa
+                            v-if="!!owner.signature"
+                            class="success_status"
+                            icon="check-circle"
+                        ></fa>
+                        <div v-else class="dashed_circle"></div>
+                        <div>
+                            <p class="body_text">{{ owner.address }}</p>
+                            <p v-if="!!owner.signature" class="success_status">
+                                ({{ $t('earn.validate.pending_multisig.signed') }})
+                            </p>
+                            <p v-else class="pending_status">
+                                ({{ $t('earn.validate.pending_multisig.pending') }})
+                            </p>
+                        </div>
+
+                        <CamBtn
+                            v-if="!Boolean(owner?.signature) && isMyWallet(owner?.address)"
+                            class="button_secondary"
+                            @click="sign"
+                            :loading="loadingSigning"
+                            depressed
+                            variant="accent"
+                            style="margin-left: auto"
+                        >
+                            {{ $t('earn.validate.pending_multisig.sign') }}
+                        </CamBtn>
                     </div>
 
-                    <v-btn
-                        v-if="!Boolean(owner?.signature) && isMyWallet(owner?.address)"
-                        class="button_secondary"
-                        @click="sign"
-                        :loading="loadingSigning"
-                        depressed
-                    >
-                        {{ $t('earn.validate.pending_multisig.sign') }}
-                    </v-btn>
+                    <h4 class="mt2" style="word-break: break-word">
+                        {{
+                            $t('earn.validate.pending_multisig.threshold', {
+                                value: sigValue,
+                                threshold: multisigTx?.tx.threshold,
+                            })
+                        }}
+                    </h4>
+                    <Alert v-if="SignStatus" variant="positive">
+                        {{ $t('earn.validate.pending_multisig.already_signed') }}
+                    </Alert>
+                    <Alert v-else variant="warning">
+                        {{ $t('earn.validate.pending_multisig.sign_transaction') }}
+                    </Alert>
                 </div>
-
-                <h4 class="mt2">
-                    {{
-                        $t('earn.validate.pending_multisig.threshold', {
-                            value: sigValue,
-                            threshold: multisigTx?.tx.threshold,
-                        })
-                    }}
-                </h4>
-                <p v-if="SignStatus">
-                    {{ $t('earn.validate.pending_multisig.already_signed') }}
-                </p>
-                <p v-else>
-                    {{ $t('earn.validate.pending_multisig.sign_transaction') }}
-                </p>
-                <v-btn
-                    @click="issue"
-                    class="button_secondary mt2"
-                    depressed
-                    block
-                    :disabled="!canExecuteMultisigTx"
-                >
-                    <Spinner v-if="loadingIssue" class="spinner"></Spinner>
-                    <span v-else>
-                        {{ $t('earn.validate.pending_multisig.execute_transaction') }}
-                    </span>
-                </v-btn>
-                <v-btn @click="abort" class="button_primary" depressed block>
-                    <Spinner v-if="loadingIssue" class="spinner"></Spinner>
-                    <span v-else>
-                        {{ $t('earn.rewards.abort_modal.abort') }}
-                    </span>
-                </v-btn>
+                <div class="signatures_buttons">
+                    <CamBtn @click="abort" variant="negative">
+                        <Spinner v-if="loadingIssue" class="spinner"></Spinner>
+                        <span v-else>
+                            {{ $t('earn.rewards.abort_modal.abort') }}
+                        </span>
+                    </CamBtn>
+                    <CamBtn @click="issue" variant="primary" :disabled="!canExecuteMultisigTx">
+                        <Spinner v-if="loadingIssue" class="spinner"></Spinner>
+                        <span v-else>
+                            {{ $t('earn.validate.pending_multisig.execute_transaction') }}
+                        </span>
+                    </CamBtn>
+                </div>
             </div>
         </div>
         <ModalAbortSigning
@@ -139,11 +135,15 @@ import Big from 'big.js'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import moment from 'moment'
 import ModalAbortSigning from '../ModalAbortSigning.vue'
+import CamBtn from '@/components/CamBtn.vue'
+import Alert from '@/components/Alert.vue'
 
 @Component({
     components: {
         Spinner,
         ModalAbortSigning,
+        CamBtn,
+        Alert,
     },
 })
 export default class PendingMultisig extends Vue {
@@ -156,6 +156,7 @@ export default class PendingMultisig extends Vue {
         modal_abort_signing: ModalAbortSigning
     }
 
+    // @ts-ignore
     helpers = this.globalHelper()
     loading = false
     loadingSigning = false
@@ -314,7 +315,9 @@ export default class PendingMultisig extends Vue {
         } catch (e: any) {
             console.log(e)
             this.helpers.dispatchNotification({
-                message: this.$t('notifications.execute_multisig_transaction_error'),
+                message: this.$t('notifications.execute_multisig_transaction_error', {
+                    error: `:` + e?.response?.data?.error?.split(':')[2] ?? '',
+                }),
                 type: 'error',
             })
         }
@@ -369,8 +372,16 @@ export default class PendingMultisig extends Vue {
 }
 
 .signatures {
-    flex-basis: 65%;
+    // flex-basis: 65%;
     order: 1;
+}
+
+.signatures_buttons {
+    display: flex;
+    margin-left: auto;
+    width: fit-content;
+    gap: 1rem;
+    margin-top: 1.5rem;
 }
 
 .transaction_details {
