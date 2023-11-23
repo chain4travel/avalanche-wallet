@@ -804,13 +804,18 @@ class WalletHelper {
 
     static async sendMultisigAliasTxUpdate(
         wallet: WalletType,
+        initialAddresses: string[],
         addresses: string[],
         memo: string,
+        initialThreshold: number,
         threshold: number,
         multisigAliasAddress: string
     ) {
         const pchain = ava.PChain()
 
+        if (!multisigAliasAddress) {
+            throw new Error('Multisig alias address is required')
+        }
         const multisigAliasParams: MultisigAliasParams = {
             id: pchain.parseAddress(multisigAliasAddress),
             memo: memo,
@@ -826,12 +831,12 @@ class WalletHelper {
             .PChain()
             .buildMultisigAliasTx(
                 wallet.platformUtxoset,
-                [[multisigAliasAddress], addresses],
+                [[multisigAliasAddress], initialAddresses],
                 [multisigAliasAddress],
                 multisigAliasParams,
                 undefined,
                 ZeroBN,
-                threshold
+                initialThreshold
             )
 
         let tx = await wallet.signP(unsignedTx)
