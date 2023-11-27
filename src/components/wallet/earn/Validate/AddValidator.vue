@@ -22,6 +22,7 @@
                                     :minDurationMs="minValidationStartDate"
                                     :maxDurationMs="maxValidationStartDate"
                                     :defaultDurationMs="minValidationStartDate"
+                                    :zeroSeconds="true"
                                 ></DateForm>
                             </div>
                             <div style="margin: 30px 0">
@@ -34,6 +35,7 @@
                                     :minDurationMs="minStakeDuration"
                                     :maxDurationMs="maxStakeDuration"
                                     :defaultDurationMs="minStakeDuration"
+                                    :zeroSeconds="true"
                                 ></DateForm>
                             </div>
                             <div style="margin: 30px 0">
@@ -227,6 +229,7 @@ import ValidatorPending from './ValidatorPending.vue'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import CamBtn from '@/components/CamBtn.vue'
 import Alert from '@/components/Alert.vue'
+import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 const MIN_MS = 60000
 const HOUR_MS = MIN_MS * 60
@@ -252,7 +255,7 @@ const SINGLETON_WALLET_MIN_VALIDATION_START_TIME = MIN_MS * 5 // 5 minutes
 })
 export default class AddValidator extends Vue {
     @Prop() nodeId!: string
-    startDate: string = new Date(Date.now() + MIN_MS * 15).toISOString()
+    startDate: string = new Date(Date.now()).toISOString()
     endDate: string = new Date().toISOString()
     transactionEndDate: string = new Date(
         new Date().setMinutes(new Date().getMinutes() + DEFAULT_VALIDATION_START_TIME)
@@ -387,13 +390,15 @@ export default class AddValidator extends Vue {
         let start = this.isMultiSig ? new Date(this.transactionEndDate) : new Date(this.startDate)
         let end = new Date(this.endDate)
 
+        start.setSeconds(0, 0)
+        end.setSeconds(0, 0)
+
         if (this.isConfirm) {
             end = this.formEnd
         }
 
-        let diff = this.isMultiSig
-            ? end.getTime() - start.getTime()
-            : end.getTime() - start.getTime() + 15 * MIN_MS
+        let diff = end.getTime() - start.getTime()
+
         return diff
     }
 
@@ -506,6 +511,14 @@ export default class AddValidator extends Vue {
         return true
     }
 
+    roundUpToNearestMinute(date: Date) {
+        if (date.getSeconds() > 0) {
+            date.setMinutes(date.getMinutes() + 1)
+            date.setSeconds(0)
+        }
+        return date
+    }
+
     async submit() {
         if (!this.formCheck()) return
         let wallet: WalletType = this.$store.state.activeWallet
@@ -530,8 +543,13 @@ export default class AddValidator extends Vue {
         try {
             this.isLoading = true
             this.err = ''
-            const startTime = startDate.getTime() / 1000
-            const endTime = this.formEnd.getTime() / 1000
+            const startTime = this.roundUpToNearestMinute(startDate).getTime() / 1000
+            const endTime = this.isMultiSig
+                ? this.roundUpToNearestMinute(this.formEnd).getTime() / 1000
+                : (this.roundUpToNearestMinute(this.formEnd).getTime() +
+                      SINGLETON_WALLET_MIN_VALIDATION_START_TIME) /
+                  1000
+
             let txId = await WalletHelper.addValidatorTx(
                 wallet,
                 this.nodeId,
@@ -548,14 +566,22 @@ export default class AddValidator extends Vue {
                 this.$emit('initiated')
             }
         } catch (err: any) {
-            this.helpers.dispatchNotification({
-                message: this.$t('notifications.execute_multisig_transaction_error', {
-                    error: `:` + err.message.split(':')[1] ?? '',
-                }),
-                type: 'error',
-            })
+            if (err instanceof SignatureError) {
+                this.$store.dispatch('Signavault/updateTransaction')
+                this.helpers.dispatchNotification({
+                    message: this.$t('notifications.multisig_transaction_saved'),
+                    type: 'success',
+                })
+            } else {
+                this.helpers.dispatchNotification({
+                    message: this.$t('notifications.execute_multisig_transaction_error', {
+                        error: `:` + err.message.split(':')[1] ?? '',
+                    }),
+                    type: 'error',
+                })
+                this.onerror(err)
+            }
             this.isLoading = false
-            this.onerror(err)
         }
     }
 

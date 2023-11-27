@@ -368,7 +368,7 @@ export default class PendingMultisig extends Vue {
 
 .container {
     display: flex;
-    gap: 3rem;
+    gap: 2rem;
 }
 
 .signatures {
@@ -385,7 +385,7 @@ export default class PendingMultisig extends Vue {
 }
 
 .transaction_details {
-    flex-basis: 35%;
+    width: 600px;
     order: 2;
 
     > div {
@@ -466,5 +466,21 @@ export default class PendingMultisig extends Vue {
 
 .mt2 {
     margin: 2rem 0 1rem 0;
+}
+
+@media screen and (max-width: 1200px) {
+    .container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .signatures {
+        order: 2;
+    }
+
+    .transaction_details {
+        width: 100%;
+        order: 1;
+    }
 }
 </style>

@@ -121,12 +121,19 @@
         <div v-if="showMultisigTransactionDisclaimer" class="input_section mt2">
             <div>
                 <h4 class="input_label">
-                    {{ $t('earn.validate.label_4', { threshold: thresholdMultiSig - 1 }) }}
+                    {{ $t('earn.validate.label_4') }}
                 </h4>
                 <h4 class="mt2 input_label">{{ $t('earn.validate.label_5') }}</h4>
                 <span class="disabled_input" role="textbox">
                     {{ nodeId }}
                 </span>
+                <Alert variant="warning" class="mt2">
+                    {{
+                        $t('earn.validate.warns.threshold_validation', {
+                            threshold: thresholdMultiSig - 1,
+                        })
+                    }}
+                </Alert>
             </div>
             <CamBtn @click="registerNode($event, true)" variant="primary" style="margin-left: auto">
                 <Spinner v-if="loadingRegisterNode" class="spinner"></Spinner>

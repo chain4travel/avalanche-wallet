@@ -3,46 +3,44 @@
         <Spinner v-if="loading" class="spinner-color"></Spinner>
 
         <div v-if="!loading" class="validator_child_card">
+            <br />
             <div class="validator_info">
                 <div class="alt_validator_info">
-                    <div class="space-div"></div>
-                    <div>
-                        <Tooltip
-                            style="display: inline-block"
-                            :text="$t('validator.info.staking_start_date')"
-                        >
-                            <v-icon class="icon-mdi-camino">mdi-calendar-blank</v-icon>
-                            <label>{{ startTime }}</label>
-                        </Tooltip>
+                    <div class="info_div">
+                        <v-icon class="icon-mdi-camino">mdi-calendar-blank</v-icon>
+                        <div class="infos">
+                            <label>{{ $t('validator.info.staking_start_date') }}</label>
+                            <span>{{ startTime }}</span>
+                        </div>
                     </div>
-                    <div>
-                        <Tooltip
-                            style="display: inline-block"
-                            :text="$t('validator.info.staking_end_date')"
-                        >
-                            <v-icon class="icon-mdi-camino">mdi-calendar-remove-outline</v-icon>
-                            <label>{{ endTime }}</label>
-                        </Tooltip>
+                    <div class="info_div">
+                        <v-icon class="icon-mdi-camino">mdi-calendar-remove</v-icon>
+                        <div class="infos">
+                            <label>{{ $t('validator.info.staking_end_date') }}</label>
+                            <span>{{ endTime }}</span>
+                        </div>
                     </div>
-                    <div>
-                        <Tooltip style="display: inline-block" :text="$t('validator.info.up_time')">
-                            <v-icon class="icon-mdi-camino">mdi-arrow-up-bold</v-icon>
-                            <label v-if="initialized">{{ upTime.toFixed() }} %</label>
+                    <div class="info_div">
+                        <v-icon class="icon-mdi-camino">mdi-clock-time-three</v-icon>
+                        <div class="infos">
+                            <label>
+                                {{ $t('validator.info.remaining_validation_period') }}
+                            </label>
+                            <span>{{ reaminingValidation }}</span>
+                        </div>
+                    </div>
+                    <div class="info_div">
+                        <v-icon class="icon-mdi-camino">mdi-percent</v-icon>
+                        <div class="infos">
+                            <label>
+                                {{ $t('validator.info.up_time') }}
+                            </label>
+                            <span v-if="initialized">{{ upTime.toFixed() }} %</span>
                             <Spinner v-else />
-                        </Tooltip>
-                    </div>
-                    <div>
-                        <Tooltip
-                            style="display: inline-block"
-                            :text="$t('validator.info.remaining_validation_period')"
-                        >
-                            <v-icon class="icon-mdi-camino">mdi-clock-time-five-outline</v-icon>
-                            <label>{{ reaminingValidation }}</label>
-                        </Tooltip>
+                        </div>
                     </div>
                 </div>
             </div>
-            <br />
             <div>
                 <h4 class="input_label">{{ $t('earn.validate.nodeId') }}</h4>
                 <span class="disabled_input" role="textbox">
@@ -72,7 +70,6 @@
 import 'reflect-metadata'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import Spinner from '@/components/misc/Spinner.vue'
-import moment from 'moment'
 import { ava } from '@/AVA'
 import { BN } from '@c4tplatform/caminojs'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
@@ -92,168 +89,41 @@ import axios from 'axios'
 export default class ValidatorInfo extends Vue {
     @Prop() nodeId!: string
     @Prop() nodeInfo!: ValidatorRaw
+    @Prop() startTime!: string
+    @Prop() endTime!: string
+    @Prop() upTime!: number
+    @Prop() reaminingValidation!: string
+    @Prop() bondedAmount!: BN
+    @Prop() txID!: string
+    @Prop() loading!: boolean
+    @Prop() nodeVersion!: string
+    @Prop() initialized!: boolean
 
-    startTime: string = ''
-    endTime: string = ''
-    upTime: number = 0
-    reaminingValidation: string = ''
-    bondedAmount: BN = new BN(0)
-    txID: string = ''
-
-    loading: boolean = true
-    nodeVersion: string = ''
-    initialized: boolean = false
-
-    mounted() {
-        this.getInformationValidator()
-
-        this.$nextTick(() => {
-            //@ts-ignore
-            this.$refs.avax_input_bonded_amount.maxOut()
-        })
+    async mounted() {
+        this.$emit('getValidatorInfo')
+        this.initializeInputMaxAmount()
     }
 
     get maxAmt(): BN {
         return ava.getNetwork().P.minStake
     }
 
+    @Watch('bondedAmount')
+    bondedAmountWatcher() {
+        this.initializeInputMaxAmount()
+    }
+
+    initializeInputMaxAmount() {
+        this.$nextTick(() => {
+            if (this.$refs.avax_input_bonded_amount) {
+                // @ts-ignore
+                this.$refs.avax_input_bonded_amount.maxOut()
+            }
+        })
+    }
+
     get activeNetwork(): null | AvaNetwork {
         return this.$store?.state?.Network?.selectedNetwork
-    }
-
-    async fetchNodeVersion() {
-        if (this.activeNetwork && this.activeNetwork.url) {
-            await axios
-                .post(this.activeNetwork.url + '/ext/info', {
-                    jsonrpc: '2.0',
-                    id: 1,
-                    method: 'info.getNodeVersion',
-                })
-                .then((res) => {
-                    const data = res.data
-                    if (data && data.result && data.result.gitVersion) {
-                        this.nodeVersion = data.result.gitVersion.slice(1) // remove v
-                    }
-                })
-                .finally(() => {
-                    this.initialized = true
-                })
-        }
-    }
-
-    checkNodeVersionFlag(targetVersion: string): boolean {
-        if (!this.initialized) {
-            throw new Error('Provider not initialized yet')
-        }
-
-        if (!this.nodeVersion) {
-            throw new Error('Node version not exists, function uncallable')
-        }
-
-        const versionRegex = /^\d+\.\d+\.\d+(-rc\d+)?$/
-        if (!versionRegex.test(targetVersion)) {
-            throw new Error(
-                `Invalid version format: ${targetVersion}. Correct version is of type major.minor.path e.g 1.2.3-rc2`
-            )
-        }
-
-        const [coreTargetVersion, targetVariant] = targetVersion.split('-')
-        const [coreNodeVersion, nodeVariant] = this.nodeVersion.split('-')
-
-        const [targetMajor, targetMinor, targetPatch] = coreTargetVersion.split('.').map(Number)
-        const [nodeMajor, nodeMinor, nodePatch] = coreNodeVersion.split('.').map(Number)
-
-        if (targetMajor !== nodeMajor) {
-            return targetMajor < nodeMajor
-        }
-
-        if (targetMinor !== nodeMinor) {
-            return targetMinor < nodeMinor
-        }
-
-        if (targetPatch !== nodePatch) {
-            return targetPatch < nodePatch
-        }
-
-        if (nodeVariant) {
-            return targetVariant <= nodeVariant
-        }
-
-        return true
-    }
-
-    formatUptime(uptime: string): number {
-        const versionFlag = this.checkNodeVersionFlag('0.4.10-rc3')
-        const value = versionFlag
-            ? Math.round(parseFloat(uptime))
-            : Math.round(parseFloat(uptime) * 100)
-
-        return value
-    }
-
-    async getInformationValidator() {
-        try {
-            await this.fetchNodeVersion()
-            this.loading = true
-            let today = moment()
-
-            this.startTime = moment(new Date(parseInt(this.nodeInfo.startTime) * 1000)).format(
-                'MMMM Do YYYY, h:mm:ss a'
-            )
-            this.endTime = moment(new Date(parseInt(this.nodeInfo.endTime) * 1000)).format(
-                'MMMM Do YYYY, h:mm:ss a'
-            )
-            this.upTime = this.formatUptime(this.nodeInfo.uptime)
-
-            var reaminingValidationDuration = moment.duration(
-                moment(new Date(parseInt(this.nodeInfo.endTime) * 1000)).diff(today)
-            )
-
-            let dataReaminingValdiationDuration = {
-                years: reaminingValidationDuration.years(),
-                months: reaminingValidationDuration.months(),
-                days: reaminingValidationDuration.days().toString(),
-                hours:
-                    reaminingValidationDuration.hours() > 9
-                        ? reaminingValidationDuration.hours().toString()
-                        : `0${reaminingValidationDuration.hours().toString()}`,
-                minutes:
-                    reaminingValidationDuration.minutes() > 9
-                        ? reaminingValidationDuration.minutes().toString()
-                        : `0${reaminingValidationDuration.minutes().toString()}`,
-                seconds:
-                    reaminingValidationDuration.seconds() > 9
-                        ? reaminingValidationDuration.seconds().toString()
-                        : `0${reaminingValidationDuration.seconds().toString()}`,
-            }
-
-            let strRemainingValidation = `${dataReaminingValdiationDuration.days} Days ${dataReaminingValdiationDuration.hours}h ${dataReaminingValdiationDuration.minutes}m ${dataReaminingValdiationDuration.seconds}s`
-
-            if (dataReaminingValdiationDuration.months > 0) {
-                strRemainingValidation = `${dataReaminingValdiationDuration.months} Months ${strRemainingValidation}`
-            }
-
-            if (dataReaminingValdiationDuration.years > 0) {
-                strRemainingValidation = `${dataReaminingValdiationDuration.years} Years ${strRemainingValidation}`
-            }
-
-            this.reaminingValidation = strRemainingValidation
-            this.bondedAmount = new BN(parseFloat(this.nodeInfo.stakeAmount) / 1000000000)
-            this.txID = this.nodeInfo.txID
-        } catch (e) {
-            console.error(e)
-        } finally {
-            this.loading = false
-        }
-    }
-
-    refresh() {
-        this.getInformationValidator()
-
-        this.$nextTick(() => {
-            //@ts-ignore
-            this.$refs.avax_input_bonded_amount.maxOut()
-        })
     }
 }
 </script>
@@ -275,35 +145,95 @@ h4 {
     font-weight: normal;
 }
 
-.validator_info > div {
-    display: grid;
-    grid-template-columns: repeat(5, max-content);
-    column-gap: 0px;
-    margin-top: 12px;
+.validator_info {
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--tailwind-slate-slate-600);
+    background: var(--tailwind-slate-slate-900);
+}
 
-    > div {
-        position: relative;
-        padding: 0 24px;
-        border-right: 2px solid var(--bg-light);
+.v-icon {
+    @include mixins.typography-subtitle-1;
+    color: var(--tailwind-slate-slate-200);
+    margin-right: var(--spacing-space-base);
+}
 
-        &:first-of-type {
-            padding-left: 0;
+.info_div {
+    width: 100%;
+    min-height: 80px;
+
+    display: flex;
+    padding: var(--spacing-space-md) var(--spacing-space-base);
+    align-items: center;
+    gap: var(--spacing-space-base);
+    border-right: none;
+    border-top: 1px solid var(--tailwind-slate-slate-600);
+
+    &:first-of-type {
+        border-top: none;
+    }
+
+    .infos {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        // justify-content: space-between;
+        height: 100%;
+        gap: 0.5rem;
+
+        label {
+            @include mixins.typography-caption;
+            font-weight: 400;
+            color: var(--tailwind-slate-slate-200);
         }
+
+        span {
+            @include mixins.typography-body-2;
+            font-weight: 600;
+            color: var(--tailwind-slate-white);
+        }
+    }
+}
+
+@media screen and (min-width: 900px) and (max-width: 1000px) {
+    .info_div {
+        width: 100%;
+    }
+}
+
+@media screen and (min-width: 750px) and (max-width: 900px),
+    screen and (min-width: 1001px) and (max-width: 1550px) {
+    .info_div {
+        width: 50%;
+        border-right: 1px solid var(--tailwind-slate-slate-600);
+        border-top: none;
+
+        &:nth-child(3),
+        &:nth-child(4) {
+            border-top: 1px solid var(--tailwind-slate-slate-600);
+        }
+
+        &:nth-child(2),
+        &:nth-child(4) {
+            border-right: none;
+        }
+    }
+}
+
+@media screen and (min-width: 1551px) {
+    .info_div {
+        width: 25%;
+        border-right: 1px solid var(--tailwind-slate-slate-600);
+        border-top: none;
 
         &:last-of-type {
-            border: none;
+            border-right: none;
         }
     }
+}
 
-    label {
-        @include mixins.typography-body-1;
-        color: var(--primary-color);
-    }
-
-    .icon-mdi-camino {
-        @include mixins.typography-subtitle-1;
-        color: var(--primary-color);
-    }
+.alt_validator_info {
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .disabled_input {
@@ -328,35 +258,13 @@ h4 {
     pointer-events: none;
 }
 
-.space-div {
-    display: none;
-}
-
 @media screen and (max-width: 900px) {
-    .validator_info > div {
-        grid-template-columns: repeat(1, minmax(auto, auto));
-        border-right: transparent;
-    }
-
-    .space-div {
-        display: block;
-    }
-
     .disabled_input {
         width: 100%;
     }
 }
 
 @media screen and (max-width: 900px) {
-    .validator_info > div {
-        grid-template-columns: repeat(1, minmax(auto, auto));
-        border-right: transparent;
-    }
-
-    .space-div {
-        display: block;
-    }
-
     .disabled_input {
         width: 100%;
     }
@@ -367,15 +275,6 @@ h4 {
 }
 
 @media screen and (min-width: 720px) and (max-width: 1440px) {
-    .validator_info > div {
-        grid-template-columns: repeat(2, minmax(auto, auto));
-        border-right: transparent;
-    }
-
-    .space-div {
-        display: none;
-    }
-
     .disabled_input {
         width: 100%;
     }
@@ -387,29 +286,5 @@ h4 {
 
 .spinner-color {
     color: var(--primary-color);
-}
-
-.refresh_div {
-    position: relative;
-    float: right;
-    margin-top: -5%;
-
-    width: 20px;
-    height: 20px;
-    .v-icon {
-        color: var(--primary-color);
-    }
-
-    button {
-        outline: none !important;
-    }
-    img {
-        object-fit: contain;
-        width: 100%;
-    }
-
-    .spinner {
-        color: var(--primary-color) !important;
-    }
 }
 </style>

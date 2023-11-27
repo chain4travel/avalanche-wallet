@@ -1,6 +1,8 @@
 :root {
     --border-radius-lg: 12px;
     --border-radius-sm: 6px;
+    --spacing-space-md: 12px;
+    --spacing-space-base: 16px;
     --primary-btn-border-color: #149ded;
     --secondary-color: #149ded;
     --primary-border: solid 1px var(--primary-border-color);
@@ -21,6 +23,10 @@
     --camino-brand-error-100: rgba(229, 67, 31, 0.25);
     --primary-font: 'Inter', sans-serif;
     --camino-brand-primary: linear-gradient(90deg, #0085ff 0%, #b440fc 100%);
+    --tailwind-slate-slate-200: #e2e7f0;
+    --tailwind-slate-slate-600: #475569;
+    --tailwind-slate-slate-900: #0f182a;
+    --tailwind-slate-white: #fff;
 }
 
 html[data-theme='day'] {

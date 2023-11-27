@@ -615,7 +615,7 @@
             "label_1": "Validator Node's Private Key",
             "description_1": "Node Private Key",
             "label_3": "P-Chain address your validator node will be assigned to",
-            "label_4": "Are you sure you want initiate this transaction? To execute this transaction, {threshold} additional signatures from your multisignature co-owners are required.",
+            "label_4": "Are you sure you want initiate this transaction?",
             "label_5": "Tx Details",
             "duration": {
                 "label": "Validation End Date",
@@ -677,7 +677,8 @@
                 "consortium_member_verified": "Accepted to be a member of the consortium",
                 "consortium_member_address_linked_to_node": "Consortium member address needs to be linked to your NodeID",
                 "node_registration_fee": "Registering a validator node costs {fee} {symbol}.",
-                "duration_warn": "Your validation period must be at least {period} long."
+                "duration_warn": "Your validation period must be at least {period} long.",
+                "threshold_validation": "To execute this transaction, {threshold} additional signatures from your multisignature co-owners are required."
             },
             "errs": {
                 "duration_warn": "WARNING: You must have at least 14 days remaining on your validation period to accept delegations.",
