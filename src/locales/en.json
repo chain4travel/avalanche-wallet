@@ -510,7 +510,7 @@
             "create": {
                 "offer_start": "Offer Start",
                 "offer_end": "Offer End",
-                "interrest_rate": "Interest rate",
+                "interrest_rate": "Interest rate (%)",
                 "min_amount": "Min Amount",
                 "total_max_amount": "Total Max Amount",
                 "min_duration": "Minimum Duration (Day)",
