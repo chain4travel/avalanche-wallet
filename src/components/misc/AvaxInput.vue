@@ -163,7 +163,7 @@ export default class AvaxInput extends Vue {
     .ticker,
     .amt_in,
     .max_but {
-        background-color: transparent;
+        background-color: var(--bg-light);
     }
 }
 
@@ -212,6 +212,12 @@ export default class AvaxInput extends Vue {
     input,
     p {
         background-color: transparent !important;
+    }
+    display: flex;
+    .ticker,
+    .amt_in,
+    .max_but {
+        background-color: transparent;
     }
 }
 .ticker {
