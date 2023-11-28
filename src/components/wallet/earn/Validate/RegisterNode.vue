@@ -1,13 +1,5 @@
 <template>
     <div>
-        <div class="refresh_div">
-            <div class="refresh">
-                <Spinner v-if="loadingRefreshRegisterNode" class="spinner"></Spinner>
-                <button v-else @click="refresh">
-                    <v-icon>mdi-refresh</v-icon>
-                </button>
-            </div>
-        </div>
         <br />
         <div class="requirements_list">
             <h4>{{ $t('earn.validate.requirements_introduction') }}</h4>
@@ -98,10 +90,16 @@
                     :placeholder="$t('earn.validate.description_1').toString()"
                 />
             </div>
-            <v-btn
+            <Alert v-if="!isNodeRegistered" variant="warning">
+                {{
+                    $t('earn.validate.warns.node_registration_fee', {
+                        fee: feeAmt,
+                        symbol: nativeAssetSymbol,
+                    })
+                }}
+            </Alert>
+            <CamBtn
                 @click="registerNode"
-                class="button_secondary"
-                depressed
                 :disabled="
                     !isKycVerified ||
                     !isConsortiumMember ||
@@ -109,7 +107,7 @@
                     !nodePrivateKey ||
                     showMultisigTransactionDisclaimer
                 "
-                block
+                style="margin-left: auto"
             >
                 <Spinner
                     v-if="loadingRegisterNode && !showMultisigTransactionDisclaimer"
@@ -118,24 +116,31 @@
                 <span v-else>
                     {{ $t('earn.validate.register_validator_node') }}
                 </span>
-            </v-btn>
+            </CamBtn>
         </div>
         <div v-if="showMultisigTransactionDisclaimer" class="input_section mt2">
             <div>
                 <h4 class="input_label">
-                    {{ $t('earn.validate.label_4', { threshold: thresholdMultiSig - 1 }) }}
+                    {{ $t('earn.validate.label_4') }}
                 </h4>
-                <h4 class="mt2">{{ $t('earn.validate.label_5') }}</h4>
+                <h4 class="mt2 input_label">{{ $t('earn.validate.label_5') }}</h4>
                 <span class="disabled_input" role="textbox">
                     {{ nodeId }}
                 </span>
+                <Alert variant="warning" class="mt2">
+                    {{
+                        $t('earn.validate.warns.threshold_validation', {
+                            threshold: thresholdMultiSig - 1,
+                        })
+                    }}
+                </Alert>
             </div>
-            <v-btn @click="registerNode($event, true)" class="button_secondary" depressed block>
+            <CamBtn @click="registerNode($event, true)" variant="primary" style="margin-left: auto">
                 <Spinner v-if="loadingRegisterNode" class="spinner"></Spinner>
                 <span v-else>
                     {{ $t('earn.validate.initiate_transaction') }}
                 </span>
-            </v-btn>
+            </CamBtn>
         </div>
     </div>
 </template>
@@ -157,10 +162,15 @@ import Big from 'big.js'
 import Spinner from '@/components/misc/Spinner.vue'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { WalletType } from '@/js/wallets/types'
+import CamBtn from '@/components/CamBtn.vue'
+import Alert from '@/components/Alert.vue'
+import AvaAsset from '@/js/AvaAsset'
 
 @Component({
     components: {
         Spinner,
+        CamBtn,
+        Alert,
     },
 })
 export default class RegisterNode extends Vue {
@@ -171,6 +181,7 @@ export default class RegisterNode extends Vue {
     @Prop() isNodeRegistered!: boolean
     @Prop() loadingRefreshRegisterNode!: boolean
 
+    // @ts-ignore
     helpers = this.globalHelper()
     nodePrivateKey = ''
     loadingRegisterNode: boolean = false
@@ -196,6 +207,22 @@ export default class RegisterNode extends Vue {
     cleanAvaxBN(val: BN) {
         let big = Big(val.toString()).div(Big(ONEAVAX.toString()))
         return big.toLocaleString()
+    }
+
+    formattedAmount(val: BN): string {
+        return `${(Number(val.toString()) / Number(ONEAVAX.toString())).toLocaleString()}`
+    }
+
+    get feeAmt(): string {
+        return this.formattedAmount(ava.PChain().getTxFee())
+    }
+
+    get nativeAssetSymbol(): string {
+        return this.ava_asset?.symbol ?? ''
+    }
+
+    get ava_asset(): AvaAsset | null {
+        return this.$store.getters['Assets/AssetAVA']
     }
 
     get addresses() {
@@ -247,6 +274,7 @@ export default class RegisterNode extends Vue {
                     : this.$t('notifications.register_node_initiated'),
                 type: 'success',
             })
+            this.refresh()
         } catch (error) {
             console.error(error)
             this.helpers.dispatchNotification({
@@ -281,7 +309,7 @@ export default class RegisterNode extends Vue {
 input {
     color: var(--primary-color);
     background-color: var(--bg-light);
-    padding: 6px 14px;
+    padding: 10px 14px;
 }
 
 .disabled_input {
@@ -289,7 +317,8 @@ input {
     border-radius: var(--border-radius-sm);
     color: gray;
     background-color: var(--bg-light);
-    padding: 6px 14px;
+    padding: 10px 14px;
+    width: 100%;
 }
 
 .disabled_input:focus-visible {
