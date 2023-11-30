@@ -517,6 +517,7 @@
                 "max_duration": "Maximum Duration (Day)",
                 "unlock_duration": "Unlock Duration (Day)",
                 "no_rewards_duration": "No Rewards Duration (Day)",
+                "vesting_period": "Vesting Period (Day)",
                 "memo": "Title",
                 "flags": "Flags (Blocked:1)",
                 "total_max_reward_amount": "Total Max Reward Amount",

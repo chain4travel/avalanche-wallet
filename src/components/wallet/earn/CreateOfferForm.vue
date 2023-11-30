@@ -182,7 +182,7 @@
             </div>
             <div class="create-offer__container__form__element">
                 <div>
-                    <label>Vesting Period</label>
+                    {{ $t('earn.rewards.create.vesting_period') }}
                     <cam-tooltip
                         :content="$t('earn.rewards.descriptions.vesting_period')"
                         placement="right"
@@ -452,7 +452,7 @@
             </div>
             <div class="create-offer__container__form__element">
                 <div>
-                    <label>Vesting Period</label>
+                    {{ $t('earn.rewards.create.vesting_period') }}
                     <cam-tooltip
                         :content="$t('earn.rewards.descriptions.vesting_period')"
                         placement="right"
@@ -643,7 +643,7 @@ export default class CreateOfferForm extends Vue {
         depositedAmount: ZeroBN,
         minDuration: 1,
         maxDuration: 2,
-        unlockPeriodDuration: 1,
+        unlockPeriodDuration: 0,
         noRewardsPeriodDuration: 0,
         memo: '',
         flags: ZeroBN,
@@ -1069,7 +1069,7 @@ export default class CreateOfferForm extends Vue {
             depositedAmount: ZeroBN,
             minDuration: 1,
             maxDuration: 2,
-            unlockPeriodDuration: 1,
+            unlockPeriodDuration: 0,
             noRewardsPeriodDuration: 0,
             memo: '',
             flags: ZeroBN,
