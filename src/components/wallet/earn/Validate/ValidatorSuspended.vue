@@ -1,5 +1,6 @@
 <template>
     <div>
+        <br />
         <div class="validator_card">
             <p>{{ $t('validator.suspended.validator_suspended') }}</p>
         </div>

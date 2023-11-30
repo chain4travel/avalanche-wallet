@@ -305,8 +305,8 @@ export default class AddValidator extends Vue {
     intervalID: any | null = null
     durationError: boolean = false
 
-    created() {
-        if (!this.isMultiSig) {
+    activated() {
+        if (!this.isMultiSig && !this.isConfirm) {
             this.intervalID = setInterval(() => {
                 this.calculateDuration()
             }, 1000)
@@ -321,7 +321,7 @@ export default class AddValidator extends Vue {
         this.$refs.avaxinput.maxOut()
     }
 
-    destroyed() {
+    deactivated() {
         clearInterval(this.intervalID)
     }
 
@@ -356,6 +356,7 @@ export default class AddValidator extends Vue {
         const days = Math.floor(d.asDays())
 
         this.calculatedDurationText = `${days} days ${d.hours()} hours ${d.minutes()} minutes`
+        console.log(this.calculatedDurationText)
     }
 
     get minValidationStartDate(): number {
@@ -898,7 +899,6 @@ label {
     color: gray;
     background-color: var(--bg-light);
     padding: 10px 14px;
-    white-space: nowrap;
     width: 100%;
 }
 
