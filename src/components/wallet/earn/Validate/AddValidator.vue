@@ -73,7 +73,7 @@
                         <div class="summary" v-if="!isSuccess">
                             <div>
                                 <label>{{ $t('earn.validate.summary.duration') }}</label>
-                                <p>{{ durationText }}</p>
+                                <p>{{ calculatedDurationText }}</p>
                             </div>
                             <div class="submit_box">
                                 <p
@@ -122,8 +122,19 @@
                                         })
                                     }}
                                 </p>
-                                <p class="err" style="margin-bottom: 1rem">{{ err }}</p>
-                                <Alert variant="warning" style="margin-bottom: 1rem">
+                                <Alert
+                                    v-if="err"
+                                    variant="negative"
+                                    class="err"
+                                    style="margin-bottom: 1rem"
+                                >
+                                    {{ err }}
+                                </Alert>
+                                <Alert
+                                    variant="negative"
+                                    style="margin-bottom: 1rem"
+                                    v-if="durationError"
+                                >
                                     {{
                                         $t('earn.validate.warns.duration_warn', {
                                             period: minStakeDurationText,
@@ -289,11 +300,62 @@ export default class AddValidator extends Vue {
     // @ts-ignore
     helpers = this.globalHelper()
 
+    calculatedDuration: number = 0
+    calculatedDurationText: string = ''
+    intervalID: any | null = null
+    durationError: boolean = false
+
+    created() {
+        if (!this.isMultiSig) {
+            this.intervalID = setInterval(() => {
+                this.calculateDuration()
+            }, 1000)
+        }
+    }
+
     mounted() {
+        this.calculateDuration()
         this.rewardSelect('local')
         this.validateReadyValidator()
         //@ts-ignore
         this.$refs.avaxinput.maxOut()
+    }
+
+    destroyed() {
+        clearInterval(this.intervalID)
+    }
+
+    calculateDuration() {
+        const minStakeDuration = ava.getNetwork().P.minStakeDuration * 1000
+        let start = this.isMultiSig
+            ? new Date(this.transactionEndDate)
+            : new Date(Date.now() + 60000)
+        let end = new Date(this.endDate)
+
+        // if start date is less than the current date, disable submit button
+        if (start.getTime() < Date.now()) {
+            this.durationError = true
+            return
+        } else {
+            this.durationError = false
+        }
+
+        start.setSeconds(0, 0)
+        end.setSeconds(0, 0)
+
+        if (this.isConfirm) {
+            end = this.formEnd
+        }
+
+        this.calculatedDuration = end.getTime() - start.getTime()
+
+        if (this.calculatedDuration < minStakeDuration) this.durationError = true
+        else this.durationError = false
+
+        const d = moment.duration(this.calculatedDuration, 'milliseconds')
+        const days = Math.floor(d.asDays())
+
+        this.calculatedDurationText = `${days} days ${d.hours()} hours ${d.minutes()} minutes`
     }
 
     get minValidationStartDate(): number {
@@ -301,14 +363,14 @@ export default class AddValidator extends Vue {
     }
 
     get maxValidationStartDate(): number {
-        // max 13 days from now as validation start date
+        // max 14 days from now as validation start date
         return 14 * DAY_MS
     }
 
     get minStakeDuration() {
         if (this.isMultiSig)
             return ava.getNetwork().P.minStakeDuration * 1000 + this.minValidationStartDate
-        return ava.getNetwork().P.minStakeDuration * 1000
+        return ava.getNetwork().P.minStakeDuration * 1000 + MIN_MS
     }
 
     get minStakeDurationText() {
@@ -327,7 +389,7 @@ export default class AddValidator extends Vue {
                 ava.getNetwork().P.maxStakeDuration * 1000 + duration + this.minValidationStartDate
             )
         }
-        return ava.getNetwork().P.maxStakeDuration * 1000
+        return ava.getNetwork().P.maxStakeDuration * 1000 + MIN_MS
     }
 
     get defaultStakeDuration() {
@@ -387,7 +449,9 @@ export default class AddValidator extends Vue {
     }
 
     get stakeDuration(): number {
-        let start = this.isMultiSig ? new Date(this.transactionEndDate) : new Date(this.startDate)
+        let start = this.isMultiSig
+            ? new Date(this.transactionEndDate)
+            : new Date(this.startDate + 60000)
         let end = new Date(this.endDate)
 
         start.setSeconds(0, 0)
@@ -472,7 +536,7 @@ export default class AddValidator extends Vue {
             return false
         }
 
-        if (this.stakeDuration < minDuration || this.stakeDuration > maxDuration) {
+        if (this.calculatedDuration < minDuration || this.calculatedDuration > maxDuration) {
             return false
         }
 

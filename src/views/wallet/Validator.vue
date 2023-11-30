@@ -195,6 +195,33 @@ export default class Validator extends Vue {
         )
     }
 
+    @Watch('$store.state.activeWallet')
+    async onActiveWalletChange() {
+        this.nodeInfo = null
+        this.nodeId = ''
+        this.pendingValidator = null
+        this.isNodeRegistered = false
+        this.isSuspended = false
+        this.registeredNodeID = ''
+        this.isKycVerified = false
+        this.isConsortiumMember = false
+        this.validatorIsSuspended = false
+        this.loadingRefreshRegisterNode = false
+        this.tab = 'opt-validator'
+        this.loading = false
+        this.nodeVersion = ''
+        this.initialized = false
+        this.startTime = ''
+        this.endTime = ''
+        this.upTime = 0
+        this.reaminingValidation = ''
+        this.bondedAmount = new BN(0)
+        this.txID = ''
+
+        this.evaluateCanRegisterNode()
+        this.updateValidators()
+    }
+
     verifyValidatorIsReady(val: ValidatorRaw) {
         this.nodeInfo = val
     }
@@ -344,6 +371,10 @@ export default class Validator extends Vue {
     }
 
     async refresh() {
+        if (this.multisigPendingNodeTx) {
+            await this.$store.dispatch('Signavault/updateTransaction')
+            await this.evaluateCanRegisterNode()
+        }
         this.loadingRefreshRegisterNode = true
         this.loading = true
         this.$store.dispatch('updateBalances')
