@@ -313,20 +313,6 @@ input {
     padding: 10px 14px;
 }
 
-.disabled_input {
-    display: inline-block;
-    border-radius: var(--border-radius-sm);
-    color: gray;
-    background-color: var(--bg-light);
-    padding: 10px 14px;
-    width: 100%;
-    overflow-wrap: anywhere;
-}
-
-.disabled_input:focus-visible {
-    outline: 0;
-}
-
 a {
     color: #0085ff !important;
 }

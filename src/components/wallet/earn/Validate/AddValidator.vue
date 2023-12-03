@@ -893,19 +893,6 @@ label {
     margin-bottom: 6px;
 }
 
-.disabled_input {
-    display: inline-block;
-    border-radius: var(--border-radius-sm);
-    color: gray;
-    background-color: var(--bg-light);
-    padding: 10px 14px;
-    width: 100%;
-}
-
-.disabled_input:focus-visible {
-    outline: 0;
-}
-
 .input_label {
     margin-bottom: 0.5rem;
 }

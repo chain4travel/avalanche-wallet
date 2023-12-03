@@ -1,62 +1,48 @@
 <template>
     <div>
-        <div v-if="loading">
-            <Spinner class="spinner"></Spinner>
-        </div>
+        <pending-multisig
+            v-if="pendingTx !== undefined && pendingTx !== null"
+            :multisigTx="pendingTx"
+            @issued="issued"
+            @refresh="refreshMultisignTx"
+            :nodeId="nodeId"
+            :nodeInfo="nodeInfo"
+        ></pending-multisig>
         <div v-else>
-            <pending-multisig
-                v-if="pendingTx !== undefined && pendingTx !== null"
-                :multisigTx="pendingTx"
-                @issued="issued"
-                @refresh="refreshMultisignTx"
-                :nodeId="nodeId"
-                :nodeInfo="nodeInfo"
-            ></pending-multisig>
-            <div v-else>
-                <div class="refresh_div">
-                    <div class="refresh">
-                        <Spinner v-if="loading" class="spinner"></Spinner>
-                        <button v-else @click="refresh">
-                            <v-icon>mdi-refresh</v-icon>
-                        </button>
-                    </div>
+            <div class="rewards-div">
+                <div class="info_div">
+                    <h4>{{ $t('validator.rewards.claim.claimable_validation') }}</h4>
+                    <h1>{{ pRewardAmountText }} {{ symbol }}</h1>
                 </div>
-                <div class="rewards-div">
-                    <div>
-                        <h4 class="input_label">
-                            {{ $t('validator.rewards.claim.reward_owner') }}
-                        </h4>
-                        <span class="disabled_input" role="textbox">
-                            {{ rewardOwner }}
-                        </span>
-                    </div>
-                    <br />
-                    <div>
-                        <h4>{{ $t('validator.rewards.claim.claimable_validation') }}</h4>
-                        <div class="reward-claim-div">
-                            <h1>{{ pRewardAmountText }} {{ symbol }}</h1>
-                            <v-btn
-                                class="button_secondary btn-claim-reward"
-                                depressed
-                                @click="openModalClaimReward"
-                                :disabled="disabledButtonRewards"
-                            >
-                                {{ $t('validator.rewards.claim.claim_rewards') }}
-                            </v-btn>
-                        </div>
-                    </div>
+                <br />
+                <div>
+                    <h4 class="input_label">
+                        {{ $t('validator.rewards.claim.reward_owner') }}
+                    </h4>
+                    <span class="disabled_input" role="textbox">
+                        {{ rewardOwner }}
+                    </span>
                 </div>
-                <ModalClaimReward
-                    ref="modal_claim_reward"
-                    :amountText="pRewardAmountText"
-                    :symbol="symbol"
-                    :amount="rewardAmount"
-                    @beforeCloseModal="beforeCloseModal"
-                    :rewardOwner="rewardOwner"
-                    :pChainddress="pChainddress"
-                    :isMultisignTx="isMultisignTx"
-                ></ModalClaimReward>
+                <br />
+                <CamBtn
+                    variant="primary"
+                    @click="openModalClaimReward"
+                    :disabled="disabledButtonRewards"
+                    style="margin-left: auto"
+                >
+                    {{ $t('validator.rewards.claim.claim_rewards') }}
+                </CamBtn>
             </div>
+            <ModalClaimReward
+                ref="modal_claim_reward"
+                :amountText="pRewardAmountText"
+                :symbol="symbol"
+                :amount="rewardAmount"
+                @beforeCloseModal="beforeCloseModal"
+                :rewardOwner="rewardOwner"
+                :pChainddress="pChainddress"
+                :isMultisignTx="isMultisignTx"
+            ></ModalClaimReward>
         </div>
     </div>
 </template>
@@ -75,12 +61,14 @@ import Spinner from '@/components/misc/Spinner.vue'
 import { ava } from '@/AVA'
 import { bnToBigAvaxX } from '@/helpers/helper'
 import { WalletType } from '@/js/wallets/types'
+import CamBtn from '@/components/CamBtn.vue'
 
 @Component({
     components: {
         ModalClaimReward,
         PendingMultisig,
         Spinner,
+        CamBtn,
     },
 })
 export default class ClaimRewards extends Vue {
@@ -102,9 +90,11 @@ export default class ClaimRewards extends Vue {
     }
 
     mounted() {
-        this.getClaimableReward()
-        this.getPChainAddress()
-        this.getPendingTransaction()
+        this.refresh()
+    }
+
+    refresh() {
+        this.$emit('refresh')
     }
 
     beforeCloseModal(claimed: boolean) {
@@ -119,27 +109,6 @@ export default class ClaimRewards extends Vue {
                 this.getPendingTransaction()
                 this.loading = false
             }, 100)
-        }
-    }
-
-    get rewardOwner() {
-        if (this.nodeInfo != null && this.nodeInfo != undefined) {
-            return this.nodeInfo.rewardOwner.addresses[0].toString()
-        } else {
-            return null
-        }
-    }
-
-    async getClaimableReward() {
-        let responseClaimable = await WalletHelper.getClaimables(
-            this.nodeInfo.rewardOwner.addresses[0].toString(),
-            this.nodeInfo.txID
-        )
-
-        if (responseClaimable != null && responseClaimable != undefined) {
-            this.rewardAmount = responseClaimable.validatorRewards
-        } else {
-            this.rewardAmount = new BN(0)
         }
     }
 
@@ -176,34 +145,11 @@ export default class ClaimRewards extends Vue {
         }
     }
 
-    async getPChainAddress() {
-        try {
-            if (this.$store.state.activeWallet instanceof MultisigWallet) {
-                let activeWallet: MultisigWallet = this.$store.state.activeWallet
-                let address = activeWallet.getCurrentAddressPlatform()
-                this.pChainddress = address
-                this.isMultisignTx = true
-            } else {
-                let activeWallet: WalletType = this.$store.state.activeWallet
-                let address = await activeWallet.getAllAddressesP()
-                this.pChainddress = address[0]
-                this.isMultisignTx = false
-            }
-        } catch (e) {
-            console.error(e)
-        }
-    }
-
-    async getPendingTransaction() {
-        if (this.isMultisignTx) {
-            let txClaim = this.$store.getters['Signavault/transactions'].find(
-                (item: any) =>
-                    item?.tx?.alias === this.pChainddress &&
-                    WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
-            )
-            this.pendingTx = txClaim
+    get rewardOwner() {
+        if (this.nodeInfo != null && this.nodeInfo != undefined) {
+            return this.nodeInfo.rewardOwner.addresses[0].toString()
         } else {
-            this.pendingTx = undefined
+            return null
         }
     }
 
@@ -229,16 +175,16 @@ export default class ClaimRewards extends Vue {
         }, 100)
     }
 
-    async refresh() {
-        this.loading = true
-        await this.getClaimableReward()
-        await this.getPChainAddress()
-        await this.getPendingTransaction()
-        this.loading = false
-    }
-
     get feeTx() {
         return bnToBigAvaxX(ava.PChain().getTxFee())
+    }
+
+    getClaimableReward() {
+        this.$emit('getClaimableReward')
+    }
+
+    getPendingTransaction() {
+        this.$emit('getPendingTransaction')
     }
 }
 </script>
@@ -249,52 +195,23 @@ export default class ClaimRewards extends Vue {
     margin-top: 1rem;
 }
 
-.disabled_input {
-    display: inline-block;
-    border-radius: var(--border-radius-sm);
-    color: var(--primary-color-light);
-    background-color: var(--bg-light);
-    padding: 6px 14px;
-    white-space: nowrap;
-    width: 70%;
-}
-
-.disabled_input:focus-visible {
-    outline: 0;
-}
-
-@media screen and (max-width: 900px) {
-    .disabled_input {
-        width: 100%;
-    }
-}
-
-@media screen and (max-width: 900px) {
-    .disabled_input {
-        width: 100%;
-    }
-}
-
-@media screen and (min-width: 720px) and (max-width: 1440px) {
-    .disabled_input {
-        width: 100%;
-    }
-}
-
 h4 {
     font-weight: normal;
 }
 
-.reward-claim-div {
-    width: 100%;
+.info_div {
     display: flex;
+    flex-direction: column;
+    min-height: 80px;
+    padding: var(--spacing-space-md) var(--spacing-space-base);
+    gap: var(--spacing-space-base);
+    border: 1px solid var(--tailwind-slate-slate-600);
+    border-radius: var(--border-radius-lg);
+    width: 100%;
 }
 
-.btn-claim-reward {
-    position: relative;
-    left: 15px;
-    height: 24px !important;
-    top: 5px;
+.input_label {
+    margin-bottom: 0.5rem;
 }
 
 .refresh_div {
@@ -304,9 +221,6 @@ h4 {
 
     width: 20px;
     height: 20px;
-    .v-icon {
-        color: var(--primary-color);
-    }
 
     button {
         outline: none !important;

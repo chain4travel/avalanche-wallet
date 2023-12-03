@@ -13,7 +13,7 @@
             <h1 v-else :class="depositAndBond ? '' : 'wrong_network'">
                 {{ $t('validator.info.validator_running') }}
             </h1>
-            <div class="refresh" v-if="(tab = 'opt-validator')">
+            <div class="refresh">
                 <Spinner v-if="loading" class="spinner"></Spinner>
                 <button v-else @click="refresh">
                     <v-icon>mdi-refresh</v-icon>
@@ -105,7 +105,16 @@
                 </div>
                 <div v-if="tab == 'opt-rewards'">
                     <div v-if="nodeInfo">
-                        <ClaimRewards :nodeId="nodeId" :nodeInfo="nodeInfo" />
+                        <ClaimRewards
+                            :nodeId="nodeId"
+                            :nodeInfo="nodeInfo"
+                            :rewardAmount="rewardAmount"
+                            :pChainddress="pChainddress"
+                            :isMultisignTx="isMultisignTx"
+                            @refresh="refresh"
+                            @getClaimableReward="getClaimableReward"
+                            @getPendingTransaction="getPendingTransaction"
+                        />
                     </div>
                     <div v-else>
                         <div class="rewards-not-available">
@@ -142,6 +151,8 @@ import { AvaNetwork } from '@/js/AvaNetwork'
 import Spinner from '@/components/misc/Spinner.vue'
 import moment from 'moment'
 import { ava } from '@/AVA'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { WalletType } from '@/js/wallets/types'
 
 @Component({
     name: 'validator',
@@ -181,6 +192,11 @@ export default class Validator extends Vue {
     reaminingValidation: string = ''
     bondedAmount: BN = new BN(0)
     txID: string = ''
+
+    rewardAmount: BN = new BN(0)
+    pChainddress: string = ''
+    isMultisignTx: boolean = false
+    pendingTx: any = undefined
 
     // @ts-ignore
     helpers = this.globalHelper()
@@ -371,19 +387,69 @@ export default class Validator extends Vue {
     }
 
     async refresh() {
-        if (this.multisigPendingNodeTx) {
-            await this.$store.dispatch('Signavault/updateTransaction')
+        if (this.tab == 'opt-rewards') {
+            await this.getClaimableReward()
+        } else {
+            if (this.multisigPendingNodeTx) {
+                await this.$store.dispatch('Signavault/updateTransaction')
+                await this.evaluateCanRegisterNode()
+            }
+            this.loadingRefreshRegisterNode = true
+            this.loading = true
+            this.$store.dispatch('updateBalances')
             await this.evaluateCanRegisterNode()
+            await this.updateValidators()
+            await this.$store.dispatch('Signavault/updateTransaction')
+            if (this.nodeInfo) await this.getInformationValidator()
+            this.loading = false
+            this.loadingRefreshRegisterNode = false
         }
-        this.loadingRefreshRegisterNode = true
-        this.loading = true
-        this.$store.dispatch('updateBalances')
-        await this.evaluateCanRegisterNode()
-        await this.updateValidators()
-        await this.$store.dispatch('Signavault/updateTransaction')
-        if (this.nodeInfo) await this.getInformationValidator()
-        this.loading = false
-        this.loadingRefreshRegisterNode = false
+    }
+
+    async getPendingTransaction() {
+        if (this.isMultisignTx) {
+            let txClaim = this.$store.getters['Signavault/transactions'].find(
+                (item: any) =>
+                    item?.tx?.alias === this.pChainddress &&
+                    WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
+            )
+            this.pendingTx = txClaim
+        } else {
+            this.pendingTx = undefined
+        }
+    }
+
+    async getClaimableReward() {
+        if (this.nodeInfo == null) return
+
+        let responseClaimable = await WalletHelper.getClaimables(
+            this.nodeInfo.rewardOwner.addresses[0].toString(),
+            this.nodeInfo.txID
+        )
+
+        if (responseClaimable != null && responseClaimable != undefined) {
+            this.rewardAmount = responseClaimable.validatorRewards
+        } else {
+            this.rewardAmount = new BN(0)
+        }
+    }
+
+    async getPChainAddress() {
+        try {
+            if (this.$store.state.activeWallet instanceof MultisigWallet) {
+                let activeWallet: MultisigWallet = this.$store.state.activeWallet
+                let address = activeWallet.getCurrentAddressPlatform()
+                this.pChainddress = address
+                this.isMultisignTx = true
+            } else {
+                let activeWallet: WalletType = this.$store.state.activeWallet
+                let address = await activeWallet.getAllAddressesP()
+                this.pChainddress = address[0]
+                this.isMultisignTx = false
+            }
+        } catch (e) {
+            console.error(e)
+        }
     }
 
     get hasValidator(): boolean {
@@ -720,5 +786,20 @@ span {
 .rewards-not-available {
     position: relative;
     top: 15px;
+}
+</style>
+<style lang="scss">
+.disabled_input {
+    display: inline-block;
+    border-radius: var(--border-radius-sm);
+    color: gray;
+    background-color: var(--bg-light);
+    padding: 10px 14px;
+    width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.disabled_input:focus-visible {
+    outline: 0;
 }
 </style>
