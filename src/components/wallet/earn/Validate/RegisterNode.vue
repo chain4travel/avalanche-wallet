@@ -86,6 +86,7 @@
                 <input
                     class="high_input"
                     v-model="nodePrivateKey"
+                    type="password"
                     style="width: 100%; border-radius: var(--border-radius-sm)"
                     :placeholder="$t('earn.validate.description_1').toString()"
                 />
@@ -312,19 +313,6 @@ input {
     padding: 10px 14px;
 }
 
-.disabled_input {
-    display: inline-block;
-    border-radius: var(--border-radius-sm);
-    color: gray;
-    background-color: var(--bg-light);
-    padding: 10px 14px;
-    width: 100%;
-}
-
-.disabled_input:focus-visible {
-    outline: 0;
-}
-
 a {
     color: #0085ff !important;
 }
@@ -357,40 +345,6 @@ input::placeholder {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-}
-
-@media only screen and (max-width: variables.$mobile_width) {
-    .high_input {
-        line-height: 4;
-    }
-}
-
-.refresh {
-    width: 20px;
-    height: 20px;
-
-    .v-icon {
-        color: var(--primary-color);
-    }
-
-    button {
-        outline: none !important;
-    }
-
-    img {
-        object-fit: contain;
-        width: 100%;
-    }
-
-    .spinner {
-        color: var(--primary-color) !important;
-    }
-}
-
-.refresh_div {
-    position: relative;
-    float: right;
-    margin-top: -5%;
 }
 
 .mt2 {
