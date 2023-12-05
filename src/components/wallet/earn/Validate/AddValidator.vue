@@ -1,13 +1,6 @@
 <template>
     <div>
-        <div class="refresh_div">
-            <div class="refresh">
-                <Spinner v-if="loading" class="spinner"></Spinner>
-                <button v-else @click="refresh">
-                    <v-icon>mdi-refresh</v-icon>
-                </button>
-            </div>
-        </div>
+        <br />
         <div v-if="!validatorIsLoading">
             <div class="cols">
                 <form @submit.prevent="">
@@ -26,9 +19,10 @@
                                 </p>
                                 <DateForm
                                     @change_end="setTransactionEnd"
-                                    :typeDateForm="'transactionDateForm'"
-                                    tx="true"
-                                    :minEndDate="minValidationStartDate"
+                                    :minDurationMs="minValidationStartDate"
+                                    :maxDurationMs="maxValidationStartDate"
+                                    :defaultDurationMs="minValidationStartDate"
+                                    :zeroSeconds="true"
                                 ></DateForm>
                             </div>
                             <div style="margin: 30px 0">
@@ -38,9 +32,10 @@
                                 </p>
                                 <DateForm
                                     @change_end="setEnd"
-                                    :typeDateForm="'validatorDateForm'"
-                                    :minEndDate="minValidationEndDate"
-                                    :maxEndDate="maxValidationEndDate"
+                                    :minDurationMs="minStakeDuration"
+                                    :maxDurationMs="maxStakeDuration"
+                                    :defaultDurationMs="minStakeDuration"
+                                    :zeroSeconds="true"
                                 ></DateForm>
                             </div>
                             <div style="margin: 30px 0">
@@ -78,7 +73,7 @@
                         <div class="summary" v-if="!isSuccess">
                             <div>
                                 <label>{{ $t('earn.validate.summary.duration') }}</label>
-                                <p>{{ durationText }}</p>
+                                <p>{{ calculatedDurationText }}</p>
                             </div>
                             <div class="submit_box">
                                 <p
@@ -127,36 +122,53 @@
                                         })
                                     }}
                                 </p>
-                                <p class="err">{{ err }}</p>
-                                <v-btn
+                                <Alert
+                                    v-if="err"
+                                    variant="negative"
+                                    class="err"
+                                    style="margin-bottom: 1rem"
+                                >
+                                    {{ err }}
+                                </Alert>
+                                <Alert
+                                    variant="negative"
+                                    style="margin-bottom: 1rem"
+                                    v-if="durationError"
+                                >
+                                    {{
+                                        $t('earn.validate.warns.duration_warn', {
+                                            period: minStakeDurationText,
+                                        })
+                                    }}
+                                </Alert>
+                                <CamBtn
                                     v-if="!isConfirm"
+                                    variant="primary"
                                     @click="confirm"
-                                    class="button_secondary"
-                                    depressed
                                     :loading="isLoading"
                                     :disabled="!canSubmit"
-                                    block
+                                    style="width: 100%"
                                 >
                                     {{ $t('earn.validate.confirm') }}
-                                </v-btn>
+                                </CamBtn>
                                 <template v-else>
-                                    <v-btn
-                                        @click="submit"
-                                        class="button_secondary"
-                                        depressed
-                                        :loading="isLoading"
-                                        block
-                                    >
-                                        {{ $t('earn.validate.submit') }}
-                                    </v-btn>
-                                    <v-btn
-                                        text
-                                        @click="cancelConfirm"
-                                        block
-                                        style="color: var(--primary-color); margin-top: 20px"
-                                    >
-                                        {{ $t('earn.validate.cancel') }}
-                                    </v-btn>
+                                    <div class="box_buttons_container">
+                                        <CamBtn
+                                            variant="transparent"
+                                            @click="cancelConfirm"
+                                            style="width: 100%"
+                                        >
+                                            {{ $t('earn.validate.cancel') }}
+                                        </CamBtn>
+                                        <CamBtn
+                                            @click="submit"
+                                            variant="primary"
+                                            :loading="isLoading"
+                                            style="width: 100%"
+                                        >
+                                            {{ $t('earn.validate.submit') }}
+                                        </CamBtn>
+                                    </div>
                                 </template>
                             </div>
                         </div>
@@ -204,7 +216,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 //@ts-ignore
 import AvaxInput from '@/components/misc/AvaxInput.vue'
 import { BN } from '@c4tplatform/caminojs/dist'
@@ -226,6 +238,9 @@ import { WalletHelper } from '@/helpers/wallet_helper'
 import { bnToBig } from '@/helpers/helper'
 import ValidatorPending from './ValidatorPending.vue'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import CamBtn from '@/components/CamBtn.vue'
+import Alert from '@/components/Alert.vue'
+import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 const MIN_MS = 60000
 const HOUR_MS = MIN_MS * 60
@@ -245,11 +260,13 @@ const SINGLETON_WALLET_MIN_VALIDATION_START_TIME = MIN_MS * 5 // 5 minutes
         Expandable,
         UtxoSelectForm,
         ValidatorPending,
+        CamBtn,
+        Alert,
     },
 })
 export default class AddValidator extends Vue {
     @Prop() nodeId!: string
-    startDate: string = new Date(Date.now() + MIN_MS * 15).toISOString()
+    startDate: string = new Date(Date.now()).toISOString()
     endDate: string = new Date().toISOString()
     transactionEndDate: string = new Date(
         new Date().setMinutes(new Date().getMinutes() + DEFAULT_VALIDATION_START_TIME)
@@ -280,11 +297,104 @@ export default class AddValidator extends Vue {
     currency_type = 'NATIVE'
     validatorIsLoading = false
 
+    // @ts-ignore
+    helpers = this.globalHelper()
+
+    calculatedDuration: number = 0
+    calculatedDurationText: string = ''
+    intervalID: any | null = null
+    durationError: boolean = false
+
+    activated() {
+        if (!this.isMultiSig && !this.isConfirm) {
+            this.intervalID = setInterval(() => {
+                this.calculateDuration()
+            }, 1000)
+        }
+    }
+
     mounted() {
+        this.calculateDuration()
         this.rewardSelect('local')
         this.validateReadyValidator()
         //@ts-ignore
         this.$refs.avaxinput.maxOut()
+    }
+
+    deactivated() {
+        clearInterval(this.intervalID)
+    }
+
+    calculateDuration() {
+        const minStakeDuration = ava.getNetwork().P.minStakeDuration * 1000
+        let start = this.isMultiSig
+            ? new Date(this.transactionEndDate)
+            : new Date(Date.now() + 60000)
+        let end = new Date(this.endDate)
+
+        // if start date is less than the current date, disable submit button
+        if (start.getTime() < Date.now()) {
+            this.durationError = true
+            return
+        } else {
+            this.durationError = false
+        }
+
+        start.setSeconds(0, 0)
+        end.setSeconds(0, 0)
+
+        if (this.isConfirm) {
+            end = this.formEnd
+        }
+
+        this.calculatedDuration = end.getTime() - start.getTime()
+
+        if (this.calculatedDuration < minStakeDuration) this.durationError = true
+        else this.durationError = false
+
+        const d = moment.duration(this.calculatedDuration, 'milliseconds')
+        const days = Math.floor(d.asDays())
+
+        this.calculatedDurationText = `${days} days ${d.hours()} hours ${d.minutes()} minutes`
+        console.log(this.calculatedDurationText)
+    }
+
+    get minValidationStartDate(): number {
+        return DEFAULT_VALIDATION_START_TIME * MIN_MS
+    }
+
+    get maxValidationStartDate(): number {
+        // max 14 days from now as validation start date
+        return 14 * DAY_MS
+    }
+
+    get minStakeDuration() {
+        if (this.isMultiSig)
+            return ava.getNetwork().P.minStakeDuration * 1000 + this.minValidationStartDate
+        return ava.getNetwork().P.minStakeDuration * 1000 + MIN_MS
+    }
+
+    get minStakeDurationText() {
+        let duration = ava.getNetwork().P.minStakeDuration * 1000
+
+        return moment.duration(duration, 'milliseconds').humanize()
+    }
+
+    get maxStakeDuration() {
+        if (this.isMultiSig) {
+            let start = new Date(this.transactionEndDate)
+            let now = Date.now() + DEFAULT_VALIDATION_START_TIME * MIN_MS
+            let duration = start.getTime() - now
+
+            return (
+                ava.getNetwork().P.maxStakeDuration * 1000 + duration + this.minValidationStartDate
+            )
+        }
+        return ava.getNetwork().P.maxStakeDuration * 1000 + MIN_MS
+    }
+
+    get defaultStakeDuration() {
+        return 21 * DAY_MS
     }
 
     async validateReadyValidator() {
@@ -340,14 +450,20 @@ export default class AddValidator extends Vue {
     }
 
     get stakeDuration(): number {
-        let start = this.isMultiSig ? new Date(this.transactionEndDate) : new Date(this.startDate)
+        let start = this.isMultiSig
+            ? new Date(this.transactionEndDate)
+            : new Date(this.startDate + 60000)
         let end = new Date(this.endDate)
+
+        start.setSeconds(0, 0)
+        end.setSeconds(0, 0)
 
         if (this.isConfirm) {
             end = this.formEnd
         }
 
         let diff = end.getTime() - start.getTime()
+
         return diff
     }
 
@@ -406,6 +522,9 @@ export default class AddValidator extends Vue {
     }
 
     get canSubmit() {
+        let minDuration = ava.getNetwork().P.minStakeDuration * 1000
+        let maxDuration = ava.getNetwork().P.maxStakeDuration * 1000
+
         if (!this.nodeId) {
             return false
         }
@@ -415,6 +534,10 @@ export default class AddValidator extends Vue {
         }
 
         if (!this.rewardIn) {
+            return false
+        }
+
+        if (this.calculatedDuration < minDuration || this.calculatedDuration > maxDuration) {
             return false
         }
 
@@ -453,6 +576,14 @@ export default class AddValidator extends Vue {
         return true
     }
 
+    roundUpToNearestMinute(date: Date) {
+        if (date.getSeconds() > 0) {
+            date.setMinutes(date.getMinutes() + 1)
+            date.setSeconds(0)
+        }
+        return date
+    }
+
     async submit() {
         if (!this.formCheck()) return
         let wallet: WalletType = this.$store.state.activeWallet
@@ -477,8 +608,13 @@ export default class AddValidator extends Vue {
         try {
             this.isLoading = true
             this.err = ''
-            const startTime = startDate.getTime() / 1000
-            const endTime = this.formEnd.getTime() / 1000
+            const startTime = this.roundUpToNearestMinute(startDate).getTime() / 1000
+            const endTime = this.isMultiSig
+                ? this.roundUpToNearestMinute(this.formEnd).getTime() / 1000
+                : (this.roundUpToNearestMinute(this.formEnd).getTime() +
+                      SINGLETON_WALLET_MIN_VALIDATION_START_TIME) /
+                  1000
+
             let txId = await WalletHelper.addValidatorTx(
                 wallet,
                 this.nodeId,
@@ -494,10 +630,23 @@ export default class AddValidator extends Vue {
             } else {
                 this.$emit('initiated')
             }
-        } catch (err) {
-            console.error(err)
+        } catch (err: any) {
+            if (err instanceof SignatureError) {
+                this.$store.dispatch('Signavault/updateTransaction')
+                this.helpers.dispatchNotification({
+                    message: this.$t('notifications.multisig_transaction_saved'),
+                    type: 'success',
+                })
+            } else {
+                this.helpers.dispatchNotification({
+                    message: this.$t('notifications.execute_multisig_transaction_error', {
+                        error: `:` + err.message.split(':')[1] ?? '',
+                    }),
+                    type: 'error',
+                })
+                this.onerror(err)
+            }
             this.isLoading = false
-            this.onerror(err)
         }
     }
 
@@ -563,31 +712,6 @@ export default class AddValidator extends Vue {
         return bnToBig(bn, 9)
     }
 
-    get minValidationStartDate(): string {
-        // 10 minutes after
-        return new Date(
-            new Date().setMinutes(new Date().getMinutes() + DEFAULT_VALIDATION_START_TIME)
-        ).toISOString()
-    }
-
-    get minValidationEndDate(): string {
-        const date = new Date(this.transactionEndDate)
-        const minStakeDuration = ava.getNetwork().P.minStakeDuration
-        const milisMinStakeDuration = minStakeDuration * 1000
-        const end = date.getTime() + milisMinStakeDuration
-        const endDate = new Date(end)
-        return endDate.toISOString()
-    }
-
-    get maxValidationEndDate(): string {
-        const date = new Date(this.transactionEndDate)
-        const maxStakeDuration = ava.getNetwork().P.maxStakeDuration
-        const milisMaxStakeDuration = maxStakeDuration * 1000
-        const end = date.getTime() + milisMaxStakeDuration
-        const endDate = new Date(end)
-        return endDate.toISOString()
-    }
-
     onerror(err: any) {
         let msg: string = err.message
         console.error(err)
@@ -603,21 +727,6 @@ export default class AddValidator extends Vue {
         } else {
             this.err = err.message
         }
-    }
-
-    get nativeAssetSymbol(): string {
-        return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
-    }
-
-    async validateNodeIDActivation(): Promise<boolean> {
-        let isReady = false
-        let validator = await WalletHelper.findNodeIDInCurrentValidators(this.nodeId)
-        if (validator != null && validator != undefined) {
-            isReady = false
-        } else {
-            isReady = true
-        }
-        return isReady
     }
 
     async refresh() {
@@ -784,25 +893,17 @@ label {
     margin-bottom: 6px;
 }
 
-.disabled_input {
-    display: inline-block;
-    border-radius: var(--border-radius-sm);
-    color: gray;
-    background-color: var(--bg-light);
-    padding: 6px 14px;
-    white-space: nowrap;
-}
-
-.disabled_input:focus-visible {
-    outline: 0;
-}
-
 .input_label {
     margin-bottom: 0.5rem;
 }
 
 .amt_in {
     pointer-events: none;
+}
+
+.box_buttons_container {
+    display: flex;
+    gap: 0.75rem;
 }
 
 @include main.mobile-device {

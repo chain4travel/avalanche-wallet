@@ -26,7 +26,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
 export default class Modal extends Vue {
@@ -156,6 +156,8 @@ export default class Modal extends Vue {
         padding-bottom: 20px;
         max-width: 100%;
         border-radius: var(--border-radius-lg);
+        height: 100%;
+        overflow: auto;
     }
 }
 </style>

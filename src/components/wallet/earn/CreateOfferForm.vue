@@ -66,7 +66,6 @@
                     class="input"
                     v-model="offer.minAmount"
                     :initial="offer.minAmount"
-                    :max="maxDepositAmount"
                     :camInput="true"
                     :error="minAmountError"
                     :errorMessage="
@@ -106,7 +105,6 @@
                             class="input"
                             v-model="offer.totalMaxAmount"
                             :initial="offer.totalMaxAmount"
-                            :max="maxDepositAmount"
                             :camInput="true"
                         ></AvaxInput>
                     </div>
@@ -143,13 +141,13 @@
                                 <fa icon="question-circle"></fa>
                             </cam-tooltip>
                         </div>
-                        <CamInput
+                        <AvaxInput
+                            ref="totalMaxAmount"
                             class="input"
                             v-model="totalMaxRewardAmount"
-                            v-on:input="setTotalMaxRewardAmount"
-                            :placeholder="`totalMaxRewardAmount`"
+                            :camInput="true"
                             :readonly="sunrisePhase === 0"
-                        ></CamInput>
+                        ></AvaxInput>
                     </div>
                 </v-tab-item>
             </v-tabs>
@@ -184,7 +182,7 @@
             </div>
             <div class="create-offer__container__form__element">
                 <div>
-                    <label>Vesting Period</label>
+                    {{ $t('earn.rewards.create.vesting_period') }}
                     <cam-tooltip
                         :content="$t('earn.rewards.descriptions.vesting_period')"
                         placement="right"
@@ -454,7 +452,7 @@
             </div>
             <div class="create-offer__container__form__element">
                 <div>
-                    <label>Vesting Period</label>
+                    {{ $t('earn.rewards.create.vesting_period') }}
                     <cam-tooltip
                         :content="$t('earn.rewards.descriptions.vesting_period')"
                         placement="right"
@@ -645,7 +643,7 @@ export default class CreateOfferForm extends Vue {
         depositedAmount: ZeroBN,
         minDuration: 1,
         maxDuration: 2,
-        unlockPeriodDuration: 1,
+        unlockPeriodDuration: 0,
         noRewardsPeriodDuration: 0,
         memo: '',
         flags: ZeroBN,
@@ -911,12 +909,6 @@ export default class CreateOfferForm extends Vue {
     setFlags(ev: any) {
         this.offer.flags = new BN(ev.target.value)
     }
-    setTotalMaxRewardAmount(ev: any) {
-        if (ev && ev.target) {
-            const totalMaxRewardAmountValue = ev.target.value
-            this.offer.totalMaxRewardAmount = new BN(totalMaxRewardAmountValue)
-        }
-    }
     cancelCreateOffer(): void {
         this.$emit('selectOffer')
     }
@@ -1077,7 +1069,7 @@ export default class CreateOfferForm extends Vue {
             depositedAmount: ZeroBN,
             minDuration: 1,
             maxDuration: 2,
-            unlockPeriodDuration: 1,
+            unlockPeriodDuration: 0,
             noRewardsPeriodDuration: 0,
             memo: '',
             flags: ZeroBN,
@@ -1086,7 +1078,6 @@ export default class CreateOfferForm extends Vue {
             ownerAddress: '',
         }
         this.setInterestRate({ target: { value: 0 } })
-        this.setTotalMaxRewardAmount({ target: { value: 0 } })
         this.setFlags({ target: { value: 0 } })
     }
 }

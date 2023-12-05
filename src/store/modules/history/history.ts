@@ -117,7 +117,7 @@ const history_module: Module<HistoryState, RootState> = {
         async getAliasChains({ state, rootState }) {
             //@ts-ignore
             let network = rootState.Network.selectedNetwork
-            if (!network.explorerUrl) {
+            if (!network?.explorerUrl) {
                 return
             }
             let res = await getAliasChains()
