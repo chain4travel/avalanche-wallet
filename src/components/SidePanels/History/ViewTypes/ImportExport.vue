@@ -11,13 +11,10 @@
     </div>
 </template>
 <script lang="ts">
-import { bintools } from '@/AVA'
-import { chainIdFromAlias, bnToBig } from '@/helpers/helper'
+import { aliasFromChainId, bnToBig } from '@/helpers/helper'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { ITransactionData } from '@/store/modules/history/types'
-import { ava } from '@/AVA'
 import { BN } from '@c4tplatform/caminojs/dist'
-import { bnToBig } from '@/helpers/helper'
 
 @Component
 export default class ImportExport extends Vue {
@@ -55,7 +52,7 @@ export default class ImportExport extends Vue {
 
     get chainAlias() {
         let chainId = this.isExport ? this.fromChainId : this.destinationChainId
-        return chainIdFromAlias(chainId)
+        return aliasFromChainId(chainId)
     }
 
     get amt(): BN {
@@ -110,10 +107,11 @@ export default class ImportExport extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .import_row {
     display: flex;
     justify-content: space-between;
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
 
     &[export] {
@@ -126,7 +124,7 @@ export default class ImportExport extends Vue {
 .amt {
     text-align: right;
     white-space: nowrap;
-    font-size: 15px;
+    @include mixins.typography-body-2;
     color: var(--success);
 }
 </style>

@@ -234,7 +234,7 @@ export default class FilterSettings extends Vue {
     padding: 4px 12px;
     border-radius: 2px;
     margin-bottom: 4px;
-    font-size: 14px;
+    @include mixins.typography-caption;
 }
 
 .slider_row {
@@ -256,7 +256,7 @@ label {
     display: block;
     text-align: left;
     color: var(--primary-color-light);
-    font-size: 12px;
+    @include mixins.typography-caption;
     margin-bottom: 20px;
 }
 
@@ -275,7 +275,7 @@ label {
 
 .preview {
     margin: 12px 0;
-    font-size: 12px;
+    @include mixins.typography-caption;
 }
 
 .checkout {

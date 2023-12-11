@@ -141,6 +141,7 @@ export default class SaveAccountModal extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .remember_modal {
     width: 320px;
     max-width: 100%;
@@ -164,7 +165,7 @@ input {
 
 .cancel_but {
     color: #999;
-    font-size: 0.9rem;
+    @include mixins.typography-caption;
 }
 
 .password {

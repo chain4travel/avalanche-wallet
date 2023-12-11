@@ -113,7 +113,7 @@ export default class UserRewardRow extends Vue {
 .reward_row {
     border-radius: var(--border-radius-sm);
     overflow: hidden;
-    font-size: 14px;
+    @include mixins.typography-caption;
     //border: 2px solid var(--bg-light);
     background-color: var(--bg-light);
 }

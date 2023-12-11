@@ -114,6 +114,7 @@ export default class UtxoSelectForm extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .available {
     max-width: 100%;
     padding: 6px 14px;
@@ -127,11 +128,11 @@ export default class UtxoSelectForm extends Vue {
 label {
     margin-top: 6px;
     color: var(--primary-color-light);
-    font-size: 14px;
+    @include mixins.typography-caption;
     margin-bottom: 3px;
 }
 .select_but {
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: var(--secondary-color);
     opacity: 0.7;
     &:hover {
@@ -140,7 +141,7 @@ label {
 }
 
 .desc {
-    font-size: 13px;
+    @include mixins.typography-caption;
     margin-bottom: 8px !important;
     color: var(--primary-color-light);
 }

@@ -1,63 +1,75 @@
 <template>
-    <div v-if="hasOffers">
-        <h4 class="balance">
+    <div>
+        <h1 class="create-offer-header" v-if="isSuite">Create new DepositOffer</h1>
+        <h4 v-if="!isSuite && hasOffers" class="balance">
             {{ $t('earn.offer.balance') }}: {{ cleanAvaxBN(maxDepositAmount) }}
             {{ nativeAssetSymbol }}
-            <button v-if="$data.depositOffer" @click="closeOffer" class="close_offer">
-                <fa icon="times"></fa>
-            </button>
         </h4>
         <transition name="fade" mode="out-in">
-            <div v-if="$data.depositOffer" class="user_offers" key="offer">
-                <DepositOfferCard
-                    :key="'os'"
-                    :offer="$data.depositOffer"
-                    :maxDepositAmount="maxDepositAmount"
-                    class="reward_card"
-                ></DepositOfferCard>
-                <DepositForm
-                    :key="'of'"
-                    :offer="$data.depositOffer"
-                    :maxDepositAmount="maxDepositAmount"
-                    @selectOffer="selectOffer"
-                    class="reward_card"
-                ></DepositForm>
+            <CreateOfferForm
+                :isSuite="isSuite"
+                v-if="$data.createOffer"
+                key="create"
+                @selectOffer="selectOffer"
+                :maxDepositAmount="maxDepositAmount"
+            ></CreateOfferForm>
+            <div v-if="hasOffers">
+                <div class="user_offers" key="list">
+                    <DepositOfferCard
+                        v-for="(o, i) in platformOffers"
+                        :key="'o' + i"
+                        :offer="o"
+                        :maxDepositAmount="maxDepositAmount"
+                        @selectOffer="selectOffer"
+                        class="reward_card"
+                    ></DepositOfferCard>
+                </div>
             </div>
-            <div v-else class="user_offers" key="list">
-                <DepositOfferCard
-                    v-for="(o, i) in platformOffers"
-                    :key="'o' + i"
-                    :offer="o"
-                    :maxDepositAmount="maxDepositAmount"
-                    @selectOffer="selectOffer"
-                    class="reward_card"
-                ></DepositOfferCard>
-            </div>
+            <div v-else class="empty">No Active Saving Pool</div>
         </transition>
     </div>
-    <div v-else class="empty">No Active Saving Pool</div>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
-import DepositOfferCard from './DepositOfferCard.vue'
-import DepositForm from './DepositForm.vue'
+import CreateOfferForm from '@/components/wallet/earn/CreateOfferForm.vue'
+import DepositForm from '@/components/wallet/earn/DepositForm.vue'
+import DepositOfferCard from '@/components/wallet/earn/DepositOfferCard.vue'
 import { cleanAvaxBN } from '@/helpers/helper'
 
+import ModalAbortSigning from '@/components/wallet/earn/ModalAbortSigning.vue'
 import { BN } from '@c4tplatform/caminojs/dist'
 import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
 
 @Component({
     components: {
+        CreateOfferForm,
         DepositOfferCard,
         DepositForm,
+        ModalAbortSigning,
     },
     data: () => ({
         depositOffer: undefined,
+        createOffer: false,
     }),
 })
 export default class DepositOffers extends Vue {
+    @Prop() isSuite?: boolean
+    @Prop() navigate?: (path: string) => void
+
+    // @ts-ignore
+    helpers = this.globalHelper()
+    async beforeMount() {
+        if (this.isSuite) {
+            this.addOffer()
+        }
+    }
+    @Watch('canAddOffers')
+    checkNetwork() {
+        if (this.navigate && !this.canAddOffers) this.navigate('/')
+    }
+
     get platformOffers(): DepositOffer[] {
         return this.$store.getters['Platform/depositOffers'](true)
     }
@@ -76,16 +88,24 @@ export default class DepositOffers extends Vue {
         return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
     }
 
+    get canAddOffers(): boolean {
+        return this.$store.getters['Platform/isOfferCreator']
+    }
     cleanAvaxBN(val: BN): string {
         return cleanAvaxBN(val)
     }
 
     selectOffer(offer: DepositOffer): void {
         this.$data.depositOffer = offer
+        if (offer === undefined && !this.isSuite) this.$data.createOffer = false
+    }
+    addOffer(): void {
+        this.$data.createOffer = true
     }
 
     closeOffer(): void {
         this.$data.depositOffer = undefined
+        this.$data.createOffer = false
     }
 }
 </script>
@@ -97,8 +117,13 @@ export default class DepositOffers extends Vue {
 }
 
 .balance {
-    font-weight: 500;
-    padding-bottom: 10px;
+    color: var(--primary-color);
+    font-family: 'Inter';
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 32px;
+    margin-bottom: 20px;
 }
 
 .user_offers {
@@ -111,6 +136,16 @@ export default class DepositOffers extends Vue {
 
 .claimables {
     margin-bottom: 10px;
+}
+
+.create-offer-header {
+    color: var(--primary-color);
+    font-family: 'Inter';
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 36px;
+    margin-bottom: 24px;
 }
 
 @include mixins.medium-device {

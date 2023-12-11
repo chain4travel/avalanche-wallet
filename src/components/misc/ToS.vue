@@ -20,9 +20,10 @@ export default class ToS extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../styles/abstracts/mixins';
 .term-of-us {
     color: var(--primary-color-light);
-    font-size: 13px;
+    @include mixins.typography-caption;
 }
 .link {
     color: var(--primary-color) !important;

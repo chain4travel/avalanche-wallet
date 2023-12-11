@@ -95,7 +95,7 @@ export default class MnemonicDisplay extends Vue {
     grid-template-columns: repeat(4, 1fr);
     grid-gap: 6px;
     row-gap: 6px;
-    font-size: 12px;
+    @include mixins.typography-caption;
 }
 
 .word {
@@ -153,7 +153,7 @@ span {
 label {
     text-align: left;
     color: variables.$primary-color-light;
-    font-size: 12px;
+    @include mixins.typography-caption;
     margin-bottom: 20px;
 }
 

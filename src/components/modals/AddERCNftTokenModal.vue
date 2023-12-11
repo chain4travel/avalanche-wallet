@@ -187,14 +187,14 @@ export default class AddERCNftTokenModal extends Vue {
     }
 
     label {
-        font-size: 13px;
+        @include mixins.typography-caption;
     }
     input {
         width: 100%;
         background-color: var(--bg-light);
         padding: 14px 24px;
         border-radius: 3px;
-        font-size: 14px;
+        @include mixins.typography-caption;
         color: var(--primary-color);
     }
 
@@ -247,7 +247,7 @@ export default class AddERCNftTokenModal extends Vue {
 
         button {
             align-self: baseline;
-            font-size: 0.8em;
+            @include mixins.typography-caption;
             opacity: 0.5;
 
             &:hover {

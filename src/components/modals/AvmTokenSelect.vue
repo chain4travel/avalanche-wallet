@@ -21,7 +21,7 @@
                         <p>{{ asset.name }}</p>
                     </div>
                     <div class="col_balance">
-                        <p>{{ asset | bal }}</p>
+                        <p>{{ asset | bal(chainId) }}</p>
                     </div>
                 </div>
             </div>
@@ -35,19 +35,23 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import Modal from '@/components/modals/Modal.vue'
 import AvaAsset from '@/js/AvaAsset'
 import { bnToBig } from '@/helpers/helper'
+import { ChainIdType } from '@/constants'
 
 @Component({
     components: {
         Modal,
     },
     filters: {
-        bal(asset: AvaAsset) {
+        bal(asset: AvaAsset, chainId: string) {
+            if (chainId === 'P')
+                return bnToBig(asset.amountExtra, asset.denomination).toLocaleString()
             return bnToBig(asset.amount, asset.denomination).toLocaleString()
         },
     },
 })
 export default class PrivateKey extends Vue {
     @Prop() assets!: AvaAsset[]
+    @Prop() chainId!: ChainIdType
     @Prop({ default: () => [] }) disabledIds!: string[] // asset id | if nft the utxo id
 
     open(): void {
@@ -95,7 +99,7 @@ $logo_w: 38px;
 }
 
 .token_row {
-    font-size: 15px;
+    @include mixins.typography-body-2;
     display: grid;
     grid-template-columns: max-content max-content 1fr;
     column-gap: 12px;
@@ -134,7 +138,7 @@ $logo_w: 38px;
 
     p:last-of-type {
         color: var(--primary-color-light);
-        font-size: 13px;
+        @include mixins.typography-caption;
     }
 }
 

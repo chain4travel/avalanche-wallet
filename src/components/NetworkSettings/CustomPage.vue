@@ -204,6 +204,7 @@ export default class CustomPage extends Vue {
 </script>
 <style scoped lang="scss">
 @use '../../styles/abstracts/variables';
+@use '../../styles/abstracts/mixins';
 
 .custom_network {
     padding: 0px 15px;
@@ -219,7 +220,7 @@ export default class CustomPage extends Vue {
     }
 
     button {
-        font-size: 12px;
+        @include mixins.typography-caption;
         padding: 3px 14px;
         border-radius: var(--border-radius-sm);
     }
@@ -228,7 +229,7 @@ export default class CustomPage extends Vue {
 form {
     margin-top: 12px;
     label {
-        font-size: 12px;
+        @include mixins.typography-caption;
     }
     > div {
         display: flex;
@@ -243,19 +244,19 @@ select {
     background-color: var(--bg-light);
     border-radius: var(--border-radius-sm);
     padding: 6px 6px;
-    font-size: 13px;
+    @include mixins.typography-caption;
     outline: none;
 }
 button {
     margin-top: 10px;
     width: 100%;
-    font-size: 12px;
+    @include mixins.typography-caption;
     border-radius: var(--border-radius-sm);
 }
 
 .v-btn {
     text-transform: none;
-    font-size: 12px !important;
+    @include mixins.typography-caption;
     color: var(--bg) !important;
 }
 
@@ -274,7 +275,7 @@ button {
 }
 
 .form_error {
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: #e03737;
 }
 </style>

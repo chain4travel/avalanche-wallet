@@ -71,7 +71,7 @@ export default class ExportKeys extends Vue {
     color: var(--primary-color);
     text-align: center;
     font-weight: bold;
-    font-size: 14px;
+    @include mixins.typography-caption;
     padding-bottom: 14px;
 }
 

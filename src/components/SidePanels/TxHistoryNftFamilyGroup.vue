@@ -78,8 +78,7 @@ $countW: 18px;
     width: $countW;
     height: $countW;
     border-radius: $countW;
-    line-height: $countW;
-    font-size: 10px;
+    @include mixins.typography-caption;
     text-align: center;
     background-color: var(--primary-color);
     border: 1px solid var(--bg-wallet);
@@ -92,6 +91,8 @@ $countW: 18px;
 }
 
 .nft_card {
+    display: flex;
+    justify-content: center;
     height: 35px !important;
     width: 35px !important;
     background-color: var(--bg-light);

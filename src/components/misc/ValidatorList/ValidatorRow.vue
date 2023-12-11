@@ -118,12 +118,12 @@ export default class ValidatorsList extends Vue {
 
 .amount {
     text-align: right;
-    font-family: 'Inter';
+    font-family: var(--primary-font);
 }
 
 button {
     padding: 3px 12px;
-    font-size: 13px;
+    @include mixins.typography-caption;
     border-radius: 3px;
 }
 
@@ -134,12 +134,12 @@ td {
     padding: 4px 14px;
     background-color: var(--bg-light);
     border: 1px solid var(--bg);
-    font-size: 13px;
+    @include mixins.typography-caption;
 }
 
 @include mixins.medium-device {
     td {
-        font-size: 10px !important;
+        @include mixins.typography-caption;
     }
 }
 </style>

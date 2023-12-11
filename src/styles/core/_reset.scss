@@ -43,12 +43,12 @@ h3,
 h4,
 h5,
 h6 {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--primary-font);
     font-weight: 600;
 }
 
 div {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--primary-font);
     font-weight: 500;
 }
 

@@ -34,13 +34,14 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@use '../../styles/abstracts/mixins';
 .faucet {
     background-color: #e4f1fb;
     border-radius: 8px;
     width: 140px;
     padding: 6px 14px;
     border: 1px solid #aaa;
-    font-size: 13px;
+    @include mixins.typography-caption;
     justify-self: center;
     text-align: center;
 
@@ -49,7 +50,7 @@ export default {
     }
 
     .drop {
-        font-size: 45px;
+        @include mixins.typography-headline-2;
     }
 
     a {

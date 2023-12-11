@@ -47,7 +47,7 @@ export default {
     display: grid;
     grid-template-columns: max-content 1fr max-content;
     padding: 24px 16px;
-    font-size: 14px;
+    @include mixins.typography-caption;
     > * {
         outline: none !important;
         padding: 4px 8px;

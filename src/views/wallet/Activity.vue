@@ -405,7 +405,7 @@ export default class Activity extends Vue {
     p {
         margin: 0px 24px !important;
         color: var(--primary-color-light);
-        font-size: 22px;
+        @include mixins.typography-subtitle-1;
     }
 }
 
@@ -497,12 +497,12 @@ export default class Activity extends Vue {
 }
 
 .date_display {
-    font-size: 24px;
+    @include mixins.typography-subtitle-1;
 }
 
 .filter_cont {
     label {
-        font-size: 12px;
+        @include mixins.typography-caption;
         color: var(--primary-color);
     }
 }
@@ -511,7 +511,7 @@ export default class Activity extends Vue {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
-    font-size: 13px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
     transition-duration: 0.1s;
 
@@ -533,7 +533,7 @@ export default class Activity extends Vue {
 @include mixins.medium-device {
     .pagination {
         p {
-            font-size: 18px;
+            @include mixins.typography-body-1;
         }
     }
 }

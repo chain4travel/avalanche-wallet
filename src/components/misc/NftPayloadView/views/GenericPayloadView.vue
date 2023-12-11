@@ -128,14 +128,14 @@ video {
 }
 
 .nft_title {
-    font-size: 1.2em;
+    @include mixins.typography-body-2;
     text-align: left;
     font-weight: bold;
 }
 
 .desc {
     margin-top: 4px;
-    font-size: 13px;
+    @include mixins.typography-caption;
 }
 
 @include mixins.mobile-device {

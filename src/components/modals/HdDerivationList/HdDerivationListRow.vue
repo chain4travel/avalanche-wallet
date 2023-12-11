@@ -72,6 +72,7 @@ export default class HdDerivationListRow extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .col_index {
     color: var(--primary-color-light);
 }
@@ -81,7 +82,7 @@ export default class HdDerivationListRow extends Vue {
     overflow: hidden;
     text-overflow: ellipsis;
     word-break: break-all;
-    font-family: 'Inter';
+    font-family: var(--primary-font);
     color: var(--primary-color-light);
 
     .verify {
@@ -89,7 +90,7 @@ export default class HdDerivationListRow extends Vue {
         cursor: pointer;
         color: var(--primary-color);
         transition: opacity 0.1s;
-        font-size: 11px;
+        @include mixins.typography-caption;
         padding: 2px 4px;
         background: var(--bg-light);
     }
@@ -106,7 +107,7 @@ export default class HdDerivationListRow extends Vue {
     text-align: right;
     padding-right: 15px;
     padding-left: 15px;
-    font-family: 'Inter';
+    font-family: var(--primary-font);
     word-break: keep-all;
     white-space: nowrap;
 }

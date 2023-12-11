@@ -70,6 +70,7 @@ export default class UtfPayloadView extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .generic_payload_view {
     position: absolute;
     top: 0;
@@ -85,7 +86,7 @@ export default class UtfPayloadView extends Vue {
     overflow: hidden;
 }
 p {
-    font-size: 13px;
+    @include mixins.typography-caption;
     word-break: break-word;
     overflow: scroll;
     background-color: var(--bg-light);
@@ -106,7 +107,7 @@ video {
     position: absolute;
     bottom: 0;
     width: 100%;
-    font-size: 13px;
+    @include mixins.typography-caption;
     background-color: #000000aa;
     color: #fff;
     transition-duration: 0.2s;
@@ -127,7 +128,7 @@ video {
     top: 0;
     left: 0;
     opacity: 0;
-    font-size: 13px;
+    @include mixins.typography-caption;
     transition-duration: 0.2s;
     color: #fff;
     text-align: center;

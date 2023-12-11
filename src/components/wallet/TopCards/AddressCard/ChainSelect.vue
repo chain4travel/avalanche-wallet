@@ -38,9 +38,10 @@ export default class ChainSelect extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../.././../styles/abstracts/mixins';
 .chain_select {
     display: flex;
-    font-size: 13px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
 }
 button {

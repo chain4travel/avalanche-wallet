@@ -124,7 +124,7 @@ export default class CollectibleFamilyRow extends Vue {
 @use 'tokens';
 
 .mint_card {
-    font-size: 13px;
+    @include mixins.typography-caption;
     border: 1px dashed var(--primary-color-light);
     padding: 12px 12px;
     color: var(--primary-color);

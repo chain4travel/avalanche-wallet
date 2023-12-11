@@ -76,6 +76,7 @@ export default class TxSummary extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .tx_summary {
     padding-right: 20px;
 }
@@ -86,8 +87,7 @@ export default class TxSummary extends Vue {
     background-color: var(--bg-light);
     padding: 8px 16px;
     color: var(--primary-color-light);
-    font-size: 16px;
-    font-family: 'Inter' sans-serif;
+    @include mixins.typography-body-2;
     margin-bottom: 6px !important;
 }
 .amt {
@@ -117,14 +117,14 @@ export default class TxSummary extends Vue {
 h4 {
     display: block;
     text-align: left;
-    font-size: 12px;
+    @include mixins.typography-caption;
     font-weight: bold;
     margin: 12px 0;
 }
 
 label {
     color: var(--primary-color-light);
-    font-size: 12px;
+    @include mixins.typography-caption;
     font-weight: bold;
     margin: 2px 0 !important;
 }

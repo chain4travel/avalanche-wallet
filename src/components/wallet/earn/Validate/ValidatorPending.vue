@@ -1,12 +1,5 @@
 <template>
     <div>
-        <div class="refresh_div">
-            <div class="refresh">
-                <button @click="refresh">
-                    <v-icon>mdi-refresh</v-icon>
-                </button>
-            </div>
-        </div>
         <Spinner class="pending-validator" style="color: var(--primary-color)"></Spinner>
         <br />
         <p>
@@ -61,6 +54,7 @@ export default class ValidatorPending extends Vue {
 </script>
 <style scoped lang="scss">
 @use '../../../../styles/main';
+@use '../../../../styles/abstracts/mixins';
 
 .refresh {
     width: 20px;
@@ -89,7 +83,7 @@ export default class ValidatorPending extends Vue {
 }
 
 .pending-validator {
-    font-size: 40px;
+    @include mixins.typography-headline-3;
     position: relative;
     left: 3%;
 }

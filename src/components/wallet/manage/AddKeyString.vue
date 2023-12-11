@@ -79,15 +79,16 @@ export default class AddKeyString extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 label {
     color: #909090;
-    font-size: 12px;
+    @include mixins.typography-caption;
 }
 
 .qrIn {
     border-radius: 2px !important;
     height: 40px;
-    font-size: 12px;
+    @include mixins.typography-caption;
     background-color: #f5f6fa;
 }
 

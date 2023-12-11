@@ -468,7 +468,7 @@ export default class FormC extends Vue {
 h4 {
     display: block;
     text-align: left;
-    font-size: 12px;
+    @include mixins.typography-caption;
     font-weight: bold;
     margin: 12px 0;
 }
@@ -505,7 +505,7 @@ input,
     background-color: var(--bg-light);
     padding: 6px 12px;
     color: var(--primary-color);
-    font-size: 14px;
+    @include mixins.typography-caption;
 }
 .gas_cont {
     column-gap: 14px;
@@ -519,7 +519,7 @@ input,
 
 label {
     color: var(--primary-color-light);
-    font-size: 12px;
+    @include mixins.typography-caption;
     font-weight: bold;
     margin: 2px 0 !important;
 }
@@ -533,7 +533,7 @@ label {
 }
 .fees p {
     text-align: left;
-    font-size: 13px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
 }
 

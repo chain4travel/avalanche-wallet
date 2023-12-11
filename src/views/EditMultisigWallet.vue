@@ -745,8 +745,7 @@ export default class EditMultisigWallet extends Vue {
             const msigAlias = this.activeWallet?.getStaticAddress('P')
             const localStorageAccountIndex = this.$store.state.Accounts.accountIndex
 
-            if (localStorageAccountIndex === null || localStorageAccountIndex === undefined)
-                throw new Error('account is not set in local storage')
+            if (localStorageAccountIndex === null || localStorageAccountIndex === undefined) return
 
             let accounts = JSON.parse(localStorage.getItem('accounts') || '[]')
             if (accounts[localStorageAccountIndex]) {
@@ -778,12 +777,9 @@ export default class EditMultisigWallet extends Vue {
 
                 accounts[localStorageAccountIndex].multisignatures = targetMultisignatures
                 localStorage.setItem('accounts', JSON.stringify(accounts))
-            } else console.error(`Account with index ${localStorageAccountIndex} does not exist.`)
-        } catch (error) {
-            console.error(
-                'An error occurred while updating multisig account in local storage: ',
-                error
-            )
+            } else console.warn(`Account with index ${localStorageAccountIndex} does not exist.`)
+        } catch (err) {
+            console.warn('Error:', err)
         }
     }
 }

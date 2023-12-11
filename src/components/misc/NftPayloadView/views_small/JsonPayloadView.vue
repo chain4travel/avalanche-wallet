@@ -63,6 +63,7 @@ export default class JsonPayloadView extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .json_payload_view {
     color: #0f0 !important;
     background-color: #000 !important;
@@ -77,7 +78,7 @@ export default class JsonPayloadView extends Vue {
 
     p {
         color: #0f0 !important;
-        font-size: 16px;
+        @include mixins.typography-body-2;
         word-break: break-word;
         font-weight: bold;
     }

@@ -109,8 +109,9 @@ export default class NetworkRow extends Vue {
 </script>
 <style scoped lang="scss">
 @use '../../styles/abstracts/variables';
+@use '../../styles/abstracts/mixins';
 .stat_col {
-    font-size: 14px;
+    @include mixins.typography-caption;
     color: var(--primary-color);
     text-align: right;
     word-break: keep-all !important;
@@ -153,7 +154,7 @@ img {
 .editBut {
     color: var(--primary-color);
     opacity: 0.4;
-    font-size: 11px;
+    @include mixins.typography-caption;
     /*position: absolute;*/
     /*top: 12px;*/
     /*right: 0px;*/
@@ -174,7 +175,7 @@ img {
 .url,
 .credentials {
     color: variables.$primary-color-light;
-    font-size: 12px;
+    @include mixins.typography-caption;
     word-break: break-all;
 }
 

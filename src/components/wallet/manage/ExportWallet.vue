@@ -122,8 +122,9 @@ export default class ExportWallet extends Vue {
 </style>
 
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 .export_wallet {
-    font-size: 12px;
+    @include mixins.typography-caption;
 }
 .explain {
     color: var(--primary-color-light);
@@ -136,7 +137,7 @@ label {
 
 .formIn {
     background-color: var(--bg-light);
-    font-size: 12px;
+    @include mixins.typography-caption;
     border-radius: 2px;
 }
 

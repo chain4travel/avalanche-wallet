@@ -13,6 +13,12 @@
             <h1 v-else :class="depositAndBond ? '' : 'wrong_network'">
                 {{ $t('validator.info.validator_running') }}
             </h1>
+            <div class="refresh">
+                <Spinner v-if="loading" class="spinner"></Spinner>
+                <button v-else @click="refresh">
+                    <v-icon>mdi-refresh</v-icon>
+                </button>
+            </div>
         </div>
         <transition name="fade" mode="out-in">
             <div>
@@ -82,12 +88,33 @@
                         <validator-suspended :nodeId="nodeId"></validator-suspended>
                     </div>
                     <div v-else>
-                        <validator-info :nodeId="nodeId" :nodeInfo="nodeInfo"></validator-info>
+                        <validator-info
+                            :nodeId="nodeId"
+                            :nodeInfo="nodeInfo"
+                            :startTime="startTime"
+                            :endTime="endTime"
+                            :upTime="upTime"
+                            :reaminingValidation="reaminingValidation"
+                            :bondedAmount="bondedAmount"
+                            :txID="txID"
+                            :nodeVersion="nodeVersion"
+                            :initialized="initialized"
+                            @getValidatorInfo="getInformationValidator"
+                        ></validator-info>
                     </div>
                 </div>
                 <div v-if="tab == 'opt-rewards'">
                     <div v-if="nodeInfo">
-                        <ClaimRewards :nodeId="nodeId" :nodeInfo="nodeInfo" />
+                        <ClaimRewards
+                            :nodeId="nodeId"
+                            :nodeInfo="nodeInfo"
+                            :rewardAmount="rewardAmount"
+                            :pChainddress="pChainddress"
+                            :isMultisignTx="isMultisignTx"
+                            @refresh="refresh"
+                            @getClaimableReward="getClaimableReward"
+                            @getPendingTransaction="getPendingTransaction"
+                        />
                     </div>
                     <div v-else>
                         <div class="rewards-not-available">
@@ -117,8 +144,15 @@ import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { BN } from '@c4tplatform/caminojs/dist'
 import { AddressState } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import Big from 'big.js'
+import axios from 'axios'
 import 'reflect-metadata'
 import { Component, Vue, Watch } from 'vue-property-decorator'
+import { AvaNetwork } from '@/js/AvaNetwork'
+import Spinner from '@/components/misc/Spinner.vue'
+import moment from 'moment'
+import { ava } from '@/AVA'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { WalletType } from '@/js/wallets/types'
 
 @Component({
     name: 'validator',
@@ -131,6 +165,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
         PendingMultisig,
         ValidatorPending,
         RewardsNotAvailable,
+        Spinner,
     },
 })
 export default class Validator extends Vue {
@@ -146,6 +181,25 @@ export default class Validator extends Vue {
     loadingRefreshRegisterNode: boolean = false
     tab: string = 'opt-validator'
     pendingValidator: ValidatorRaw | null = null
+    loading: boolean = false
+
+    nodeVersion: string = ''
+    initialized: boolean = false
+
+    startTime: string = ''
+    endTime: string = ''
+    upTime: number = 0
+    reaminingValidation: string = ''
+    bondedAmount: BN = new BN(0)
+    txID: string = ''
+
+    rewardAmount: BN = new BN(0)
+    pChainddress: string = ''
+    isMultisignTx: boolean = false
+    pendingTx: any = undefined
+
+    // @ts-ignore
+    helpers = this.globalHelper()
 
     get multisigPendingNodeTx(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
@@ -155,6 +209,33 @@ export default class Validator extends Vue {
                     WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx)
                 )
         )
+    }
+
+    @Watch('$store.state.activeWallet')
+    async onActiveWalletChange() {
+        this.nodeInfo = null
+        this.nodeId = ''
+        this.pendingValidator = null
+        this.isNodeRegistered = false
+        this.isSuspended = false
+        this.registeredNodeID = ''
+        this.isKycVerified = false
+        this.isConsortiumMember = false
+        this.validatorIsSuspended = false
+        this.loadingRefreshRegisterNode = false
+        this.tab = 'opt-validator'
+        this.loading = false
+        this.nodeVersion = ''
+        this.initialized = false
+        this.startTime = ''
+        this.endTime = ''
+        this.upTime = 0
+        this.reaminingValidation = ''
+        this.bondedAmount = new BN(0)
+        this.txID = ''
+
+        this.evaluateCanRegisterNode()
+        this.updateValidators()
     }
 
     verifyValidatorIsReady(val: ValidatorRaw) {
@@ -182,8 +263,11 @@ export default class Validator extends Vue {
         clearInterval(this.intervalID)
     }
 
-    @Watch('$store.state.networkName')
-    @Watch('$store.state.activeWallet')
+    hrp() {
+        return ava.getHRP()
+    }
+
+    @Watch('addresses')
     async evaluateCanRegisterNode() {
         const BN_ONE = new BN(1)
         const result = await WalletHelper.getAddressState(this.addresses[0])
@@ -244,6 +328,7 @@ export default class Validator extends Vue {
         return (this.$store.state.activeWallet as WalletCore).getStaticAddress('P')
     }
 
+    @Watch('activeNetwork')
     get addresses() {
         let wallet: MnemonicWallet = this.$store.state.activeWallet
         return wallet.getAllAddressesP()
@@ -302,15 +387,196 @@ export default class Validator extends Vue {
     }
 
     async refresh() {
-        this.loadingRefreshRegisterNode = true
-        await this.evaluateCanRegisterNode()
-        await this.updateValidators()
-        await this.$store.dispatch('Signavault/updateTransaction')
-        this.loadingRefreshRegisterNode = false
+        if (this.tab == 'opt-rewards') {
+            await this.getClaimableReward()
+        } else {
+            if (this.multisigPendingNodeTx) {
+                await this.$store.dispatch('Signavault/updateTransaction')
+                await this.evaluateCanRegisterNode()
+            }
+            this.loadingRefreshRegisterNode = true
+            this.loading = true
+            this.$store.dispatch('updateBalances')
+            await this.evaluateCanRegisterNode()
+            await this.updateValidators()
+            await this.$store.dispatch('Signavault/updateTransaction')
+            if (this.nodeInfo) await this.getInformationValidator()
+            this.loading = false
+            this.loadingRefreshRegisterNode = false
+        }
+    }
+
+    async getPendingTransaction() {
+        if (this.isMultisignTx) {
+            let txClaim = this.$store.getters['Signavault/transactions'].find(
+                (item: any) =>
+                    item?.tx?.alias === this.pChainddress &&
+                    WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
+            )
+            this.pendingTx = txClaim
+        } else {
+            this.pendingTx = undefined
+        }
+    }
+
+    async getClaimableReward() {
+        if (this.nodeInfo == null) return
+
+        let responseClaimable = await WalletHelper.getClaimables(
+            this.nodeInfo.rewardOwner.addresses[0].toString(),
+            this.nodeInfo.txID
+        )
+
+        if (responseClaimable != null && responseClaimable != undefined) {
+            this.rewardAmount = responseClaimable.validatorRewards
+        } else {
+            this.rewardAmount = new BN(0)
+        }
+    }
+
+    async getPChainAddress() {
+        try {
+            if (this.$store.state.activeWallet instanceof MultisigWallet) {
+                let activeWallet: MultisigWallet = this.$store.state.activeWallet
+                let address = activeWallet.getCurrentAddressPlatform()
+                this.pChainddress = address
+                this.isMultisignTx = true
+            } else {
+                let activeWallet: WalletType = this.$store.state.activeWallet
+                let address = await activeWallet.getAllAddressesP()
+                this.pChainddress = address[0]
+                this.isMultisignTx = false
+            }
+        } catch (e) {
+            console.error(e)
+        }
     }
 
     get hasValidator(): boolean {
         return this.$store.getters['Platform/isValidator'](this.registeredNodeID)
+    }
+
+    get activeNetwork(): null | AvaNetwork {
+        return this.$store?.state?.Network?.selectedNetwork
+    }
+
+    async fetchNodeVersion() {
+        if (this.activeNetwork && this.activeNetwork.url) {
+            await axios
+                .post(this.activeNetwork.url + '/ext/info', {
+                    jsonrpc: '2.0',
+                    id: 1,
+                    method: 'info.getNodeVersion',
+                })
+                .then((res) => {
+                    const data = res.data
+                    if (data && data.result && data.result.gitVersion) {
+                        this.nodeVersion = data.result.gitVersion.slice(1) // remove v
+                    }
+                })
+                .finally(() => {
+                    this.initialized = true
+                })
+        }
+    }
+
+    checkNodeVersionFlag(targetVersion: string): boolean {
+        if (!this.initialized) {
+            throw new Error('Provider not initialized yet')
+        }
+
+        if (!this.nodeVersion) {
+            throw new Error('Node version not exists, function uncallable')
+        }
+
+        const versionRegex = /^\d+\.\d+\.\d+(-rc\d+)?$/
+        if (!versionRegex.test(targetVersion)) {
+            throw new Error(
+                `Invalid version format: ${targetVersion}. Correct version is of type major.minor.path e.g 1.2.3-rc2`
+            )
+        }
+
+        const [coreTargetVersion, targetVariant] = targetVersion.split('-')
+        const [coreNodeVersion, nodeVariant] = this.nodeVersion.split('-')
+
+        const [targetMajor, targetMinor, targetPatch] = coreTargetVersion.split('.').map(Number)
+        const [nodeMajor, nodeMinor, nodePatch] = coreNodeVersion.split('.').map(Number)
+
+        if (targetMajor !== nodeMajor) {
+            return targetMajor < nodeMajor
+        }
+
+        if (targetMinor !== nodeMinor) {
+            return targetMinor < nodeMinor
+        }
+
+        if (targetPatch !== nodePatch) {
+            return targetPatch < nodePatch
+        }
+
+        if (nodeVariant) {
+            return targetVariant <= nodeVariant
+        }
+
+        return true
+    }
+
+    formatUptime(uptime: string): number {
+        const versionFlag = this.checkNodeVersionFlag('0.4.10-rc3')
+        const value = versionFlag
+            ? Math.round(parseFloat(uptime))
+            : Math.round(parseFloat(uptime) * 100)
+
+        return value
+    }
+
+    humanizeDuration(duration: moment.Duration) {
+        const years = duration.years()
+        const months = duration.months()
+        const days = duration.days()
+        const hours = duration.hours()
+        const minutes = duration.minutes()
+        const seconds = duration.seconds()
+
+        let result = ''
+        if (years > 0) result += years + (years === 1 ? ' Year ' : ' Years ')
+        if (months > 0) result += months + (months === 1 ? ' Month ' : ' Months ')
+        if (days > 0) result += days + (days === 1 ? ' Day ' : ' Days ')
+        if (hours > 0) result += hours + ' h '
+        if (minutes > 0) result += minutes + ' m '
+        if (seconds > 0) result += seconds + ' s'
+
+        return result.trim()
+    }
+
+    async getInformationValidator() {
+        try {
+            await this.fetchNodeVersion()
+            this.loading = true
+            let today = moment()
+
+            if (this.nodeInfo === null) throw new Error('Node info is null')
+
+            this.startTime = moment(new Date(parseInt(this.nodeInfo.startTime) * 1000)).format(
+                'MMM Do YYYY, h:mm:ss A'
+            )
+            this.endTime = moment(new Date(parseInt(this.nodeInfo.endTime) * 1000)).format(
+                'MMM Do YYYY, h:mm:ss A'
+            )
+            this.upTime = this.formatUptime(this.nodeInfo.uptime)
+
+            var reaminingValidationDuration = moment.duration(
+                moment(new Date(parseInt(this.nodeInfo.endTime) * 1000)).diff(today)
+            )
+
+            this.reaminingValidation = this.humanizeDuration(reaminingValidationDuration)
+            this.bondedAmount = new BN(parseFloat(this.nodeInfo.stakeAmount) / 1000000000)
+            this.txID = this.nodeInfo.txID
+        } catch (e) {
+            console.error(e)
+        } finally {
+            this.loading = false
+        }
     }
 }
 </script>
@@ -321,16 +587,46 @@ export default class Validator extends Vue {
     height: auto;
     overflow: auto !important;
 } */
+
+.refresh {
+    max-width: 30px;
+    max-width: 30px;
+    margin-left: auto;
+    position: absolute;
+    top: 11px;
+    right: 0;
+    .v-icon {
+        color: var(--primary-color);
+    }
+
+    button {
+        padding: 0 !important;
+        margin: 0 !important;
+        outline: none !important;
+    }
+    img {
+        object-fit: contain;
+        width: 100%;
+    }
+
+    .spinner {
+        color: var(--primary-color) !important;
+    }
+}
+
 .earn_page {
     display: grid;
     grid-template-rows: max-content 1fr;
+    min-height: 300px;
 }
 
 .header {
     margin-bottom: 1rem;
+    position: relative;
 
     h1 {
         font-weight: normal;
+        margin-right: 30px;
     }
 
     display: flex;
@@ -340,9 +636,7 @@ export default class Validator extends Vue {
 
     .subtitle {
         margin-left: 0.5em;
-        /*font-size: 20px;*/
         color: var(--primary-color-light);
-        font-weight: lighter;
     }
 
     span {
@@ -409,7 +703,7 @@ span {
 }
 
 .cancel {
-    font-size: 13px;
+    @include mixins.typography-caption;
     color: var(--secondary-color);
     justify-self: flex-end;
 }
@@ -492,5 +786,20 @@ span {
 .rewards-not-available {
     position: relative;
     top: 15px;
+}
+</style>
+<style lang="scss">
+.disabled_input {
+    display: inline-block;
+    border-radius: var(--border-radius-sm);
+    color: gray;
+    background-color: var(--bg-light);
+    padding: 10px 14px;
+    width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.disabled_input:focus-visible {
+    outline: 0;
 }
 </style>

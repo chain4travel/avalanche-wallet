@@ -288,7 +288,7 @@ export default class AddressCard extends Vue {
     justify-content: flex-end;
 
     > * {
-        font-size: 16px;
+        @include mixins.typography-body-2;
         margin-left: 14px;
         position: relative;
         outline: none;
@@ -306,7 +306,7 @@ export default class AddressCard extends Vue {
         color: var(--primary-color);
         width: 18px;
         height: 18px;
-        font-size: 22px;
+        @include mixins.typography-subtitle-1;
     }
 }
 
@@ -355,7 +355,7 @@ export default class AddressCard extends Vue {
     margin: 19px !important;
     margin-bottom: 0 !important;
     background-color: var(--bg-light);
-    font-size: 13px;
+    @include mixins.typography-caption;
     font-weight: bold;
     text-align: center;
     padding: 12px 16px;
@@ -404,7 +404,7 @@ $qr_width: 110px;
 }
 
 .addr_text {
-    font-size: 15px;
+    @include mixins.typography-body-2;
     word-break: break-all;
     color: var(--primary-color);
     min-height: 55px;

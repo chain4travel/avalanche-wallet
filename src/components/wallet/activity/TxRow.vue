@@ -135,7 +135,7 @@ export default class TxRow extends Vue {
     //display: grid;
     //grid-template-columns: 1fr 1fr;
     padding: 1px 0px;
-    font-size: 13px;
+    @include mixins.typography-caption;
     //display: grid;
     //grid-template-columns: 1fr 1fr;
     //margin-bottom: 22px;
@@ -157,7 +157,7 @@ export default class TxRow extends Vue {
 
 .date {
     color: var(--primary-color);
-    font-size: 14px;
+    @include mixins.typography-caption;
     //display: flex;
     //max-width: 320px;
     //justify-content: space-between;
@@ -173,7 +173,7 @@ export default class TxRow extends Vue {
 
 .time {
     //color: var(--primary-color-light);
-    font-size: 13px;
+    @include mixins.typography-caption;
 
     span {
         margin-left: 12px;
@@ -181,7 +181,7 @@ export default class TxRow extends Vue {
 }
 .memo {
     p {
-        font-size: 12px;
+        @include mixins.typography-caption;
     }
     overflow-wrap: break-word;
     width: 100%;
@@ -199,7 +199,7 @@ export default class TxRow extends Vue {
     position: sticky;
     top: 0px;
     height: max-content;
-    font-size: 24px;
+    @include mixins.typography-subtitle-1;
     width: max-content;
     z-index: 2;
     //background-color: var(--bg);
@@ -210,10 +210,10 @@ export default class TxRow extends Vue {
     .v-btn {
         color: var(--primary-color);
         opacity: 0.4;
-        font-size: 12px;
+        @include mixins.typography-caption;
         padding: 0px !important;
         & .v-icon {
-            font-size: 20px;
+            @include mixins.typography-subtitle-2;
         }
 
         &:hover {
@@ -226,7 +226,7 @@ export default class TxRow extends Vue {
 }
 
 label {
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
 }
 

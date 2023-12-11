@@ -729,6 +729,7 @@ export default class Transfer extends Vue {
 </script>
 
 <style lang="scss">
+@use '../../styles/abstracts/mixins';
 .multi-sig__container {
     display: flex;
     flex-direction: column;
@@ -737,8 +738,7 @@ export default class Transfer extends Vue {
 .advanced_panel {
     .v-expansion-panel-header {
         padding: 0;
-        font-size: 12px;
-        font-weight: normal;
+        @include mixins.typography-caption;
         color: #2c3e50;
         min-height: auto !important;
         margin-bottom: 10px;
@@ -748,7 +748,7 @@ export default class Transfer extends Vue {
     }
 
     .v-icon {
-        font-size: 12px;
+        @include mixins.typography-caption;
     }
 }
 </style>
@@ -769,7 +769,7 @@ $padTop: 8px;
 }
 
 .explain {
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
 }
 h1 {
@@ -778,7 +778,7 @@ h1 {
 h4 {
     display: block;
     text-align: left;
-    font-size: 12px;
+    @include mixins.typography-caption;
     font-weight: bold;
     margin: 12px 0;
 }
@@ -793,7 +793,7 @@ h4 {
     padding: 5px 6px !important;
     text-align: center;
     letter-spacing: 2px;
-    font-size: 12px;
+    @include mixins.typography-caption;
 }
 
 .addressIn >>> input::-webkit-input-placeholder {
@@ -820,7 +820,7 @@ h4 {
 }
 
 .memo {
-    font-size: 14px;
+    @include mixins.typography-caption;
     background-color: var(--bg-light);
     resize: none;
     width: 100%;
@@ -835,7 +835,7 @@ h4 {
 
 .tx_info {
     text-align: left;
-    font-size: 14px;
+    @include mixins.typography-caption;
 }
 
 .new_order_Form {
@@ -865,7 +865,7 @@ h4 {
 
 .fees p {
     text-align: left;
-    font-size: 13px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
 }
 
@@ -875,7 +875,7 @@ h4 {
 
 label {
     color: var(--primary-color-light);
-    font-size: 12px;
+    @include mixins.typography-caption;
     font-weight: bold;
     margin: 2px 0 !important;
 }
@@ -894,7 +894,7 @@ label {
 }
 
 .err_list {
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: var(--error);
     margin: 6px 0;
 }

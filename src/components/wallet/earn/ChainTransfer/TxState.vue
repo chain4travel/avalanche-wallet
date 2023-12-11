@@ -49,6 +49,7 @@ export default class TxStateCard extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 .loading_header {
     display: flex;
     justify-content: space-between;
@@ -77,7 +78,7 @@ export default class TxStateCard extends Vue {
 
     p {
         word-break: break-all;
-        font-size: 13px;
+        @include mixins.typography-caption;
     }
 }
 
@@ -91,7 +92,7 @@ export default class TxStateCard extends Vue {
     margin: 4px 0;
 
     label {
-        font-size: 12px;
+        @include mixins.typography-caption;
         color: var(--primary-color-light);
     }
 }

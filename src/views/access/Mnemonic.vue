@@ -140,7 +140,7 @@ textarea {
 label {
     text-align: left;
     color: variables.$primary-color-light;
-    font-size: 12px;
+    @include mixins.typography-caption;
     margin-bottom: 20px;
 }
 
@@ -152,7 +152,7 @@ textarea {
     resize: none;
     min-height: 120px;
     padding: 8px 16px;
-    font-size: 14px;
+    @include mixins.typography-caption;
     color: var(--primary-color);
 }
 
@@ -164,7 +164,7 @@ textarea {
 }
 
 .err {
-    font-size: 13px;
+    @include mixins.typography-caption;
     color: var(--error);
     text-align: center;
     margin: 14px 0 !important;
@@ -179,7 +179,7 @@ textarea {
     margin: 30px auto;
     margin-bottom: 6px;
     width: 100%;
-    font-size: 13px;
+    @include mixins.typography-caption;
     background-color: variables.$white;
     border-radius: var(--border-radius-sm);
 }
@@ -250,7 +250,7 @@ textarea {
     }
 
     .err {
-        font-size: 13px;
+        @include mixins.typography-caption;
         margin: 14px 0 !important;
     }
 
@@ -263,7 +263,7 @@ textarea {
         margin: 30px auto;
         margin-bottom: 6px;
         width: 100%;
-        font-size: 13px;
+        @include mixins.typography-caption;
     }
 
     .but_primary {

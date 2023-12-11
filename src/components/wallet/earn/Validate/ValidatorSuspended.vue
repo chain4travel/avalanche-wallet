@@ -1,5 +1,6 @@
 <template>
     <div>
+        <br />
         <div class="validator_card">
             <p>{{ $t('validator.suspended.validator_suspended') }}</p>
         </div>
@@ -21,7 +22,7 @@ export default class ValidatorSuspended extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../../styles/main';
+@use '../../../../styles/abstracts/mixins';
 
 .validator_card {
     display: grid;
@@ -53,7 +54,7 @@ h4 {
     }
 
     label {
-        font-size: 13px;
+        @include mixins.typography-caption;
         color: var(--primary-color-light);
     }
 
@@ -61,20 +62,6 @@ h4 {
         font-size: 30px;
         color: var(--primary-color-light);
     }
-}
-
-.disabled_input {
-    display: inline-block;
-    border-radius: var(--border-radius-sm);
-    color: gray;
-    background-color: var(--bg-light);
-    padding: 6px 14px;
-    white-space: nowrap;
-    width: 70%;
-}
-
-.disabled_input:focus-visible {
-    outline: 0;
 }
 
 .input_label {

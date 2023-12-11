@@ -132,9 +132,10 @@ export default class AddMultisigAlias extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../styles/abstracts/mixins';
 label {
     color: #909090;
-    font-size: 12px;
+    @include mixins.typography-caption;
 }
 
 .multisigAliasInput {
@@ -165,7 +166,7 @@ label {
 }
 
 .alias_input button {
-    font-size: 19px;
+    @include mixins.typography-body-1;
     height: 100%;
     padding-right: 12px;
     padding-left: 12px;

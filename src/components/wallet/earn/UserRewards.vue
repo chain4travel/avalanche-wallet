@@ -1,226 +1,83 @@
 <template>
-    <div>
-        <div class="user_offers" v-if="activeOffers.length > 0">
-            <UserRewardCard
-                v-for="(v, i) in activeOffers"
-                :key="i"
-                :depositTxID="v.depositTxID"
-                :title="v.memo"
-                :start="v.start"
-                :duration="v.lockDuration"
-                :minLock="v.minAmount"
-                :rewards="v.interestRateNominator"
-                :lockedAmount="v.amount"
-                :alreadyClaimed="v.claimedRewardAmount"
-                :pendingRewards="v.pendingRewards"
-                :rewardOwner="v.rewardOwner"
-                :signatureStatus="signatureStatus(v.depositTxID)"
-                :alreadySigned="alreadySigned(v.depositTxID)"
-                :disallowedClaim="disallowedClaim(v.depositTxID)"
-                :canExecuteMultisigTx="canExecuteMultisigTx(v.depositTxID)"
-                class="reward_card"
-            />
+    <div v-if="hasRewards">
+        <div class="claimables">
+            <ClaimableRewardCard
+                v-for="(v, i) in platformRewards.treasuryRewards"
+                :key="'c' + i"
+                :reward="v"
+            ></ClaimableRewardCard>
         </div>
-        <div v-else class="empty">No Active Earning</div>
+        <div class="user_offers">
+            <DepositRewardCard
+                v-for="(v, i) in platformRewards.depositRewards"
+                :key="'u' + i"
+                :reward="v"
+                class="reward_card"
+            ></DepositRewardCard>
+        </div>
     </div>
+    <div v-else class="empty">No Active Earning</div>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { AvaWalletCore } from '../../../js/wallets/types'
-import { DelegatorRaw, ValidatorRaw } from '@/components/misc/ValidatorList/types'
-import UserRewardRow from '@/components/wallet/earn/UserRewardRow.vue'
-import UserRewardCard from '@/components/wallet/earn/UserRewardCard.vue'
-import { bnToBig } from '@/helpers/helper'
-import Big from 'big.js'
-import { BN } from '@c4tplatform/caminojs/dist'
-import { bintools } from '@/AVA'
-import { WalletType } from '@/js/wallets/types'
-import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
-import { WalletHelper } from '@/helpers/wallet_helper'
-import { Buffer } from '@c4tplatform/caminojs/dist'
-import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
-import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import { ActiveDeposit } from '@/components/misc/ValidatorList/types'
-import { ClaimTx } from '@c4tplatform/caminojs/dist/apis/platformvm/claimtx'
+import { Component, Vue } from 'vue-property-decorator'
+
+import ClaimableRewardCard from '@/components/wallet/earn/ClaimableRewardCard.vue'
+import DepositRewardCard from '@/components/wallet/earn/DepositRewardCard.vue'
+import { PlatformRewards } from '@/store/modules/platform/types'
 
 @Component({
     components: {
-        UserRewardRow,
-        UserRewardCard,
+        ClaimableRewardCard,
+        DepositRewardCard,
     },
 })
 export default class UserRewards extends Vue {
-    @Prop() loadingRefreshDepositRewards!: boolean
-
-    get activeOffers(): ActiveDeposit[] {
-        return this.$store.state.Platform.activeDepositOffer
+    get platformRewards(): PlatformRewards {
+        return this.$store.state.Platform.rewards
     }
 
-    get userAddresses() {
-        let wallet: AvaWalletCore = this.$store.state.activeWallet
-        if (!wallet) return []
-
-        return wallet.getAllAddressesP()
-    }
-
-    get validators(): ValidatorRaw[] {
-        let validators: ValidatorRaw[] = this.$store.state.Platform.validators
-
-        return this.cleanList(validators) as ValidatorRaw[]
-    }
-
-    get totLength() {
-        return this.validators?.length
-    }
-
-    get totalReward() {
-        let vals = this.validators?.reduce((acc, val: ValidatorRaw) => {
-            return acc.add(new BN(val.potentialReward))
-        }, new BN(0))
-
-        return vals
-    }
-
-    get totalRewardBig(): Big {
-        return bnToBig(this.totalReward, 9)
+    get hasRewards(): boolean {
+        return (
+            this.platformRewards.depositRewards.length > 0 ||
+            this.platformRewards.treasuryRewards.length > 0
+        )
     }
 
     get nativeAssetSymbol(): string {
         return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
     }
-
-    cleanList(list: ValidatorRaw[] | DelegatorRaw[]) {
-        let res = list?.filter((val) => {
-            let rewardAddrs = val.rewardOwner.addresses
-            let filtered = rewardAddrs.filter((addr) => {
-                return this.userAddresses.includes(addr)
-            })
-            return filtered.length > 0
-        })
-
-        res?.sort((a, b) => {
-            let startA = parseInt(a.startTime)
-            let startB = parseInt(b.startTime)
-            return startA - startB
-        })
-        return res
-    }
-
-    get activeWallet(): WalletType {
-        return this.$store.state.activeWallet
-    }
-
-    alreadySigned(depositTxID: string): boolean {
-        const txOwners = this.txOwners(depositTxID)
-        if (!txOwners) return false
-
-        const walletAddresses = (this.activeWallet as MultisigWallet)?.wallets?.map(
-            (w) => w?.getAllAddressesP()?.[0]
-        )
-        if (!walletAddresses) return false
-
-        const isSigned = txOwners.some((owner) => {
-            if (!owner) return false
-            const isOwnerSigned = owner.signature && walletAddresses.includes(owner.address)
-            return isOwnerSigned
-        })
-
-        return isSigned
-    }
-
-    pendingSendMultisigTX(): SignavaultTx | undefined {
-        const tx: SignavaultTx = this.$store.getters['Signavault/transactions'].find(
-            (item: any) =>
-                item?.tx?.alias === this.activeWallet.getStaticAddress('P') &&
-                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
-        )
-
-        if (!tx) return undefined
-        return tx
-    }
-
-    signedDepositID() {
-        const tx = this.pendingSendMultisigTX()
-
-        if (!tx) return undefined
-
-        const unsignedTx = new UnsignedTx()
-        unsignedTx.fromBuffer(Buffer.from(tx.tx?.unsignedTx, 'hex'))
-        const utx = unsignedTx.getTransaction() as ClaimTx
-        const claimAmounts = utx.getClaimAmounts()
-
-        return bintools.cb58Encode(claimAmounts[0].getID())
-    }
-
-    getPendingMultisigTx(depositTxID: string): SignavaultTx | undefined {
-        const tx = this.pendingSendMultisigTX()
-        if (!tx) return undefined
-
-        const depositId = this.signedDepositID()
-        if (depositId === depositTxID) return tx
-        else return undefined
-    }
-
-    txOwners(depositTxID: string): ModelMultisigTxOwner[] | [] {
-        return this.getPendingMultisigTx(depositTxID)?.tx?.owners ?? []
-    }
-
-    canExecuteMultisigTx(depositTxID: string): boolean {
-        let signers = 0
-        let threshold = this.getPendingMultisigTx(depositTxID)?.tx?.threshold
-        const txOwners = this.txOwners(depositTxID)
-
-        txOwners.forEach((owner) => {
-            if (owner.signature) signers++
-        })
-        if (threshold) return signers >= threshold
-        return false
-    }
-
-    signatureStatus(depositTxID: string): number {
-        if (!this.getPendingMultisigTx(depositTxID)?.tx) return -1
-        else if (!this.canExecuteMultisigTx(depositTxID)) return 1
-        else if (this.canExecuteMultisigTx(depositTxID)) return 2
-
-        return -1
-    }
-
-    disallowedClaim(depositTxID: string): boolean {
-        if (!this.pendingSendMultisigTX) return false
-        else {
-            if (!this.signedDepositID() || this.signedDepositID() === depositTxID) return false
-            else return true
-        }
-    }
 }
 </script>
 <style scoped lang="scss">
 @use '../../../styles/main';
+@use '../../../styles/abstracts/mixins';
 .user_offers {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-auto-rows: auto;
     grid-gap: 1rem;
 }
+.user_rewards {
+    padding-bottom: 5vh;
+}
 
-h3 {
-    margin: 12px 0;
-    margin-top: 32px;
-    font-size: 2em;
-    color: var(--primary-color);
-    font-weight: normal;
+.reward_row {
+    margin-bottom: 12px;
+}
+
+.claimables {
+    margin-bottom: 10px;
 }
 
 label {
     margin-top: 6px;
     color: var(--primary-color-light);
-    font-size: 14px;
+    @include mixins.typography-caption;
     margin-bottom: 3px;
 }
 
-@include main.medium-device {
+@include mixins.medium-device {
     .user_offers {
         display: grid;
         grid-template-rows: repeat(1, 1fr);
@@ -228,7 +85,7 @@ label {
         grid-gap: 1rem;
     }
 }
-@include main.mobile-device {
+@include mixins.mobile-device {
     .user_offers {
         display: grid;
         grid-template-rows: repeat(1, 1fr);

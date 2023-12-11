@@ -71,10 +71,10 @@ export default class AccountsFound extends Vue {
 
 .savedAccounts {
     margin: 0;
-    font-family: ClashDisplay;
+    font-family: var(--primary-font);
     font-weight: 500;
     line-height: 1.5;
-    font-size: 1rem;
+    @include mixins.typography-body-2;
     margin-bottom: 0.5rem;
 }
 
@@ -82,7 +82,7 @@ export default class AccountsFound extends Vue {
     color: var(--primary-color);
     width: 20px;
     height: 20px;
-    font-size: 22px;
+    @include mixins.typography-subtitle-1;
 }
 
 .goTo {

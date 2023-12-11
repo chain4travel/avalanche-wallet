@@ -1,50 +1,51 @@
 import { Module } from 'vuex'
+
+import { ava, bintools } from '@/AVA'
+import { OneBN, ZeroBN } from '@/constants'
 import { RootState } from '@/store/types'
-
-import { BN } from '@c4tplatform/caminojs/dist'
-import { ZeroBN } from '@/constants'
-import { ava } from '@/AVA'
-
 import {
     GetPendingValidatorsResponse,
     GetValidatorsResponse,
+    PlatformRewards,
     PlatformState,
-    ValidatorDelegatorDict,
-    ValidatorDelegatorPendingDict,
-    ValidatorListItem,
-} from '@/store/modules/platform/types'
-import {
-    DelegatorPendingRaw,
-    DelegatorRaw,
     ValidatorRaw,
-    ActiveDeposit,
-} from '@/components/misc/ValidatorList/types'
-import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
-import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
+} from './types'
 
-const MINUTE_MS = 60000
-const HOUR_MS = MINUTE_MS * 60
-const DAY_MS = HOUR_MS * 24
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { SignaVaultDepositOfferApi } from '@/signavault_api'
+import { BN, Buffer } from '@c4tplatform/caminojs/dist'
+import { AddressState } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { Claimable, OwnerParam } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
+import { SECP256k1KeyPair } from '@c4tplatform/caminojs/dist/common'
+import { ModelDepositOfferSig } from '@c4tplatform/signavaultjs'
+import createHash from 'create-hash'
 
 const platform_module: Module<PlatformState, RootState> = {
     namespaced: true,
     state: {
         validators: [],
         validatorsPending: [],
-        // delegators: [],
-        delegatorsPending: [],
         minStake: new BN(0),
         minStakeDelegation: new BN(0),
         currentSupply: new BN(1),
         depositOffers: [],
-        activeDepositOffer: [],
+        restrictedOffers: [],
+        rewards: {
+            treasuryRewards: [],
+            depositRewards: [],
+        },
+        addressStates: ZeroBN,
+        sunrisePhase: 0,
     },
     mutations: {
         setValidators(state, validators: ValidatorRaw[]) {
             state.validators = validators
         },
-        updateDepositOffers(state, results) {
-            state.depositOffers = results
+        setAddressStates(state, states: BN) {
+            state.addressStates = states
+        },
+        setSunrisePhase(state, phase: number) {
+            state.sunrisePhase = phase
         },
     },
     actions: {
@@ -58,220 +59,236 @@ const platform_module: Module<PlatformState, RootState> = {
         },
 
         async update({ dispatch }) {
-            dispatch('updateValidators')
             dispatch('updateCurrentSupply')
             dispatch('updateMinStakeAmount')
-            dispatch('updateAllDepositOffers')
-            dispatch('updateActiveDepositOffer')
+            dispatch('updateSunrisePhase')
+            dispatch('updateAddressStates')
+            dispatch('getRestrictedOffers')
+            dispatch('updateValidators').then(() =>
+                dispatch('updateAllDepositOffers').then(() => {
+                    dispatch('updateRewards')
+                })
+            )
         },
 
         async updateValidators({ dispatch }) {
-            dispatch('updateValidatorsCurrent')
-            dispatch('updateValidatorsPending')
+            const p1 = dispatch('updateValidatorsCurrent')
+            const p2 = dispatch('updateValidatorsPending')
+            await Promise.all([p1, p2])
         },
 
-        async updateValidatorsCurrent({ state, commit }) {
+        async updateValidatorsCurrent({ commit }) {
             let res = (await ava.PChain().getCurrentValidators()) as GetValidatorsResponse
             let validators = res.validators
 
             commit('setValidators', validators)
         },
 
-        async updateValidatorsPending({ state, commit }) {
+        async updateValidatorsPending({ state }) {
             let res = (await ava.PChain().getPendingValidators()) as GetPendingValidatorsResponse
             let validators = res.validators
-            let delegators = res.delegators
 
             //@ts-ignore
             state.validatorsPending = validators
-            state.delegatorsPending = delegators
         },
 
-        async updateAllDepositOffers({ state, commit }) {
-            const results = (await ava.PChain().getAllDepositOffers()) as DepositOffer[]
-
-            commit('updateDepositOffers', results)
+        async updateAllDepositOffers({ state }) {
+            const res = await ava.PChain().getAllDepositOffers()
+            res.sort((a, b) => {
+                if (!a.start.eq(b.start)) return a.start.lt(b.start) ? -1 : 1
+                return a.id < b.id ? -1 : 1
+            })
+            state.depositOffers = res
         },
-        async updateActiveDepositOffer({ state, commit, rootState }) {
-            try {
-                const wallet = rootState.activeWallet
-                const pAddressStrings = wallet?.getAllAddressesP() as string[] | string
 
-                if (!pAddressStrings) {
-                    state.activeDepositOffer = []
-                    return
-                }
-
-                const utxos = await ava.PChain().getUTXOs(pAddressStrings)
-                const lockedTxIDs = await utxos.utxos.getLockedTxIDs()
-                const activeDepositOffers = await ava.PChain().getDeposits(lockedTxIDs.depositIDs)
-
-                const activeOffers = [] as ActiveDeposit[]
-
-                for (const depositOffer of activeDepositOffers.deposits) {
-                    const matchingOffer = state.depositOffers.find(
-                        (o) => o.id === depositOffer.depositOfferID
-                    )
-
-                    if (matchingOffer) {
-                        const index = activeDepositOffers.deposits.indexOf(depositOffer)
-                        activeOffers.push({
-                            depositTxID: activeDepositOffers.deposits[index].depositTxID,
-                            memo: matchingOffer.memo,
-                            start: activeDepositOffers.deposits[index].start,
-                            lockDuration: activeDepositOffers.deposits[index].duration,
-                            minAmount: matchingOffer.minAmount,
-                            interestRateNominator: matchingOffer.interestRateNominator,
-                            amount: activeDepositOffers.deposits[index].amount,
-                            claimedRewardAmount:
-                                activeDepositOffers.deposits[index].claimedRewardAmount,
-                            pendingRewards: activeDepositOffers.availableRewards[index],
-                            rewardOwner: activeDepositOffers.deposits[index].rewardOwner,
-                        })
+        async updateRewards({ state, rootState, getters }) {
+            const newRewards: PlatformRewards = { treasuryRewards: [], depositRewards: [] }
+            const wallet = rootState.activeWallet
+            if (wallet) {
+                const lockedTxIDs = wallet.getPlatformUTXOSet().getLockedTxIDs()
+                const addresses = wallet.getAllAddressesP()
+                if (lockedTxIDs.depositIDs.length > 0) {
+                    try {
+                        const activeDepositOffers = await ava
+                            .PChain()
+                            .getDeposits(lockedTxIDs.depositIDs)
+                        activeDepositOffers.deposits.forEach((deposit, idx) =>
+                            newRewards.depositRewards.push({
+                                amountToClaim: activeDepositOffers.availableRewards[idx],
+                                deposit: deposit,
+                            })
+                        )
+                    } catch (e: unknown) {
+                        console.log(e)
                     }
                 }
+                // Since magellan is not ready we get treasury rewards
+                // by requesting the node with all single threshold owners
+                const owners = addresses.map(
+                    (a) => ({ locktime: '0', threshold: 1, addresses: [a] } as OwnerParam)
+                )
 
-                state.activeDepositOffer = activeOffers
-            } catch (error) {
-                state.activeDepositOffer = []
-                console.error(error)
+                let validatorFound = false
+                const pushReward = (c: Claimable, idx: number, v: boolean) => {
+                    if (v) validatorFound = true
+                    newRewards.treasuryRewards.push({
+                        type: v ? 'validator' : 'deposit',
+                        amountToClaim: c.expiredDepositRewards,
+                        rewardOwner: c.rewardOwner
+                            ? c.rewardOwner
+                            : {
+                                  addresses: owners[idx].addresses,
+                                  threshold: owners[idx].threshold,
+                                  locktime: new BN(owners[idx].locktime),
+                              },
+                    })
+                }
+
+                try {
+                    const treasuryRewards = await ava.PChain().getClaimables(owners)
+                    treasuryRewards.claimables.forEach((c, idx) => {
+                        if (!c.expiredDepositRewards.isZero()) pushReward(c, idx, false)
+                        if (!c.validatorRewards.isZero()) pushReward(c, idx, true)
+                    })
+                    if (!validatorFound) {
+                        const v = getters.getValidatorByRewardOwner(addresses) as ValidatorRaw
+                        if (v)
+                            pushReward(
+                                {
+                                    rewardOwner: {
+                                        addresses: v.rewardOwner.addresses,
+                                        threshold: parseInt(v.rewardOwner.threshold),
+                                        locktime: new BN(v.rewardOwner.locktime),
+                                    },
+                                    validatorRewards: ZeroBN,
+                                    expiredDepositRewards: ZeroBN,
+                                },
+                                -1,
+                                true
+                            )
+                    }
+                } catch (e: unknown) {
+                    console.log(e)
+                }
+            }
+            state.rewards = newRewards
+        },
+        async updateAddressStates({ commit, rootState }) {
+            const address = rootState.activeWallet?.getStaticAddress('P')
+            const states = address ? await ava.PChain().getAddressStates(address) : ZeroBN
+            commit('setAddressStates', states)
+        },
+        async updateSunrisePhase({ commit }) {
+            let sp = 0
+            try {
+                let res = await ava.PChain().getUpgradePhases()
+                sp = res.SunrisePhase
+            } catch (e: any) {
+                if ((e.message as string).indexOf('platform.GetUpgradePhases') > 0)
+                    console.log(e.message)
+                throw e
+            }
+            commit('setSunrisePhase', sp)
+        },
+        addAllowedAddresses: async (
+            { rootState },
+            {
+                allowedAddresses,
+                depositOfferID,
+                timestamp,
+            }: {
+                allowedAddresses: { address: string }[]
+                depositOfferID: string
+                timestamp: number
+            }
+        ) => {
+            try {
+                const wallet = rootState.activeWallet
+                const addressString = wallet?.getStaticAddress('P')
+                let shortIDAddresses = allowedAddresses.map((elem) => {
+                    return bintools.cb58Encode(ava.PChain().parseAddress(elem.address))
+                })
+                if (!wallet || !addressString) return
+                let signer: SECP256k1KeyPair | undefined = wallet?.getStaticKeyPair()
+                let signatures = allowedAddresses.map((elem) => {
+                    const msgHashed: Buffer = Buffer.from(
+                        createHash('sha256')
+                            .update(
+                                Buffer.concat([
+                                    bintools.cb58Decode(depositOfferID),
+                                    ava.PChain().parseAddress(elem.address),
+                                ])
+                            )
+                            .digest()
+                    )
+                    return signer?.sign(msgHashed).toString('hex')
+                })
+                const result = await SignaVaultDepositOfferApi().addSignature({
+                    addresses: shortIDAddresses,
+                    depositOfferID: depositOfferID,
+                    signatures: signatures as string[],
+                    timestamp,
+                })
+            } catch (e) {
+                let error = e as Error
+                console.error('Error:', error.message)
+            }
+        },
+        async updateRestrictedOffers({ state, rootState }) {
+            try {
+                const wallet = rootState.activeWallet
+                const addressString = wallet?.getStaticAddress('P')
+                if (!wallet || !addressString) return
+                const address = ava.PChain().parseAddress(addressString)
+                let signer: SECP256k1KeyPair | undefined = wallet?.getStaticKeyPair()
+                const timestamp = Math.floor(Date.now() / 1000).toString()
+                const hashedMessage = Buffer.from(
+                    createHash('sha256')
+                        .update(Buffer.concat([address, Buffer.from(timestamp)]))
+                        .digest()
+                )
+                const signatureTimestamp = signer?.sign(hashedMessage).toString('hex')
+                const result = await SignaVaultDepositOfferApi().getSignatures(
+                    bintools.cb58Encode(address),
+                    signatureTimestamp as string,
+                    timestamp,
+                    'false'
+                )
+                state.restrictedOffers = result.data
+            } catch (e) {
+                let error = e as Error
+                console.error('Error:', error.message)
+            }
+        },
+        getRestrictedOffers: async ({ state, rootState }) => {
+            try {
+                const wallet = rootState.activeWallet
+                const signer =
+                    wallet instanceof MultisigWallet
+                        ? wallet?.wallets[0].getStaticKeyPair()
+                        : wallet?.getStaticKeyPair()
+                const addressString = wallet?.getStaticAddress('P')
+                if (!signer || !addressString) return
+                const timestamp = Math.floor(Date.now() / 1000).toString()
+                const a = ava.PChain().parseAddress(addressString)
+                const t = Buffer.from(timestamp)
+                const signature: Buffer = Buffer.concat([a, t])
+                const hashedMessage = Buffer.from(createHash('sha256').update(signature).digest())
+                const signatureAliasTimestamp = signer.sign(hashedMessage).toString('hex')
+                const result = await SignaVaultDepositOfferApi().getSignatures(
+                    bintools.cb58Encode(a),
+                    signatureAliasTimestamp,
+                    timestamp,
+                    wallet?.type === 'multisig' ? 'true' : 'false'
+                )
+                state.restrictedOffers = result.data
+            } catch (e) {
+                let error = e as Error
+                console.error('Error:', error.message)
             }
         },
     },
     getters: {
-        validatorListEarn(state, getters): ValidatorListItem[] {
-            // Filter validators we do not need
-            let now = Date.now()
-
-            let validators = state.validators
-            validators = validators.filter((v) => {
-                let endTime = parseInt(v.endTime) * 1000
-                let dif = endTime - now
-
-                // If End time is less than 2 weeks + 1 hour, remove from list they are no use
-                let threshold = DAY_MS * 14 + 10 * MINUTE_MS
-                if (dif <= threshold) {
-                    return false
-                }
-
-                return true
-            })
-
-            let delegatorMap: ValidatorDelegatorDict = getters.nodeDelegatorMap
-            let delegatorPendingMap: ValidatorDelegatorPendingDict = getters.nodeDelegatorPendingMap
-
-            let res: ValidatorListItem[] = []
-
-            for (var i = 0; i < validators.length; i++) {
-                let v = validators[i]
-
-                let nodeID = v.nodeID
-
-                let delegators: DelegatorRaw[] = delegatorMap[nodeID] || []
-                let delegatorsPending: DelegatorPendingRaw[] = delegatorPendingMap[nodeID] || []
-
-                let delegatedAmt = new BN(0)
-                let delegatedPendingAmt = new BN(0)
-
-                if (delegators) {
-                    delegatedAmt = delegators.reduce((acc: BN, val: DelegatorRaw) => {
-                        return acc.add(new BN(val.stakeAmount))
-                    }, new BN(0))
-                }
-
-                if (delegatorsPending) {
-                    delegatedPendingAmt = delegatorsPending.reduce(
-                        (acc: BN, val: DelegatorPendingRaw) => {
-                            return acc.add(new BN(val.stakeAmount))
-                        },
-                        new BN(0)
-                    )
-                }
-
-                let startTime = new Date(parseInt(v.startTime) * 1000)
-                let endTime = new Date(parseInt(v.endTime) * 1000)
-
-                let delegatedStake = delegatedAmt.add(delegatedPendingAmt)
-                let validatorStake = new BN(v.stakeAmount)
-                // Calculate remaining stake
-                let absMaxStake = ONEAVAX.mul(new BN(3000000))
-                let relativeMaxStake = validatorStake.mul(new BN(5))
-                let stakeLimit = BN.min(absMaxStake, relativeMaxStake)
-
-                let remainingStake = stakeLimit.sub(validatorStake).sub(delegatedStake)
-
-                let listItem: ValidatorListItem = {
-                    nodeID: v.nodeID,
-                    validatorStake: validatorStake,
-                    delegatedStake: delegatedStake,
-                    remainingStake: remainingStake,
-                    numDelegators: delegators.length + delegatorsPending.length,
-                    startTime: startTime,
-                    endTime,
-                    uptime: parseFloat(v.uptime),
-                    fee: parseFloat(v.delegationFee),
-                }
-                res.push(listItem)
-            }
-
-            res = res.filter((v) => {
-                // Remove if remaining space is less than minimum
-                let min = state.minStakeDelegation
-                if (v.remainingStake.lt(min)) return false
-                return true
-            })
-
-            return res
-        },
-
-        // Maps delegators to a node id
-
-        nodeDelegatorMap(state): ValidatorDelegatorDict {
-            let res: ValidatorDelegatorDict = {}
-            let validators = state.validators
-            for (var i = 0; i < validators.length; i++) {
-                let validator = validators[i]
-                let nodeID = validator.nodeID
-                res[nodeID] = validator.delegators || []
-            }
-            return res
-        },
-
-        nodeDelegatorPendingMap(state): ValidatorDelegatorPendingDict {
-            let res: ValidatorDelegatorPendingDict = {}
-            let delegators = state.delegatorsPending
-            for (var i = 0; i < delegators.length; i++) {
-                let delegator = delegators[i]
-                let nodeID = delegator.nodeID
-                let target = res[nodeID]
-
-                if (target) {
-                    res[nodeID].push(delegator)
-                } else {
-                    res[nodeID] = [delegator]
-                }
-            }
-            return res
-        },
-
-        // Given a validator list item, calculate the max stake of this item
-        validatorMaxStake: (state, getters) => (validator: ValidatorListItem) => {
-            let stakeAmt = validator.validatorStake
-
-            // 5 times the validator's stake
-            let relativeMaxStake = stakeAmt.mul(new BN(5))
-
-            // absolute max stake
-            let mult = new BN(10).pow(new BN(6 + 9))
-            let absMaxStake = new BN(3).mul(mult)
-
-            if (relativeMaxStake.lt(absMaxStake)) {
-                return relativeMaxStake
-            } else {
-                return absMaxStake
-            }
-        },
-
         // Return if a given nodeID is either current or pending validator
         isValidator: (state) => (nodeID: string) => {
             return (
@@ -279,11 +296,47 @@ const platform_module: Module<PlatformState, RootState> = {
                 state.validatorsPending.findIndex((v) => v.nodeID === nodeID) >= 0
             )
         },
+        getValidatorByRewardOwner: (state) => (addresses: string[]): ValidatorRaw | undefined => {
+            return state.validators.find(
+                (v) => v.rewardOwner.addresses.findIndex((a) => addresses.includes(a)) >= 0
+            )
+        },
 
-        depositOffers: (state) => (active: boolean) => {
+        depositOffers: (state, _, rootState) => (active: boolean) => {
             const lockedFlag = new BN(1)
             const expected = active ? ZeroBN : lockedFlag
-            return state.depositOffers.filter((v) => v.flags.and(lockedFlag).eq(expected))
+
+            return state.depositOffers
+                .filter((v) => v.flags.and(lockedFlag).eq(expected))
+                .filter((elem) => {
+                    const depositOwnerAddress = ava
+                        .PChain()
+                        .addressFromBuffer(bintools.cb58Decode(elem.ownerAddress as string))
+                    if (depositOwnerAddress === ava.PChain().addressFromBuffer(Buffer.alloc(20)))
+                        return true
+                    else if (state.restrictedOffers?.find((el) => elem.id === el.depositOfferID))
+                        return true
+                    else return false
+                })
+        },
+        isDepositOfferRestricted: (state, _, rootState) => (depositOfferID: string) => {
+            let restrictedDepositOffer: ModelDepositOfferSig | undefined
+            if (
+                (restrictedDepositOffer = state.restrictedOffers?.find(
+                    (el) => depositOfferID === el.depositOfferID
+                ))
+            ) {
+                return restrictedDepositOffer
+            }
+        },
+        depositOffer: (state) => (depositOfferID: string) => {
+            return state.depositOffers.find((v) => v.id === depositOfferID)
+        },
+        isOfferCreator: (state): boolean => {
+            return !state.addressStates.and(OneBN.shln(AddressState.OFFERS_CREATOR)).isZero()
+        },
+        getSunrisePhase(state): number {
+            return state.sunrisePhase
         },
     },
 }

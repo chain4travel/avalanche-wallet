@@ -242,7 +242,7 @@ h1 {
         display: grid;
         gap: 10px;
         label {
-            font-size: 14px;
+            @include mixins.typography-caption;
             margin-bottom: 10px !important;
             color: var(--primary-contrast-text);
         }
@@ -329,7 +329,7 @@ input {
     background-color: var(--bg-light);
     border-radius: var(--border-radius-sm);
     padding: 10px 10px;
-    font-size: 13px;
+    @include mixins.typography-caption;
     outline: none;
 }
 

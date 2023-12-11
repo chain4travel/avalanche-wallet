@@ -32,7 +32,7 @@ export default class BalanceRow extends Vue {
     background-color: var(--bg-light);
     border-radius: 6px;
     padding: 2px 6px;
-    font-size: 11px;
+    @include mixins.typography-caption;
     align-self: center;
     text-align: center;
 }

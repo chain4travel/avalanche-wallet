@@ -1,12 +1,12 @@
-import { ava } from '@/AVA'
 import { Buffer } from '@c4tplatform/caminojs/dist'
+import { SignerKeyPair } from '@c4tplatform/caminojs/dist/common'
 import {
     Configuration,
+    DepositOfferApi,
     ModelMultisigTx,
     ModelMultisigTxOwner,
     MultisigApi,
 } from '@c4tplatform/signavaultjs'
-import { SignerKeyPair } from '@c4tplatform/caminojs/dist/common'
 import createHash from 'create-hash'
 import store from './store/index'
 
@@ -34,6 +34,24 @@ function SignaVault(): MultisigApi {
     return new MultisigApi(config)
 }
 
+function SignaVaultDepositOfferApi(): DepositOfferApi {
+    let config = defaultConfig
+    const activeNetwork = store.state.network
+
+    const versioRegex = /\/v\d+$/
+    const signavaultUrl =
+        activeNetwork?.signavaultUrl && versioRegex.test(activeNetwork.signavaultUrl)
+            ? activeNetwork.signavaultUrl
+            : activeNetwork.signavaultUrl + defaultVersion
+
+    if (activeNetwork.signavaultUrl) {
+        config = new Configuration({
+            basePath: signavaultUrl,
+        })
+    }
+    return new DepositOfferApi(config)
+}
+
 async function SignaVaultTx(alias: string, signer: SignerKeyPair): Promise<ModelMultisigTx[]> {
     const sv = SignaVault()
 
@@ -52,5 +70,5 @@ async function SignaVaultTx(alias: string, signer: SignerKeyPair): Promise<Model
     return res.data
 }
 
+export { SignaVault, SignaVaultDepositOfferApi, SignaVaultTx }
 export type { ModelMultisigTx, ModelMultisigTxOwner }
-export { SignaVault, SignaVaultTx }

@@ -361,8 +361,9 @@ export default class BaseTx extends Vue {
 }
 </script>
 <style scoped lang="scss">
+@use '../../../../styles/abstracts/mixins';
 label {
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
 }
 .nfts {
@@ -383,10 +384,10 @@ label {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: var(--primary-color-light);
     overflow: hidden;
-    font-family: 'Inter' sans-serif;
+    font-family: var(--primary-font);
     white-space: nowrap;
 
     p {

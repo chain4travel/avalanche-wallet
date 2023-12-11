@@ -8,14 +8,14 @@
                 class="date"
                 :min-datetime="endDateMin"
                 :max-datetime="endDateMax"
+                :disabled="pendingTxDate"
             ></datetime>
         </div>
     </div>
 </template>
 <script lang="ts">
-import { DAY_MS, MINUTE_MS } from '../../../constants'
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Datetime } from 'vue-datetime'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 @Component({
     components: {
@@ -24,14 +24,16 @@ import { Datetime } from 'vue-datetime'
 })
 export default class DateForm extends Vue {
     // timeNow = 0
-    @Prop() tx?: boolean
-    @Prop() initialDate?: string
-    @Prop() minEndDate?: string
-    @Prop() maxEndDate?: string
-    @Prop() typeDateForm?: string
 
-    localStart = this.startDateMin
+    localStart = this.startDate
     localEnd = this.endDateMin
+
+    @Prop() maxEndDate?: number
+    @Prop() minDurationMs!: number
+    @Prop() maxDurationMs!: number
+    @Prop() defaultDurationMs!: number
+    @Prop() pendingTxDate?: number
+    @Prop() zeroSeconds?: boolean
 
     @Watch('localEnd')
     endChange(val: string) {
@@ -46,12 +48,9 @@ export default class DateForm extends Vue {
     }
 
     mounted() {
-        this.localStart = this.startDateMin
+        this.localStart = this.startDate
+        this.localEnd = this.defaultEndDate
 
-        // default end date is 3 weeks
-        this.localEnd = this.minEndDate ?? this.defaultEndDate
-
-        // this.setStartDate(this.localStart)
         this.setEndDate(this.localEnd)
     }
 
@@ -59,90 +58,45 @@ export default class DateForm extends Vue {
         this.$emit('change_end', val)
     }
 
-    maxoutEndDate() {
+    maxoutEndDate(ev: MouseEvent) {
+        ev.preventDefault()
         this.localEnd = this.endDateMax
     }
 
-    get stakeDuration(): number {
-        let start = new Date(this.localStart)
-        let end = new Date(this.localEnd)
-        let diff = end.getTime() - start.getTime()
-        return diff
+    zeroOutSeconds(date: Date) {
+        if (this.zeroSeconds) {
+            date.setSeconds(0, 0)
+        }
+        return date
     }
 
-    // 15 minutes from now
-    // In reality it will be 5 minutes after the form is submitted
-    get startDateMin() {
-        let now = Date.now()
-        let res = now + MINUTE_MS * 15
-        return new Date(res).toISOString()
+    get startDate() {
+        let now = Date.now() + 60
+        now -= now % 60
+        let date = new Date(now)
+        return this.zeroOutSeconds(date).toISOString()
     }
 
-    // now + 15 minutes + 2 weeks (Min Staking Duration)
     get endDateMin() {
-        if (this.minEndDate) {
-            this.localEnd = this.minEndDate
-            return this.minEndDate
-        }
-        if (this.typeDateForm == 'transactionDateForm') {
-            let start = this.localStart
-            let startDate = new Date(start)
-
-            let now = new Date()
-            now.setMonth(now.getMonth() + 6)
-
-            let end = startDate.getTime()
-            let endDate = new Date(end)
-            return endDate.toISOString()
-        } else {
-            let now = new Date()
-            now.setMonth(now.getMonth() + 6)
-
-            const year = now.getFullYear()
-            const month = String(now.getMonth() + 1).padStart(2, '0')
-            const day = String(now.getDate()).padStart(2, '0')
-            const hour = String(now.getHours()).padStart(2, '0')
-            const minute = String(now.getMinutes()).padStart(2, '0')
-            const second = String(now.getSeconds()).padStart(2, '0')
-
-            const formattedDate = `${year}-${month}-${day}T${hour}:${minute}:${second}`
-
-            let minDate = new Date(`${formattedDate}`)
-            let minDateParsed = new Date(minDate).toISOString()
-            let endDate = new Date(minDateParsed)
-            return endDate.toISOString()
-        }
+        let startDate = new Date(this.localStart)
+        let end = startDate.getTime() + this.minDurationMs
+        let endDate = new Date(end)
+        return this.zeroOutSeconds(endDate).toISOString()
     }
 
-    // Start date + 1 year, or the prop
     get endDateMax() {
-        if (this.maxEndDate) return this.maxEndDate
-
-        let start = this.localStart
-        let startDate = new Date(start)
-
-        let end = startDate.getTime() + DAY_MS * 365
+        let startDate = new Date(this.localStart)
+        let end = startDate.getTime() + this.maxDurationMs
+        if (this.maxEndDate && end > this.maxEndDate) end = this.maxEndDate
         let endDate = new Date(end)
-        return endDate.toISOString()
+        return this.zeroOutSeconds(endDate).toISOString()
     }
 
     get defaultEndDate() {
-        let start = this.localStart
-        let startDate = new Date(start)
-        let end = startDate.getTime() + DAY_MS * 21
-
-        //If the DateForm have typeDateForm, the end is different days
-        switch (this.typeDateForm) {
-            case 'validatorDateForm':
-                end = startDate.getTime() + DAY_MS * 183
-                break
-            case 'transactionDateForm':
-                end = startDate.getTime() + DAY_MS * 5
-                break
-        }
-
+        let startDate = new Date(this.localStart)
+        let end = startDate.getTime() + this.defaultDurationMs
         let endDate = new Date(end)
-        return endDate.toISOString()
+        return this.zeroOutSeconds(endDate).toISOString()
     }
 }
 </script>
@@ -162,12 +116,12 @@ export default class DateForm extends Vue {
         overflow: hidden;
         background-color: var(--bg-light);
         color: var(--text-color);
-        font-family: 'Inter', sans-serif;
+        font-family: var(--primary-font);
         .vdatetime-popup__header {
             background-color: #0085ff;
         }
         .vdatetime-popup__header div {
-            font-family: 'ClashDisplay', sans-serif;
+            font-family: var(--primary-font);
         }
         .vdatetime-calendar__navigation--next svg path,
         .vdatetime-calendar__navigation--previous svg path {
@@ -198,12 +152,16 @@ export default class DateForm extends Vue {
     grid-template-columns: 1fr;
     grid-gap: 15px;
     width: 100%;
-
+    border: 1px solid var(--camino-slate-slate-600);
+    border-radius: 8px;
     > div {
         width: 100%;
         display: grid;
         grid-template-columns: max-content 1fr;
-        background-color: var(--bg-light);
+        background-color: transparent !important;
+    }
+    .vdatetime {
+        background-color: transparent !important;
     }
 
     label > span {

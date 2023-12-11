@@ -191,7 +191,7 @@ $nft_w: 90px;
     padding: 14px;
     border: 1px dashed var(--primary-color-light);
     cursor: pointer;
-    font-size: 12px;
+    @include mixins.typography-caption;
     opacity: 0.5;
     text-align: center;
     transition-duration: 0.2s;

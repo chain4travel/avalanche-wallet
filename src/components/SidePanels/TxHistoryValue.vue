@@ -141,18 +141,18 @@ export default class TxHistoryValue extends Vue {
 }
 
 .action {
-    font-size: 12px;
+    @include mixins.typography-caption;
     color: variables.$primary-color-light;
 }
 .amount {
     text-align: right;
     white-space: nowrap;
-    font-size: 15px;
+    @include mixins.typography-body-2;
 }
 
 @include mixins.medium-device {
     .amount {
-        font-size: 14px;
+        @include mixins.typography-caption;
     }
 }
 </style>

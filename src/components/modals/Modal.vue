@@ -26,7 +26,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
 export default class Modal extends Vue {
@@ -86,19 +86,18 @@ export default class Modal extends Vue {
 }
 
 .modal_title {
-    font-size: 22px;
+    @include mixins.typography-subtitle-1;
     text-align: left;
     flex-grow: 1;
     margin: 0;
-    font-weight: lighter;
 }
 
 .modal_subtitle {
-    font-size: 14px;
+    @include mixins.typography-caption;
 }
 
 .modalClose {
-    font-size: 22px;
+    @include mixins.typography-subtitle-1;
     font-weight: lighter;
     opacity: 0.5;
     &:hover {
@@ -157,6 +156,8 @@ export default class Modal extends Vue {
         padding-bottom: 20px;
         max-width: 100%;
         border-radius: var(--border-radius-lg);
+        height: 100%;
+        overflow: auto;
     }
 }
 </style>

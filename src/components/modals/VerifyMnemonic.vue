@@ -177,7 +177,7 @@ h3 {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-gap: 20px;
-    font-size: 1rem;
+    @include mixins.typography-body-2;
     margin-bottom: 30px;
 }
 
@@ -233,7 +233,7 @@ h3 {
     }
 
     .words {
-        font-size: 0.8rem;
+        @include mixins.typography-caption;
         grid-gap: 14px;
     }
 }
