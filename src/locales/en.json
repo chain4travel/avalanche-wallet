@@ -517,6 +517,7 @@
                 "max_duration": "Maximum Duration (Day)",
                 "unlock_duration": "Unlock Duration (Day)",
                 "no_rewards_duration": "No Rewards Duration (Day)",
+                "vesting_period": "Vesting Period (Day)",
                 "memo": "Title",
                 "flags": "Flags (Blocked:1)",
                 "total_max_reward_amount": "Total Max Reward Amount",
@@ -615,7 +616,7 @@
             "label_1": "Validator Node's Private Key",
             "description_1": "Node Private Key",
             "label_3": "P-Chain address your validator node will be assigned to",
-            "label_4": "Are you sure you want initiate this transaction? To execute this transaction, {threshold} additional signatures from your multisignature co-owners are required.",
+            "label_4": "Are you sure you want initiate this transaction?",
             "label_5": "Tx Details",
             "duration": {
                 "label": "Validation End Date",
@@ -661,7 +662,7 @@
                 "transaction_end": "Transaction Expiration Date"
             },
             "register_validator_node": "Register Validator Node",
-            "initiate_transaction": "Initiate transaction",
+            "initiate_transaction": "Initiate Transaction",
             "confirm": "Confirm",
             "submit": "Submit",
             "cancel": "Cancel",
@@ -675,7 +676,10 @@
                 "camino_available": "{0} @.native:(0) are available on your P-chain address",
                 "kyc_verified": "KYC or KYB verified",
                 "consortium_member_verified": "Accepted to be a member of the consortium",
-                "consortium_member_address_linked_to_node": "Consortium member address needs to be linked to your NodeID"
+                "consortium_member_address_linked_to_node": "Consortium member address needs to be linked to your NodeID",
+                "node_registration_fee": "Registering a validator node costs {fee} {symbol}.",
+                "duration_warn": "Your validation period must be at least {period} long.",
+                "threshold_validation": "To execute this transaction, {threshold} additional signatures from your multisignature co-owners are required."
             },
             "errs": {
                 "duration_warn": "WARNING: You must have at least 14 days remaining on your validation period to accept delegations.",
@@ -995,7 +999,7 @@
         "transfer_success_msg": "You have succesfully sent your transaction.",
         "transfer_error_msg": "Failed to send transaction.",
         "transfer_cancelled_msg": "Transaction has been cancelled.",
-        "execute_multisig_transaction_error": "Transaction execution failed",
+        "execute_multisig_transaction_error": "Transaction execution failed {error}",
         "multisig_transaction_saved": "Your signature saved successfully!",
         "multisig_transaction_not_saved": "Your signature saved successfully!",
         "transaction_cancel_failed": "Cancelling the transaction failed",

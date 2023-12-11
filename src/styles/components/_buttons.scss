@@ -128,58 +128,46 @@
     color: var(--primary-contrast-text);
 }
 
-.camino__primary--button {
+.camino__primary--button,
+.camino__transparent--button,
+.camino__negative--button,
+.camino__accent--button {
     display: flex;
     padding: 10px 16px;
     justify-content: center;
     align-items: center;
     gap: 6px;
     border-radius: 8px;
-    background: #0085ff;
-    width: fit-content;
     height: 40px;
-}
-
-.camino__primary--button:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-.camino__transparent--button {
-    display: flex;
-    padding: 10px 16px;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-    border-radius: 8px;
-    border: 1px solid var(--slate-600);
-    height: 40px;
-}
-
-.camino__transparent--button:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-.camino--button--disabled {
-    opacity: 0.5;
-}
-
-.camino__negative--button {
-    height: 40px;
-    padding: 10px 16px;
-    border-radius: 8px;
-    gap: 6px;
     font-family: 'Inter';
     font-weight: 600;
     line-height: 20px;
     letter-spacing: 0em;
     text-align: left;
     color: var(--white);
+}
+
+.camino__primary--button {
+    background: #0085ff;
+    width: fit-content;
+}
+
+.camino__transparent--button {
+    border: 1px solid var(--slate-600);
+}
+
+.camino__negative--button {
     background-color: var(--negative-background);
 }
 
-.camino__negative--button:disabled {
+.camino__accent--button {
+    background: var(--camino-brand-primary);
+}
+
+.camino__primary--button:disabled,
+.camino__transparent--button:disabled,
+.camino__negative--button:disabled,
+.camino__accent--button:disabled {
     cursor: not-allowed;
     opacity: 0.5;
 }

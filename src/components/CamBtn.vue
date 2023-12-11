@@ -15,7 +15,11 @@ import Spinner from '@/components/misc/Spinner.vue'
     components: { Spinner },
 })
 export default class CamBtn extends Vue {
-    @Prop({ default: 'primary' }) readonly variant!: 'primary' | 'transparent' | 'negative'
+    @Prop({ default: 'primary' }) readonly variant!:
+        | 'primary'
+        | 'transparent'
+        | 'negative'
+        | 'accent'
     @Prop({ default: false }) readonly disabled!: boolean
     @Prop({ default: false }) readonly loading!: boolean
     @Prop({ default: () => {} }) readonly onClick!: Function

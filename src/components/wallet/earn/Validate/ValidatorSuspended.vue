@@ -1,5 +1,6 @@
 <template>
     <div>
+        <br />
         <div class="validator_card">
             <p>{{ $t('validator.suspended.validator_suspended') }}</p>
         </div>
@@ -61,20 +62,6 @@ h4 {
         font-size: 30px;
         color: var(--primary-color-light);
     }
-}
-
-.disabled_input {
-    display: inline-block;
-    border-radius: var(--border-radius-sm);
-    color: gray;
-    background-color: var(--bg-light);
-    padding: 6px 14px;
-    white-space: nowrap;
-    width: 70%;
-}
-
-.disabled_input:focus-visible {
-    outline: 0;
 }
 
 .input_label {

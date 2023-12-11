@@ -223,7 +223,6 @@ export default class AvaxInput extends Vue {
 .ticker {
     border-radius: var(--border-radius-sm);
     padding: 10px 12px;
-    border: 1px solid var(--camino-slate-slate-600);
     &:disabled {
         border: 1px solid var(--camino-slate-slate-600) !important;
     }

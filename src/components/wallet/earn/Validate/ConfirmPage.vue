@@ -70,6 +70,7 @@ export default class ConfirmPage extends Vue {
         background-color: var(--bg-light);
         margin: 14px 0;
         padding: 6px 14px;
+        border-radius: var(--border-radius-sm);
 
         label {
             @include mixins.typography-caption;

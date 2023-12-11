@@ -1,12 +1,5 @@
 <template>
     <div>
-        <div class="refresh_div">
-            <div class="refresh">
-                <button @click="refresh">
-                    <v-icon>mdi-refresh</v-icon>
-                </button>
-            </div>
-        </div>
         <Spinner class="pending-validator" style="color: var(--primary-color)"></Spinner>
         <br />
         <p>

@@ -33,6 +33,7 @@ export default class DateForm extends Vue {
     @Prop() maxDurationMs!: number
     @Prop() defaultDurationMs!: number
     @Prop() pendingTxDate?: number
+    @Prop() zeroSeconds?: boolean
 
     @Watch('localEnd')
     endChange(val: string) {
@@ -62,39 +63,40 @@ export default class DateForm extends Vue {
         this.localEnd = this.endDateMax
     }
 
+    zeroOutSeconds(date: Date) {
+        if (this.zeroSeconds) {
+            date.setSeconds(0, 0)
+        }
+        return date
+    }
+
     get startDate() {
         let now = Date.now() + 60
         now -= now % 60
-        return new Date(now).toISOString()
+        let date = new Date(now)
+        return this.zeroOutSeconds(date).toISOString()
     }
 
     get endDateMin() {
-        let start = this.localStart
-        let startDate = new Date(start)
-
+        let startDate = new Date(this.localStart)
         let end = startDate.getTime() + this.minDurationMs
         let endDate = new Date(end)
-        return endDate.toISOString()
+        return this.zeroOutSeconds(endDate).toISOString()
     }
 
     get endDateMax() {
-        let start = this.localStart
-        let startDate = new Date(start)
-
+        let startDate = new Date(this.localStart)
         let end = startDate.getTime() + this.maxDurationMs
         if (this.maxEndDate && end > this.maxEndDate) end = this.maxEndDate
         let endDate = new Date(end)
-
-        return endDate.toISOString()
+        return this.zeroOutSeconds(endDate).toISOString()
     }
 
     get defaultEndDate() {
-        let start = this.localStart
-        let startDate = new Date(start)
-
+        let startDate = new Date(this.localStart)
         let end = startDate.getTime() + this.defaultDurationMs
         let endDate = new Date(end)
-        return endDate.toISOString()
+        return this.zeroOutSeconds(endDate).toISOString()
     }
 }
 </script>
