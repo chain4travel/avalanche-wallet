@@ -43,41 +43,32 @@
             </div>
         </div>
         <div v-if="!isMultiSig" class="button_group">
-            <v-btn
-                class="claim_button button_primary"
-                @click="openModal"
-                :disabled="isClaimDisabled"
-            >
+            <CamBtn variant="primary" @click="openUndepositModal" :disabled="isClaimDisabled">
+                {{ $t('earn.rewards.active_earning.undeposit') }}
+            </CamBtn>
+            <CamBtn variant="primary" @click="openModal" :disabled="isClaimDisabled">
                 {{ $t('earn.rewards.active_earning.claim') }}
-            </v-btn>
+            </CamBtn>
         </div>
         <template v-else>
             <div v-if="signatureStatus(reward.deposit.depositTxID) === 2" class="button_group">
-                <v-btn
-                    class="claim_button button_secondary"
-                    @click="openModal"
-                    :disabled="isClaimDisabled"
-                >
+                <CamBtn variant="primary" @click="openModal" :disabled="isClaimDisabled">
                     {{ $t('earn.rewards.active_earning.execute_claim') }}
-                </v-btn>
-                <v-btn class="claim_button button_primary" @click="openAbortModal">
+                </CamBtn>
+                <CamBtn variant="negative" @click="openAbortModal">
                     {{ $t('earn.rewards.active_earning.abort') }}
-                </v-btn>
+                </CamBtn>
             </div>
             <div
                 v-else-if="signatureStatus(reward.deposit.depositTxID) === -1 && disclamer"
                 class="button_group"
             >
-                <v-btn
-                    class="claim_button bordered_button"
-                    @click="openModal"
-                    :disabled="isClaimDisabled"
-                >
+                <CamBtn variant="primary" @click="openModal" :disabled="isClaimDisabled">
                     {{ $t('earn.rewards.active_earning.initiate_transaction') }}
-                </v-btn>
-                <v-btn class="claim_button button_primary" @click="disclamer = false">
+                </CamBtn>
+                <CamBtn variant="transparent" @click="disclamer = false">
                     {{ $t('earn.rewards.active_earning.cancel') }}
-                </v-btn>
+                </CamBtn>
             </div>
             <div
                 v-else-if="
@@ -86,16 +77,16 @@
                 "
                 class="button_group"
             >
-                <v-btn
-                    class="claim_button bordered_button"
+                <CamBtn
+                    variant="primary"
                     @click="signMultisigTx"
                     :disabled="alreadySigned(reward.deposit.depositTxID)"
                 >
                     {{ $t('earn.rewards.active_earning.sign') }}
-                </v-btn>
-                <v-btn class="claim_button button_primary" @click="openAbortModal">
+                </CamBtn>
+                <CamBtn variant="negative" @click="openAbortModal">
                     {{ $t('earn.rewards.active_earning.abort') }}
-                </v-btn>
+                </CamBtn>
             </div>
             <div
                 v-else-if="
@@ -104,8 +95,8 @@
                 "
                 class="button_group"
             >
-                <v-btn
-                    class="claim_button bordered_button"
+                <CamBtn
+                    variant="primary"
                     @click="signMultisigTx"
                     :disabled="alreadySigned(reward.deposit.depositTxID)"
                 >
@@ -115,24 +106,32 @@
                             threshold: threshold,
                         })
                     }}
-                </v-btn>
-                <v-btn class="claim_button button_primary" @click="openAbortModal">
+                </CamBtn>
+                <CamBtn variant="negative" @click="openAbortModal">
                     {{ $t('earn.rewards.active_earning.abort') }}
-                </v-btn>
+                </CamBtn>
             </div>
             <div v-else class="button_group">
-                <v-btn
-                    class="claim_button button_primary"
+                <!-- <CamBtn
+                    variant="primary"
+                    @click="disclamer = true"
+                    :disabled="isClaimDisabled || disallowedClaim(reward.deposit.depositTxID)"
+                >
+                    Undeposit
+                </CamBtn> -->
+                <CamBtn
+                    variant="primary"
                     @click="disclamer = true"
                     :disabled="isClaimDisabled || disallowedClaim(reward.deposit.depositTxID)"
                 >
                     {{ $t('earn.rewards.active_earning.claim') }}
-                </v-btn>
+                </CamBtn>
             </div>
             <div v-if="disclamer && !alreadySigned(reward.deposit.depositTxID)" class="err">
                 {{ $t('earn.rewards.active_earning.are_you_sure') }}
             </div>
         </template>
+        <ModalUndeposit ref="modal_undeposit" />
         <ModalClaimDepositReward
             ref="modal_claim_reward"
             :depositTxID="reward.deposit.depositTxID"
@@ -156,31 +155,36 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import ModalClaimReward from '@/components/modals/ClaimRewardModal.vue'
-import { cleanAvaxBN } from '@/helpers/helper'
-import AvaAsset from '@/js/AvaAsset'
-import { PlatformRewardDeposit } from '@/store/modules/platform/types'
-
-import { bintools } from '@/AVA'
-import { ZeroBN } from '@/constants'
-import { WalletHelper } from '@/helpers/wallet_helper'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import { WalletType } from '@/js/wallets/types'
-import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { BN, Buffer } from '@c4tplatform/caminojs/dist'
 import { ClaimTx, UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
 import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+
+import { bintools } from '@/AVA'
+import CamBtn from '@/components/CamBtn.vue'
+import ModalClaimReward from '@/components/modals/ClaimRewardModal.vue'
+import { ZeroBN } from '@/constants'
+import { cleanAvaxBN } from '@/helpers/helper'
+import { WalletHelper } from '@/helpers/wallet_helper'
+import AvaAsset from '@/js/AvaAsset'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { WalletType } from '@/js/wallets/types'
+import { PlatformRewardDeposit } from '@/store/modules/platform/types'
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
+
 import ModalAbortSigning from './ModalAbortSigning.vue'
 import ModalClaimDepositReward from './ModalClaimDepositReward.vue'
+import ModalUndeposit from './ModalUndeposit.vue'
 
 @Component({
     components: {
         ModalClaimReward,
         ModalClaimDepositReward,
         ModalAbortSigning,
+        ModalUndeposit,
+        CamBtn,
     },
 })
 export default class DepositRewardCard extends Vue {
@@ -188,6 +192,7 @@ export default class DepositRewardCard extends Vue {
     intervalID: any = null
     claimDisabled: boolean = true
     disclamer: boolean = false
+    // @ts-ignore
     helpers = this.globalHelper()
     // signedDepositID: string = ''
     @Prop() reward!: PlatformRewardDeposit
@@ -196,6 +201,7 @@ export default class DepositRewardCard extends Vue {
         // modal_claim_reward: ModalClaimReward
         modal_claim_reward: ModalClaimDepositReward
         modal_abort_signing: ModalAbortSigning
+        modal_undeposit: ModalUndeposit
     }
 
     openAbortModal() {
@@ -451,6 +457,11 @@ export default class DepositRewardCard extends Vue {
     openModal() {
         this.disclamer = false
         this.$refs.modal_claim_reward.open()
+    }
+
+    openUndepositModal() {
+        this.disclamer = false
+        this.$refs.modal_undeposit.open()
     }
 }
 </script>

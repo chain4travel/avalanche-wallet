@@ -1,18 +1,7 @@
-import { ava, bintools } from '@/AVA'
-import {
-    buildCreateNftFamilyTx,
-    buildEvmTransferERCNftTx,
-    buildEvmTransferErc20Tx,
-    buildEvmTransferNativeTx,
-    buildMintNftTx,
-} from '@/js/TxHelper'
-import { WalletType } from '@/js/wallets/types'
-import { AmountOutput } from '@c4tplatform/caminojs/dist/apis/avm'
-import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
-
-import { ITransaction } from '@/components/wallet/transfer/types'
 import { BN, Buffer } from '@c4tplatform/caminojs/dist'
+import { AmountOutput } from '@c4tplatform/caminojs/dist/apis/avm'
 import { UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm/utxos'
+import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import {
     ClaimAmountParams,
     ClaimType,
@@ -20,22 +9,32 @@ import {
     UTXO as PlatformUTXO,
     UTXOSet as PlatformUTXOSet,
 } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { MultisigAliasParams } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { OutputOwners, SignatureError } from '@c4tplatform/caminojs/dist/common'
 import { PayloadBase } from '@c4tplatform/caminojs/dist/utils'
+import { ModelDepositOfferSig } from '@c4tplatform/signavaultjs'
 
+import { ava, bintools } from '@/AVA'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
+import { ITransaction } from '@/components/wallet/transfer/types'
 import { ChainIdType, ZeroBN } from '@/constants'
 import { web3 } from '@/evm'
 import { bnToBig } from '@/helpers/helper'
 import { getStakeForAddresses } from '@/helpers/utxo_helper'
-import ERCNftToken from '@/js/ERCNftToken'
 import Erc20Token from '@/js/Erc20Token'
+import ERCNftToken from '@/js/ERCNftToken'
+import {
+    buildCreateNftFamilyTx,
+    buildEvmTransferErc20Tx,
+    buildEvmTransferERCNftTx,
+    buildEvmTransferNativeTx,
+    buildMintNftTx,
+} from '@/js/TxHelper'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import { WalletType } from '@/js/wallets/types'
 import { GetValidatorsResponse } from '@/store/modules/platform/types'
-import { MultisigAliasParams } from '@c4tplatform/caminojs/dist/apis/platformvm'
-import { OutputOwners, SignatureError } from '@c4tplatform/caminojs/dist/common'
-import { ModelDepositOfferSig } from '@c4tplatform/signavaultjs'
 class WalletHelper {
     static async getStake(wallet: WalletType): Promise<BN> {
         let addrs = wallet.getAllAddressesP()
@@ -632,6 +631,38 @@ class WalletHelper {
             )
         let tx = await wallet.signP(unsignedTx)
         return await ava.PChain().issueTx(tx)
+    }
+
+    static async buildUnlockDepositTx(wallet: WalletType, amount: BN) {
+        const pAddressStrings = wallet.getAllAddressesP()
+        const signerAddresses = wallet.getSignerAddresses('P')
+        const changeAddress = wallet.getChangeAddressPlatform()
+
+        const threshold =
+            wallet.type === 'multisig' ? (wallet as MultisigWallet)?.keyData?.owner?.threshold : 1
+
+        const unsignedTx = await ava
+            .PChain()
+            .buildUnlockDepositTx(
+                wallet.platformUtxoset,
+                [pAddressStrings, signerAddresses],
+                [changeAddress],
+                Buffer.alloc(0),
+                ZeroBN,
+                amount,
+                threshold
+            )
+
+        try {
+            const tx = await wallet.signP(unsignedTx)
+            return await ava.PChain().issueTx(tx)
+        } catch (err) {
+            if (err instanceof SignatureError) {
+                return undefined
+            } else {
+                throw err
+            }
+        }
     }
 
     static async buildAddDepositOfferTx(wallet: WalletType, offer: DepositOffer) {

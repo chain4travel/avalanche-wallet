@@ -571,7 +571,8 @@
                 "deposit_start": "Deposit Start",
                 "deposit_end": "Deposit End",
                 "deposit_amount": "Deposit Amount",
-                "deposited_amount": "Deposited Amount"
+                "deposited_amount": "Deposited Amount",
+                "undeposit": "Undeposit"
             },
             "claim_modal": {
                 "are_you_sure": "Are you sure you want to claim {amount} {symbol} rewards?",
