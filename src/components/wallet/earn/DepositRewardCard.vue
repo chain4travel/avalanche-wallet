@@ -28,9 +28,21 @@
                     </p>
                 </div>
                 <div>
+                    <label>{{ $t('earn.rewards.active_earning.undepositable_amount') }}:</label>
+                    <p class="reward">
+                        {{ cleanAvaxBN(reward?.deposit?.unlockableAmount) }} {{ nativeAssetSymbol }}
+                    </p>
+                </div>
+                <div>
                     <label>{{ $t('earn.rewards.active_earning.pending_reward') }}:</label>
                     <p class="reward">
                         {{ cleanAvaxBN(reward.amountToClaim) }} {{ nativeAssetSymbol }}
+                    </p>
+                </div>
+                <div>
+                    <label>{{ $t('earn.rewards.active_earning.already_undeposited') }}:</label>
+                    <p class="reward">
+                        {{ cleanAvaxBN(reward?.deposit?.unlockedAmount) }} {{ nativeAssetSymbol }}
                     </p>
                 </div>
                 <div>
@@ -43,7 +55,7 @@
             </div>
         </div>
         <div v-if="!isMultiSig" class="button_group">
-            <CamBtn variant="primary" @click="openUndepositModal" :disabled="isClaimDisabled">
+            <CamBtn variant="primary" @click="openUndepositModal" :disabled="isUndepositDisabled">
                 {{ $t('earn.rewards.active_earning.undeposit') }}
             </CamBtn>
             <CamBtn variant="primary" @click="openModal" :disabled="isClaimDisabled">
@@ -450,6 +462,10 @@ export default class DepositRewardCard extends Vue {
         return this.reward.amountToClaim.isZero()
     }
 
+    get isUndepositDisabled() {
+        return this.reward.deposit.unlockableAmount.isZero()
+    }
+
     cleanAvaxBN(val: BN): string {
         return cleanAvaxBN(val)
     }
@@ -487,6 +503,7 @@ export default class DepositRewardCard extends Vue {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-gap: 1.25rem;
+    margin-bottom: 1rem;
     .offer_detail_left {
         border-right: 2px solid var(--bg-wallet-light);
     }

@@ -30,13 +30,14 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
+
+import { BN } from '@c4tplatform/caminojs/dist'
+import Big from 'big.js'
 import { Component, Vue } from 'vue-property-decorator'
 
 import DepositOffers from '@/components/wallet/earn/DepositOffers.vue'
 import UserRewards from '@/components/wallet/earn/UserRewards.vue'
 import { bnToBig } from '@/helpers/helper'
-import { BN } from '@c4tplatform/caminojs/dist'
-import Big from 'big.js'
 
 @Component({
     name: 'earn',
@@ -49,7 +50,7 @@ export default class Earn extends Vue {
     pageNow: any = null
     subtitle: string = ''
     intervalID: any = null
-    tab: string = 'actine_earning'
+    tab: string = 'earn_now'
     loadingRefreshDepositRewards: boolean = false
 
     transfer() {
