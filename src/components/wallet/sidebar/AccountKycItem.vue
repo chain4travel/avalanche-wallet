@@ -121,7 +121,7 @@ export default class AccountKycItem extends Vue {
     display: inline-flex;
     align-items: center;
     width: 100%;
-    justify-content: center;
+    justify-content: start;
     .v-icon {
         color: var(--success);
         margin-right: 10px;
