@@ -124,13 +124,13 @@
                 </CamBtn>
             </div>
             <div v-else class="button_group">
-                <!-- <CamBtn
+                <CamBtn
                     variant="primary"
-                    @click="disclamer = true"
-                    :disabled="isClaimDisabled || disallowedClaim(reward.deposit.depositTxID)"
+                    @click="openUndepositModal"
+                    :disabled="isUndepositDisabled"
                 >
-                    Undeposit
-                </CamBtn> -->
+                    {{ $t('earn.rewards.active_earning.undeposit') }}
+                </CamBtn>
                 <CamBtn
                     variant="primary"
                     @click="disclamer = true"

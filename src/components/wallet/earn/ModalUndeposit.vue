@@ -38,7 +38,7 @@
                 <h2>
                     {{
                         $t('earn.rewards.claim_modal.confirmation_message', {
-                            amount: confiremedClaimedAmount,
+                            amount: formattedAmount(amt),
                             symbol: nativeAssetSymbol,
                         })
                     }}
@@ -144,7 +144,7 @@ export default class ModalUndeposit extends Vue {
         return this.$store.getters['Signavault/transactions'].find(
             (item: any) =>
                 item?.tx?.alias === this.activeWallet.getAllAddressesP()[0] &&
-                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
+                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'UnlockDepositTx'
         )
     }
 
@@ -161,10 +161,12 @@ export default class ModalUndeposit extends Vue {
 
         await WalletHelper.buildUnlockDepositTx(this.$store.state.activeWallet, this.amt)
             .then(async (value) => {
-                // this.updateBalance()
-                // this.$store.dispatch('Platform/updateActiveDepositOffer')
+                this.updateBalance()
+                this.$store.dispatch('Platform/updateActiveDepositOffer')
                 this.helpers.dispatchNotification({
-                    message: `Claim Successful (TX: ${value})`,
+                    message: `Undeposit Successful for ${this.formattedAmount(this.amt)} ${
+                        this.nativeAssetSymbol
+                    }`,
                     type: 'success',
                 })
 
