@@ -144,7 +144,7 @@ export default class Modal extends Vue {
     inset: 50% auto auto 50%;
     transform: translate(-50%, -50%);
     border-radius: var(--border-radius-lg);
-    overflow: hidden;
+    overflow: auto;
     max-height: 90%;
 }
 

@@ -325,6 +325,9 @@ export default class AddValidator extends Vue {
         clearInterval(this.intervalID)
     }
 
+    @Watch('startDate')
+    @Watch('endDate')
+    @Watch('transactionEndDate')
     calculateDuration() {
         const minStakeDuration = ava.getNetwork().P.minStakeDuration * 1000
         let start = this.isMultiSig
@@ -356,7 +359,6 @@ export default class AddValidator extends Vue {
         const days = Math.floor(d.asDays())
 
         this.calculatedDurationText = `${days} days ${d.hours()} hours ${d.minutes()} minutes`
-        console.log(this.calculatedDurationText)
     }
 
     get minValidationStartDate(): number {
