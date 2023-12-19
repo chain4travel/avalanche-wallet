@@ -69,20 +69,22 @@
                             !pendingValidator
                         "
                     >
-                        <pending-multisig
-                            v-if="!!multisigPendingNodeTx"
-                            :nodeId="nodeId"
-                            :multisigTx="multisigPendingNodeTx"
-                            @issued="onAddValidatorIssued"
-                            @refresh="handlePendingMultisigRefresh"
-                        ></pending-multisig>
-                        <add-validator
-                            v-else
-                            :nodeId="nodeId"
-                            @validatorReady="verifyValidatorIsReady"
-                            @initiated="onAddValidatorInitiated"
-                            @refresh="refresh()"
-                        ></add-validator>
+                        <keep-alive>
+                            <pending-multisig
+                                v-if="!!multisigPendingNodeTx"
+                                :nodeId="nodeId"
+                                :multisigTx="multisigPendingNodeTx"
+                                @issued="onAddValidatorIssued"
+                                @refresh="handlePendingMultisigRefresh"
+                            ></pending-multisig>
+                            <add-validator
+                                v-else
+                                :nodeId="nodeId"
+                                @validatorReady="verifyValidatorIsReady"
+                                @initiated="onAddValidatorInitiated"
+                                @refresh="refresh()"
+                            ></add-validator>
+                        </keep-alive>
                     </template>
                     <div v-else-if="validatorIsSuspended">
                         <validator-suspended :nodeId="nodeId"></validator-suspended>
