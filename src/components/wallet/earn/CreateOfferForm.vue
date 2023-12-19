@@ -762,6 +762,8 @@ export default class CreateOfferForm extends Vue {
             this.isMaxDirationLessThanMinDuration ||
             this.isMinDurationEqualtoZero ||
             this.isStartDateGreaterThanEndDate ||
+            this.nameLengthError ||
+            this.offer.memo.length === 0 ||
             this.minAmountError
         )
             return false
