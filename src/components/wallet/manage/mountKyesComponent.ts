@@ -1,25 +1,26 @@
-import Vue from 'vue'
-import store from '@/store'
-import VueMeta from 'vue-meta'
 import router from '@/router'
+import store from '@/store'
+import Vue from 'vue'
+import VueMeta from 'vue-meta'
 
+import MyKeys from '@/components/wallet/manage/MyKeys.vue'
+import i18n from '@/plugins/i18n'
+import vuetify from '@/plugins/vuetify'
+import BootstrapVue from 'bootstrap-vue'
 import { Datetime } from 'vue-datetime'
 import 'vue-datetime/dist/vue-datetime.css'
-import i18n from '@/plugins/i18n'
-import BootstrapVue from 'bootstrap-vue'
-import vuetify from '@/plugins/vuetify'
-import MyKeys from '@/components/wallet/manage/MyKeys.vue'
 Vue.use(VueMeta)
 Vue.use(BootstrapVue)
 Vue.component('datetime', Datetime)
 
 export const mountKyesComponent = (el: string, props: any) => {
-    const { dispatchNotification } = props
+    const { dispatchNotification, setWalletSwitched } = props
     const MyPlugin = {
         install(Vue) {
             Vue.prototype.globalHelper = () => {
                 return {
                     dispatchNotification: (params) => dispatchNotification(params),
+                    setWalletSwitched: (s) => setWalletSwitched(s),
                 }
             }
         },

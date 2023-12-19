@@ -164,6 +164,11 @@ export default class MyKeys extends Vue {
     get activeNetworkStatus() {
         return this.$store.state.Network.status
     }
+    @Watch('activeWallet')
+    walletChanged() {
+        // @ts-ignore
+        this.globalHelper()?.setWalletSwitched(this.activeWallet.getStaticAddress('P'))
+    }
     @Watch('activeNetworkStatus')
     async handleNetowrkChanged() {
         if (this.activeNetworkStatus === 'connected' && this.multiSigAliases.length > 0) {
