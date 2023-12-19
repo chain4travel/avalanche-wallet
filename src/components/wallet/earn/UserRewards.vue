@@ -20,6 +20,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
+
 import { Component, Vue } from 'vue-property-decorator'
 
 import ClaimableRewardCard from '@/components/wallet/earn/ClaimableRewardCard.vue'
@@ -77,7 +78,7 @@ label {
     margin-bottom: 3px;
 }
 
-@include mixins.medium-device {
+@include mixins.large-device {
     .user_offers {
         display: grid;
         grid-template-rows: repeat(1, 1fr);

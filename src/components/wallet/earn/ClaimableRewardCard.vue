@@ -6,13 +6,9 @@
             <p class="reward">{{ cleanAvaxBN(reward.amountToClaim) }} {{ nativeAssetSymbol }}</p>
         </div>
         <div class="claim_button_container">
-            <button
-                class="claim_button button_primary"
-                @click="openModal"
-                :disabled="!isClaimDisabled"
-            >
+            <CamBtn variant="primary" @click="openModal" :disabled="!isClaimDisabled">
                 {{ $t('earn.rewards.active_earning.claim') }}
-            </button>
+            </CamBtn>
         </div>
         <ModalClaimReward
             ref="modal_claim_reward"
@@ -23,17 +19,19 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
+
+import { BN } from '@c4tplatform/caminojs/dist'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
+import CamBtn from '@/components/CamBtn.vue'
 import ModalClaimReward from '@/components/modals/ClaimRewardModal.vue'
 import { cleanAvaxBN } from '@/helpers/helper'
 import { PlatformRewardTreasury } from '@/store/modules/platform/types'
 
-import { BN } from '@c4tplatform/caminojs/dist'
-
 @Component({
     components: {
         ModalClaimReward,
+        CamBtn,
     },
 })
 export default class ClaimableRewardCard extends Vue {

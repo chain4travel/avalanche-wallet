@@ -23,5 +23,8 @@ module.exports = {
         'no-unused-vars': 'off',
         'no-var': 'off',
         'vue/multi-word-component-names': 'off',
+        'simple-import-sort/imports': 'error',
+        'simple-import-sort/exports': 'error',
     },
+    plugins: ['simple-import-sort'],
 }

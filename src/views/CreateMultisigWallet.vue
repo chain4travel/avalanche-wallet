@@ -95,23 +95,25 @@
     </div>
 </template>
 <script lang="ts">
+import { BN } from '@c4tplatform/caminojs'
+import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
+import { TranslateResult } from 'vue-i18n'
+import { Component, Vue, Watch } from 'vue-property-decorator'
+
 import { ava } from '@/AVA'
 import Alert from '@/components/Alert.vue'
 import CamBtn from '@/components/CamBtn.vue'
 import CamInput from '@/components/CamInput.vue'
 import CamTooltip from '@/components/misc/CamTooltip.vue'
+import { isValidPChainAddress } from '@/helpers/address_helper'
 import AvaAsset from '@/js/AvaAsset'
 import { AvaNetwork } from '@/js/AvaNetwork'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import { WalletType } from '@/js/wallets/types'
 import { getMultisigAliasesFromTxId } from '@/utils/multisig'
-import { BN } from '@c4tplatform/caminojs'
-import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
-import { Component, Vue, Watch } from 'vue-property-decorator'
+
 import { WalletHelper } from '../helpers/wallet_helper'
-import { TranslateResult } from 'vue-i18n'
-import { isValidPChainAddress } from '@/helpers/address_helper'
 
 const MAX_ADDRESS_COUNT = 128
 const UPDATE_ALIAS_TIMEOUT = 3000
