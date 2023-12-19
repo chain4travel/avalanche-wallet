@@ -359,7 +359,6 @@ export default class AddValidator extends Vue {
         const days = Math.floor(d.asDays())
 
         this.calculatedDurationText = `${days} days ${d.hours()} hours ${d.minutes()} minutes`
-        console.log(this.calculatedDurationText)
     }
 
     get minValidationStartDate(): number {
