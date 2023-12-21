@@ -48,20 +48,21 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import ModalClaimReward from './ModalClaimReward.vue'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
-import { WalletHelper } from '../../../../helpers/wallet_helper'
 import { BN } from '@c4tplatform/caminojs'
 import AvaAsset from '@/js/AvaAsset'
 import Big from 'big.js'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import PendingMultisig from './PendingMultisig.vue'
 import Spinner from '@/components/misc/Spinner.vue'
 import { ava } from '@/AVA'
 import { bnToBigAvaxX } from '@/helpers/helper'
-import { WalletType } from '@/js/wallets/types'
 import CamBtn from '@/components/CamBtn.vue'
+import { WalletHelper } from '@/helpers/wallet_helper'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { WalletType } from '@/js/wallets/types'
+import { AvaNetwork } from '@/js/AvaNetwork'
 
 @Component({
     components: {
@@ -74,12 +75,12 @@ import CamBtn from '@/components/CamBtn.vue'
 export default class ClaimRewards extends Vue {
     @Prop() nodeId!: string
     @Prop() nodeInfo!: ValidatorRaw
+    @Prop() rewardAmount: BN = new BN(0)
 
-    rewardAmount: BN = new BN(0)
-    loading: boolean = false
-    pChainddress: string = ''
-    isMultisignTx: boolean = false
-    pendingTx: any = undefined
+    @Prop() loading: boolean = false
+    @Prop() pChainddress: string = ''
+    @Prop() isMultisignTx: boolean = false
+    @Prop() pendingTx: any = undefined
 
     get symbol(): string {
         return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
@@ -90,11 +91,9 @@ export default class ClaimRewards extends Vue {
     }
 
     mounted() {
-        this.refresh()
-    }
-
-    refresh() {
-        this.$emit('refresh')
+        this.getClaimableReward()
+        this.getPChainAddress()
+        this.getPendingTransaction()
     }
 
     beforeCloseModal(claimed: boolean) {
@@ -109,6 +108,15 @@ export default class ClaimRewards extends Vue {
                 this.getPendingTransaction()
                 this.loading = false
             }, 100)
+        }
+        this.$emit('refresh')
+    }
+
+    get rewardOwner() {
+        if (this.nodeInfo != null && this.nodeInfo != undefined) {
+            return this.nodeInfo.rewardOwner.addresses[0].toString()
+        } else {
+            return null
         }
     }
 
@@ -145,16 +153,22 @@ export default class ClaimRewards extends Vue {
         }
     }
 
-    get rewardOwner() {
-        if (this.nodeInfo != null && this.nodeInfo != undefined) {
-            return this.nodeInfo.rewardOwner.addresses[0].toString()
-        } else {
-            return null
-        }
+    getPendingTransaction() {
+        this.$emit('getPendingTransaction')
+    }
+
+    getClaimableReward() {
+        this.$emit('getClaimableReward')
+    }
+
+    getPChainAddress() {
+        this.$emit('getPChainAddress')
     }
 
     async refreshMultisignTx() {
         await this.$store.dispatch('Signavault/updateTransaction')
+        this.$emit('refresh')
+
         this.loading = true
         setTimeout(async () => {
             await this.getPendingTransaction()
@@ -165,6 +179,7 @@ export default class ClaimRewards extends Vue {
     async issued() {
         this.loading = true
         await this.$store.dispatch('Signavault/updateTransaction')
+        this.$emit('refresh')
 
         setTimeout(async () => {
             await this.getClaimableReward()
@@ -175,16 +190,12 @@ export default class ClaimRewards extends Vue {
         }, 100)
     }
 
+    get activeNetwork(): null | AvaNetwork {
+        return this.$store?.state?.Network?.selectedNetwork
+    }
+
     get feeTx() {
         return bnToBigAvaxX(ava.PChain().getTxFee())
-    }
-
-    getClaimableReward() {
-        this.$emit('getClaimableReward')
-    }
-
-    getPendingTransaction() {
-        this.$emit('getPendingTransaction')
     }
 }
 </script>

@@ -113,9 +113,12 @@
                             :rewardAmount="rewardAmount"
                             :pChainddress="pChainddress"
                             :isMultisignTx="isMultisignTx"
+                            :pendingTx="pendingTx"
+                            :loading="loading"
                             @refresh="refresh"
                             @getClaimableReward="getClaimableReward"
                             @getPendingTransaction="getPendingTransaction"
+                            @getPChainAddress="getPChainAddress"
                         />
                     </div>
                     <div v-else>
@@ -390,7 +393,12 @@ export default class Validator extends Vue {
 
     async refresh() {
         if (this.tab == 'opt-rewards') {
+            this.loading = true
+            await this.$store.dispatch('Signavault/updateTransaction')
             await this.getClaimableReward()
+            await this.getPChainAddress()
+            await this.getPendingTransaction()
+            this.loading = false
         } else {
             if (this.multisigPendingNodeTx) {
                 await this.$store.dispatch('Signavault/updateTransaction')
@@ -399,6 +407,7 @@ export default class Validator extends Vue {
             this.loadingRefreshRegisterNode = true
             this.loading = true
             this.$store.dispatch('updateBalances')
+            if (this.isMultisignTx) await this.getPendingTransaction()
             await this.evaluateCanRegisterNode()
             await this.updateValidators()
             await this.$store.dispatch('Signavault/updateTransaction')
