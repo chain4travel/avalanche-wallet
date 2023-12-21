@@ -4,6 +4,12 @@
         <div class="container">
             <div v-if="!!claimTxDetails" class="transaction_details">
                 <h4>{{ $t('validator.transaction_reward.title') }}</h4>
+                <div v-if="claimTxDetails?.claimedAmount">
+                    <label>{{ $t('earn.validate.confirmation.claimed_amount') }}</label>
+                    <p style="word-break: break-all">
+                        {{ claimTxDetails?.claimedAmount }} {{ nativeAssetSymbol }}
+                    </p>
+                </div>
                 <div v-if="claimTxDetails?.nodeId">
                     <label>{{ $t('earn.validate.confirmation.id') }}</label>
                     <p style="word-break: break-all">{{ claimTxDetails?.nodeId }}</p>
@@ -125,11 +131,10 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import Spinner from '@/components/misc/Spinner.vue'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import { Buffer } from '@c4tplatform/caminojs/dist'
 import { UnsignedTx, AddValidatorTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import Big from 'big.js'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
@@ -137,6 +142,9 @@ import moment from 'moment'
 import ModalAbortSigning from '../ModalAbortSigning.vue'
 import CamBtn from '@/components/CamBtn.vue'
 import Alert from '@/components/Alert.vue'
+import { ClaimTx } from '@c4tplatform/caminojs/dist/apis/platformvm/claimtx'
+import { bnToBig } from '@/helpers/helper'
+import { BN, Buffer } from '@c4tplatform/caminojs'
 
 @Component({
     components: {
@@ -219,7 +227,7 @@ export default class PendingMultisig extends Vue {
     get claimTxDetails() {
         let unsignedTx = new UnsignedTx()
         unsignedTx.fromBuffer(Buffer.from(this.multisigTx?.tx?.unsignedTx, 'hex'))
-        const utx = unsignedTx.getTransaction()
+        const utx = unsignedTx.getTransaction() as ClaimTx
         if (
             utx?.getTypeName() === 'ClaimTx' &&
             this.nodeInfo !== undefined &&
@@ -239,6 +247,10 @@ export default class PendingMultisig extends Vue {
                     ? moment(new Date(this.multisigTx.tx.timestamp)).format('DD/MM/YYYY')
                     : ''
 
+            const claimAmounts = utx.getClaimAmounts()
+            const amount = claimAmounts[0].getAmount()
+            const claimedAmount = bnToBig(new BN(amount), 9)?.toLocaleString()
+
             return {
                 nodeId: this.nodeId,
                 from: this.nodeInfo.rewardOwner.addresses[0],
@@ -246,6 +258,7 @@ export default class PendingMultisig extends Vue {
                 startDate: dateTimeStart,
                 endDate: dateTimeEnd,
                 stakeAmount: parseFloat(this.nodeInfo.stakeAmount) / 1000000000,
+                claimedAmount: claimedAmount,
             }
         }
 
@@ -328,6 +341,7 @@ export default class PendingMultisig extends Vue {
         return !!this.activeWallet.wallets.find((w) => w?.getAllAddressesP()?.[0] === pAddress)
     }
 
+    @Watch('pendingTx')
     refresh() {
         this.$emit('refresh')
     }

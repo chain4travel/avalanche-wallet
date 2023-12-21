@@ -659,7 +659,8 @@
                 "reward": "Reward Address",
                 "type_local": "This wallet",
                 "type_custom": "Custom",
-                "transaction_end": "Transaction Expiration Date"
+                "transaction_end": "Transaction Expiration Date",
+                "claimed_amount": "Claimed Amount"
             },
             "register_validator_node": "Register Validator Node",
             "initiate_transaction": "Initiate Transaction",

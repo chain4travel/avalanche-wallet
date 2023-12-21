@@ -3,7 +3,7 @@
         <div class="modal_main" v-if="isActive">
             <div class="modal_bg" @click="bgclick" :icy="icy"></div>
             <div class="modal_container">
-                <div class="modal_body">
+                <div :class="{ modal_body: true, 'overflow--hidden': isOverflowHidden }">
                     <div class="modal_topbar">
                         <div class="modal_title">
                             <h4>{{ title }}</h4>
@@ -36,6 +36,7 @@ export default class Modal extends Vue {
     @Prop({ default: false }) icy!: boolean
     @Prop() isKybModal?: boolean
     @Prop() canCloseKybModal?: boolean
+    @Prop() isOverflowHidden?: boolean
 
     isActive: boolean = false
 
@@ -146,6 +147,10 @@ export default class Modal extends Vue {
     border-radius: var(--border-radius-lg);
     overflow: auto;
     max-height: 90%;
+}
+
+.overflow--hidden {
+    overflow: hidden;
 }
 
 @include mixins.mobile-device {
