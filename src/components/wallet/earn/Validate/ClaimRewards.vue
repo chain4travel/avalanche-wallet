@@ -51,16 +51,13 @@ import 'reflect-metadata'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import ModalClaimReward from './ModalClaimReward.vue'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
-import { WalletHelper } from '../../../../helpers/wallet_helper'
 import { BN } from '@c4tplatform/caminojs'
 import AvaAsset from '@/js/AvaAsset'
 import Big from 'big.js'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import PendingMultisig from './PendingMultisig.vue'
 import Spinner from '@/components/misc/Spinner.vue'
 import { ava } from '@/AVA'
 import { bnToBigAvaxX } from '@/helpers/helper'
-import { WalletType } from '@/js/wallets/types'
 import CamBtn from '@/components/CamBtn.vue'
 
 @Component({
@@ -74,11 +71,11 @@ import CamBtn from '@/components/CamBtn.vue'
 export default class ClaimRewards extends Vue {
     @Prop() nodeId!: string
     @Prop() nodeInfo!: ValidatorRaw
+    @Prop() rewardAmount: BN = new BN(0)
+    @Prop() pChainddress: string = ''
+    @Prop() isMultisignTx: boolean = false
 
-    rewardAmount: BN = new BN(0)
     loading: boolean = false
-    pChainddress: string = ''
-    isMultisignTx: boolean = false
     pendingTx: any = undefined
 
     get symbol(): string {
