@@ -125,7 +125,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import Spinner from '@/components/misc/Spinner.vue'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
@@ -328,6 +328,7 @@ export default class PendingMultisig extends Vue {
         return !!this.activeWallet.wallets.find((w) => w?.getAllAddressesP()?.[0] === pAddress)
     }
 
+    @Watch('pendingTx')
     refresh() {
         this.$emit('refresh')
     }

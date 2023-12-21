@@ -48,7 +48,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import ModalClaimReward from './ModalClaimReward.vue'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import { BN } from '@c4tplatform/caminojs'
@@ -59,6 +59,10 @@ import Spinner from '@/components/misc/Spinner.vue'
 import { ava } from '@/AVA'
 import { bnToBigAvaxX } from '@/helpers/helper'
 import CamBtn from '@/components/CamBtn.vue'
+import { WalletHelper } from '@/helpers/wallet_helper'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { WalletType } from '@/js/wallets/types'
+import { AvaNetwork } from '@/js/AvaNetwork'
 
 @Component({
     components: {
@@ -72,9 +76,10 @@ export default class ClaimRewards extends Vue {
     @Prop() nodeId!: string
     @Prop() nodeInfo!: ValidatorRaw
     @Prop() rewardAmount: BN = new BN(0)
-    @Prop() pChainddress: string = ''
-    @Prop() isMultisignTx: boolean = false
-    @Prop() loading: boolean = false
+
+    loading: boolean = false
+    pChainddress: string = ''
+    isMultisignTx: boolean = false
     @Prop() pendingTx: any = undefined
 
     get symbol(): string {
@@ -86,11 +91,9 @@ export default class ClaimRewards extends Vue {
     }
 
     mounted() {
-        this.refresh()
-    }
-
-    refresh() {
-        this.$emit('refresh')
+        this.getClaimableReward()
+        this.getPChainAddress()
+        this.getPendingTransaction()
     }
 
     beforeCloseModal(claimed: boolean) {
@@ -105,6 +108,27 @@ export default class ClaimRewards extends Vue {
                 this.getPendingTransaction()
                 this.loading = false
             }, 100)
+        }
+    }
+
+    get rewardOwner() {
+        if (this.nodeInfo != null && this.nodeInfo != undefined) {
+            return this.nodeInfo.rewardOwner.addresses[0].toString()
+        } else {
+            return null
+        }
+    }
+
+    async getClaimableReward() {
+        let responseClaimable = await WalletHelper.getClaimables(
+            this.nodeInfo.rewardOwner.addresses[0].toString(),
+            this.nodeInfo.txID
+        )
+
+        if (responseClaimable != null && responseClaimable != undefined) {
+            this.rewardAmount = responseClaimable.validatorRewards
+        } else {
+            this.rewardAmount = new BN(0)
         }
     }
 
@@ -141,11 +165,34 @@ export default class ClaimRewards extends Vue {
         }
     }
 
-    get rewardOwner() {
-        if (this.nodeInfo != null && this.nodeInfo != undefined) {
-            return this.nodeInfo.rewardOwner.addresses[0].toString()
+    async getPChainAddress() {
+        try {
+            if (this.$store.state.activeWallet instanceof MultisigWallet) {
+                let activeWallet: MultisigWallet = this.$store.state.activeWallet
+                let address = activeWallet.getCurrentAddressPlatform()
+                this.pChainddress = address
+                this.isMultisignTx = true
+            } else {
+                let activeWallet: WalletType = this.$store.state.activeWallet
+                let address = await activeWallet.getAllAddressesP()
+                this.pChainddress = address[0]
+                this.isMultisignTx = false
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    async getPendingTransaction() {
+        if (this.isMultisignTx) {
+            let txClaim = this.$store.getters['Signavault/transactions'].find(
+                (item: any) =>
+                    item?.tx?.alias === this.pChainddress &&
+                    WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
+            )
+            this.pendingTx = txClaim
         } else {
-            return null
+            this.pendingTx = undefined
         }
     }
 
@@ -171,16 +218,21 @@ export default class ClaimRewards extends Vue {
         }, 100)
     }
 
+    get activeNetwork(): null | AvaNetwork {
+        return this.$store?.state?.Network?.selectedNetwork
+    }
+
+    @Watch('pendingTx')
+    async refresh() {
+        this.loading = true
+        await this.getClaimableReward()
+        await this.getPChainAddress()
+        await this.getPendingTransaction()
+        this.loading = false
+    }
+
     get feeTx() {
         return bnToBigAvaxX(ava.PChain().getTxFee())
-    }
-
-    getClaimableReward() {
-        this.$emit('getClaimableReward')
-    }
-
-    getPendingTransaction() {
-        this.$emit('getPendingTransaction')
     }
 }
 </script>

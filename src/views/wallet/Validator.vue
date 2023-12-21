@@ -392,7 +392,11 @@ export default class Validator extends Vue {
 
     async refresh() {
         if (this.tab == 'opt-rewards') {
+            this.loading = true
             await this.getClaimableReward()
+            await this.getPChainAddress()
+            await this.getPendingTransaction()
+            this.loading = false
         } else {
             if (this.multisigPendingNodeTx) {
                 await this.$store.dispatch('Signavault/updateTransaction')
