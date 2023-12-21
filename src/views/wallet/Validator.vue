@@ -118,6 +118,7 @@
                             @refresh="refresh"
                             @getClaimableReward="getClaimableReward"
                             @getPendingTransaction="getPendingTransaction"
+                            @getPChainAddress="getPChainAddress"
                         />
                     </div>
                     <div v-else>
@@ -393,6 +394,7 @@ export default class Validator extends Vue {
     async refresh() {
         if (this.tab == 'opt-rewards') {
             this.loading = true
+            await this.$store.dispatch('Signavault/updateTransaction')
             await this.getClaimableReward()
             await this.getPChainAddress()
             await this.getPendingTransaction()

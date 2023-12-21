@@ -77,9 +77,9 @@ export default class ClaimRewards extends Vue {
     @Prop() nodeInfo!: ValidatorRaw
     @Prop() rewardAmount: BN = new BN(0)
 
-    loading: boolean = false
-    pChainddress: string = ''
-    isMultisignTx: boolean = false
+    @Prop() loading: boolean = false
+    @Prop() pChainddress: string = ''
+    @Prop() isMultisignTx: boolean = false
     @Prop() pendingTx: any = undefined
 
     get symbol(): string {
@@ -109,6 +109,7 @@ export default class ClaimRewards extends Vue {
                 this.loading = false
             }, 100)
         }
+        this.$emit('refresh')
     }
 
     get rewardOwner() {
@@ -116,19 +117,6 @@ export default class ClaimRewards extends Vue {
             return this.nodeInfo.rewardOwner.addresses[0].toString()
         } else {
             return null
-        }
-    }
-
-    async getClaimableReward() {
-        let responseClaimable = await WalletHelper.getClaimables(
-            this.nodeInfo.rewardOwner.addresses[0].toString(),
-            this.nodeInfo.txID
-        )
-
-        if (responseClaimable != null && responseClaimable != undefined) {
-            this.rewardAmount = responseClaimable.validatorRewards
-        } else {
-            this.rewardAmount = new BN(0)
         }
     }
 
@@ -165,39 +153,22 @@ export default class ClaimRewards extends Vue {
         }
     }
 
-    async getPChainAddress() {
-        try {
-            if (this.$store.state.activeWallet instanceof MultisigWallet) {
-                let activeWallet: MultisigWallet = this.$store.state.activeWallet
-                let address = activeWallet.getCurrentAddressPlatform()
-                this.pChainddress = address
-                this.isMultisignTx = true
-            } else {
-                let activeWallet: WalletType = this.$store.state.activeWallet
-                let address = await activeWallet.getAllAddressesP()
-                this.pChainddress = address[0]
-                this.isMultisignTx = false
-            }
-        } catch (e) {
-            console.error(e)
-        }
+    getPendingTransaction() {
+        this.$emit('getPendingTransaction')
     }
 
-    async getPendingTransaction() {
-        if (this.isMultisignTx) {
-            let txClaim = this.$store.getters['Signavault/transactions'].find(
-                (item: any) =>
-                    item?.tx?.alias === this.pChainddress &&
-                    WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
-            )
-            this.pendingTx = txClaim
-        } else {
-            this.pendingTx = undefined
-        }
+    getClaimableReward() {
+        this.$emit('getClaimableReward')
+    }
+
+    getPChainAddress() {
+        this.$emit('getPChainAddress')
     }
 
     async refreshMultisignTx() {
         await this.$store.dispatch('Signavault/updateTransaction')
+        this.$emit('refresh')
+
         this.loading = true
         setTimeout(async () => {
             await this.getPendingTransaction()
@@ -208,6 +179,7 @@ export default class ClaimRewards extends Vue {
     async issued() {
         this.loading = true
         await this.$store.dispatch('Signavault/updateTransaction')
+        this.$emit('refresh')
 
         setTimeout(async () => {
             await this.getClaimableReward()
@@ -220,15 +192,6 @@ export default class ClaimRewards extends Vue {
 
     get activeNetwork(): null | AvaNetwork {
         return this.$store?.state?.Network?.selectedNetwork
-    }
-
-    @Watch('pendingTx')
-    async refresh() {
-        this.loading = true
-        await this.getClaimableReward()
-        await this.getPChainAddress()
-        await this.getPendingTransaction()
-        this.loading = false
     }
 
     get feeTx() {
