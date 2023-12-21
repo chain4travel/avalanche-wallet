@@ -4,7 +4,7 @@
         <div class="container">
             <div v-if="!!claimTxDetails" class="transaction_details">
                 <h4>{{ $t('validator.transaction_reward.title') }}</h4>
-                <div>
+                <div v-if="claimTxDetails?.claimedAmount">
                     <label>{{ $t('earn.validate.confirmation.claimed_amount') }}</label>
                     <p style="word-break: break-all">
                         {{ claimTxDetails?.claimedAmount }} {{ nativeAssetSymbol }}
