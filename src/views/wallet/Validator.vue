@@ -113,6 +113,8 @@
                             :rewardAmount="rewardAmount"
                             :pChainddress="pChainddress"
                             :isMultisignTx="isMultisignTx"
+                            :pendingTx="pendingTx"
+                            :loading="loading"
                             @refresh="refresh"
                             @getClaimableReward="getClaimableReward"
                             @getPendingTransaction="getPendingTransaction"

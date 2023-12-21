@@ -74,9 +74,8 @@ export default class ClaimRewards extends Vue {
     @Prop() rewardAmount: BN = new BN(0)
     @Prop() pChainddress: string = ''
     @Prop() isMultisignTx: boolean = false
-
-    loading: boolean = false
-    pendingTx: any = undefined
+    @Prop() loading: boolean = false
+    @Prop() pendingTx: any = undefined
 
     get symbol(): string {
         return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
