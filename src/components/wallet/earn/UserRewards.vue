@@ -1,12 +1,12 @@
 <template>
     <div v-if="hasRewards">
-        <div class="claimables">
+        <!-- <div class="claimables">
             <ClaimableRewardCard
                 v-for="(v, i) in platformRewards.treasuryRewards"
                 :key="'c' + i"
                 :reward="v"
             ></ClaimableRewardCard>
-        </div>
+        </div> -->
         <div class="user_offers">
             <DepositRewardCard
                 v-for="(v, i) in platformRewards.depositRewards"
