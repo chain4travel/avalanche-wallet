@@ -144,7 +144,7 @@ export default class Alert extends Vue {
     }
 }
 
-[data-theme='day'] {
+[data-theme='light'] {
     .camino-alert {
         &__content {
             color: var(--camino-slate-slate-700);

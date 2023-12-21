@@ -383,7 +383,7 @@ export default class KeyRow extends Vue {
     filter: invert(0);
 }
 
-[data-theme='night'] .icon {
+[data-theme='dark'] .icon {
     filter: invert(1);
 }
 

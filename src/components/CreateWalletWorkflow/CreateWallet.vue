@@ -8,11 +8,11 @@
                         <div v-if="!keyPhrase" class="stage_1">
                             <div class="img_container">
                                 <img
-                                    v-if="$root.theme === 'day'"
+                                    v-if="$root.theme === 'light'"
                                     src="@/assets/diamond-secondary.png"
-                                    alt
+                                    alt=""
                                 />
-                                <img v-else src="@/assets/diamond-secondary-night.svg" alt />
+                                <img v-else src="@/assets/diamond-secondary-night.svg" alt="" />
                             </div>
                             <h1>{{ $t('create.generate') }}</h1>
                             <div @click="navigate('/login')" class="link">
@@ -69,14 +69,14 @@
                                 <div class="phrase_disp_col">
                                     <template v-if="!isVerified">
                                         <img
-                                            v-if="$root.theme === 'day'"
+                                            v-if="$root.theme === 'light'"
                                             src="@/assets/keyphrase.png"
-                                            alt
+                                            alt=""
                                         />
-                                        <img v-else src="@/assets/keyphrase_night.svg" alt />
+                                        <img v-else src="@/assets/keyphrase_night.svg" alt="" />
                                     </template>
                                     <template v-else>
-                                        <img src="@/assets/success.svg" alt />
+                                        <img src="@/assets/success.svg" alt="" />
                                     </template>
                                     <header v-if="!isVerified">
                                         <h1>
@@ -151,7 +151,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 import Spinner from '@/components/misc/Spinner.vue'
 import * as bip39 from 'bip39'
 
@@ -174,6 +174,7 @@ export default class CreateWallet extends Vue {
     keyPhrase: MnemonicPhrase | null = null
     isSecured: boolean = false
     isVerified: boolean = false
+    // @ts-ignore
     helpers = this.globalHelper()
     navigate(to: string) {
         this.helpers.navigate(to)

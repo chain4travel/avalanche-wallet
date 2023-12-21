@@ -52,23 +52,22 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Watch } from 'vue-property-decorator'
 
-import CopyText from '@/components/misc/CopyText.vue'
-import QRModal from '@/components/modals/QRModal.vue'
-import PaperWallet from '@/components/modals/PaperWallet/PaperWallet.vue'
 import QRCode from 'qrcode'
-import { WalletType, WalletNameType } from '@/js/wallets/types'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 
+import { ava } from '@/AVA'
+import CopyText from '@/components/misc/CopyText.vue'
+import PaperWallet from '@/components/modals/PaperWallet/PaperWallet.vue'
+import QRModal from '@/components/modals/QRModal.vue'
+import ChainSelect from '@/components/wallet/TopCards/AddressCard/ChainSelect.vue'
+import { ChainIdType } from '@/constants'
+import { LedgerWallet } from '@/js/wallets/LedgerWallet'
 import MnemonicWallet, {
     AVA_ACCOUNT_PATH,
     LEDGER_ETH_ACCOUNT_PATH,
 } from '@/js/wallets/MnemonicWallet'
-import { LedgerWallet } from '@/js/wallets/LedgerWallet'
-
-import ChainSelect from '@/components/wallet/TopCards/AddressCard/ChainSelect.vue'
-import { ChainIdType } from '@/constants'
-import { ava } from '@/AVA'
+import { WalletNameType, WalletType } from '@/js/wallets/types'
 
 @Component({
     components: {
@@ -96,7 +95,7 @@ export default class AddressCard extends Vue {
 
     @Watch('themeSelected', { immediate: true })
     onthemechange(val: string) {
-        if (val === 'night') {
+        if (val === 'dark') {
             this.colorDark = '#E5E5E5'
             this.colorLight = '#0f172a'
         } else {
@@ -153,7 +152,7 @@ export default class AddressCard extends Vue {
 
     get isDayTheme(): boolean {
         //@ts-ignore
-        return this.$root.theme === 'day'
+        return this.$root.theme === 'light'
     }
 
     get walletType(): WalletNameType {
