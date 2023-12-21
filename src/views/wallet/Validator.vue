@@ -401,6 +401,7 @@ export default class Validator extends Vue {
             this.loadingRefreshRegisterNode = true
             this.loading = true
             this.$store.dispatch('updateBalances')
+            if (this.isMultisignTx) await this.getPendingTransaction()
             await this.evaluateCanRegisterNode()
             await this.updateValidators()
             await this.$store.dispatch('Signavault/updateTransaction')
