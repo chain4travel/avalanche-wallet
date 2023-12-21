@@ -1,5 +1,5 @@
 <template>
-    <modal ref="modal" :title="$t('modal.qr.title')">
+    <modal ref="modal" :title="$t('modal.qr.title')" :isOverflowHidden="true">
         <div class="qr_body">
             <canvas ref="qr"></canvas>
             <p>{{ address }}</p>
@@ -9,11 +9,11 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
-import Modal from './Modal.vue'
-import CopyText from '../misc/CopyText.vue'
 import QRCode from 'qrcode'
+import CopyText from '../misc/CopyText.vue'
+import Modal from './Modal.vue'
 
 @Component({
     components: {
@@ -33,8 +33,10 @@ export default class QRModal extends Vue {
             this.updateQR()
         }
     }
-
-    @Watch('$root.theme', { immediate: true })
+    get currentThemeSelected() {
+        return this.$store.state.theme
+    }
+    @Watch('currentThemeSelected', { immediate: true })
     onthemechange(val: string) {
         if (val === 'night') {
             this.colorDark = '#E5E5E5'
