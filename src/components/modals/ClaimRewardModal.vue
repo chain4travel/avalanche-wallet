@@ -126,7 +126,7 @@ export default class ModalClaimReward extends Vue {
         try {
             const result = await WalletHelper.buildDepositClaimTx(
                 wallet,
-                this.depositTxID,
+                this.depositTxID as string,
                 rewardOwner,
                 this.amt,
                 this.validatorClaim

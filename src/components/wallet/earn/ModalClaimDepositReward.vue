@@ -184,7 +184,6 @@ export default class ModalClaimDepositReward extends Vue {
                 .then(async (value) => {
                     if (!value) {
                         // multisg flow
-                        this.$store.dispatch('Platform/updateActiveDepositOffer')
                         this.$store.dispatch('Signavault/updateTransaction')
                         dispatchNotification({
                             message: this.$t('notifications.transfer_success_msg'),
@@ -196,7 +195,6 @@ export default class ModalClaimDepositReward extends Vue {
 
                     this.confiremedClaimedAmount = this.formattedAmount(this.amount)
                     this.updateBalance()
-                    this.$store.dispatch('Platform/updateActiveDepositOffer')
                     this.updateMultisigTxDetails()
                     this.updateRewards()
                     this.helpers.dispatchNotification({

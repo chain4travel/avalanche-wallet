@@ -293,7 +293,6 @@ export default class KeyRow extends Vue {
     select() {
         this.activating = true
         this.$emit('select', this.wallet)
-        this.$store.dispatch('Platform/updateActiveDepositOffer')
     }
 
     showModal() {
