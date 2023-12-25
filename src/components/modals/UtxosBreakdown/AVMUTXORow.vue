@@ -1,28 +1,22 @@
 <template>
     <tr class="utxo_row">
-        <td class="col_explorer">
-            <a
-                v-if="explorerLink"
-                @click="redirect()"
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                <fa icon="globe"></fa>
+        <td class="col_explorer" v-if="explorerLink">
+            <a @click="redirect()" href="#" target="_blank" rel="noopener noreferrer">
+                <img v-if="$root.theme === 'day'" src="@/assets/globe_light.svg" alt="globe" />
+                <img v-else src="@/assets/globe_dark.svg" alt="globe" />
             </a>
         </td>
         <td class="col_id">
             <p>{{ utxo.getUTXOID() }}</p>
         </td>
         <td>{{ typeName }}</td>
-        <td class="col_locktime">{{ locktimeText }}</td>
         <td class="col_thresh">{{ out.getThreshold() }}</td>
         <td class="col_owners">
             <p v-for="addr in addresses" :key="addr">{{ addr }}</p>
         </td>
         <td class="col_bal">
             <div>
-                <p>{{ balanceText }}</p>
+                <p class="bal">{{ balanceText }}</p>
                 <p>{{ symbol }}</p>
             </div>
         </td>
@@ -168,13 +162,6 @@ td {
     padding: 0;
 }
 
-.col_id {
-    p {
-        width: 80px;
-        overflow: auto;
-        text-overflow: ellipsis;
-    }
-}
 .col_bal {
     > div {
         display: grid;
@@ -193,20 +180,32 @@ td {
 }
 
 .col_owners {
-    //word-break: break-all;
     > p {
         text-overflow: ellipsis;
     }
 }
 
+.col_thresh {
+    text-align: end;
+}
+
 .col_explorer {
-    text-align: center;
     a {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         color: var(--primary-color-light);
 
         &:hover {
             color: var(--secondary-color);
         }
+    }
+}
+
+.col_bal {
+    .bal {
+        text-align: end;
+        margin-right: 0.3rem;
     }
 }
 </style>

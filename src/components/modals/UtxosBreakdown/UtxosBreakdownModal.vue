@@ -10,10 +10,8 @@
                     <table cellspacing="0" cellpadding="0">
                         <thead>
                             <tr>
-                                <th></th>
                                 <th class="col_id">ID</th>
                                 <th>Type</th>
-                                <th>Locktime</th>
                                 <th class="col_thresh">Threshold</th>
                                 <th>Owners</th>
                                 <th>Balance</th>
@@ -173,11 +171,18 @@ export default class UtxosBreakdownModal extends Vue {
     overflow: auto;
     position: relative;
 }
+
 table {
     width: 100%;
     overflow: scroll;
     border-collapse: collapse;
     padding: 0;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+table::-webkit-scrollbar {
+    display: none;
 }
 th {
     @include mixins.typography-caption;
@@ -219,19 +224,10 @@ thead {
 
 <style lang="scss">
 .utxos_breakdown_body {
-    .col_id {
-        //padding-left: 12px !important;
-        //width: 60px;
-        display: block;
-    }
-
-    .col_thresh {
-        text-align: center;
-    }
-
     th,
     td {
-        padding: 1px 4px;
+        padding: 10px 8px;
+        white-space: nowrap;
     }
 }
 </style>
