@@ -1,12 +1,5 @@
 <template>
     <div v-if="hasRewards">
-        <!-- <div class="claimables">
-            <ClaimableRewardCard
-                v-for="(v, i) in platformRewards.treasuryRewards"
-                :key="'c' + i"
-                :reward="v"
-            ></ClaimableRewardCard>
-        </div> -->
         <div class="user_offers">
             <DepositRewardCard
                 v-for="(v, i) in platformRewards.depositRewards"
@@ -22,13 +15,11 @@
 import 'reflect-metadata'
 import { Component, Vue } from 'vue-property-decorator'
 
-import ClaimableRewardCard from '@/components/wallet/earn/ClaimableRewardCard.vue'
 import DepositRewardCard from '@/components/wallet/earn/DepositRewardCard.vue'
 import { PlatformRewards } from '@/store/modules/platform/types'
 
 @Component({
     components: {
-        ClaimableRewardCard,
         DepositRewardCard,
     },
 })
@@ -38,10 +29,7 @@ export default class UserRewards extends Vue {
     }
 
     get hasRewards(): boolean {
-        return (
-            this.platformRewards.depositRewards.length > 0 ||
-            this.platformRewards.treasuryRewards.length > 0
-        )
+        return this.platformRewards.depositRewards.length > 0
     }
 
     get nativeAssetSymbol(): string {
