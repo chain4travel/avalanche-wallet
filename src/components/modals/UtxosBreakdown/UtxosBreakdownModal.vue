@@ -10,6 +10,7 @@
                     <table cellspacing="0" cellpadding="0">
                         <thead>
                             <tr>
+                                <th></th>
                                 <th class="col_id">ID</th>
                                 <th>Type</th>
                                 <th class="col_thresh">Threshold</th>
