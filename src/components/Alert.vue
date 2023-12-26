@@ -99,7 +99,7 @@ export default class Alert extends Vue {
     line-height: 20px;
 
     &--content {
-        color: var(--camino-slate-slate-300);
+        color: var(--tailwind-slate-slate-300);
         display: flex;
         flex-direction: column;
         align-items: flex-start;
@@ -147,11 +147,11 @@ export default class Alert extends Vue {
 
 [data-theme='day'] {
     .camino-alert {
-        &__content {
+        &--content {
             color: var(--camino-slate-slate-700);
         }
 
-        &__title {
+        &--title {
             color: var(--camino-slate-slate-800);
         }
     }
