@@ -405,11 +405,13 @@ export default class Transfer extends Vue {
         })
     }
     @Watch('formType', { immediate: true })
+    @Watch('activeWallet', { immediate: true })
     updateDetails() {
-        if (this.formType === 'P') this.updateMultisigTxDetails()
+        if (this.isMultiSig && this.formType === 'P') this.updateMultisigTxDetails()
         else {
             this.memo = ''
             this.addressIn = ''
+            this.pendingTxAmount = new BN(0).toLocaleString()
         }
     }
     async refresh() {
