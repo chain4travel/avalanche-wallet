@@ -180,6 +180,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import { WalletHelper } from '../helpers/wallet_helper'
 import { TranslateResult } from 'vue-i18n'
 import { isValidPChainAddress } from '@/helpers/address_helper'
+import { getMultisigAliases } from '@/explorer_api'
 
 const MAX_ADDRESS_COUNT = 128
 const UPDATE_ALIAS_TIMEOUT = 3000
@@ -673,7 +674,13 @@ export default class EditMultisigWallet extends Vue {
                 message: this.$t('notifications.msig_edit_success', { address: msigAlias }),
                 type: 'success',
             })
-            this.fetchMultisigAliases()
+            await this.fetchMultisigAliases()
+            setTimeout(async () => {
+                const staticAddresses = this.$store.getters['staticAddresses']('P')
+                const multisigAliases = await getMultisigAliases(staticAddresses)
+                if (!multisigAliases.includes(msigAlias.replace('P-', '')))
+                    await this.$store.dispatch('activateWallet', this.$store.state.wallets[0])
+            }, 3000)
         } catch (e: any) {
             console.error('MultiSigTx::sign: Error', e)
             await this.getAliasInfos()
@@ -689,9 +696,10 @@ export default class EditMultisigWallet extends Vue {
     async fetchMultisigAliases(): Promise<void> {
         // Fetch multisig aliases after a delay
         setTimeout(async () => {
-            const aliasesResponse = await this.$store.dispatch('fetchMultiSigAliases', {
-                disable: false,
-            })
+            const aliasesResponse =
+                (await this.$store.dispatch('fetchMultiSigAliases', {
+                    disable: false,
+                })) || []
             const aliases = aliasesResponse.map((alias: string): string => 'P-' + alias)
             await this.$store.dispatch('editWalletsMultisig', { keys: aliases })
         }, 3000)

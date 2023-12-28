@@ -8,24 +8,28 @@
                         <div v-if="!keyPhrase" class="stage_1">
                             <div class="img_container">
                                 <img
-                                    v-if="$root.theme === 'day'"
+                                    v-if="$store.state.theme === 'day'"
                                     src="@/assets/diamond-secondary.png"
-                                    alt
+                                    alt="diamond"
                                 />
-                                <img v-else src="@/assets/diamond-secondary-night.svg" alt />
+                                <img
+                                    v-else
+                                    src="@/assets/diamond-secondary-night.svg"
+                                    alt="diamond"
+                                />
                             </div>
                             <h1>{{ $t('create.generate') }}</h1>
                             <div @click="navigate('/login')" class="link">
                                 {{ $t('create.but_have') }}
                             </div>
                             <div class="options">
-                                <button
-                                    class="ava_button but_generate button_secondary"
+                                <CamBtn
+                                    variant="primary"
                                     @click="createKey"
                                     data-cy="btn-generate-key-phrase"
                                 >
                                     {{ $t('create.submit') }}
-                                </button>
+                                </CamBtn>
                                 <!--                                <TorusGoogle class="torus_but"></TorusGoogle>-->
                             </div>
                             <ToS></ToS>
@@ -55,13 +59,10 @@
                                             {{ keyPhrase.getValue() }}
                                         </p>
                                         <div class="mneumonic_button_container" v-if="!isVerified">
-                                            <button
-                                                @click="createKey"
-                                                class="ava_button but_randomize button_primary"
-                                            >
+                                            <CamBtn @click="createKey" variant="primary">
                                                 <fa icon="sync"></fa>
                                                 <span>{{ $t('create.regenerate') }}</span>
-                                            </button>
+                                            </CamBtn>
                                         </div>
                                     </div>
                                 </div>
@@ -90,10 +91,9 @@
                                         </h1>
                                         <p>{{ $t('create.success_desc') }}</p>
                                     </header>
-                                    <p class="warn" v-if="!isVerified">
-                                        <span class="label">{{ $t('create.attention') }}</span>
-                                        <span class="description">{{ $t('create.warning') }}</span>
-                                    </p>
+                                    <Alert variant="warning" v-if="!isVerified">
+                                        {{ $t('create.warning') }}
+                                    </Alert>
                                     <!-- STEP 2a - VERIFY -->
                                     <div class="verify_cont" v-if="!isVerified">
                                         <MnemonicCopied
@@ -106,37 +106,37 @@
                                             ref="verify"
                                             @complete="complete"
                                         ></VerifyMnemonic>
-                                        <button
-                                            class="but_primary ava_button button_secondary"
+                                        <CamBtn
+                                            variant="primary"
+                                            class="ml-auto"
                                             @click="verifyMnemonic"
                                             :disabled="!canVerify"
                                             data-cy="btn-verify-mnemonic"
                                         >
                                             {{ $t('create.success_submit') }}
-                                        </button>
+                                        </CamBtn>
                                     </div>
                                     <!-- STEP 2b - ACCESS -->
                                     <div class="access_cont" v-if="isVerified">
                                         <transition name="fade" mode="out-in">
                                             <Spinner v-if="isLoad" class="spinner"></Spinner>
-                                            <div v-else>
-                                                <br />
-                                                <button
-                                                    class="button_primary ava_button access generate"
+                                            <div class="access_btns" v-else>
+                                                <CamBtn
+                                                    variant="transparent"
+                                                    @click="navigate('/login')"
+                                                >
+                                                    {{ $t('create.cancel') }}
+                                                </CamBtn>
+                                                <CamBtn
+                                                    variant="primary"
                                                     @click="access"
                                                     :disabled="!canSubmit"
                                                     data-cy="btn-success-mnemonic"
                                                 >
                                                     {{ $t('create.success_submit') }}
-                                                </button>
-                                                <div
-                                                    @click="navigate('/login')"
-                                                    class="link confirm-cancel-link"
-                                                >
-                                                    {{ $t('create.cancel') }}
-                                                </div>
-                                                <ToS style="margin: 30px 0 !important"></ToS>
+                                                </CamBtn>
                                             </div>
+                                            <ToS style="margin: 30px 0 !important"></ToS>
                                         </transition>
                                     </div>
                                 </div>
@@ -159,6 +159,8 @@ import VerifyMnemonic from '@/components/modals/VerifyMnemonic.vue'
 import MnemonicCopied from '@/components/CreateWalletWorkflow/MnemonicCopied.vue'
 import ToS from '@/components/misc/ToS.vue'
 import MnemonicPhrase from '@/js/wallets/MnemonicPhrase'
+import Alert from '@/components/Alert.vue'
+import CamBtn from '@/components/CamBtn.vue'
 
 @Component({
     components: {
@@ -166,6 +168,8 @@ import MnemonicPhrase from '@/js/wallets/MnemonicPhrase'
         Spinner,
         VerifyMnemonic,
         MnemonicCopied,
+        CamBtn,
+        Alert,
     },
 })
 export default class CreateWallet extends Vue {
@@ -174,6 +178,7 @@ export default class CreateWallet extends Vue {
     keyPhrase: MnemonicPhrase | null = null
     isSecured: boolean = false
     isVerified: boolean = false
+    // @ts-ignore
     helpers = this.globalHelper()
     navigate(to: string) {
         this.helpers.navigate(to)
@@ -265,7 +270,6 @@ export default class CreateWallet extends Vue {
     align-items: center;
     margin: 15px;
     padding-top: 15px;
-    border-top: 1px solid var(--primary-color-light);
 
     > * {
         margin: 4px;
@@ -344,6 +348,7 @@ a {
     }
 
     .mneumonic_button_container {
+        margin-left: auto;
         .but_randomize {
             span {
                 margin-left: 12px;
@@ -359,6 +364,7 @@ a {
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
+    gap: 8px;
 
     > * {
         width: 100%;
@@ -400,6 +406,13 @@ a {
         }
     }
 
+    .verify_cont {
+        display: flex;
+        flex-direction: column;
+        margin-top: 8px;
+        gap: 8px;
+    }
+
     .access_cont {
         text-align: left;
         flex-direction: column;
@@ -409,14 +422,20 @@ a {
             flex-direction: row;
             margin-top: 14px;
             text-align: left;
-            //flex-direction: column;
-            //align-items: flex-start;
-            //justify-content: space-between;
-
-            .access {
-            }
         }
     }
+}
+
+.access_btns {
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-space-sm);
+    margin-left: auto;
+    width: fit-content;
+}
+
+.ml-auto {
+    margin-left: auto;
 }
 
 .spinner {

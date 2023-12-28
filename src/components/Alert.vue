@@ -67,7 +67,7 @@
                 />
             </svg>
         </template>
-        <div class="camino__alert--content">
+        <div class="camino-alert--content">
             <div v-if="title" class="camino__alert--title">{{ title }}</div>
             <slot />
         </div>
@@ -98,13 +98,14 @@ export default class Alert extends Vue {
     font-weight: 400;
     line-height: 20px;
 
-    &__content {
-        color: var(--camino-slate-slate-300);
+    &--content {
+        color: var(--tailwind-slate-slate-300);
         display: flex;
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
         flex: 1 0 0;
+        text-align: initial;
     }
 
     &__title {
@@ -146,11 +147,11 @@ export default class Alert extends Vue {
 
 [data-theme='day'] {
     .camino-alert {
-        &__content {
+        &--content {
             color: var(--camino-slate-slate-700);
         }
 
-        &__title {
+        &--title {
             color: var(--camino-slate-slate-800);
         }
     }
