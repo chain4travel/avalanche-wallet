@@ -13,14 +13,23 @@
                     />
                 </div>
             </div>
-            <p class="err">{{ err }}</p>
-            <button
-                data-cy="btn-confirm-verify-new-mnemonic-phrase"
-                class="but_primary ava_button button_primary"
-                @click="verify"
-            >
-                Verify
-            </button>
+            <Alert variant="negative" v-if="err">{{ err }}</Alert>
+            <div class="modal_btns">
+                <CamBtn
+                    data-cy="btn-confirm-verify-new-mnemonic-phrase"
+                    variant="transparent"
+                    @click="cancel"
+                >
+                    Cancel
+                </CamBtn>
+                <CamBtn
+                    data-cy="btn-confirm-verify-new-mnemonic-phrase"
+                    variant="primary"
+                    @click="verify"
+                >
+                    Verify
+                </CamBtn>
+            </div>
         </div>
     </modal>
 </template>
@@ -31,10 +40,14 @@ import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 
 import Modal from '@/components/modals/Modal.vue'
 import MnemonicPhrase from '@/js/wallets/MnemonicPhrase'
+import CamBtn from '@/components/CamBtn.vue'
+import Alert from '@/components/Alert.vue'
 
 @Component({
     components: {
         Modal,
+        CamBtn,
+        Alert,
     },
 })
 export default class VerifyMnemonic extends Vue {
@@ -124,6 +137,12 @@ export default class VerifyMnemonic extends Vue {
         this.$emit('complete')
     }
 
+    cancel() {
+        // @ts-ignore
+        this.$refs.modal.close()
+        this.$emit('cancel')
+    }
+
     getDataCY(pos: number) {
         return `mnemonic-in-${pos}`
     }
@@ -134,10 +153,13 @@ export default class VerifyMnemonic extends Vue {
 @use '../../styles/abstracts/mixins';
 
 .mnemonic_body {
+    display: flex;
+    flex-direction: column;
     padding: 30px;
     text-align: center;
     max-width: 100%;
     width: 450px;
+    gap: var(--spacing-space-base);
 }
 
 .verify {
@@ -169,16 +191,12 @@ export default class VerifyMnemonic extends Vue {
     border-radius: 14px;
 }
 
-h3 {
-    margin-bottom: 30px;
-}
-
 .words {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-gap: 20px;
     @include mixins.typography-body-2;
-    margin-bottom: 30px;
+    margin-top: var(--spacing-space-base);
 }
 
 .mnemonic_in {
@@ -208,6 +226,11 @@ h3 {
             opacity: 0.6;
         }
     }
+}
+
+.modal_btns {
+    display: flex;
+    justify-content: space-between;
 }
 
 .but_primary {

@@ -201,6 +201,7 @@ import { UTXO } from '@c4tplatform/caminojs/dist/apis/avm'
 import { QrInput } from '@c4tplatform/vue_components'
 import * as bip39 from 'bip39'
 import { ava, isValidAddress } from '../../AVA'
+import { AvaNetwork } from '@/js/AvaNetwork'
 
 import { TxState } from '@/components/wallet/earn/ChainTransfer/types'
 import ChainInput from '@/components/wallet/transfer/ChainInput.vue'
@@ -405,13 +406,21 @@ export default class Transfer extends Vue {
         })
     }
     @Watch('formType', { immediate: true })
+    @Watch('activeWallet', { immediate: true })
+    @Watch('activeNetwork')
     updateDetails() {
-        if (this.formType === 'P') this.updateMultisigTxDetails()
+        if (this.isMultiSig && this.formType === 'P') this.updateMultisigTxDetails()
         else {
             this.memo = ''
             this.addressIn = ''
+            this.pendingTxAmount = new BN(0).toLocaleString()
         }
     }
+
+    get activeNetwork(): null | AvaNetwork {
+        return this.$store?.state?.Network?.selectedNetwork
+    }
+
     async refresh() {
         if (!this.isMultiSig) return
         await this.$store.dispatch('Signavault/updateTransaction')

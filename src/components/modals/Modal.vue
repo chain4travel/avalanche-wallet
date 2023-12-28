@@ -161,7 +161,7 @@ export default class Modal extends Vue {
         padding-bottom: 20px;
         max-width: 100%;
         border-radius: var(--border-radius-lg);
-        height: 100%;
+        height: 'min-content';
         overflow: auto;
     }
 }

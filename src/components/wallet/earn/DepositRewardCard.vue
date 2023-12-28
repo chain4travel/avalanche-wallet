@@ -43,41 +43,29 @@
             </div>
         </div>
         <div v-if="!isMultiSig" class="button_group">
-            <v-btn
-                class="claim_button button_primary"
-                @click="openModal"
-                :disabled="isClaimDisabled"
-            >
+            <CamBtn variant="primary" @click="openModal" :disabled="isClaimDisabled">
                 {{ $t('earn.rewards.active_earning.claim') }}
-            </v-btn>
+            </CamBtn>
         </div>
         <template v-else>
             <div v-if="signatureStatus(reward.deposit.depositTxID) === 2" class="button_group">
-                <v-btn
-                    class="claim_button button_secondary"
-                    @click="openModal"
-                    :disabled="isClaimDisabled"
-                >
+                <CamBtn variant="primary" @click="openModal" :disabled="isClaimDisabled">
                     {{ $t('earn.rewards.active_earning.execute_claim') }}
-                </v-btn>
-                <v-btn class="claim_button button_primary" @click="openAbortModal">
+                </CamBtn>
+                <CamBtn variant="negative" @click="openAbortModal">
                     {{ $t('earn.rewards.active_earning.abort') }}
-                </v-btn>
+                </CamBtn>
             </div>
             <div
                 v-else-if="signatureStatus(reward.deposit.depositTxID) === -1 && disclamer"
                 class="button_group"
             >
-                <v-btn
-                    class="claim_button bordered_button"
-                    @click="openModal"
-                    :disabled="isClaimDisabled"
-                >
+                <CamBtn variant="primary" @click="openModal" :disabled="isClaimDisabled">
                     {{ $t('earn.rewards.active_earning.initiate_transaction') }}
-                </v-btn>
-                <v-btn class="claim_button button_primary" @click="disclamer = false">
+                </CamBtn>
+                <CamBtn variant="transparent" @click="disclamer = false">
                     {{ $t('earn.rewards.active_earning.cancel') }}
-                </v-btn>
+                </CamBtn>
             </div>
             <div
                 v-else-if="
@@ -86,16 +74,16 @@
                 "
                 class="button_group"
             >
-                <v-btn
-                    class="claim_button bordered_button"
+                <CamBtn
+                    variant="transparent"
                     @click="signMultisigTx"
                     :disabled="alreadySigned(reward.deposit.depositTxID)"
                 >
                     {{ $t('earn.rewards.active_earning.sign') }}
-                </v-btn>
-                <v-btn class="claim_button button_primary" @click="openAbortModal">
+                </CamBtn>
+                <CamBtn variant="negative" @click="openAbortModal">
                     {{ $t('earn.rewards.active_earning.abort') }}
-                </v-btn>
+                </CamBtn>
             </div>
             <div
                 v-else-if="
@@ -104,8 +92,8 @@
                 "
                 class="button_group"
             >
-                <v-btn
-                    class="claim_button bordered_button"
+                <CamBtn
+                    variant="transparent"
                     @click="signMultisigTx"
                     :disabled="alreadySigned(reward.deposit.depositTxID)"
                 >
@@ -115,23 +103,27 @@
                             threshold: threshold,
                         })
                     }}
-                </v-btn>
-                <v-btn class="claim_button button_primary" @click="openAbortModal">
+                </CamBtn>
+                <CamBtn variant="negative" @click="openAbortModal">
                     {{ $t('earn.rewards.active_earning.abort') }}
-                </v-btn>
+                </CamBtn>
             </div>
             <div v-else class="button_group">
-                <v-btn
-                    class="claim_button button_primary"
+                <CamBtn
+                    variant="primary"
                     @click="disclamer = true"
                     :disabled="isClaimDisabled || disallowedClaim(reward.deposit.depositTxID)"
                 >
                     {{ $t('earn.rewards.active_earning.claim') }}
-                </v-btn>
+                </CamBtn>
             </div>
-            <div v-if="disclamer && !alreadySigned(reward.deposit.depositTxID)" class="err">
+            <Alert
+                v-if="disclamer && !alreadySigned(reward.deposit.depositTxID)"
+                variant="warning"
+                class="mt-2"
+            >
                 {{ $t('earn.rewards.active_earning.are_you_sure') }}
-            </div>
+            </Alert>
         </template>
         <ModalClaimDepositReward
             ref="modal_claim_reward"
@@ -175,12 +167,16 @@ import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfa
 import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
 import ModalAbortSigning from './ModalAbortSigning.vue'
 import ModalClaimDepositReward from './ModalClaimDepositReward.vue'
+import CamBtn from '@/components/CamBtn.vue'
+import Alert from '@/components/Alert.vue'
 
 @Component({
     components: {
         ModalClaimReward,
         ModalClaimDepositReward,
         ModalAbortSigning,
+        CamBtn,
+        Alert,
     },
 })
 export default class DepositRewardCard extends Vue {
@@ -188,6 +184,7 @@ export default class DepositRewardCard extends Vue {
     intervalID: any = null
     claimDisabled: boolean = true
     disclamer: boolean = false
+    // @ts-ignore
     helpers = this.globalHelper()
     // signedDepositID: string = ''
     @Prop() reward!: PlatformRewardDeposit
@@ -256,7 +253,6 @@ export default class DepositRewardCard extends Vue {
                 type: 'success',
             })
             this.updateMultisigTxDetails()
-            this.$store.dispatch('Platform/updateActiveDepositOffer')
             this.$store.dispatch('Signavault/updateTransaction')
         } catch (e: any) {
             this.helpers.dispatchNotification({
@@ -472,6 +468,10 @@ export default class DepositRewardCard extends Vue {
     margin-bottom: 1rem;
 }
 
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
 .offer_detail {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -567,10 +567,6 @@ label {
     > div {
         align-self: baseline;
     }
-}
-
-.v-btn {
-    margin-top: 0.5rem;
 }
 
 .bordered_button {
