@@ -678,7 +678,6 @@ export default class EditMultisigWallet extends Vue {
             setTimeout(async () => {
                 const staticAddresses = this.$store.getters['staticAddresses']('P')
                 const multisigAliases = await getMultisigAliases(staticAddresses)
-                console.log('multisigAliases', multisigAliases)
                 if (!multisigAliases.includes(msigAlias.replace('P-', '')))
                     await this.$store.dispatch('activateWallet', this.$store.state.wallets[0])
             }, 3000)
