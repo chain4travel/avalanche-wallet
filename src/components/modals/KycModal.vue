@@ -85,7 +85,7 @@ export default class KycModal extends Vue {
     }
     @Watch('themeSelected', { immediate: true })
     onthemechange(val: string) {
-        if (val === 'night') {
+        if (val === 'dark') {
             this.background = kycStyleNight
         } else {
             this.background = kycStyleDay

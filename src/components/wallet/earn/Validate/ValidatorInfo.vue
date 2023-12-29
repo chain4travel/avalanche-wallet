@@ -255,13 +255,13 @@ h4 {
     color: var(--primary-color);
 }
 
-[data-theme='night'] {
+[data-theme='dark'] {
     .v-icon {
         color: white;
     }
 }
 
-[data-theme='day'] {
+[data-theme='light'] {
     .info_div {
         border-color: gray !important;
         color: var(--primary-color);

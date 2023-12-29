@@ -141,7 +141,7 @@
 }
 
 @mixin night-mode {
-    html[data-theme='night'] {
+    html[data-theme='dark'] {
         @content;
     }
 }

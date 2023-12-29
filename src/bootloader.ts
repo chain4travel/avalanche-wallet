@@ -58,7 +58,7 @@ export const mount = (el: string, appSuiteStore: any) => {
             }
         },
         data: {
-            theme: 'night',
+            theme: 'dark',
         },
     })
     app.$mount(el)

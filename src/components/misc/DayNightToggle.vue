@@ -16,15 +16,15 @@ export default {
         setNight() {
             this.val = true
             // localStorage.setItem("theme", "night");
-            document.documentElement.setAttribute('data-theme', 'night')
-            this.$root.theme = 'night'
+            document.documentElement.setAttribute('data-theme', 'dark')
+            this.$root.theme = 'dark'
             this.$vuetify.theme.dark = true
         },
         setDay() {
             this.val = false
             // localStorage.setItem("theme", "day");
-            document.documentElement.setAttribute('data-theme', 'day')
-            this.$root.theme = 'day'
+            document.documentElement.setAttribute('data-theme', 'light')
+            this.$root.theme = 'light'
             this.$vuetify.theme.dark = false
         },
         toggle() {},
