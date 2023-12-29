@@ -324,7 +324,6 @@ export default class UserRewardCard extends Vue {
                             type: 'success',
                         })
                         this.updateBalance()
-                        this.$store.dispatch('Platform/updateActiveDepositOffer')
                         this.$store.dispatch('History/updateMultisigTransactionHistory')
                         this.disclamer = false
                         return this.updateMultisigTxDetails()
@@ -332,7 +331,6 @@ export default class UserRewardCard extends Vue {
 
                     this.confiremedClaimedAmount = this.formattedAmount(this.pendingRewards)
                     setTimeout(() => this.updateBalance(), 500)
-                    this.$store.dispatch('Platform/updateActiveDepositOffer')
                     this.updateMultisigTxDetails()
                     dispatchNotification({
                         message: this.$t('notifications.transfer_success_msg'),
@@ -387,7 +385,6 @@ export default class UserRewardCard extends Vue {
                 type: 'success',
             })
             this.updateMultisigTxDetails()
-            this.$store.dispatch('Platform/updateActiveDepositOffer')
             this.$store.dispatch('Signavault/updateTransaction')
         } catch (e: any) {
             this.helpers.dispatchNotification({

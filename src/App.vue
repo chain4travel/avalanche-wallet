@@ -20,8 +20,6 @@
 
         <LedgerWalletLoading></LedgerWalletLoading>
 
-        <NetworkLoadingBlock></NetworkLoadingBlock>
-
         <notifications></notifications>
     </v-app>
 </template>
@@ -31,7 +29,6 @@ import Notifications from '@/components/Notifications'
 import SaveAccountModal from '@/components/modals/SaveAccount/SaveAccountModal'
 import LedgerBlock from '@/components/modals/LedgerBlock'
 import LedgerUpgrade from '@/components/modals/LedgerUpgrade'
-import NetworkLoadingBlock from '@/components/misc/NetworkLoadingBlock'
 import UpgradeToAccountModal from '@/components/modals/SaveAccount/UpgradeToAccountModal'
 import LedgerWalletLoading from '@/components/modals/LedgerWalletLoading'
 import UrlBanner from '@/components/misc/UrlBanner'
@@ -41,7 +38,6 @@ export default {
         UrlBanner,
         LedgerWalletLoading,
         UpgradeToAccountModal,
-        NetworkLoadingBlock,
         LedgerBlock,
         LedgerUpgrade,
         SaveAccountModal,

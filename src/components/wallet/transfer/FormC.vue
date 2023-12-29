@@ -510,6 +510,7 @@ input,
 .gas_cont {
     column-gap: 14px;
     input {
+        border-radius: var(--border-radius-sm);
         width: 100%;
         &:disabled {
             color: var(--primary-color-light);
