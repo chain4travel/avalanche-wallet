@@ -7,16 +7,7 @@
                         <!-- PHASE 1 -->
                         <div v-if="!keyPhrase" class="stage_1">
                             <div class="img_container">
-                                <img
-                                    v-if="$store.state.theme === 'light'"
-                                    src="@/assets/diamond-secondary.png"
-                                    alt="diamond"
-                                />
-                                <img
-                                    v-else
-                                    src="@/assets/diamond-secondary-night.svg"
-                                    alt="diamond"
-                                />
+                                <img src="@/assets/diamond-secondary-night.svg" alt="diamond" />
                             </div>
                             <h1>{{ $t('create.generate') }}</h1>
                             <div @click="navigate('/login')" class="link">
@@ -70,7 +61,7 @@
                                 <div class="phrase_disp_col">
                                     <template v-if="!isVerified">
                                         <img
-                                            v-if="$root.theme === 'light'"
+                                            v-if="$store.state.theme === 'dark'"
                                             src="@/assets/keyphrase.png"
                                             alt=""
                                         />
@@ -151,7 +142,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import Spinner from '@/components/misc/Spinner.vue'
 import * as bip39 from 'bip39'
 

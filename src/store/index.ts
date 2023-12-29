@@ -107,8 +107,8 @@ export default new Vuex.Store({
     },
     mutations: {
         updateTheme(state) {
-            if (state.theme === 'light') state.theme = 'light'
-            else state.theme = 'dark'
+            if (state.theme === 'light') state.theme = 'dark'
+            else state.theme = 'light'
         },
         updateActiveAddress(state) {
             if (!state.activeWallet) {
