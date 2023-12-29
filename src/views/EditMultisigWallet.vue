@@ -988,7 +988,7 @@ input {
     gap: 0.5rem;
 }
 
-[data-theme='day'] {
+[data-theme='light'] {
     h1,
     h3 {
         color: var(--camino-slate-slate-950, #020617);

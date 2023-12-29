@@ -10,7 +10,7 @@
         </p>
         <p class="name_col mobile_only">{{ symbol }}</p>
         <router-link :to="sendLink" class="send_col" v-if="isBalance">
-            <img v-if="$root.theme === 'day'" src="@/assets/sidebar/transfer_nav.png" />
+            <img v-if="$root.theme === 'light'" src="@/assets/sidebar/transfer_nav.png" />
             <img v-else src="@/assets/sidebar/transfer_nav_night.svg" />
         </router-link>
         <p v-else></p>
@@ -24,16 +24,17 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
 
-import AvaAsset from '../../../js/AvaAsset'
-import Hexagon from '@/components/misc/Hexagon.vue'
 import { BN } from '@c4tplatform/caminojs/dist'
-import { bnToBig } from '../../../helpers/helper'
-import { priceDict } from '../../../store/types'
+import Big from 'big.js'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+
+import Hexagon from '@/components/misc/Hexagon.vue'
 import { WalletType } from '@/js/wallets/types'
 
-import Big from 'big.js'
+import { bnToBig } from '../../../helpers/helper'
+import AvaAsset from '../../../js/AvaAsset'
+import { priceDict } from '../../../store/types'
 
 @Component({
     components: {

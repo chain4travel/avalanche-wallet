@@ -38,7 +38,7 @@ export default class QRModal extends Vue {
     }
     @Watch('currentThemeSelected', { immediate: true })
     onthemechange(val: string) {
-        if (val === 'night') {
+        if (val === 'dark') {
             this.colorDark = '#E5E5E5'
             this.colorLight = '#0000'
         } else {
