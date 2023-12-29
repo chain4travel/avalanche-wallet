@@ -24,9 +24,14 @@
     --primary-font: 'Inter', sans-serif;
     --camino-brand-primary: linear-gradient(90deg, #0085ff 0%, #b440fc 100%);
     --tailwind-slate-slate-200: #e2e7f0;
+    --tailwind-slate-slate-300: #cbd4e2;
     --tailwind-slate-slate-600: #475569;
     --tailwind-slate-slate-900: #0f182a;
     --tailwind-slate-white: #fff;
+    --spacing-space-sm: 8px;
+    --spacing-space-md: 12px;
+    --spacing-space-base: 16px;
+    --spacing-space-lg: 24px;
 }
 
 html[data-theme='light'] {

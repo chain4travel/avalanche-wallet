@@ -25,6 +25,10 @@ export default {
 </script>
 
 <style lang="scss">
+input[type='checkbox'] {
+    display: none;
+}
+
 .checkbox {
     .v-label {
         color: var(--primary-color);
@@ -37,7 +41,8 @@ export default {
     }
 
     .v-input--selection-controls__ripple {
-        color: var(--secondary-color) !important;
+        color: var(--camino-brand-too-blue-to-be-true) !important;
+        opacity: 0.35;
     }
 }
 </style>
