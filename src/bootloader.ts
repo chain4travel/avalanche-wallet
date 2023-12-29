@@ -1,13 +1,13 @@
+import vuetify from '@/plugins/vuetify'
+import BootstrapVue from 'bootstrap-vue'
 import Vue from 'vue'
-import store from './store'
-import VueMeta from 'vue-meta'
-import router from './router'
-import App from './App.vue'
 import { Datetime } from 'vue-datetime'
 import 'vue-datetime/dist/vue-datetime.css'
+import VueMeta from 'vue-meta'
+import App from './App.vue'
 import i18n from './plugins/i18n'
-import BootstrapVue from 'bootstrap-vue'
-import vuetify from '@/plugins/vuetify'
+import router from './router'
+import store from './store'
 
 Vue.use(VueMeta)
 Vue.use(BootstrapVue)
@@ -21,6 +21,7 @@ export const mount = (el: string, appSuiteStore: any) => {
         dispatchNotification,
         navigate,
         updateShowAlias,
+        setWalletSwitched,
     } = appSuiteStore
     const MyPlugin = {
         install(Vue) {
@@ -30,6 +31,7 @@ export const mount = (el: string, appSuiteStore: any) => {
                     updateShowAlias: () => updateShowAlias(),
                     logout: () => setLogOut(true),
                     setAccount: (acc) => setAccount(acc),
+                    setWalletSwitched: (s) => setWalletSwitched(s),
                     dispatchNotification: (params) => dispatchNotification(params),
                     navigate: (to: string) => {
                         navigate(to)
