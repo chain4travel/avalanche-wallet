@@ -5,23 +5,23 @@
                 <div>
                     <AvaxInput v-model="claimAmount" :max="amount" :initial="amount"></AvaxInput>
                     <br />
-                    <p class="text-modal">
+                    <Alert variant="warning">
                         {{
                             $t('validator.rewards.modal_claim.kindy_be_aware', {
                                 fee: feeTx,
                                 symbol: nativeAssetSymbol,
                             })
                         }}
-                    </p>
+                    </Alert>
                     <br />
                 </div>
-                <div class="modal-claim-reward-div-options">
-                    <v-btn depressed class="button_primary" @click="close()">
+                <div class="modal-buttons">
+                    <CamBtn variant="transparent" @click="close()">
                         {{ $t('validator.rewards.modal_claim.cancel') }}
-                    </v-btn>
-                    <v-btn depressed class="button_secondary btn-claim" @click="confirmClaim()">
+                    </CamBtn>
+                    <CamBtn variant="primary" @click="confirmClaim()">
                         {{ $t('validator.rewards.modal_claim.claim') }}
-                    </v-btn>
+                    </CamBtn>
                 </div>
             </div>
             <div class="confirmed-claimed" v-else>
@@ -50,11 +50,15 @@ import { WalletHelper } from '../../../../helpers/wallet_helper'
 import { ava } from '@/AVA'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
 import { bnToBigAvaxX } from '@/helpers/helper'
+import CamBtn from '@/components/CamBtn.vue'
+import Alert from '@/components/Alert.vue'
 
 @Component({
     components: {
         Modal,
         AvaxInput,
+        CamBtn,
+        Alert,
     },
 })
 export default class ModalClaimReward extends Vue {
@@ -86,6 +90,8 @@ export default class ModalClaimReward extends Vue {
     }
 
     async confirmClaim() {
+        // @ts-ignore
+        let { dispatchNotification } = this.globalHelper()
         try {
             let txClaim = this.$store.getters['Signavault/transactions'].find(
                 (item: any) =>
@@ -100,6 +106,13 @@ export default class ModalClaimReward extends Vue {
                 this.rewardOwner
             )
 
+            dispatchNotification({
+                message: this.$t('notifications.multisig_transaction_saved', {
+                    txId: txClaim?.tx?.id,
+                }),
+                type: 'success',
+            })
+
             if (this.isMultisignTx) {
                 this.claimed = true
                 this.close()
@@ -112,6 +125,12 @@ export default class ModalClaimReward extends Vue {
             console.error(e)
             if (this.isMultisignTx) {
                 this.close()
+                dispatchNotification({
+                    message: this.$t('notifications.execute_multisig_transaction_error', {
+                        error: e ?? '',
+                    }),
+                    type: 'error',
+                })
                 this.$emit('beforeCloseModal', false)
             } else {
                 this.claimed = false
@@ -129,7 +148,12 @@ export default class ModalClaimReward extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../../styles/main';
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 10px;
+}
 
 .modal-claim-reward-div {
     padding: 30px 22px;
@@ -138,29 +162,10 @@ export default class ModalClaimReward extends Vue {
     overflow-x: hidden;
 }
 
-.options-buttons {
-    width: 100%;
-    display: flex;
-}
-
-.btn-options {
-    position: relative;
-    height: 24px !important;
-}
-
-.btn-claim {
-    position: relative;
-    left: 15px;
-}
-
-.text-modal {
-    text-align: center;
-    color: rgb(117, 117, 117);
-}
-
 @media screen and (max-width: 720px) {
     .modal-claim-reward-div {
         width: 350px;
+        min-width: fit-content;
     }
 }
 
