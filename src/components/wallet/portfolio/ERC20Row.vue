@@ -18,7 +18,10 @@
                 opacity: isBalance ? 1 : 0.4,
             }"
         >
-            <img v-if="$root.theme === 'day'" :src="require('@/assets/sidebar/transfer_nav.png')" />
+            <img
+                v-if="$root.theme === 'light'"
+                :src="require('@/assets/sidebar/transfer_nav.png')"
+            />
             <img v-else :src="require('@/assets/sidebar/transfer_nav_night.svg')" />
         </component>
         <p class="balance_col">
@@ -27,7 +30,8 @@
     </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+
 import Erc20Token from '@/js/Erc20Token'
 
 @Component

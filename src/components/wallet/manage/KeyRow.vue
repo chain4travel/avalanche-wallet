@@ -293,7 +293,6 @@ export default class KeyRow extends Vue {
     select() {
         this.activating = true
         this.$emit('select', this.wallet)
-        this.$store.dispatch('Platform/updateActiveDepositOffer')
     }
 
     showModal() {
@@ -383,7 +382,7 @@ export default class KeyRow extends Vue {
     filter: invert(0);
 }
 
-[data-theme='night'] .icon {
+[data-theme='dark'] .icon {
     filter: invert(1);
 }
 

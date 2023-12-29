@@ -3,14 +3,8 @@
         <div class="claim-reward-modal">
             <div v-if="claimed === 0">
                 <div v-if="canExecuteMultisigTx">
-                    <h3>
-                        {{
-                            $t('earn.rewards.claim_modal.are_you_sure', {
-                                amount: claimableAmount,
-                                symbol: nativeAssetSymbol,
-                            })
-                        }}
-                    </h3>
+                    <AvaxInput v-model="amt" :max="amount" :initial="amount"></AvaxInput>
+                    <br />
                 </div>
                 <div v-if="!canExecuteMultisigTx">
                     <AvaxInput v-model="amt" :max="amount" :initial="amount"></AvaxInput>
@@ -25,12 +19,12 @@
                     </p>
                 </div>
                 <div class="modal-buttons">
-                    <v-btn depressed class="button_secondary btn-claim" @click="confirmClaim()">
-                        {{ $t('earn.rewards.claim_modal.confirm') }}
-                    </v-btn>
-                    <v-btn depressed class="button_primary" @click="close()">
+                    <CamBtn variant="transparent" @click="close()">
                         {{ $t('earn.rewards.claim_modal.cancel') }}
-                    </v-btn>
+                    </CamBtn>
+                    <CamBtn variant="primary" @click="confirmClaim()">
+                        {{ $t('earn.rewards.claim_modal.confirm') }}
+                    </CamBtn>
                 </div>
             </div>
             <div class="confirmed-claimed" v-else-if="claimed === 1">
@@ -71,11 +65,13 @@ import Big from 'big.js'
 import 'reflect-metadata'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import Modal from '../../modals/Modal.vue'
+import CamBtn from '@/components/CamBtn.vue'
 
 @Component({
     components: {
         AvaxInput,
         Modal,
+        CamBtn,
     },
 })
 export default class ModalClaimDepositReward extends Vue {
@@ -178,13 +174,12 @@ export default class ModalClaimDepositReward extends Vue {
                 wallet,
                 this.depositTxID,
                 rewardOwner,
-                this.amount,
+                this.amt,
                 this.validatorClaim
             )
                 .then(async (value) => {
                     if (!value) {
                         // multisg flow
-                        this.$store.dispatch('Platform/updateActiveDepositOffer')
                         this.$store.dispatch('Signavault/updateTransaction')
                         dispatchNotification({
                             message: this.$t('notifications.transfer_success_msg'),
@@ -194,9 +189,8 @@ export default class ModalClaimDepositReward extends Vue {
                         return this.updateMultisigTxDetails()
                     }
 
-                    this.confiremedClaimedAmount = this.formattedAmount(this.amount)
+                    this.confiremedClaimedAmount = this.formattedAmount(this.amt)
                     this.updateBalance()
-                    this.$store.dispatch('Platform/updateActiveDepositOffer')
                     this.updateMultisigTxDetails()
                     this.updateRewards()
                     this.helpers.dispatchNotification({
@@ -233,7 +227,6 @@ export default class ModalClaimDepositReward extends Vue {
             })
             this.updateBalance()
             this.updateRewards()
-            this.$store.dispatch('Platform/updateActiveDepositOffer')
             this.$store.dispatch('Signavault/updateTransaction')
             this.claimed = 1
         } catch (e: any) {
@@ -255,7 +248,7 @@ export default class ModalClaimDepositReward extends Vue {
 
             const amount = claimAmounts[0].getAmount()
             this.confiremedClaimedAmount = bnToBig(new BN(amount), 9)?.toLocaleString()
-        } else this.confiremedClaimedAmount = this.formattedAmount(this.amount)
+        } else this.confiremedClaimedAmount = this.formattedAmount(this.amt)
     }
 }
 </script>

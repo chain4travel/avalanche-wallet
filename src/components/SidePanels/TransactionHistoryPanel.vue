@@ -22,8 +22,8 @@
                 :transaction="tx"
                 class="tx_row"
             ></tx-history-row>
-            <p class="warn">{{ $t('transactions.warn_loading') }}</p>
         </div>
+        <p class="warn">{{ $t('transactions.warn_loading') }}</p>
     </div>
 </template>
 <script lang="ts">
@@ -140,6 +140,7 @@ export default class TransactionHistoryPanel extends Vue {
     overflow: scroll;
     padding: 8px 16px;
     padding-bottom: 20px;
+    flex-grow: 1;
 }
 
 .empty {
@@ -161,7 +162,6 @@ export default class TransactionHistoryPanel extends Vue {
     @include mixins.typography-caption;
     font-weight: bold;
     padding: 15px;
-    border-radius: var(--border-radius-sm);
 }
 
 .history_block {

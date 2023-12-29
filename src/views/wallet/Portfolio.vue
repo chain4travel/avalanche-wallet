@@ -20,7 +20,7 @@
             </div>
             <div style="flex-grow: 1"></div>
             <div class="search hover_border">
-                <img v-if="$root.theme === 'day'" src="@/assets/search.png" />
+                <img v-if="$root.theme === 'light'" src="@/assets/search.png" />
                 <img v-else src="@/assets/search_night.svg" />
                 <input :placeholder="$t('portfolio.search')" v-model="search" />
             </div>

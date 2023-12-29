@@ -1,35 +1,33 @@
 <template>
     <tr class="utxo_row">
         <td class="col_explorer">
-            <a
-                v-if="explorerLink"
-                @click="redirect()"
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                <fa icon="globe"></fa>
-            </a>
+            <div @click="redirect()" v-if="explorerLink" class="col_link">
+                <img
+                    v-if="$store.state.theme === 'night'"
+                    src="@/assets/globe_light.svg"
+                    alt="globe"
+                />
+                <img v-else src="@/assets/globe_dark.svg" alt="globe" />
+            </div>
         </td>
         <td class="col_id">
             <p>{{ utxo.getUTXOID() }}</p>
         </td>
         <td>{{ typeName }}</td>
-        <td class="col_locktime">{{ locktimeText }}</td>
         <td class="col_thresh">{{ out.getThreshold() }}</td>
         <td class="col_owners">
             <p v-for="addr in addresses" :key="addr">{{ addr }}</p>
         </td>
         <td class="col_bal">
             <div>
-                <p>{{ balanceText }}</p>
+                <p class="bal">{{ balanceText }}</p>
                 <p>{{ symbol }}</p>
             </div>
         </td>
     </tr>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import { AmountOutput, AVMConstants, UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm'
 import {
     PlatformVMConstants,
@@ -40,7 +38,6 @@ import { ava, bintools } from '@/AVA'
 import AvaAsset from '@/js/AvaAsset'
 import { bnToBig } from '@/helpers/helper'
 import { UnixNow } from '@c4tplatform/caminojs/dist/utils'
-import { AvaNetwork } from '@/js/AvaNetwork'
 
 @Component
 export default class UTXORow extends Vue {
@@ -79,11 +76,15 @@ export default class UTXORow extends Vue {
         return asset
     }
 
+    @Watch('$store.state.Network.selectedNetwork', { immediate: true })
     get explorerLink() {
-        let net: AvaNetwork = this.$store.state.Network.selectedNetwork
-        let explorer = net.explorerSiteUrl
-        if (!explorer) return null
-        return explorer + '/x-chain/transactions/' + bintools.cb58Encode(this.utxo.getTxID())
+        const selectedNetwork = this.$store.state.Network.selectedNetwork
+        const explorerBaseUrl = selectedNetwork.explorerSiteUrl
+        if (!explorerBaseUrl) return null
+
+        const encodedTxId = bintools.cb58Encode(this.utxo.getTxID())
+
+        return `${explorerBaseUrl}/${selectedNetwork.name.toLowerCase()}/x-chain/tx/${encodedTxId}`
     }
 
     redirect() {
@@ -168,13 +169,18 @@ td {
     padding: 0;
 }
 
-.col_id {
-    p {
-        width: 80px;
-        overflow: auto;
-        text-overflow: ellipsis;
+.col_link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+
+    img {
+        width: 1rem;
+        height: 1rem;
     }
 }
+
 .col_bal {
     > div {
         display: grid;
@@ -193,20 +199,32 @@ td {
 }
 
 .col_owners {
-    //word-break: break-all;
     > p {
         text-overflow: ellipsis;
     }
 }
 
+.col_thresh {
+    text-align: end;
+}
+
 .col_explorer {
-    text-align: center;
     a {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         color: var(--primary-color-light);
 
         &:hover {
             color: var(--secondary-color);
         }
+    }
+}
+
+.col_bal {
+    .bal {
+        text-align: end;
+        margin-right: 0.3rem;
     }
 }
 </style>

@@ -56,6 +56,13 @@
                     saved.
                 </p>
             </div>
+
+            <Alert
+                v-for="(error, index) in errors"
+                variant="negative"
+                :title="error"
+                :key="index"
+            ></Alert>
             <button
                 :class="['camino__primary--button', { 'camino--button--disabled': !canSubmit }]"
                 :disabled="!canSubmit"
@@ -69,15 +76,16 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
-import { SaveAccountInput } from '@/store/types'
-import { iUserAccountEncrypted } from '@/store/types'
 import Identicon from '@/components/misc/Identicon.vue'
+import { SaveAccountInput, iUserAccountEncrypted } from '@/store/types'
+import Alert from './Alert.vue'
 
 @Component({
     components: {
         Identicon,
+        Alert,
     },
 })
 export default class SaveAccount extends Vue {
@@ -91,19 +99,24 @@ export default class SaveAccount extends Vue {
     existsInLocalStorage: boolean = false
     index: number = 0
     foundAccount: iUserAccountEncrypted | null = null
-
+    errors: string[] = []
     get canSubmit() {
-        if (this.error !== null) return false
+        if (this.errors.length !== 0) return false
         return true
     }
 
-    get error() {
-        if (!this.password) return this.$t('keys.password_validation')
-        if (!this.password_confirm) return this.$t('keys.password_validation2')
-        if (this.accountName.length < 1) return this.$t('keys.account_name_required')
-        if (this.password.length < 9) return this.$t('keys.password_validation')
-        if (this.password !== this.password_confirm) return this.$t('keys.password_validation2')
-
+    @Watch('password_confirm')
+    @Watch('accountName')
+    @Watch('password')
+    checkError() {
+        this.errors = []
+        if (this.password && this.password !== this.password_confirm)
+            this.errors.push(this.$t('keys.password_validation2') as string)
+        if (!this.password) this.errors.push(this.$t('keys.password_validation') as string)
+        if (this.password.length < 9)
+            this.errors.push(this.$t('keys.password_validation') as string)
+        if (this.accountName.length < 1)
+            this.errors.push(this.$t('keys.account_name_required') as string)
         return null
     }
 
