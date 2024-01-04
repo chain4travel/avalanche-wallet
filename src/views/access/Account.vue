@@ -8,7 +8,7 @@
                 <cam-input
                     class="pass"
                     type="password"
-                    :placeholder="Password"
+                    :placeholder="`Password`"
                     v-model="password"
                 />
                 <p class="err">{{ error }}</p>
