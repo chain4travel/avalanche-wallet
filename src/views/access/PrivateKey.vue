@@ -14,6 +14,7 @@
                 <CamBtn
                     variant="primary"
                     style="width: 100%"
+                    :type="`button`"
                     @click="access"
                     :loading="isLoading"
                     :disabled="!canSubmit"
