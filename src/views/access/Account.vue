@@ -4,26 +4,24 @@
             <Identicon :value="account.name"></Identicon>
             <h1>{{ account.name }}</h1>
             <form @submit.prevent="access">
-                <input class="pass_name" :value="account.name" />
-                <input
-                    class="single_line_input hover_border pass"
+                <cam-input class="pass_name" :value="account.name" />
+                <cam-input
+                    class="pass"
                     type="password"
-                    placeholder="Password"
+                    :placeholder="Password"
                     v-model="password"
                 />
                 <p class="err">{{ error }}</p>
-                <v-btn
-                    class="ava_button button_primary"
+                <CamBtn
+                    variant="primary"
+                    style="width: 100%"
                     @click="access"
                     :loading="isLoading"
                     :disabled="!canSubmit"
-                    depressed
                 >
                     {{ $t('access.submit') }}
-                </v-btn>
+                </CamBtn>
                 <small>{{ $t('keys.account_slow_warning') }}</small>
-                <br />
-                <br />
             </form>
             <div @click="returnToLogin" class="link">{{ $t('access.cancel') }}</div>
         </div>
@@ -33,9 +31,11 @@
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { ImportKeyfileInput } from '@/store/types'
 import Identicon from '@/components/misc/Identicon.vue'
+import CamBtn from '@/components/CamBtn.vue'
+import CamInput from '@/components/CamInput.vue'
 
 @Component({
-    components: { Identicon },
+    components: { Identicon, CamBtn, CamInput },
 })
 export default class Account extends Vue {
     @Prop() index: string
@@ -123,7 +123,8 @@ export default class Account extends Vue {
 @use '../../styles/abstracts/mixins';
 .pass {
     text-align: center;
-    background-color: var(--bg-light) !important;
+    background-color: var(--bg-wallet-light) !important;
+    border-radius: 8px;
 }
 
 .ava_button {
@@ -144,10 +145,16 @@ export default class Account extends Vue {
     border-radius: 6px;
 }
 .content {
-    width: 340px;
-    max-width: 100%;
-    margin: 0px auto;
     text-align: center;
+    max-width: 420px;
+    background-color: var(--bg-light);
+    padding: 40px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
 }
 h1 {
     font-size: variables.$m-size;
@@ -155,7 +162,7 @@ h1 {
 }
 
 form {
-    margin: 14px 0;
+    margin-bottom: 20px;
 }
 .file_in {
     margin: 30px auto 10px;

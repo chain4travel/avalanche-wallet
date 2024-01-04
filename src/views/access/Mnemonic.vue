@@ -11,16 +11,15 @@
         />
         <div class="button_container">
             <p class="err" v-if="err">{{ err }}</p>
-            <v-btn
-                class="ava_button but_primary button_primary access"
+            <CamBtn
+                variant="primary"
                 @click="access"
-                depressed
                 :loading="isLoading"
                 :disabled="!canSubmit"
                 data-cy="btn-submit-mnemonic-phrase"
             >
                 {{ $t('access.submit') }}
-            </v-btn>
+            </CamBtn>
             <div @click="navigate('/login')" class="link">
                 {{ $t('access.cancel') }}
             </div>
@@ -34,11 +33,13 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import MnemonicDisplay from '@/components/misc/MnemonicDisplay.vue'
 import * as bip39 from 'bip39'
 import MnemonicInput from '@/components/misc/MnemonicInput.vue'
+import CamBtn from '@/components/CamBtn.vue'
 
 @Component({
     components: {
         MnemonicInput,
         MnemonicDisplay,
+        CamBtn,
     },
 })
 export default class Mnemonic extends Vue {
@@ -134,9 +135,6 @@ h1 {
     font-size: variables.$m-size;
 }
 
-textarea {
-}
-
 label {
     text-align: left;
     color: variables.$primary-color-light;
@@ -192,6 +190,7 @@ textarea {
 .button_container {
     display: flex;
     flex-direction: column;
+    gap: 1rem;
 }
 
 .link {

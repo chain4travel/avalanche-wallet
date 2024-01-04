@@ -19,14 +19,14 @@
             <button @click="isHidden = !isHidden" class="hidden-toggle">
                 <fa v-if="isHidden" icon="eye-slash"></fa>
                 <fa v-else icon="eye"></fa>
+                <label style="margin-left: 4px">
+                    {{
+                        isHidden
+                            ? $t('access.mnemonic.showKeyPhrase')
+                            : $t('access.mnemonic.hideKeyPhrase')
+                    }}
+                </label>
             </button>
-            <label>
-                {{
-                    isHidden
-                        ? $t('access.mnemonic.showKeyPhrase')
-                        : $t('access.mnemonic.hideKeyPhrase')
-                }}
-            </label>
         </div>
     </div>
 </template>
@@ -104,6 +104,7 @@ export default class MnemonicDisplay extends Vue {
     font-weight: 700;
 
     background-color: var(--bg);
+    border-radius: 8px;
 
     > * {
         padding: 16px 6px;
@@ -162,6 +163,9 @@ label {
     align-items: flex-start;
     max-height: 1.25em;
     min-width: 1.25em;
+    label {
+        cursor: pointer;
+    }
 }
 
 .show-hide-wrapper {
