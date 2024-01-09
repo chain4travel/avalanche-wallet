@@ -142,6 +142,7 @@ export interface KeyFileV7 {
 }
 
 export interface KeyFileKeyV7 {
+    network?: string
     name: string
     key: string
     iv: string
