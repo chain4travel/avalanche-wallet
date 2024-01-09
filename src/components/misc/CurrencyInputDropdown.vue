@@ -74,7 +74,7 @@ export default class CurrencyInputDropdown extends Vue {
         bigIn: BigNumInput
     }
 
-    @Watch('pendingTxAmount', { immediate: true })
+    @Watch('pendingTxAmount')
     updateAmount() {
         if (this.chainId === 'P' && !!this.pendingTxAmount) {
             this.$refs.bigIn.val = this.pendingTxAmount.replace(/\s/g, '')
@@ -121,7 +121,7 @@ export default class CurrencyInputDropdown extends Vue {
     }
     maxOut() {
         // @ts-ignore
-        this.$refs.bigIn.maxout()
+        this.$refs.bigIn?.maxout()
     }
 
     amount_in(val: BN) {

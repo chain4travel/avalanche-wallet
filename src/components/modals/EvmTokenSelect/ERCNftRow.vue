@@ -1,8 +1,8 @@
 <template>
     <div class="family_row" v-if="hasBalance">
         <div class="title_row">
-            <p>{{ token.symbol }}</p>
-            <p class="name">{{ token.name }}</p>
+            <p>{{ token.symbol || token.data.symbol }}</p>
+            <p class="name">{{ token.name || token.data.name }}</p>
         </div>
 
         <div class="items">
@@ -10,7 +10,7 @@
                 v-for="tokenIndex in walletBalance"
                 :key="tokenIndex.tokenId"
                 class="item"
-                :token="token"
+                :token="token.data"
                 :index="tokenIndex"
                 @click.native="selectToken(tokenIndex)"
             ></ERCNftView>
@@ -35,7 +35,10 @@ export default class ERCNftRow extends Vue {
     // }
 
     get walletBalance(): ERCNftBalance[] {
-        return this.$store.state.Assets.ERCNft.walletBalance[this.token.data.address] || []
+        const ownedTokens = (
+            this.$store.state.Assets.ERCNft.walletBalance[this.token.data.address] || []
+        ).filter((token: ERCNftBalance) => token.quantity > 0)
+        return ownedTokens
     }
 
     get hasBalance(): boolean {
