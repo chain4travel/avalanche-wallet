@@ -20,11 +20,12 @@
                     <p class="col_bal">{{ t.balanceBig.toLocaleString() }}</p>
                 </div>
             </div>
-            <div class="nft_list">
+
+            <div class="nft_list" v-if="!isEmpty">
                 <ERCNftRow
                     class="nft_row"
                     v-for="t in ercNfts"
-                    :key="t.contractAddress"
+                    :key="t.data.address"
                     :token="t"
                     @select="onERCNftSelect"
                 ></ERCNftRow>
@@ -58,6 +59,13 @@ export default class EVMTokenSelectModal extends Vue {
     open(): void {
         let modal = this.$refs.modal as Modal
         modal.open()
+    }
+
+    get isEmpty(): boolean {
+        let nftUtxos = this.$store.state.Assets.nftUTXOs.length
+        let mintUTxos = this.$store.state.Assets.nftMintUTXOs.length
+        let ercNftBal = this.$store.getters['Assets/ERCNft/totalOwned']
+        return nftUtxos + mintUTxos + ercNftBal === 0
     }
 
     get tokens(): Erc20Token[] {

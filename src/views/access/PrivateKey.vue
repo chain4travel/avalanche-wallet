@@ -3,28 +3,25 @@
         <div class="content">
             <h1>Private Key</h1>
             <form @submit.prevent="access">
-                <v-text-field
+                <cam-input
                     class="pass"
-                    label="Private Key"
-                    dense
-                    solo
-                    flat
+                    :placeholder="`Private Key`"
                     :type="inputType"
                     v-model="privatekey"
-                    hide-details
                     data-cy="field-private-key"
-                ></v-text-field>
+                ></cam-input>
                 <p class="err">{{ error }}</p>
-                <v-btn
-                    class="ava_button button_primary"
+                <CamBtn
+                    variant="primary"
+                    style="width: 100%"
+                    :type="`button`"
                     @click="access"
                     :loading="isLoading"
                     :disabled="!canSubmit"
-                    depressed
                     data-cy="btn-submit-private-key"
                 >
                     {{ $t('access.submit') }}
-                </v-btn>
+                </CamBtn>
             </form>
             <div @click="navigate('/login')" class="link">Cancel</div>
         </div>
@@ -32,8 +29,15 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import CamBtn from '@/components/CamBtn.vue'
+import CamInput from '@/components/CamInput.vue'
 
-@Component
+@Component({
+    components: {
+        CamBtn,
+        CamInput,
+    },
+})
 export default class PrivateKey extends Vue {
     @Prop() navigate: any
     privatekey: string = ''
@@ -83,6 +87,7 @@ export default class PrivateKey extends Vue {
 @use '../../styles/abstracts/mixins';
 .pass {
     background-color: var(--bg) !important;
+    border-radius: 8px;
 }
 .ava_button {
     width: 100%;
@@ -114,6 +119,7 @@ h1 {
 }
 form {
     width: 100%;
+    margin-bottom: 20px;
 }
 .file_in {
     margin: 30px auto 10px;
@@ -128,6 +134,7 @@ a {
 }
 .link {
     color: var(--secondary-color);
+    margin-bottom: 0px;
 }
 .remember {
     margin: 12px 0;

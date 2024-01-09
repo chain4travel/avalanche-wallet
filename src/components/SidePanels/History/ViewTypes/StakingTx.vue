@@ -310,6 +310,9 @@ export default class StakingTx extends Vue {
     @include mixins.typography-caption;
     column-gap: 1em;
     color: var(--primary-color-light);
+    p:nth-of-type(2) {
+        text-align: right;
+    }
 }
 
 .bar_row {
