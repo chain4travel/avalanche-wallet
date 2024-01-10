@@ -251,14 +251,24 @@ export default class KeyRow extends Vue {
                 return
             } else if (this.customWalletName !== this.walletName) {
                 this.wallet.name = this.customWalletName
-                this.$store.state.volatileWallets.push(this.wallet)
+                this.$store.state.volatileWallets = [
+                    ...this.$store.state.volatileWallets,
+                    this.wallet,
+                ]
+                this.globalHelper()?.setWalletSwitched({
+                    address: this.activeWallet.getStaticAddress('P'),
+                    walletName: this.activeWallet.name,
+                })
+                // this.$emit('edit', this.wallet.name)
             }
         } else {
             this.customWalletName = this.walletName
             this.$nextTick(() => this.$refs.editNameInput.focus())
         }
     }
-
+    get activeWallet(): WalletType {
+        return this.$store.state.activeWallet
+    }
     onCancel() {
         this.isEditable = false
         this.customWalletName = this.walletName
