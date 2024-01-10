@@ -112,9 +112,9 @@ export default class SaveAccount extends Vue {
         this.errors = []
         if (this.password && this.password !== this.password_confirm)
             this.errors.push(this.$t('keys.password_validation2') as string)
-        if (!this.password) this.errors.push(this.$t('keys.password_validation') as string)
-        if (this.password.length < 9)
+        if (!this.password || this.password.length < 9)
             this.errors.push(this.$t('keys.password_validation') as string)
+
         if (this.accountName.length < 1)
             this.errors.push(this.$t('keys.account_name_required') as string)
         return null
