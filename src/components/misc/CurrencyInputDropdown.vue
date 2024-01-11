@@ -12,7 +12,7 @@
                         :max="max_amount"
                         :denomination="denomination"
                         :step="stepSize"
-                        :placeholder="placeholder"
+                        :placeholder="pendingSendMultisigTX ? pendingTxAmountString : placeholder"
                         :disabled="disabled || (pendingSendMultisigTX && chainId === 'P')"
                     ></big-num-input>
                 </div>
@@ -33,27 +33,24 @@
     </div>
 </template>
 <script lang="ts">
-import 'reflect-metadata'
-import { Vue, Component, Prop, Emit, Watch } from 'vue-property-decorator'
 import { BN } from '@c4tplatform/caminojs/dist'
+import 'reflect-metadata'
+import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 
 // @ts-ignore
-import { BigNumInput } from '@c4tplatform/vue_components'
-import AvaAsset from '@/js/AvaAsset'
 import { ICurrencyInputDropdownValue } from '@/components/wallet/transfer/types'
+import AvaAsset from '@/js/AvaAsset'
 import { IWalletAssetsDict, priceDict } from '@/store/types'
+import { BigNumInput } from '@c4tplatform/vue_components'
 
-import BalanceDropdown from '@/components/misc/BalancePopup/BalanceDropdown.vue'
 import { ava } from '@/AVA'
-import Big from 'big.js'
-import { bnToBig } from '@/helpers/helper'
+import BalanceDropdown from '@/components/misc/BalancePopup/BalanceDropdown.vue'
 import { ChainIdType } from '@/constants'
+import { bnToBig } from '@/helpers/helper'
 import { WalletHelper } from '@/helpers/wallet_helper'
-import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { WalletType } from '@/js/wallets/types'
-import { ITransactionData } from '@/store/modules/history/types'
-import { parse } from '@/store/modules/history/history_utils'
-import { getTransactionSummary } from '@/helpers/history_helper'
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
+import Big from 'big.js'
 
 @Component({
     components: {
@@ -74,11 +71,9 @@ export default class CurrencyInputDropdown extends Vue {
         bigIn: BigNumInput
     }
 
-    @Watch('pendingTxAmount')
-    updateAmount() {
-        if (this.chainId === 'P' && !!this.pendingTxAmount) {
-            this.$refs.bigIn.val = this.pendingTxAmount.replace(/\s/g, '')
-        }
+    get pendingTxAmountString() {
+        if (this.pendingTxAmount) return this.pendingTxAmount.replace(/\s/g, '')
+        return ''
     }
     mounted() {
         if (this.isEmpty) return
@@ -120,6 +115,7 @@ export default class CurrencyInputDropdown extends Vue {
         }
     }
     maxOut() {
+        if (this.pendingTxAmount) return
         // @ts-ignore
         this.$refs.bigIn?.maxout()
     }
