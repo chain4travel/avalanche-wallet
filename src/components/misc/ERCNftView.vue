@@ -1,7 +1,7 @@
 <template>
     <div class="ercNft_view">
         <img :src="parseURL(img)" v-if="!isError && img" />
-        <div v-if="isError" class="err_cont">
+        <div v-if="isError || img === null" class="err_cont">
             <p>
                 <fa icon="unlink"></fa>
             </p>
@@ -53,6 +53,7 @@ export default class ERCNftView extends Vue {
     get img() {
         let data = this.metadata
         if (!data) return null
+        console.log('img', checkIPFSUri(data.img || data.image || null))
         return checkIPFSUri(data.img || data.image || null)
     }
 
@@ -70,6 +71,8 @@ export default class ERCNftView extends Vue {
 .ercNft_view {
     width: 100%;
     height: 100%;
+    border-radius: 8px;
+    overflow: hidden;
 }
 img,
 .err_cont {
