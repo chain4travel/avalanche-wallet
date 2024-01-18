@@ -12,7 +12,7 @@
                         :max="max_amount"
                         :denomination="denomination"
                         :step="stepSize"
-                        :placeholder="placeholder"
+                        :placeholder="pendingSendMultisigTX ? pendingTxAmountString : placeholder"
                         :disabled="disabled || (pendingSendMultisigTX && chainId === 'P')"
                     ></big-num-input>
                 </div>
@@ -71,11 +71,9 @@ export default class CurrencyInputDropdown extends Vue {
         bigIn: BigNumInput
     }
 
-    @Watch('pendingTxAmount')
-    updateAmount() {
-        if (this.chainId === 'P' && !!this.pendingTxAmount) {
-            this.$refs.bigIn.val = this.pendingTxAmount.replace(/\s/g, '')
-        }
+    get pendingTxAmountString() {
+        if (this.pendingTxAmount) return this.pendingTxAmount.replace(/\s/g, '')
+        return ''
     }
     mounted() {
         if (this.isEmpty) return
@@ -117,6 +115,7 @@ export default class CurrencyInputDropdown extends Vue {
         }
     }
     maxOut() {
+        if (this.pendingTxAmount) return
         // @ts-ignore
         this.$refs.bigIn?.maxout()
     }
