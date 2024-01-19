@@ -226,7 +226,7 @@ export default class CurrencyInputDropdown extends Vue {
 .bigIn {
     width: 100%;
     border: none !important;
-    @include mixins.typography-caption;
+    @include mixins.typography-body-2;
 }
 .pending {
     color: var(--primary-color-light) !important;
