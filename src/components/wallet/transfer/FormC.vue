@@ -121,22 +121,22 @@
     </div>
 </template>
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
-import { priceDict } from '@/store/types'
-import { WalletType } from '@/js/wallets/types'
-import { bnToAvaxC, bnToBigAvaxC, bnToBigAvaxX } from '@/helpers/helper'
 import { estimateAvaxGas, getAdjustedGasPrice } from '@/helpers/gas_helper'
+import { bnToAvaxC, bnToBigAvaxX } from '@/helpers/helper'
+import { WalletType } from '@/js/wallets/types'
+import { priceDict } from '@/store/types'
+import { Component, Vue } from 'vue-property-decorator'
 
 // @ts-ignore
-import { QrInput } from '@c4tplatform/vue_components'
-import { BN } from '@c4tplatform/caminojs/dist'
-import { bnToBig } from '@/helpers/helper'
-import { web3 } from '@/evm'
 import EVMInputDropdown from '@/components/misc/EVMInputDropdown/EVMInputDropdown.vue'
-import Erc20Token from '@/js/Erc20Token'
 import { iERCNftSelectInput } from '@/components/misc/EVMInputDropdown/types'
+import { web3 } from '@/evm'
+import { bnToBig } from '@/helpers/helper'
 import { WalletHelper } from '@/helpers/wallet_helper'
+import Erc20Token from '@/js/Erc20Token'
+import { BN } from '@c4tplatform/caminojs/dist'
+import { QrInput } from '@c4tplatform/vue_components'
 
 @Component({
     components: {
@@ -486,9 +486,6 @@ h4 {
     border-right: 1px solid var(--bg-light);
 }
 
-.list_item {
-    margin-bottom: 12px;
-}
 .table_title {
     display: flex;
     flex-direction: row;
@@ -564,7 +561,6 @@ label {
         display: block;
     }
     .form {
-        padding-bottom: 14px;
         border: none;
         padding-right: 0;
     }

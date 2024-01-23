@@ -57,18 +57,18 @@
     </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 //@ts-ignore
-import { BigNumInput } from '@c4tplatform/vue_components'
-import { BN } from '@c4tplatform/caminojs/dist'
 import EVMAssetDropdown from '@/components/misc/EVMInputDropdown/EVMAssetDropdown.vue'
 import Erc20Token from '@/js/Erc20Token'
-import Big from 'big.js'
 import { WalletType } from '@/js/wallets/types'
+import { BN } from '@c4tplatform/caminojs/dist'
+import { BigNumInput } from '@c4tplatform/vue_components'
+import Big from 'big.js'
 
-import { bnToBig } from '@/helpers/helper'
-import { iERCNftSelectInput } from '@/components/misc/EVMInputDropdown/types'
 import ERCNftView from '@/components/misc/ERCNftView.vue'
+import { iERCNftSelectInput } from '@/components/misc/EVMInputDropdown/types'
+import { bnToBig } from '@/helpers/helper'
 import ERCNftToken from '@/js/ERCNftToken'
 import { ERCNftBalance } from '@/store/modules/assets/modules/types'
 
@@ -254,6 +254,7 @@ export default class EVMInputDropdown extends Vue {
 .bal_col {
     background-color: transparent !important;
     padding-top: 2px !important;
+    padding-bottom: 3px !important;
 }
 
 .bal {
