@@ -11,15 +11,15 @@
     </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
 import Erc20Token from '@/js/Erc20Token'
 import { WalletType } from '@/js/wallets/types'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import { bnToBig } from '@/helpers/helper'
-import Big from 'big.js'
-import EVMTokenSelectModal from '@/components/modals/EvmTokenSelect/EVMTokenSelectModal.vue'
 import { iERCNftSelectInput } from '@/components/misc/EVMInputDropdown/types'
+import EVMTokenSelectModal from '@/components/modals/EvmTokenSelect/EVMTokenSelectModal.vue'
+import { bnToBig } from '@/helpers/helper'
 import ERCNftToken from '@/js/ERCNftToken'
+import Big from 'big.js'
 @Component({
     components: { EVMTokenSelectModal },
 })
@@ -78,6 +78,7 @@ button {
     position: absolute;
     top: 0;
     left: 0;
+    @include mixins.typography-body-2;
 }
 
 .list {

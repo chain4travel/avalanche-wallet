@@ -43,6 +43,7 @@
                                 'hover_border',
                                 { pending: !!pendingSendMultisigTX && formType === 'P' },
                             ]"
+                            style="padding: 0"
                             placeholder="xxx"
                             :disabled="isConfirm || (!!pendingSendMultisigTX && formType === 'P')"
                         ></qr-input>
@@ -194,6 +195,7 @@ import { ITransaction } from '@/components/wallet/transfer/types'
 import { ChainIdType } from '@/constants'
 import { bnToBig } from '@/helpers/helper'
 import { WalletHelper } from '@/helpers/wallet_helper'
+import { AvaNetwork } from '@/js/AvaNetwork'
 import { WalletType } from '@/js/wallets/types'
 import { IssueBatchTxInput, priceDict } from '@/store/types'
 import { BN, Buffer } from '@c4tplatform/caminojs/dist'
@@ -201,7 +203,6 @@ import { UTXO } from '@c4tplatform/caminojs/dist/apis/avm'
 import { QrInput } from '@c4tplatform/vue_components'
 import * as bip39 from 'bip39'
 import { ava, isValidAddress } from '../../AVA'
-import { AvaNetwork } from '@/js/AvaNetwork'
 
 import { TxState } from '@/components/wallet/earn/ChainTransfer/types'
 import ChainInput from '@/components/wallet/transfer/ChainInput.vue'

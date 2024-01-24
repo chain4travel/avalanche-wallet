@@ -330,7 +330,7 @@ input {
 @include mixins.mobile-device {
     .balance,
     .curr_in_drop {
-        grid-template-columns: 1fr 80px;
+        grid-template-columns: 1fr 90px;
     }
 
     .balance {
