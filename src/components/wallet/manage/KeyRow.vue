@@ -255,10 +255,7 @@ export default class KeyRow extends Vue {
                     ...this.$store.state.volatileWallets,
                     this.wallet,
                 ]
-                this.globalHelper()?.setWalletSwitched({
-                    address: this.activeWallet.getStaticAddress('P'),
-                    walletName: this.activeWallet.name,
-                })
+                this.globalHelper()?.updateStore('updateName')
                 // this.$emit('edit', this.wallet.name)
             }
         } else {

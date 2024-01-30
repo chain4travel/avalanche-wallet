@@ -21,17 +21,16 @@ export const mount = (el: string, appSuiteStore: any) => {
         dispatchNotification,
         navigate,
         updateShowAlias,
-        setWalletSwitched,
     } = appSuiteStore
     const MyPlugin = {
         install(Vue) {
             Vue.prototype.globalHelper = () => {
                 return {
+                    updateStore: (params) => appSuiteStore.updateStore(params),
                     updateSuiteStore: (s) => setUpdateStore(s),
                     updateShowAlias: () => updateShowAlias(),
                     logout: () => setLogOut(true),
                     setAccount: (acc) => setAccount(acc),
-                    setWalletSwitched: (s) => setWalletSwitched(s),
                     dispatchNotification: (params) => dispatchNotification(params),
                     navigate: (to: string) => {
                         navigate(to)
