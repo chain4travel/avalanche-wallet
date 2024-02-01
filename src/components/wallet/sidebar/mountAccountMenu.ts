@@ -1,17 +1,17 @@
-import Vue from 'vue'
-import store from '@/store'
-import VueMeta from 'vue-meta'
 import router from '@/router'
+import store from '@/store'
+import Vue from 'vue'
+import VueMeta from 'vue-meta'
 
+import i18n from '@/plugins/i18n'
+import vuetify from '@/plugins/vuetify'
+import BootstrapVue from 'bootstrap-vue'
 import { Datetime } from 'vue-datetime'
 import 'vue-datetime/dist/vue-datetime.css'
-import i18n from '@/plugins/i18n'
-import BootstrapVue from 'bootstrap-vue'
-import vuetify from '@/plugins/vuetify'
 
-import AccountKycItem from './AccountKycItem.vue'
-import AccountCard from './AccountCard.vue'
 import AliasPicker from '../manage/AliasPicker.vue'
+import AccountCard from './AccountCard.vue'
+import AccountKycItem from './AccountKycItem.vue'
 import Settings from './Settings.vue'
 Vue.use(VueMeta)
 Vue.use(BootstrapVue)
@@ -33,13 +33,15 @@ function selectAccountMenuItem(type: string) {
 }
 
 export const mountAccountMenu = (el: string, props: any) => {
-    const { setAccount, dispatchNotification } = props
+    const { setAccount, dispatchNotification, dispatchSetNewName } = props
     const MyPlugin = {
         install(Vue) {
             Vue.prototype.globalHelper = () => {
                 return {
                     setAccount: (acc) => setAccount(acc),
                     dispatchNotification: (params) => dispatchNotification(params),
+                    dispatchSetNewName: () => dispatchSetNewName(),
+                    updateStore: (params) => props.updateStore(params),
                 }
             }
         },
