@@ -14,12 +14,12 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop, Ref, Model } from 'vue-property-decorator'
+import { Component, Model, Prop, Vue } from 'vue-property-decorator'
 
 import BalancePopup from '@/components/misc/BalancePopup/BalancePopup.vue'
-import AvaAsset from '@/js/AvaAsset'
 import AvmTokenSelect from '@/components/modals/AvmTokenSelect.vue'
 import { ChainIdType } from '@/constants'
+import AvaAsset from '@/js/AvaAsset'
 
 @Component({
     components: {
@@ -69,15 +69,13 @@ export default class BalanceDropdown extends Vue {
 @use '../../../styles/abstracts/mixins';
 
 button {
-    padding: 4px 12px;
+    text-align: center;
     width: 100%;
     height: 100%;
-    text-align: left;
+    position: absolute;
+    top: 0;
+    left: 0;
     @include mixins.typography-body-2;
-
-    svg {
-        transition-duration: 0.2s;
-    }
 }
 
 .dropdown {
@@ -99,11 +97,5 @@ button {
 }
 .popup {
     position: absolute;
-}
-
-@include mixins.mobile-device {
-    button {
-        @include mixins.typography-caption;
-    }
 }
 </style>

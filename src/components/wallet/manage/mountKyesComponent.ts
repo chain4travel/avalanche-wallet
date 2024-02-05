@@ -14,13 +14,14 @@ Vue.use(BootstrapVue)
 Vue.component('datetime', Datetime)
 
 export const mountKyesComponent = (el: string, props: any) => {
-    const { dispatchNotification, setWalletSwitched } = props
+    const { dispatchNotification, dispatchSetNewName } = props
     const MyPlugin = {
         install(Vue) {
             Vue.prototype.globalHelper = () => {
                 return {
                     dispatchNotification: (params) => dispatchNotification(params),
-                    setWalletSwitched: (s) => setWalletSwitched(s),
+                    dispatchSetNewName: () => dispatchSetNewName(),
+                    updateStore: (params) => props.updateStore(params),
                 }
             }
         },

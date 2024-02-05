@@ -1,8 +1,8 @@
 <template>
     <div class="family_row" v-if="hasBalance">
-        <div class="title_row">
-            <p>{{ token.symbol || token.data.symbol }}</p>
-            <p class="name">{{ token.name || token.data.name }}</p>
+        <div class="title_row" v-if="token?.data">
+            <p>{{ token.data.symbol }}</p>
+            <p class="name">{{ token.data.name }}</p>
         </div>
 
         <div class="items">
@@ -10,7 +10,7 @@
                 v-for="tokenIndex in walletBalance"
                 :key="tokenIndex.tokenId"
                 class="item"
-                :token="token.data"
+                :token="token"
                 :index="tokenIndex"
                 @click.native="selectToken(tokenIndex)"
             ></ERCNftView>

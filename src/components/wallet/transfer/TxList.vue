@@ -286,8 +286,10 @@ $right_pad: 60px;
 }
 
 @include mixins.mobile-device {
+    .table_title {
+        padding-right: 0px !important;
+    }
     .list_item {
-        column-gap: 12px;
         grid-template-columns: 1fr max-content;
     }
 
