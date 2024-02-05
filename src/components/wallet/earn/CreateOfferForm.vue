@@ -48,7 +48,7 @@
                     class="input"
                     :minDurationMs="minDuration"
                     :maxDurationMs="maxDuration"
-                    :defaultDurationMs="maxDuration"
+                    :defaultDurationMs="defaultEndDate"
                     @change_end="setEndDate"
                 ></DateForm>
             </div>
@@ -611,6 +611,7 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 const MAX_TITLE_BYTE_SIZE = 256
 
 import CamTooltip from '@/components/misc/CamTooltip.vue'
+import { TxState } from '@/components/wallet/earn/ChainTransfer/types'
 import ModalAbortSigning from '@/components/wallet/earn/ModalAbortSigning.vue'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
@@ -626,12 +627,13 @@ export default class CreateOfferForm extends Vue {
     @Prop() maxDepositAmount!: BN
     interestRateNominator = ZeroBN
     totalMaxRewardAmount = ZeroBN
-    isRestricted = false
+    defaultEndDate = 604800000
+    isRestricted = true
     pendingOffer: any = { memo: '' }
     selectedTab: number = 0
     // @ts-ignore
     helpers = this.globalHelper()
-    addresses: { address: string }[] = [{ address: '' }]
+    addresses: { address: string }[] = [{ address: this.wallet?.getStaticAddress('P') }]
     offer: DepositOffer | any = {
         upgradeVersion: 1,
         id: '',
@@ -651,6 +653,7 @@ export default class CreateOfferForm extends Vue {
         rewardedAmount: ZeroBN,
         ownerAddress: '',
     }
+    txState: TxState | null = null
     /* errors */
     get nameLengthError() {
         const bytes = new TextEncoder().encode(this.offer.memo)
@@ -786,13 +789,9 @@ export default class CreateOfferForm extends Vue {
         let addresses = this.addresses.filter((a) => a.address !== '')
         try {
             const result = await WalletHelper.buildAddDepositOfferTx(wallet, offer)
-            this.offer = this.offer
+            if (this.isRestricted)
+                this.waitTxConfirm(result, addresses, this.offer.start.toNumber())
             this.clearOffer()
-            this.$store.dispatch('Platform/addAllowedAddresses', {
-                depositOfferID: result,
-                allowedAddresses: addresses,
-                timestamp: this.offer.start.toNumber(),
-            })
             this.helpers.dispatchNotification({
                 message: `Create Offer Successful (TX: ${result})`,
                 type: 'success',
@@ -818,6 +817,34 @@ export default class CreateOfferForm extends Vue {
     async updateMultisigTxDetails() {
         await this.$store.dispatch('Assets/updateUTXOs')
         await this.$store.dispatch('Signavault/updateTransaction')
+    }
+    async waitTxConfirm(
+        txId: string,
+        addresses: {
+            address: string
+        }[],
+        timestamp: number
+    ) {
+        let status = await ava.PChain().getTxStatus(txId)
+        if (status === 'Unknown' || status === 'Processing') {
+            // if not confirmed ask again
+            setTimeout(() => {
+                this.waitTxConfirm(txId, addresses, timestamp)
+            }, 500)
+            return false
+        } else if (status === 'Dropped') {
+            // If dropped stop the process
+            this.txState = TxState.failed
+            return false
+        } else {
+            this.$store.dispatch('Platform/addAllowedAddresses', {
+                depositOfferID: txId,
+                allowedAddresses: addresses,
+                timestamp,
+            })
+            // If success display success page
+            this.txState = TxState.success
+        }
     }
     async signMultisigTx() {
         if (!this.wallet || !(this.wallet instanceof MultisigWallet))
