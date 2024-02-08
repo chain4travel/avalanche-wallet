@@ -554,6 +554,7 @@
                         variant="primary"
                         @click.prevent="submitCreateOffer"
                         :disabled="!formValid"
+                        :loading="isLoading"
                     >
                         {{ $t('earn.rewards.create.submit') }}
                     </CamBtn>
@@ -602,6 +603,7 @@ import { BN, Buffer } from '@c4tplatform/caminojs/dist'
 import {
     AddDepositOfferTx,
     DepositOffer,
+    GetTxStatusResponse,
     Offer,
     UnsignedTx,
 } from '@c4tplatform/caminojs/dist/apis/platformvm'
@@ -777,6 +779,7 @@ export default class CreateOfferForm extends Vue {
     async submitCreateOffer() {
         if (!this.isRestricted) this.offer.ownerAddress = undefined
         else this.offer.ownerAddress = this.wallet?.getStaticAddress('P')
+        this.txState = TxState.started
         const wallet: WalletType = this.$store.state.activeWallet
         let offer = {
             ...this.offer,
@@ -789,13 +792,8 @@ export default class CreateOfferForm extends Vue {
         let addresses = this.addresses.filter((a) => a.address !== '')
         try {
             const result = await WalletHelper.buildAddDepositOfferTx(wallet, offer)
-            if (this.isRestricted)
-                this.waitTxConfirm(result, addresses, this.offer.start.toNumber())
-            this.clearOffer()
-            this.helpers.dispatchNotification({
-                message: `Create Offer Successful (TX: ${result})`,
-                type: 'success',
-            })
+            this.txState = TxState.waiting
+            this.waitTxConfirm(result, addresses, this.offer.start.toNumber(), this.isRestricted)
         } catch (error) {
             if (error instanceof SignatureError) {
                 await this.$store.dispatch('Signavault/updateTransaction')
@@ -818,18 +816,23 @@ export default class CreateOfferForm extends Vue {
         await this.$store.dispatch('Assets/updateUTXOs')
         await this.$store.dispatch('Signavault/updateTransaction')
     }
+    get isLoading() {
+        return this.txState === TxState.waiting
+    }
     async waitTxConfirm(
         txId: string,
         addresses: {
             address: string
         }[],
-        timestamp: number
+        timestamp: number,
+        restricted: boolean
     ) {
-        let status = await ava.PChain().getTxStatus(txId)
+        let response: string | GetTxStatusResponse = await ava.PChain().getTxStatus(txId)
+        let status = (response as GetTxStatusResponse).status
         if (status === 'Unknown' || status === 'Processing') {
             // if not confirmed ask again
             setTimeout(() => {
-                this.waitTxConfirm(txId, addresses, timestamp)
+                this.waitTxConfirm(txId, addresses, timestamp, restricted)
             }, 500)
             return false
         } else if (status === 'Dropped') {
@@ -837,13 +840,19 @@ export default class CreateOfferForm extends Vue {
             this.txState = TxState.failed
             return false
         } else {
-            this.$store.dispatch('Platform/addAllowedAddresses', {
-                depositOfferID: txId,
-                allowedAddresses: addresses,
-                timestamp,
+            if (restricted)
+                this.$store.dispatch('Platform/addAllowedAddresses', {
+                    depositOfferID: txId,
+                    allowedAddresses: addresses,
+                    timestamp,
+                })
+            this.helpers.dispatchNotification({
+                message: `Create Offer Successful (TX: ${txId})`,
+                type: 'success',
             })
             // If success display success page
             this.txState = TxState.success
+            this.clearOffer()
         }
     }
     async signMultisigTx() {
