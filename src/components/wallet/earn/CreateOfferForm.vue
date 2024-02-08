@@ -1038,12 +1038,9 @@ export default class CreateOfferForm extends Vue {
     }
     @Watch('selectedTab')
     onSelectedTabChange() {
-        if (this.selectedTab === 0) {
-            this.interestRateNominator = ZeroBN
-            this.totalMaxRewardAmount = ZeroBN
-        } else {
-            this.$refs.totalMaxAmount?.reset()
-        }
+        this.interestRateNominator = ZeroBN
+        this.totalMaxRewardAmount = ZeroBN
+        this.$refs.totalMaxAmount?.reset()
     }
     @Watch('pendingCreateOfferMultisigTX')
     getPandingCreateOfferTxData() {
@@ -1099,6 +1096,9 @@ export default class CreateOfferForm extends Vue {
     }
     /* utiils */
     clearOffer() {
+        this.interestRateNominator = ZeroBN
+        this.totalMaxRewardAmount = ZeroBN
+        this.$refs.totalMaxAmount?.reset()
         this.offer = {
             ...this.offer,
             interestRateNominator: ZeroBN,
