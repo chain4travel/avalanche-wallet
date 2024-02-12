@@ -1,4 +1,14 @@
 // Functions to manage import/export of keystore files
+import { ava, bintools } from '@/AVA'
+import { keyToKeypair } from '@/helpers/helper'
+import Crypto from '@/js/Crypto'
+import MnemonicWallet from '@/js/wallets/MnemonicWallet'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import { AccessWalletMultipleInput } from '@/store/types'
+import { Buffer as AjsBuffer } from '@c4tplatform/caminojs/dist'
+import * as bip39 from 'bip39'
+import { Buffer } from 'buffer/'
 import {
     AllKeyFileDecryptedTypes,
     AllKeyFileTypes,
@@ -28,16 +38,6 @@ import {
     KeyFileV7,
     KeystoreFileKeyType,
 } from './IKeystore'
-import { ava, bintools } from '@/AVA'
-import { Buffer } from 'buffer/'
-import MnemonicWallet from '@/js/wallets/MnemonicWallet'
-import { SingletonWallet } from '@/js/wallets/SingletonWallet'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import Crypto from '@/js/Crypto'
-import { AccessWalletMultipleInput } from '@/store/types'
-import { keyToKeypair } from '@/helpers/helper'
-import * as bip39 from 'bip39'
-import { Buffer as AjsBuffer } from '@c4tplatform/caminojs/dist'
 
 const cryptoHelpers = new Crypto()
 
@@ -382,7 +382,8 @@ function extractKeysFromDecryptedFile(file: AllKeyFileDecryptedTypes): AccessWal
 async function makeKeyfile(
     wallets: (MnemonicWallet | SingletonWallet | MultisigWallet)[],
     pass: string,
-    activeIndex: number
+    activeIndex: number,
+    network?: string
 ): Promise<KeyFileV7> {
     // 3.0 and above uses 200,000
     cryptoHelpers.keygenIterations = ITERATIONS_V3
@@ -408,6 +409,7 @@ async function makeKeyfile(
         let pk_crypt: PKCrypt = await cryptoHelpers.encrypt(pass, key, salt)
 
         let key_data: KeyFileKeyV7 = {
+            network: network,
             name: wallet.name,
             key: bintools.cb58Encode(AjsBuffer.from(pk_crypt.ciphertext)),
             iv: bintools.cb58Encode(AjsBuffer.from(pk_crypt.iv)),
@@ -425,4 +427,4 @@ async function makeKeyfile(
     return file_data
 }
 
-export { readKeyFile, makeKeyfile, KEYSTORE_VERSION, extractKeysFromDecryptedFile }
+export { KEYSTORE_VERSION, extractKeysFromDecryptedFile, makeKeyfile, readKeyFile }

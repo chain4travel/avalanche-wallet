@@ -1,13 +1,3 @@
-import { Module } from 'vuex'
-import {
-    AccessAccountInput,
-    ImportKeyfileInput,
-    iUserAccountEncrypted,
-    RootState,
-    SaveAccountInput,
-} from '@/store/types'
-import { AccountsState, ChangePasswordInput } from '@/store/modules/accounts/types'
-import { WalletType } from '@/js/wallets/types'
 import {
     addAccountToStorage,
     getAccountByIndex,
@@ -16,11 +6,21 @@ import {
     removeAccountByIndex,
     verifyAccountPassword,
 } from '@/helpers/account_helper'
+import { makeKeyfile } from '@/js/Keystore'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
-import { makeKeyfile } from '@/js/Keystore'
+import { WalletType } from '@/js/wallets/types'
 import { checkVerificationStatus } from '@/kyc_api'
+import { AccountsState, ChangePasswordInput } from '@/store/modules/accounts/types'
+import {
+    AccessAccountInput,
+    ImportKeyfileInput,
+    RootState,
+    SaveAccountInput,
+    iUserAccountEncrypted,
+} from '@/store/types'
 import { createHash } from 'crypto'
+import { Module } from 'vuex'
 
 const accounts_module: Module<AccountsState, RootState> = {
     namespaced: true,
@@ -58,14 +58,19 @@ const accounts_module: Module<AccountsState, RootState> = {
 
             let account = getAccountByIndex(index)
             if (!account) throw new Error('Account not found.')
-
+            if (account.wallet.keys[index] === 'multisig') {
+                index = 0
+            }
             let data: ImportKeyfileInput = {
                 password: pass,
-                data: account.wallet,
+                data:
+                    account.wallet.keys[index] === 'multisig'
+                        ? [account.wallet[0]]
+                        : account.wallet,
             }
 
             await dispatch('importKeyfile', data, { root: true })
-            state.accountIndex = index
+            state.accountIndex = account.wallet.keys[index] === 'multisig' ? 0 : index
         },
 
         // Creates a keystore file and saves to local storage
@@ -84,7 +89,7 @@ const accounts_module: Module<AccountsState, RootState> = {
                 let activeIndex = wallets.findIndex((w) => w.id == wallet!.id)
                 if (activeIndex >= wallets.length) activeIndex = 0
 
-                let file = await makeKeyfile(wallets, pass, activeIndex)
+                let file = await makeKeyfile(wallets, pass, activeIndex, rootState.network.name)
                 let baseAddresses = getters.baseAddresses
                 let encryptedWallet: iUserAccountEncrypted = {
                     baseAddresses,

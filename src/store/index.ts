@@ -1,3 +1,11 @@
+import { ava, bintools } from '@/AVA'
+import {
+    KEYSTORE_VERSION,
+    extractKeysFromDecryptedFile,
+    makeKeyfile,
+    readKeyFile,
+} from '@/js/Keystore'
+import { INetwork, WalletType } from '@/js/wallets/types'
 import {
     AccessWalletMultipleInput,
     AccessWalletMultipleInputParams,
@@ -6,39 +14,31 @@ import {
     IssueBatchTxInput,
     RootState,
 } from '@/store/types'
-import { INetwork, WalletType } from '@/js/wallets/types'
-import {
-    KEYSTORE_VERSION,
-    extractKeysFromDecryptedFile,
-    makeKeyfile,
-    readKeyFile,
-} from '@/js/Keystore'
-import { ava, bintools } from '@/AVA'
 
-import Accounts from './modules/accounts/accounts'
+import { getMultisigAliases } from '@/explorer_api'
+import { getAvaxPriceUSD } from '@/helpers/price_helper'
 import { AllKeyFileDecryptedTypes } from '@/js/IKeystore'
-import Assets from './modules/assets/assets'
+import { LedgerWallet } from '@/js/wallets/LedgerWallet'
+import MnemonicWallet from '@/js/wallets/MnemonicWallet'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import router from '@/router'
 import { Buffer as BufferAvalanche } from '@c4tplatform/caminojs/dist'
+import { MultisigAliasReply } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { privateToAddress } from '@ethereumjs/util'
+import createHash from 'create-hash'
+import Vue from 'vue'
+import Vuex from 'vuex'
+import { updateFilterAddresses } from '../providers'
+import Accounts from './modules/accounts/accounts'
+import Assets from './modules/assets/assets'
 import History from './modules/history/history'
 import Launch from './modules/launch/launch'
 import Ledger from './modules/ledger/ledger'
-import { LedgerWallet } from '@/js/wallets/LedgerWallet'
-import MnemonicWallet from '@/js/wallets/MnemonicWallet'
-import { MultisigAliasReply } from '@c4tplatform/caminojs/dist/apis/platformvm'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import Network from './modules/network/network'
 import Notifications from './modules/notifications/notifications'
 import Platform from './modules/platform/platform'
 import Signavault from './modules/signavault/signavault'
-import { SingletonWallet } from '@/js/wallets/SingletonWallet'
-import Vue from 'vue'
-import Vuex from 'vuex'
-import createHash from 'create-hash'
-import { getAvaxPriceUSD } from '@/helpers/price_helper'
-import { getMultisigAliases } from '@/explorer_api'
-import { privateToAddress } from '@ethereumjs/util'
-import router from '@/router'
-import { updateFilterAddresses } from '../providers'
 
 Vue.use(Vuex)
 
@@ -517,10 +517,16 @@ export default new Vuex.Store({
             let keys = extractKeysFromDecryptedFile(keyFile)
 
             // If not auth, login user then add keys
+            let index = keyFile.activeIndex
+            if (
+                keyFile.keys[keyFile.activeIndex].type === 'multisig' &&
+                store.state.network.name !== fileData.keys[fileData.activeIndex].network
+            )
+                index = 0
             if (!store.state.isAuth) {
                 await store.dispatch('accessWalletMultiple', {
                     keys,
-                    activeIndex: keyFile.activeIndex,
+                    activeIndex: index,
                 })
             } else {
                 for (let i = 0; i < keys.length; i++) {
