@@ -1,13 +1,3 @@
-import { Module } from 'vuex'
-import {
-    AccessAccountInput,
-    ImportKeyfileInput,
-    iUserAccountEncrypted,
-    RootState,
-    SaveAccountInput,
-} from '@/store/types'
-import { AccountsState, ChangePasswordInput } from '@/store/modules/accounts/types'
-import { WalletType } from '@/js/wallets/types'
 import {
     addAccountToStorage,
     getAccountByIndex,
@@ -16,11 +6,21 @@ import {
     removeAccountByIndex,
     verifyAccountPassword,
 } from '@/helpers/account_helper'
+import { makeKeyfile } from '@/js/Keystore'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
-import { makeKeyfile } from '@/js/Keystore'
+import { WalletType } from '@/js/wallets/types'
 import { checkVerificationStatus } from '@/kyc_api'
+import { AccountsState, ChangePasswordInput } from '@/store/modules/accounts/types'
+import {
+    AccessAccountInput,
+    ImportKeyfileInput,
+    RootState,
+    SaveAccountInput,
+    iUserAccountEncrypted,
+} from '@/store/types'
 import { createHash } from 'crypto'
+import { Module } from 'vuex'
 
 const accounts_module: Module<AccountsState, RootState> = {
     namespaced: true,
@@ -169,11 +169,7 @@ const accounts_module: Module<AccountsState, RootState> = {
             const privKey = wallet.getStaticKeyPair()?.getPrivateKey().toString('hex')
             if (!privKey) return null
             try {
-                let { kycStatus, kybStatus } = await checkVerificationStatus(
-                    privKey,
-                    //@ts-ignore
-                    rootState.Network.selectedNetwork.name.toLowerCase()
-                )
+                let { kycStatus, kybStatus } = await checkVerificationStatus(privKey)
                 state.kycStatus = kycStatus
                 state.kybStatus = kybStatus
             } catch (e) {
