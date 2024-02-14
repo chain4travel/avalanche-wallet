@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 import sha3 from 'js-sha3'
+import { ava } from './AVA'
 import { KYC_VARIANT } from './constants'
 let elliptic = require('elliptic')
 let ec = new elliptic.ec('secp256k1')
@@ -61,14 +62,10 @@ async function generateToken(privateKey: string, kyc_variant: KYC_VARIANT): Prom
     }
 }
 
-async function checkVerificationStatus(
-    privateKey: string,
-    activeNetworkName: string
-): Promise<variantType> {
+async function checkVerificationStatus(privateKey: string): Promise<variantType> {
     let keyPair = ec.keyFromPrivate(privateKey)
     let pubKey = keyPair.getPublic()
-    let url = `/verified/${activeNetworkName}/${pubKey.encode('hex', false)}`
-
+    let url = `/verified/${ava.getHRP()}/${pubKey.encode('hex', false)}`
     try {
         let res = await kyc_api.get(url)
         let kycStatus: boolean = res.data.variants[KYC_VARIANT.KYC_BASIC]
@@ -79,4 +76,4 @@ async function checkVerificationStatus(
     }
 }
 
-export { kyc_api, generateToken, checkVerificationStatus }
+export { checkVerificationStatus, generateToken, kyc_api }

@@ -174,11 +174,7 @@ const accounts_module: Module<AccountsState, RootState> = {
             const privKey = wallet.getStaticKeyPair()?.getPrivateKey().toString('hex')
             if (!privKey) return null
             try {
-                let { kycStatus, kybStatus } = await checkVerificationStatus(
-                    privKey,
-                    //@ts-ignore
-                    rootState.Network.selectedNetwork.name.toLowerCase()
-                )
+                let { kycStatus, kybStatus } = await checkVerificationStatus(privKey)
                 state.kycStatus = kycStatus
                 state.kybStatus = kybStatus
             } catch (e) {
