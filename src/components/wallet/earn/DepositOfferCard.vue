@@ -67,13 +67,16 @@
                 :disabled="isDepositDisabled"
             >
                 {{
-                    !pendingOfferID || offer.id !== pendingOfferID
+                    isWhiteListing
+                        ? 'add new addresses'
+                        : !pendingOfferID || offer.id !== pendingOfferID
                         ? $t('earn.rewards.offer.deposit')
                         : 'Sign depositing funds'
                 }}
             </button>
         </div>
         <ModalDepositFunds
+            :isWhiteListing="isWhiteListing"
             @selectOffer="emitOffer"
             ref="modal_deposit_funds"
             :title="rewardTitle"
@@ -109,6 +112,7 @@ import { DepositTx, UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformv
 export default class DepositOfferCard extends Vue {
     @Prop() offer!: DepositOffer
     @Prop() maxDepositAmount!: BN
+    @Prop() isWhiteListing?: boolean
 
     $refs!: {
         modal_deposit_funds: ModalDepositFunds

@@ -9,6 +9,7 @@ import BootstrapVue from 'bootstrap-vue'
 import { Datetime } from 'vue-datetime'
 import 'vue-datetime/dist/vue-datetime.css'
 
+import CreatedOffers from './CreatedOffers.vue'
 import DepositOffer from './DepositOffers.vue'
 
 Vue.use(VueMeta)
@@ -16,7 +17,7 @@ Vue.use(BootstrapVue)
 Vue.component('datetime', Datetime)
 export const mountCreateOfferForm = (
     el: string,
-    props?: { isSuite: boolean; navigate: (path: string) => {} }
+    props?: { isSuite: boolean; navigate: (path: string) => {}; isWhiteListing?: boolean }
 ) => {
     const context = {
         props: props,
@@ -28,7 +29,7 @@ export const mountCreateOfferForm = (
         i18n,
         data: {},
         render: (createElement) => {
-            return createElement(DepositOffer, context)
+            return createElement(!props?.isWhiteListing ? DepositOffer : CreatedOffers, context)
         },
     })
     app.$mount(el)
