@@ -3,41 +3,47 @@
         <h3 class="offer_title">{{ rewardTitle }}</h3>
         <div class="offer_detail">
             <div class="offer_detail_left">
-                <div>
+                <div class="reward_row">
                     <label>{{ $t('earn.rewards.active_earning.deposit_start') }}:</label>
                     <p class="reward">{{ startDate }}</p>
                 </div>
-                <div>
+                <div class="reward_row">
                     <label>{{ $t('earn.rewards.active_earning.deposit_end') }}:</label>
                     <p class="reward">{{ endDate }}</p>
                 </div>
-                <div>
+                <div class="reward_row">
                     <label>{{ $t('earn.rewards.offer.min_deposit') }}:</label>
-                    <p class="reward">{{ cleanAvaxBN(minLock) }} CAM</p>
+                    <p class="reward">{{ cleanAvaxBN(minLock) }} {{ nativeAssetSymbol }}</p>
                 </div>
-                <div>
+                <div class="reward_row">
                     <label>{{ $t('earn.rewards.offer.reward') }}:</label>
                     <p class="reward">{{ rewardPercent }} %</p>
                 </div>
             </div>
             <div class="offer_detail_right">
-                <div>
+                <div class="reward_row">
                     <label>{{ $t('earn.rewards.active_earning.deposited_amount') }}:</label>
                     <p class="reward">
                         {{ cleanAvaxBN(reward.deposit.amount) }} {{ nativeAssetSymbol }}
                     </p>
                 </div>
-                <div>
+                <div class="reward_row">
                     <label>{{ $t('earn.rewards.active_earning.pending_reward') }}:</label>
                     <p class="reward">
                         {{ cleanAvaxBN(reward.amountToClaim) }} {{ nativeAssetSymbol }}
                     </p>
                 </div>
-                <div>
+                <div class="reward_row">
                     <label>{{ $t('earn.rewards.active_earning.already_claimed') }}:</label>
                     <p class="reward">
                         {{ cleanAvaxBN(reward.deposit.claimedRewardAmount) }}
                         {{ nativeAssetSymbol }}
+                    </p>
+                </div>
+                <div class="reward_row" v-if="pendingSendMultisigTX">
+                    <label>{{ $t('earn.rewards.active_earning.initiated_claim') }}:</label>
+                    <p class="reward">
+                        {{ cleanAvaxBN(signedclaimedAmount) }} {{ nativeAssetSymbol }}
                     </p>
                 </div>
             </div>
@@ -138,17 +144,11 @@
             :modalText="$t('earn.rewards.abort_modal.message')"
             @cancelTx="cancelMultisigTx"
         />
-        <!-- <ModalClaimReward
-            ref="modal_claim_reward"
-            :depositTxID="reward.deposit.depositTxID"
-            :amount="reward.amountToClaim"
-            :rewardOwner="reward.deposit.rewardOwner"
-        /> -->
     </div>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import ModalClaimReward from '@/components/modals/ClaimRewardModal.vue'
 import { cleanAvaxBN } from '@/helpers/helper'
@@ -186,6 +186,7 @@ export default class DepositRewardCard extends Vue {
     disclamer: boolean = false
     // @ts-ignore
     helpers = this.globalHelper()
+    signedclaimedAmount: BN = new BN(0)
     // signedDepositID: string = ''
     @Prop() reward!: PlatformRewardDeposit
 
@@ -211,10 +212,19 @@ export default class DepositRewardCard extends Vue {
         clearInterval(this.intervalID)
     }
 
+    mounted() {
+        this.updateMultisigTxDetails()
+    }
+
+    @Watch('pendingSendMultisigTX')
+    onPendingSendMultisigTXChange() {
+        this.updateMultisigTxDetails()
+    }
+
     get activeWallet(): WalletType {
         return this.$store.state.activeWallet
     }
-    private get pendingSendMultisigTX(): SignavaultTx | undefined {
+    get pendingSendMultisigTX(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
             (item: any) =>
                 item?.tx?.alias === this.activeWallet.getStaticAddress('P') &&
@@ -239,26 +249,6 @@ export default class DepositRewardCard extends Vue {
                 type: 'error',
             })
             this.disclamer = false
-        }
-    }
-    private async issueMultisigTx() {
-        const wallet = this.activeWallet
-        if (!wallet || !(wallet instanceof MultisigWallet))
-            return console.error('MultiSigTx::sign: Invalid wallet')
-        if (!this.pendingSendMultisigTX) return console.error('MultiSigTx::sign: Invalid Tx')
-        try {
-            await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
-            this.helpers.dispatchNotification({
-                message: this.$t('notifications.transfer_success_msg'),
-                type: 'success',
-            })
-            this.updateMultisigTxDetails()
-            this.$store.dispatch('Signavault/updateTransaction')
-        } catch (e: any) {
-            this.helpers.dispatchNotification({
-                message: this.$t('notifications.execute_multisig_transaction_error'),
-                type: 'error',
-            })
         }
     }
 
@@ -288,6 +278,10 @@ export default class DepositRewardCard extends Vue {
             unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
             const utx = unsignedTx.getTransaction() as ClaimTx
             const claimAmounts = utx.getClaimAmounts()
+
+            const amount = claimAmounts[0].getAmount()
+            console.log('amount', cleanAvaxBN(new BN(amount)))
+            this.signedclaimedAmount = new BN(amount)
         }
     }
     get numberOfSignatures(): number {
@@ -452,20 +446,15 @@ export default class DepositRewardCard extends Vue {
 </script>
 <style scoped lang="scss">
 @use '../../../styles/abstracts/mixins';
-@use '../../../styles/main';
 
 .offer_row {
     display: flex;
     flex-direction: column;
-    border-radius: var(--border-radius-sm);
+    border-radius: var(--border-radius-lg);
     overflow: hidden;
     font-size: 14px;
-    background-color: var(--bg-light);
     padding: 1rem;
-}
-
-.offer_title {
-    margin-bottom: 1rem;
+    border: 2px solid var(--border-color);
 }
 
 .mt-2 {
@@ -477,131 +466,34 @@ export default class DepositRewardCard extends Vue {
     grid-template-columns: 1fr 1fr;
     grid-gap: 1.25rem;
     .offer_detail_left {
-        border-right: 2px solid var(--bg-wallet-light);
+        border-right: 2px solid var(--border-color);
     }
+    .offer_detail_right,
+    .offer_detail_left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+.reward_row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
 }
 
 label {
-    color: var(--primary-color-light) !important;
+    font-weight: bolder;
 }
 
-.claim_button {
-    border-radius: var(--border-radius-sm);
-    padding: 8px 30px;
-    margin-left: auto;
-    &[disabled] {
-        background-color: var(--primary-color) !important;
-    }
-}
-
-.offer_row {
-    display: flex;
-    flex-direction: column;
-    border-radius: var(--border-radius-sm);
-    overflow: hidden;
-    font-size: 14px;
-    background-color: var(--bg-light);
-    padding: 1rem;
+.reward {
+    color: var(--accent-dark);
 }
 
 .offer_title {
     margin-bottom: 1rem;
-}
-
-.offer_detail {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 1.25rem;
-    .offer_detail_left {
-        border-right: 2px solid var(--bg-wallet-light);
-    }
-}
-
-.node_id {
-    word-break: break-all;
-}
-
-.top_bar {
-    height: max-content;
-    position: relative;
-    padding: 2px 8px;
-    border-bottom: 2px solid var(--bg-wallet-light);
-}
-.reward_row {
-    border-radius: var(--border-radius-sm);
-    overflow: hidden;
-    font-size: 14px;
-    //border: 2px solid var(--bg-light);
-    background-color: var(--bg-light);
-}
-
-.data_row {
-    grid-column: 1/3;
-    display: grid;
-    grid-template-columns: 1fr 280px;
-    align-items: center;
-}
-
-.date {
-    z-index: 1;
-}
-.reward_bar {
-    background-color: var(--success);
-    position: absolute;
-    opacity: 0.5;
-    height: 100%;
-    left: 0;
-    top: 0;
-    z-index: 0;
-}
-
-.stake_info {
-    padding: 6px 12px;
-    display: grid;
-    column-gap: 14px;
-    grid-template-columns: 2fr 1fr 1fr;
-    /*justify-content: space-between;*/
-    /*text-align: right;*/
-    text-align: left;
-
-    > div {
-        align-self: baseline;
-    }
-}
-
-.bordered_button {
-    border-width: 1px;
-    border-style: solid;
-    border-radius: var(--border-radius-lg);
-    padding: 8px 24px;
-    border-color: var(--primary-btn-border-color);
-    color: var(--primary-btn-border-color);
-    background-color: transparent !important;
-    &:hover {
-        opacity: 0.6;
-    }
-    &[disabled] {
-        background: var(--bg-light);
-        border: var(--primary-border);
-        color: var(--primary-color-light);
-        border: var(--primary-border);
-        opacity: 0.3;
-        cursor: not-allowed;
-    }
-}
-
-label {
-    color: var(--primary-color-light) !important;
-}
-
-.claim_button {
-    border-radius: var(--border-radius-sm);
-    width: min-content;
-    padding: 8px 30px;
-    // margin-left: auto;
-    &[disabled] {
-        background-color: var(--primary-color) !important;
-    }
+    text-transform: capitalize;
+    @include mixins.typography-subtitle-2;
 }
 
 .button_group {
@@ -609,36 +501,9 @@ label {
     margin-left: auto;
     gap: 0.5rem;
     justify-content: end;
+    margin-top: 0.6rem;
 }
 
-.err {
-    text-align: left;
-    color: var(--error);
-    font-size: 0.8rem;
-    margin-top: 10px;
-}
-
-@include main.mobile-device {
-    .offer_detail {
-        grid-template-columns: 1fr;
-        grid-gap: 0.5rem;
-        .offer_detail_left {
-            border-right: none;
-        }
-    }
-}
-
-@include main.mobile-device {
-    .stake_info {
-        grid-column: 1/3;
-        border-left: none;
-        border-top: 3px solid var(--bg);
-
-        > div:first-of-type {
-            text-align: left;
-        }
-    }
-}
 @include mixins.mobile-device {
     .offer_detail {
         grid-template-columns: 1fr;
@@ -646,6 +511,12 @@ label {
         .offer_detail_left {
             border-right: none;
         }
+    }
+}
+
+@include mixins.night-mode {
+    .reward {
+        color: var(--accent);
     }
 }
 </style>

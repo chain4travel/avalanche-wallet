@@ -3,52 +3,52 @@
         <modal ref="modal" :title="title">
             <div class="modal__body">
                 <div class="offer_row">
+                    <div class="progress">
+                        <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
+                        <span>
+                            <span class="success" :style="'width:' + progress"></span>
+                        </span>
+                        {{ progressText }}
+                    </div>
                     <div class="offer_detail">
-                        <div class="progress">
-                            <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
-                            <span>
-                                <span class="success" :style="'width:' + progress"></span>
-                            </span>
-                            {{ progressText }}
-                        </div>
                         <div class="offer_detail_left">
-                            <div>
+                            <div class="reward_row">
                                 <label>{{ $t('earn.rewards.offer.pool_start') }}:</label>
                                 <p class="reward">{{ formatDate(offer.start) }}</p>
                             </div>
-                            <div>
+                            <div class="reward_row">
                                 <label>{{ $t('earn.rewards.offer.pool_end') }}:</label>
                                 <p class="reward">{{ formatDate(offer.end) }}</p>
                             </div>
-                            <div>
+                            <div class="reward_row">
                                 <label>{{ $t('earn.rewards.offer.min_deposit') }}:</label>
                                 <p class="reward">{{ cleanAvaxBN(offer.minAmount) }} CAM</p>
                             </div>
-                            <div>
+                            <div class="reward_row">
                                 <label>{{ $t('earn.rewards.offer.reward') }}:</label>
                                 <p class="reward">{{ rewardPercent }} %</p>
                             </div>
                         </div>
                         <div class="offer_detail_right">
-                            <div>
+                            <div class="reward_row">
                                 <label>{{ $t('earn.rewards.offer.min_duration') }}:</label>
                                 <p class="reward">
                                     {{ formatDuration(offer.minDuration) }}
                                 </p>
                             </div>
-                            <div>
+                            <div class="reward_row">
                                 <label>{{ $t('earn.rewards.offer.max_duration') }}:</label>
                                 <p class="reward">
                                     {{ formatDuration(offer.maxDuration) }}
                                 </p>
                             </div>
-                            <div>
+                            <div class="reward_row">
                                 <label>{{ $t('earn.rewards.offer.unlock_duration') }}:</label>
                                 <p class="reward">
                                     {{ formatDuration(offer.unlockPeriodDuration) }}
                                 </p>
                             </div>
-                            <div>
+                            <div class="reward_row">
                                 <label>{{ $t('earn.rewards.offer.no_reward_duration') }}:</label>
                                 <p class="reward">
                                     {{ formatDuration(offer.noRewardsPeriodDuration) }}
@@ -574,16 +574,14 @@ export default class ModalDepositFunds extends Vue {
 .offer_row {
     display: flex;
     flex-direction: column;
-    border-radius: var(--border-radius-sm);
+    border-radius: var(--border-radius-lg);
     overflow: hidden;
     font-size: 14px;
-    background-color: var(--bg-light);
     padding: 1rem;
+    margin: 1rem;
+    border: 2px solid var(--border-color);
 }
 
-.offer_title {
-    margin-bottom: 1rem;
-}
 .button--container {
     display: flex;
     width: 100%;
@@ -594,12 +592,14 @@ export default class ModalDepositFunds extends Vue {
     grid-column: span 2;
     display: grid;
     grid-template-columns: auto 1fr auto;
-    grid-gap: 1.25rem;
+    grid-gap: 1rem;
+    margin-bottom: 1rem;
     > span {
         margin-top: auto;
         margin-bottom: auto;
         height: 4px;
-        background-color: var(--bg);
+        background-color: var(--border-color);
+        border-radius: var(--border-radius-sm);
         display: inline-block;
     }
     .success {
@@ -612,32 +612,37 @@ export default class ModalDepositFunds extends Vue {
 .offer_detail {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-gap: 4px 1.25rem;
+    grid-gap: 1rem;
     .offer_detail_left {
-        border-right: 2px solid var(--bg-wallet-light);
+        border-right: 2px solid var(--border-color);
     }
-    .offer_detail_left,
-    .offer_detail_right {
-        div {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
+    .offer_detail_right,
+    .offer_detail_left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: start;
     }
 }
 
 label {
-    color: var(--primary-color-light) !important;
-    font-size: 13px;
+    font-weight: bolder;
 }
 
-.claim_button {
-    border-radius: var(--border-radius-sm);
-    padding: 8px 30px;
-    margin-left: auto;
-    &[disabled] {
-        background-color: var(--primary-color) !important;
+.reward_row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    label {
+        display: flex;
+        align-items: start;
     }
+}
+
+.reward {
+    display: flex;
+    align-items: start;
+    color: var(--accent-dark);
 }
 
 .deposit_row {
@@ -720,6 +725,15 @@ form {
         .offer_detail_left {
             border-right: none;
         }
+    }
+    .modal__body {
+        width: 100%;
+    }
+}
+
+@include mixins.night-mode {
+    .reward {
+        color: var(--accent);
     }
 }
 </style>

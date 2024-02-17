@@ -447,9 +447,15 @@ export default class UserRewardCard extends Vue {
 .offer_detail {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-gap: 1.25rem;
+    grid-gap: 1rem;
     .offer_detail_left {
-        border-right: 2px solid var(--bg-wallet-light);
+        border-right: 2px solid var(--border-color);
+    }
+    .offer_detail_right,
+    .offer_detail_left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
 }
 
