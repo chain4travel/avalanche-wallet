@@ -3,7 +3,14 @@
         <div class="claim-reward-modal">
             <div v-if="claimed === 0">
                 <div v-if="canExecuteMultisigTx">
-                    <AvaxInput v-model="amt" :max="amount" :initial="amount"></AvaxInput>
+                    <AvaxInput
+                        v-if="pendingSendMultisigTX"
+                        v-model="confiremedClaimedAmount"
+                        :max="confiremedClaimedAmount"
+                        :initial="confiremedClaimedAmount"
+                        :readonly="true"
+                    ></AvaxInput>
+                    <AvaxInput v-else v-model="amt" :max="amount" :initial="amount"></AvaxInput>
                     <br />
                 </div>
                 <div v-if="!canExecuteMultisigTx">
@@ -32,7 +39,7 @@
                 <h2>
                     {{
                         $t('earn.rewards.claim_modal.confirmation_message', {
-                            amount: confiremedClaimedAmount,
+                            amount: cleanAvaxBN(confiremedClaimedAmount),
                             symbol: nativeAssetSymbol,
                         })
                     }}
@@ -66,6 +73,7 @@ import 'reflect-metadata'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import Modal from '../../modals/Modal.vue'
 import CamBtn from '@/components/CamBtn.vue'
+import { cleanAvaxBN } from '@/helpers/helper'
 
 @Component({
     components: {
@@ -82,7 +90,7 @@ export default class ModalClaimDepositReward extends Vue {
     @Prop() canExecuteMultisigTx!: boolean
 
     claimed: number = 0 // 0:false, 1:true, 2:pending
-    confiremedClaimedAmount: string = ''
+    confiremedClaimedAmount: BN = new BN(0)
     amt: BN = this.amount
 
     // @ts-ignore
@@ -94,6 +102,7 @@ export default class ModalClaimDepositReward extends Vue {
 
     mounted() {
         this.updateMultisigTxDetails()
+        console.log('ModalClaimDepositReward mounted', this.amount.toString())
     }
 
     open() {
@@ -106,7 +115,7 @@ export default class ModalClaimDepositReward extends Vue {
     }
 
     beforeClose() {
-        this.confiremedClaimedAmount = ''
+        this.confiremedClaimedAmount = new BN(0)
         this.$emit('beforeCloseModal', this.claimed)
         this.claimed = 0
     }
@@ -189,7 +198,7 @@ export default class ModalClaimDepositReward extends Vue {
                         return this.updateMultisigTxDetails()
                     }
 
-                    this.confiremedClaimedAmount = this.formattedAmount(this.amt)
+                    this.confiremedClaimedAmount = this.amt
                     this.updateBalance()
                     this.updateMultisigTxDetails()
                     this.updateRewards()
@@ -247,8 +256,12 @@ export default class ModalClaimDepositReward extends Vue {
             const claimAmounts = utx.getClaimAmounts()
 
             const amount = claimAmounts[0].getAmount()
-            this.confiremedClaimedAmount = bnToBig(new BN(amount), 9)?.toLocaleString()
-        } else this.confiremedClaimedAmount = this.formattedAmount(this.amt)
+            this.confiremedClaimedAmount = new BN(amount)
+        } else this.confiremedClaimedAmount = this.amt
+    }
+
+    cleanAvaxBN(val: BN): string {
+        return cleanAvaxBN(val)
     }
 }
 </script>
