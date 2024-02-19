@@ -2,7 +2,7 @@
     <div>
         <modal ref="modal" :title="title">
             <div class="modal__body">
-                <div class="offer_row">
+                <CamCard>
                     <div class="progress">
                         <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
                         <span>
@@ -56,7 +56,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </CamCard>
                 <template>
                     <div>
                         <form class="deposit_row">
@@ -231,6 +231,7 @@ import { Buffer } from '@c4tplatform/caminojs/dist'
 import { DepositTx, UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import DateForm from './DateForm.vue'
+import CamCard from '@/components/CamCard.vue'
 
 @Component({
     components: {
@@ -240,6 +241,7 @@ import DateForm from './DateForm.vue'
         ModalAbortSigning,
         Alert,
         CamInput,
+        CamCard,
     },
 })
 export default class ModalDepositFunds extends Vue {
@@ -570,16 +572,6 @@ export default class ModalDepositFunds extends Vue {
     text-align: center;
     width: 600px;
     overflow-x: hidden;
-}
-.offer_row {
-    display: flex;
-    flex-direction: column;
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    font-size: 14px;
-    padding: 1rem;
-    margin: 1rem;
-    border: 2px solid var(--border-color);
 }
 
 .button--container {

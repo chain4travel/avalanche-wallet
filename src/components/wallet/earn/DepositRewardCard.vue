@@ -1,6 +1,5 @@
 <template>
-    <div class="offer_row">
-        <h3 class="offer_title">{{ rewardTitle }}</h3>
+    <CamCard :title="rewardTitle">
         <div class="offer_detail">
             <div class="offer_detail_left">
                 <div class="reward_row">
@@ -144,7 +143,7 @@
             :modalText="$t('earn.rewards.abort_modal.message')"
             @cancelTx="cancelMultisigTx"
         />
-    </div>
+    </CamCard>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
@@ -169,6 +168,7 @@ import ModalAbortSigning from './ModalAbortSigning.vue'
 import ModalClaimDepositReward from './ModalClaimDepositReward.vue'
 import CamBtn from '@/components/CamBtn.vue'
 import Alert from '@/components/Alert.vue'
+import CamCard from '@/components/CamCard.vue'
 
 @Component({
     components: {
@@ -177,6 +177,7 @@ import Alert from '@/components/Alert.vue'
         ModalAbortSigning,
         CamBtn,
         Alert,
+        CamCard,
     },
 })
 export default class DepositRewardCard extends Vue {
@@ -447,16 +448,6 @@ export default class DepositRewardCard extends Vue {
 <style scoped lang="scss">
 @use '../../../styles/abstracts/mixins';
 
-.offer_row {
-    display: flex;
-    flex-direction: column;
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    font-size: 14px;
-    padding: 1rem;
-    border: 2px solid var(--border-color);
-}
-
 .mt-2 {
     margin-top: 0.5rem;
 }
@@ -488,12 +479,6 @@ label {
 
 .reward {
     color: var(--accent-dark);
-}
-
-.offer_title {
-    margin-bottom: 1rem;
-    text-transform: capitalize;
-    @include mixins.typography-subtitle-2;
 }
 
 .button_group {
