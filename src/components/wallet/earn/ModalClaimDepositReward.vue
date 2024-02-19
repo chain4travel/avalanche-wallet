@@ -102,7 +102,6 @@ export default class ModalClaimDepositReward extends Vue {
 
     mounted() {
         this.updateMultisigTxDetails()
-        console.log('ModalClaimDepositReward mounted', this.amount.toString())
     }
 
     open() {

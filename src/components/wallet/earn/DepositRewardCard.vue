@@ -1,52 +1,5 @@
 <template>
-    <CamCard :title="rewardTitle">
-        <div class="offer_detail">
-            <div class="offer_detail_left">
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.active_earning.deposit_start') }}:</label>
-                    <p class="reward">{{ startDate }}</p>
-                </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.active_earning.deposit_end') }}:</label>
-                    <p class="reward">{{ endDate }}</p>
-                </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.offer.min_deposit') }}:</label>
-                    <p class="reward">{{ cleanAvaxBN(minLock) }} {{ nativeAssetSymbol }}</p>
-                </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.offer.reward') }}:</label>
-                    <p class="reward">{{ rewardPercent }} %</p>
-                </div>
-            </div>
-            <div class="offer_detail_right">
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.active_earning.deposited_amount') }}:</label>
-                    <p class="reward">
-                        {{ cleanAvaxBN(reward.deposit.amount) }} {{ nativeAssetSymbol }}
-                    </p>
-                </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.active_earning.pending_reward') }}:</label>
-                    <p class="reward">
-                        {{ cleanAvaxBN(reward.amountToClaim) }} {{ nativeAssetSymbol }}
-                    </p>
-                </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.active_earning.already_claimed') }}:</label>
-                    <p class="reward">
-                        {{ cleanAvaxBN(reward.deposit.claimedRewardAmount) }}
-                        {{ nativeAssetSymbol }}
-                    </p>
-                </div>
-                <div class="reward_row" v-if="pendingSendMultisigTX">
-                    <label>{{ $t('earn.rewards.active_earning.initiated_claim') }}:</label>
-                    <p class="reward">
-                        {{ cleanAvaxBN(signedclaimedAmount) }} {{ nativeAssetSymbol }}
-                    </p>
-                </div>
-            </div>
-        </div>
+    <CamOfferCard :title="rewardTitle" type="reward" :reward="reward">
         <div v-if="!isMultiSig" class="button_group">
             <CamBtn variant="primary" @click="openModal" :disabled="isClaimDisabled">
                 {{ $t('earn.rewards.active_earning.claim') }}
@@ -143,7 +96,7 @@
             :modalText="$t('earn.rewards.abort_modal.message')"
             @cancelTx="cancelMultisigTx"
         />
-    </CamCard>
+    </CamOfferCard>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
@@ -168,7 +121,7 @@ import ModalAbortSigning from './ModalAbortSigning.vue'
 import ModalClaimDepositReward from './ModalClaimDepositReward.vue'
 import CamBtn from '@/components/CamBtn.vue'
 import Alert from '@/components/Alert.vue'
-import CamCard from '@/components/CamCard.vue'
+import CamOfferCard from '@/components/CamOfferCard.vue'
 
 @Component({
     components: {
@@ -177,7 +130,7 @@ import CamCard from '@/components/CamCard.vue'
         ModalAbortSigning,
         CamBtn,
         Alert,
-        CamCard,
+        CamOfferCard,
     },
 })
 export default class DepositRewardCard extends Vue {
@@ -452,56 +405,11 @@ export default class DepositRewardCard extends Vue {
     margin-top: 0.5rem;
 }
 
-.offer_detail {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 1.25rem;
-    .offer_detail_left {
-        border-right: 2px solid var(--border-color);
-    }
-    .offer_detail_right,
-    .offer_detail_left {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-}
-
-.reward_row {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-}
-
-label {
-    font-weight: bolder;
-}
-
-.reward {
-    color: var(--accent-dark);
-}
-
 .button_group {
     display: flex;
     margin-left: auto;
     gap: 0.5rem;
     justify-content: end;
     margin-top: 0.6rem;
-}
-
-@include mixins.mobile-device {
-    .offer_detail {
-        grid-template-columns: 1fr;
-        grid-gap: 0.5rem;
-        .offer_detail_left {
-            border-right: none;
-        }
-    }
-}
-
-@include mixins.night-mode {
-    .reward {
-        color: var(--accent);
-    }
 }
 </style>
