@@ -2,68 +2,7 @@
     <div>
         <modal ref="modal" :title="title">
             <div class="modal__body">
-                <CamCard>
-                    <div class="progress">
-                        <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
-                        <span>
-                            <span class="success" :style="'width:' + progress"></span>
-                        </span>
-                        {{ progressText }}
-                    </div>
-                    <div class="offer_detail">
-                        <div class="progress">
-                            <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
-                            <span>
-                                <span class="success" :style="'width:' + progress"></span>
-                            </span>
-                            {{ progressText }}
-                        </div>
-                        <div class="offer_detail_left">
-                            <div>
-                                <label>{{ $t('earn.rewards.offer.pool_start') }}:</label>
-                                <p class="reward">{{ formatDate(offer.start) }}</p>
-                            </div>
-                            <div>
-                                <label>{{ $t('earn.rewards.offer.pool_end') }}:</label>
-                                <p class="reward">{{ formatDate(offer.end) }}</p>
-                            </div>
-                            <div>
-                                <label>{{ $t('earn.rewards.offer.min_deposit') }}:</label>
-                                <p class="reward">{{ cleanAvaxBN(offer.minAmount) }} CAM</p>
-                            </div>
-                            <div>
-                                <label>{{ $t('earn.rewards.offer.reward') }}:</label>
-                                <p class="reward">{{ rewardPercent }} %</p>
-                            </div>
-                        </div>
-                        <div class="offer_detail_right">
-                            <div>
-                                <label>{{ $t('earn.rewards.offer.min_duration') }}:</label>
-                                <p class="reward">
-                                    {{ formatDuration(offer.minDuration) }}
-                                </p>
-                            </div>
-                            <div>
-                                <label>{{ $t('earn.rewards.offer.max_duration') }}:</label>
-                                <p class="reward">
-                                    {{ formatDuration(offer.maxDuration) }}
-                                </p>
-                            </div>
-                            <div>
-                                <label>{{ $t('earn.rewards.offer.unlock_duration') }}:</label>
-                                <p class="reward">
-                                    {{ formatDuration(offer.unlockPeriodDuration) }}
-                                </p>
-                            </div>
-                            <div>
-                                <label>{{ $t('earn.rewards.offer.no_reward_duration') }}:</label>
-                                <p class="reward">
-                                    {{ formatDuration(offer.noRewardsPeriodDuration) }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </CamCard>
+                <CamOfferCard type="offer" :offer="offer" />
                 <template>
                     <div>
                         <form class="deposit_row">
@@ -201,35 +140,6 @@
                         </form>
                     </div>
                 </template>
-                <template v-else>
-                    <div class="whitelisting__container">
-                        <label style="margin-top: 16px">Add new addresses</label>
-                        <div class="addresses_container input">
-                            <div v-for="(address, index) in addresses" :key="index">
-                                <div class="address_container">
-                                    <button
-                                        @click="removeAddress(index)"
-                                        class="circle delete-button"
-                                    >
-                                        <CamTooltip
-                                            :content="$t('edit_multisig.label.remove_owner')"
-                                            placement="left"
-                                        >
-                                            <fa icon="minus"></fa>
-                                        </CamTooltip>
-                                    </button>
-                                    <CamInput class="input" v-model="address.address" />
-                                </div>
-                            </div>
-                            <button @click.prevent="addAddress" class="circle plus-button">
-                                <fa icon="plus"></fa>
-                            </button>
-                        </div>
-                        <CamBtn class="button-submit" variant="primary" :onClick="addNewAddresses">
-                            submit
-                        </CamBtn>
-                    </div>
-                </template>
             </div>
         </modal>
 
@@ -261,6 +171,7 @@ import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 
 import { ava, bintools } from '@/AVA'
 import CamInput from '@/components/CamInput.vue'
+import CamOfferCard from '@/components/CamOfferCard.vue'
 import ModalAbortSigning from '@/components/wallet/earn/ModalAbortSigning.vue'
 import { isValidPChainAddress } from '@/helpers/address_helper'
 import { Buffer } from '@c4tplatform/caminojs/dist'
@@ -276,7 +187,7 @@ import DateForm from './DateForm.vue'
         ModalAbortSigning,
         Alert,
         CamInput,
-        CamCard,
+        CamOfferCard,
     },
 })
 export default class ModalDepositFunds extends Vue {
@@ -286,8 +197,6 @@ export default class ModalDepositFunds extends Vue {
     @Prop() warning!: boolean
     @Prop() isDepositDisabled!: boolean
     @Prop() maxDepositAmount!: BN
-    @Prop() isWhiteListing?: boolean
-    addresses: { address: string }[] = [{ address: '' }]
     // @ts-ignore
     helpers = this.globalHelper()
     amt: BN = ZeroBN
@@ -307,14 +216,6 @@ export default class ModalDepositFunds extends Vue {
     onDepositOwnerChange() {
         this.depositOwnerError = isValidPChainAddress(this.depositOwner) ? '' : 'Invalid address'
     }
-    removeAddress(index: number): void {
-        this.addresses.splice(index, 1)
-        if (this.addresses.length === 0) this.addAddress()
-    }
-    addAddress(): void {
-        if (this.addresses.length >= 128) return
-        this.addresses.push({ address: '' })
-    }
     get activeWallet(): MultisigWallet {
         return this.$store.state.activeWallet
     }
@@ -324,15 +225,6 @@ export default class ModalDepositFunds extends Vue {
                 item?.tx?.alias === this.$store.state.activeWallet?.getStaticAddress('P') &&
                 WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'DepositTx'
         )
-    }
-    get pendingOfferID(): string | undefined {
-        if (this.pendingDepositTX) {
-            let unsignedTx = new UnsignedTx()
-            unsignedTx.fromBuffer(Buffer.from(this.pendingDepositTX.tx?.unsignedTx, 'hex'))
-            const utx = unsignedTx.getTransaction() as DepositTx
-            return bintools.cb58Encode(utx.getDepositOfferID())
-        }
-        return undefined
     }
     get pendingTxduration() {
         if (this.pendingDepositTX) {
@@ -354,19 +246,7 @@ export default class ModalDepositFunds extends Vue {
     get txOwners() {
         return this.pendingDepositTX?.tx?.owners ?? []
     }
-    // get rewardOwner() {
-    //     if (this.pendingDepositTX) {
-    //         let unsignedTx = new UnsignedTx()
-    //         unsignedTx.fromBuffer(Buffer.from(this.pendingDepositTX.tx?.unsignedTx, 'hex'))
-    //         const utx = unsignedTx.getTransaction() as DepositTx
-    //         return bintools.addressToString(
-    //             ava.getHRP(),
-    //             'P',
-    //             utx.getRewardsOwner().getAddresses()[0]
-    //         )
-    //     }
-    //     return undefined
-    // }
+
     get sigValue() {
         return this.pendingDepositTX?.tx.owners?.filter((owner) => !!owner.signature)?.length
     }
@@ -421,30 +301,12 @@ export default class ModalDepositFunds extends Vue {
             interestRateDenominator
         )
     }
-    get progressText(): string {
-        const amt = this.amountLimit
-        return amt.amount.isZero()
-            ? 'No Limit'
-            : this.progress + '(' + cleanAvaxBN(amt.amount) + this.nativeAssetSymbol + ')'
-    }
-    get amountLimit(): { nominator: BN; amount: BN } {
-        return this.offer.upgradeVersion === 0 || !this.offer.totalMaxAmount.isZero()
-            ? { nominator: this.offer.depositedAmount, amount: this.offer.totalMaxAmount }
-            : { nominator: this.offer.rewardedAmount, amount: this.offer.totalMaxRewardAmount }
-    }
     get ava_asset(): AvaAsset | null {
         let ava = this.$store.getters['Assets/AssetAVA']
         return ava
     }
     get nativeAssetSymbol(): string {
         return this.ava_asset?.symbol ?? ''
-    }
-
-    get progress(): string {
-        const amt = this.amountLimit
-        return amt.amount.isZero()
-            ? '0px'
-            : amt.nominator.div(amt.amount).mul(new BN(100)).toString() + '%'
     }
 
     get duration() {
@@ -457,24 +319,6 @@ export default class ModalDepositFunds extends Vue {
     }
     formattedAmount(val: BN): string {
         return `${(Number(val.toString()) / Number(ONEAVAX.toString())).toLocaleString()}`
-    }
-    async addNewAddresses(): Promise<void> {
-        try {
-            let result = await this.$store.dispatch('Platform/addAllowedAddresses', {
-                depositOfferID: this.offer.id,
-                allowedAddresses: this.addresses,
-                timestamp: this.offer.start.toNumber(),
-            })
-            this.helpers.dispatchNotification({
-                message: `success`,
-                type: 'success',
-            })
-        } catch (e) {
-            this.helpers.dispatchNotification({
-                message: `Duplicate entry`,
-                type: 'error',
-            })
-        }
     }
     async submitDeposit(): Promise<void> {
         if (this.depositOwner && !isValidPChainAddress(this.depositOwner)) {
@@ -636,74 +480,16 @@ export default class ModalDepositFunds extends Vue {
     width: 600px;
     overflow-x: hidden;
 }
-<<<<<<< HEAD .offer_row {
-    display: flex;
-    flex-direction: column;
-    border-radius: var(--border-radius-sm);
-    overflow: hidden;
-    font-size: 14px;
-    background-color: var(--bg-light);
-    padding: 1rem;
-}
-=======>>>>>>>85b5836a
-    (Refactor: Implemented new Standard Camino Card, replacing old versions for improved UI consistency.)
-    .offer_title {
-    margin-bottom: 1rem;
-}
+
 .button--container {
     display: flex;
     width: 100%;
     justify-content: flex-end;
     gap: 16px;
 }
-.progress {
-    grid-column: span 2;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    grid-gap: 1.25rem;
-    > span {
-        margin-top: auto;
-        margin-bottom: auto;
-        height: 4px;
-        background-color: var(--bg);
-        display: inline-block;
-    }
-    .success {
-        height: 100%;
-        background-color: var(--color-success);
-        display: block;
-    }
-}
-
-.offer_detail {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 4px 1.25rem;
-    .offer_detail_left {
-        border-right: 2px solid var(--bg-wallet-light);
-    }
-    .offer_detail_left,
-    .offer_detail_right {
-        div {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-    }
-}
 
 label {
-    color: var(--primary-color-light) !important;
-    font-size: 13px;
-}
-
-.claim_button {
-    border-radius: var(--border-radius-sm);
-    padding: 8px 30px;
-    margin-left: auto;
-    &[disabled] {
-        background-color: var(--primary-color) !important;
-    }
+    font-weight: bolder;
 }
 
 .deposit_row {
@@ -771,90 +557,9 @@ form {
     }
 }
 
-.deposit_button {
-    border-radius: var(--border-radius-sm);
-    padding: 8px 30px;
-    margin-left: auto;
-    &[disabled] {
-        background-color: var(--primary-color) !important;
-    }
-}
-
-.whitelisting__container {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-}
-.addresses_container {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin: 16px 0;
-}
-.address_container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 16px;
-}
-.input {
-    width: 100%;
-}
-.button-submit {
-    align-self: flex-end;
-}
-.circle {
-    border: 2px solid var(--camino-slate-slate-600);
-    cursor: pointer;
-    justify-content: center;
-    align-items: center;
-    display: flex;
-    border-radius: 100%;
-    padding: 10px;
-}
-
-.plus-button {
-    border: 2px solid var(--camino-success-color);
-    font-size: 10px;
-    width: 40px !important;
-    height: 40px !important;
-    svg {
-        color: var(--camino-success-color);
-    }
-}
-
-.delete-button {
-    border: 2px solid var(--camino-error-color);
-    width: 40px !important;
-    height: 40px !important;
-    svg {
-        color: var(--camino-error-color);
-    }
-}
-.delete-button.mobile {
-    display: none;
-}
-
-.delete-button.desktop {
-    display: flex;
-}
-
 @include mixins.mobile-device {
-    .delete-button.mobile {
-        display: flex;
-    }
-
-    .delete-button.desktop {
-        display: none;
-    }
-}
-@include mixins.mobile-device {
-    .offer_detail {
-        grid-template-columns: 1fr;
-        grid-gap: 0.5rem;
-        .offer_detail_left {
-            border-right: none;
-        }
+    .modal__body {
+        width: 100%;
     }
 }
 </style>

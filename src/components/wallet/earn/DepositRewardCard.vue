@@ -1,46 +1,5 @@
 <template>
-    <CamCard :title="rewardTitle">
-        <div class="offer_detail">
-            <div class="offer_detail_left">
-                <div>
-                    <label>{{ $t('earn.rewards.active_earning.deposit_start') }}:</label>
-                    <p class="reward">{{ startDate }}</p>
-                </div>
-                <div>
-                    <label>{{ $t('earn.rewards.active_earning.deposit_end') }}:</label>
-                    <p class="reward">{{ endDate }}</p>
-                </div>
-                <div>
-                    <label>{{ $t('earn.rewards.offer.min_deposit') }}:</label>
-                    <p class="reward">{{ cleanAvaxBN(minLock) }} CAM</p>
-                </div>
-                <div>
-                    <label>{{ $t('earn.rewards.offer.reward') }}:</label>
-                    <p class="reward">{{ rewardPercent }} %</p>
-                </div>
-            </div>
-            <div class="offer_detail_right">
-                <div>
-                    <label>{{ $t('earn.rewards.active_earning.deposited_amount') }}:</label>
-                    <p class="reward">
-                        {{ cleanAvaxBN(reward.deposit.amount) }} {{ nativeAssetSymbol }}
-                    </p>
-                </div>
-                <div>
-                    <label>{{ $t('earn.rewards.active_earning.pending_reward') }}:</label>
-                    <p class="reward">
-                        {{ cleanAvaxBN(reward.amountToClaim) }} {{ nativeAssetSymbol }}
-                    </p>
-                </div>
-                <div>
-                    <label>{{ $t('earn.rewards.active_earning.already_claimed') }}:</label>
-                    <p class="reward">
-                        {{ cleanAvaxBN(reward.deposit.claimedRewardAmount) }}
-                        {{ nativeAssetSymbol }}
-                    </p>
-                </div>
-            </div>
-        </div>
+    <CamOfferCard :title="rewardTitle" type="reward" :reward="reward">
         <div v-if="!isMultiSig" class="button_group">
             <CamBtn variant="primary" @click="openModal" :disabled="isClaimDisabled">
                 {{ $t('earn.rewards.active_earning.claim') }}
@@ -137,7 +96,7 @@
             :modalText="$t('earn.rewards.abort_modal.message')"
             @cancelTx="cancelMultisigTx"
         />
-    </CamCard>
+    </CamOfferCard>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
@@ -145,14 +104,12 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import ModalClaimReward from '@/components/modals/ClaimRewardModal.vue'
 import { cleanAvaxBN } from '@/helpers/helper'
-import AvaAsset from '@/js/AvaAsset'
 import { PlatformRewardDeposit } from '@/store/modules/platform/types'
 
 import { bintools } from '@/AVA'
 import Alert from '@/components/Alert.vue'
 import CamBtn from '@/components/CamBtn.vue'
-import CamCard from '@/components/CamCard.vue'
-import { ZeroBN } from '@/constants'
+import CamOfferCard from '@/components/CamOfferCard.vue'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { WalletType } from '@/js/wallets/types'
@@ -171,7 +128,7 @@ import ModalClaimDepositReward from './ModalClaimDepositReward.vue'
         ModalAbortSigning,
         CamBtn,
         Alert,
-        CamCard,
+        CamOfferCard,
     },
 })
 export default class DepositRewardCard extends Vue {
@@ -181,6 +138,7 @@ export default class DepositRewardCard extends Vue {
     disclamer: boolean = false
     // @ts-ignore
     helpers = this.globalHelper()
+    signedclaimedAmount: BN = new BN(0)
     // signedDepositID: string = ''
     @Prop() reward!: PlatformRewardDeposit
 
@@ -202,20 +160,27 @@ export default class DepositRewardCard extends Vue {
             this.updateNow()
         }, 2000)
     }
+
     destroyed() {
         clearInterval(this.intervalID)
+    }
+
+    mounted() {
+        this.updateMultisigTxDetails()
     }
 
     get activeWallet(): WalletType {
         return this.$store.state.activeWallet
     }
-    private get pendingSendMultisigTX(): SignavaultTx | undefined {
+
+    get pendingSendMultisigTX(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
             (item: any) =>
                 item?.tx?.alias === this.activeWallet.getStaticAddress('P') &&
                 WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
         )
     }
+
     async signMultisigTx() {
         const wallet = this.activeWallet
         if (!wallet || !(wallet instanceof MultisigWallet))
@@ -234,26 +199,6 @@ export default class DepositRewardCard extends Vue {
                 type: 'error',
             })
             this.disclamer = false
-        }
-    }
-    private async issueMultisigTx() {
-        const wallet = this.activeWallet
-        if (!wallet || !(wallet instanceof MultisigWallet))
-            return console.error('MultiSigTx::sign: Invalid wallet')
-        if (!this.pendingSendMultisigTX) return console.error('MultiSigTx::sign: Invalid Tx')
-        try {
-            await wallet.issueExternal(this.pendingSendMultisigTX?.tx)
-            this.helpers.dispatchNotification({
-                message: this.$t('notifications.transfer_success_msg'),
-                type: 'success',
-            })
-            this.updateMultisigTxDetails()
-            this.$store.dispatch('Signavault/updateTransaction')
-        } catch (e: any) {
-            this.helpers.dispatchNotification({
-                message: this.$t('notifications.execute_multisig_transaction_error'),
-                type: 'error',
-            })
         }
     }
 
@@ -277,12 +222,16 @@ export default class DepositRewardCard extends Vue {
             })
         }
     }
+
     private async updateMultisigTxDetails() {
         if (this.pendingSendMultisigTX) {
             let unsignedTx = new UnsignedTx()
             unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
             const utx = unsignedTx.getTransaction() as ClaimTx
             const claimAmounts = utx.getClaimAmounts()
+
+            const amount = claimAmounts[0].getAmount()
+            this.signedclaimedAmount = new BN(amount)
         }
     }
     get numberOfSignatures(): number {
@@ -305,6 +254,7 @@ export default class DepositRewardCard extends Vue {
         if (depositId === depositTxID) return tx
         else return undefined
     }
+
     signedDepositID() {
         const tx = this.pendingSendMultisigTX
 
@@ -317,9 +267,11 @@ export default class DepositRewardCard extends Vue {
 
         return bintools.cb58Encode(claimAmounts[0].getID())
     }
+
     txOwners(depositTxID: string): ModelMultisigTxOwner[] | [] {
         return this.getPendingMultisigTx(depositTxID)?.tx?.owners ?? []
     }
+
     signatureStatus(depositTxID: string): number {
         if (!this.getPendingMultisigTx(depositTxID)?.tx) return -1
         else if (!this.canExecuteMultisigTx(depositTxID)) return 1
@@ -327,6 +279,7 @@ export default class DepositRewardCard extends Vue {
 
         return -1
     }
+
     canExecuteMultisigTx(depositTxID: string): boolean {
         let signers = 0
         let threshold = this.getPendingMultisigTx(depositTxID)?.tx?.threshold
@@ -356,6 +309,7 @@ export default class DepositRewardCard extends Vue {
 
         return isSigned
     }
+
     disallowedClaim(depositTxID: string): boolean {
         if (!this.pendingSendMultisigTX) return false
         else {
@@ -378,59 +332,6 @@ export default class DepositRewardCard extends Vue {
             : 'Unknown'
     }
 
-    get startDate() {
-        const startDate = new Date(parseInt(this.reward.deposit.start.toString()) * 1000)
-
-        return startDate.toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric',
-        })
-    }
-
-    get endDate() {
-        const endDate = new Date(
-            (this.reward.deposit.start.toNumber() + this.reward.deposit.duration) * 1000
-        )
-
-        return endDate.toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric',
-        })
-    }
-
-    get rewardPercent() {
-        if (!this.depositOffer) return 0
-
-        const interestRateBase = 365 * 24 * 60 * 60
-        const interestRateDenominator = 1000000 * interestRateBase
-
-        return (
-            (this.depositOffer.interestRateNominator.toNumber() * interestRateBase * 100) /
-            interestRateDenominator
-        )
-    }
-
-    get minLock() {
-        return this.depositOffer?.minAmount ?? ZeroBN
-    }
-
-    get ava_asset(): AvaAsset | null {
-        let ava = this.$store.getters['Assets/AssetAVA']
-        return ava
-    }
-
-    get nativeAssetSymbol(): string {
-        return this.ava_asset?.symbol ?? ''
-    }
-
     get isClaimDisabled() {
         return this.reward.amountToClaim.isZero()
     }
@@ -447,42 +348,9 @@ export default class DepositRewardCard extends Vue {
 </script>
 <style scoped lang="scss">
 @use '../../../styles/abstracts/mixins';
-@use '../../../styles/main';
 
 .mt-2 {
     margin-top: 0.5rem;
-}
-
-.offer_detail {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 1.25rem;
-    .offer_detail_left {
-        border-right: 2px solid var(--bg-wallet-light);
-    }
-}
-
-label {
-    color: var(--primary-color-light) !important;
-}
-
-.claim_button {
-    border-radius: var(--border-radius-sm);
-    padding: 8px 30px;
-    margin-left: auto;
-    &[disabled] {
-        background-color: var(--primary-color) !important;
-    }
-}
-
-.offer_row {
-    display: flex;
-    flex-direction: column;
-    border-radius: var(--border-radius-sm);
-    overflow: hidden;
-    font-size: 14px;
-    background-color: var(--bg-light);
-    padding: 1rem;
 }
 
 .button_group {
@@ -490,43 +358,6 @@ label {
     margin-left: auto;
     gap: 0.5rem;
     justify-content: end;
-}
-
-.err {
-    text-align: left;
-    color: var(--error);
-    font-size: 0.8rem;
-    margin-top: 10px;
-}
-
-@include main.mobile-device {
-    .offer_detail {
-        grid-template-columns: 1fr;
-        grid-gap: 0.5rem;
-        .offer_detail_left {
-            border-right: none;
-        }
-    }
-}
-
-@include main.mobile-device {
-    .stake_info {
-        grid-column: 1/3;
-        border-left: none;
-        border-top: 3px solid var(--bg);
-
-        > div:first-of-type {
-            text-align: left;
-        }
-    }
-}
-@include mixins.mobile-device {
-    .offer_detail {
-        grid-template-columns: 1fr;
-        grid-gap: 0.5rem;
-        .offer_detail_left {
-            border-right: none;
-        }
-    }
+    margin-top: 0.6rem;
 }
 </style>

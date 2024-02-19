@@ -1,65 +1,5 @@
 <template>
-    <CamCard :title="rewardTitle">
-        <div class="progress">
-            <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
-            <span>
-                <span class="success" :style="'width:' + progress"></span>
-            </span>
-            {{ progressText }}
-        </div>
-        <div class="offer_detail">
-            <div class="progress">
-                <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
-                <span>
-                    <span class="success" :style="'width:' + progress"></span>
-                </span>
-                {{ progressText }}
-            </div>
-            <div class="offer_detail_left">
-                <div>
-                    <label>{{ $t('earn.rewards.offer.pool_start') }}:</label>
-                    <p class="reward">{{ formatDate(offer.start) }}</p>
-                </div>
-                <div>
-                    <label>{{ $t('earn.rewards.offer.pool_end') }}:</label>
-                    <p class="reward">{{ formatDate(offer.end) }}</p>
-                </div>
-                <div>
-                    <label>{{ $t('earn.rewards.offer.min_deposit') }}:</label>
-                    <p class="reward">{{ cleanAvaxBN(offer.minAmount) }} CAM</p>
-                </div>
-                <div>
-                    <label>{{ $t('earn.rewards.offer.reward') }}:</label>
-                    <p class="reward">{{ rewardPercent }} %</p>
-                </div>
-            </div>
-            <div class="offer_detail_right">
-                <div>
-                    <label>{{ $t('earn.rewards.offer.min_duration') }}:</label>
-                    <p class="reward">
-                        {{ formatDuration(offer.minDuration) }}
-                    </p>
-                </div>
-                <div>
-                    <label>{{ $t('earn.rewards.offer.max_duration') }}:</label>
-                    <p class="reward">
-                        {{ formatDuration(offer.maxDuration) }}
-                    </p>
-                </div>
-                <div>
-                    <label>{{ $t('earn.rewards.offer.unlock_duration') }}:</label>
-                    <p class="reward">
-                        {{ formatDuration(offer.unlockPeriodDuration) }}
-                    </p>
-                </div>
-                <div>
-                    <label>{{ $t('earn.rewards.offer.no_reward_duration') }}:</label>
-                    <p class="reward">
-                        {{ formatDuration(offer.noRewardsPeriodDuration) }}
-                    </p>
-                </div>
-            </div>
-        </div>
+    <CamOfferCard :title="rewardTitle" type="offer" :offer="offer">
         <div class="button--container">
             <!-- <button v-if="!isDepositDisabled" @click="openDepositFundsModal()">open modal</button> -->
             <button
@@ -73,16 +13,13 @@
                 :disabled="isDepositDisabled"
             >
                 {{
-                    isWhiteListing
-                        ? 'add new addresses'
-                        : !pendingOfferID || offer.id !== pendingOfferID
+                    !pendingOfferID || offer.id !== pendingOfferID
                         ? $t('earn.rewards.offer.deposit')
                         : 'Sign depositing funds'
                 }}
             </button>
         </div>
         <ModalDepositFunds
-            :isWhiteListing="isWhiteListing"
             @selectOffer="emitOffer"
             ref="modal_deposit_funds"
             :title="rewardTitle"
@@ -92,7 +29,7 @@
             :maxDepositAmount="maxDepositAmount"
             @closeDepositFundsModal="closeDepositFundsModal"
         />
-    </CamCard>
+    </CamOfferCard>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
@@ -101,7 +38,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { cleanAvaxBN, formatDuration } from '@/helpers/helper'
 import AvaAsset from '@/js/AvaAsset'
 
-import CamCard from '@/components/CamCard.vue'
+import CamOfferCard from '@/components/CamOfferCard.vue'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { BN } from '@c4tplatform/caminojs/dist'
 import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
@@ -114,13 +51,12 @@ import { DepositTx, UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformv
 @Component({
     components: {
         ModalDepositFunds,
-        CamCard,
+        CamOfferCard,
     },
 })
 export default class DepositOfferCard extends Vue {
     @Prop() offer!: DepositOffer
     @Prop() maxDepositAmount!: BN
-    @Prop() isWhiteListing?: boolean
 
     $refs!: {
         modal_deposit_funds: ModalDepositFunds
@@ -230,56 +166,5 @@ export default class DepositOfferCard extends Vue {
     display: flex;
     width: 100%;
     justify-content: flex-end;
-}
-.progress {
-    grid-column: span 2;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    grid-gap: 1.25rem;
-    > span {
-        margin-top: auto;
-        margin-bottom: auto;
-        height: 4px;
-        background-color: var(--bg);
-        display: inline-block;
-    }
-    .success {
-        height: 100%;
-        background-color: var(--color-success);
-        display: block;
-    }
-}
-
-.offer_detail {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 4px 1.25rem;
-    .offer_detail_left {
-        border-right: 2px solid var(--bg-wallet-light);
-    }
-}
-
-label {
-    color: var(--primary-color-light) !important;
-    font-size: 13px;
-}
-
-.claim_button {
-    border-radius: var(--border-radius-sm);
-    padding: 8px 30px;
-    margin-left: auto;
-    &[disabled] {
-        background-color: var(--primary-color) !important;
-    }
-}
-
-@include mixins.mobile-device {
-    .offer_detail {
-        grid-template-columns: 1fr;
-        grid-gap: 0.5rem;
-        .offer_detail_left {
-            border-right: none;
-        }
-    }
 }
 </style>
