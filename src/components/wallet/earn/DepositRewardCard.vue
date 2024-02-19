@@ -231,7 +231,6 @@ export default class DepositRewardCard extends Vue {
             const claimAmounts = utx.getClaimAmounts()
 
             const amount = claimAmounts[0].getAmount()
-            console.log('amount', cleanAvaxBN(new BN(amount)))
             this.signedclaimedAmount = new BN(amount)
         }
     }
