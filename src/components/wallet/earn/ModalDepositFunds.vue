@@ -226,15 +226,6 @@ export default class ModalDepositFunds extends Vue {
                 WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'DepositTx'
         )
     }
-    get pendingOfferID(): string | undefined {
-        if (this.pendingDepositTX) {
-            let unsignedTx = new UnsignedTx()
-            unsignedTx.fromBuffer(Buffer.from(this.pendingDepositTX.tx?.unsignedTx, 'hex'))
-            const utx = unsignedTx.getTransaction() as DepositTx
-            return bintools.cb58Encode(utx.getDepositOfferID())
-        }
-        return undefined
-    }
     get pendingTxduration() {
         if (this.pendingDepositTX) {
             let unsignedTx = new UnsignedTx()
@@ -255,19 +246,7 @@ export default class ModalDepositFunds extends Vue {
     get txOwners() {
         return this.pendingDepositTX?.tx?.owners ?? []
     }
-    // get rewardOwner() {
-    //     if (this.pendingDepositTX) {
-    //         let unsignedTx = new UnsignedTx()
-    //         unsignedTx.fromBuffer(Buffer.from(this.pendingDepositTX.tx?.unsignedTx, 'hex'))
-    //         const utx = unsignedTx.getTransaction() as DepositTx
-    //         return bintools.addressToString(
-    //             ava.getHRP(),
-    //             'P',
-    //             utx.getRewardsOwner().getAddresses()[0]
-    //         )
-    //     }
-    //     return undefined
-    // }
+
     get sigValue() {
         return this.pendingDepositTX?.tx.owners?.filter((owner) => !!owner.signature)?.length
     }
@@ -322,30 +301,12 @@ export default class ModalDepositFunds extends Vue {
             interestRateDenominator
         )
     }
-    get progressText(): string {
-        const amt = this.amountLimit
-        return amt.amount.isZero()
-            ? 'No Limit'
-            : this.progress + '(' + cleanAvaxBN(amt.amount) + this.nativeAssetSymbol + ')'
-    }
-    get amountLimit(): { nominator: BN; amount: BN } {
-        return this.offer.upgradeVersion === 0 || !this.offer.totalMaxAmount.isZero()
-            ? { nominator: this.offer.depositedAmount, amount: this.offer.totalMaxAmount }
-            : { nominator: this.offer.rewardedAmount, amount: this.offer.totalMaxRewardAmount }
-    }
     get ava_asset(): AvaAsset | null {
         let ava = this.$store.getters['Assets/AssetAVA']
         return ava
     }
     get nativeAssetSymbol(): string {
         return this.ava_asset?.symbol ?? ''
-    }
-
-    get progress(): string {
-        const amt = this.amountLimit
-        return amt.amount.isZero()
-            ? '0px'
-            : amt.nominator.div(amt.amount).mul(new BN(100)).toString() + '%'
     }
 
     get duration() {

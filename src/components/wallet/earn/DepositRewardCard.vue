@@ -104,11 +104,9 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import ModalClaimReward from '@/components/modals/ClaimRewardModal.vue'
 import { cleanAvaxBN } from '@/helpers/helper'
-import AvaAsset from '@/js/AvaAsset'
 import { PlatformRewardDeposit } from '@/store/modules/platform/types'
 
 import { bintools } from '@/AVA'
-import { ZeroBN } from '@/constants'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { WalletType } from '@/js/wallets/types'
@@ -162,6 +160,7 @@ export default class DepositRewardCard extends Vue {
             this.updateNow()
         }, 2000)
     }
+
     destroyed() {
         clearInterval(this.intervalID)
     }
@@ -170,14 +169,10 @@ export default class DepositRewardCard extends Vue {
         this.updateMultisigTxDetails()
     }
 
-    @Watch('pendingSendMultisigTX')
-    onPendingSendMultisigTXChange() {
-        this.updateMultisigTxDetails()
-    }
-
     get activeWallet(): WalletType {
         return this.$store.state.activeWallet
     }
+
     get pendingSendMultisigTX(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
             (item: any) =>
@@ -185,6 +180,7 @@ export default class DepositRewardCard extends Vue {
                 WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
         )
     }
+
     async signMultisigTx() {
         const wallet = this.activeWallet
         if (!wallet || !(wallet instanceof MultisigWallet))
@@ -226,6 +222,7 @@ export default class DepositRewardCard extends Vue {
             })
         }
     }
+
     private async updateMultisigTxDetails() {
         if (this.pendingSendMultisigTX) {
             let unsignedTx = new UnsignedTx()
@@ -258,6 +255,7 @@ export default class DepositRewardCard extends Vue {
         if (depositId === depositTxID) return tx
         else return undefined
     }
+
     signedDepositID() {
         const tx = this.pendingSendMultisigTX
 
@@ -270,9 +268,11 @@ export default class DepositRewardCard extends Vue {
 
         return bintools.cb58Encode(claimAmounts[0].getID())
     }
+
     txOwners(depositTxID: string): ModelMultisigTxOwner[] | [] {
         return this.getPendingMultisigTx(depositTxID)?.tx?.owners ?? []
     }
+
     signatureStatus(depositTxID: string): number {
         if (!this.getPendingMultisigTx(depositTxID)?.tx) return -1
         else if (!this.canExecuteMultisigTx(depositTxID)) return 1
@@ -280,6 +280,7 @@ export default class DepositRewardCard extends Vue {
 
         return -1
     }
+
     canExecuteMultisigTx(depositTxID: string): boolean {
         let signers = 0
         let threshold = this.getPendingMultisigTx(depositTxID)?.tx?.threshold
@@ -309,6 +310,7 @@ export default class DepositRewardCard extends Vue {
 
         return isSigned
     }
+
     disallowedClaim(depositTxID: string): boolean {
         if (!this.pendingSendMultisigTX) return false
         else {
@@ -329,59 +331,6 @@ export default class DepositRewardCard extends Vue {
         return this.depositOffer
             ? Buffer.from(this.depositOffer.memo.replace('0x', ''), 'hex').toString()
             : 'Unknown'
-    }
-
-    get startDate() {
-        const startDate = new Date(parseInt(this.reward.deposit.start.toString()) * 1000)
-
-        return startDate.toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric',
-        })
-    }
-
-    get endDate() {
-        const endDate = new Date(
-            (this.reward.deposit.start.toNumber() + this.reward.deposit.duration) * 1000
-        )
-
-        return endDate.toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric',
-        })
-    }
-
-    get rewardPercent() {
-        if (!this.depositOffer) return 0
-
-        const interestRateBase = 365 * 24 * 60 * 60
-        const interestRateDenominator = 1000000 * interestRateBase
-
-        return (
-            (this.depositOffer.interestRateNominator.toNumber() * interestRateBase * 100) /
-            interestRateDenominator
-        )
-    }
-
-    get minLock() {
-        return this.depositOffer?.minAmount ?? ZeroBN
-    }
-
-    get ava_asset(): AvaAsset | null {
-        let ava = this.$store.getters['Assets/AssetAVA']
-        return ava
-    }
-
-    get nativeAssetSymbol(): string {
-        return this.ava_asset?.symbol ?? ''
     }
 
     get isClaimDisabled() {

@@ -130,7 +130,7 @@ export default class CamOfferCard extends Vue {
 
     @Watch('pendingSendMultisigTX')
     onPendingSendMultisigTXChange() {
-        this.updateMultisigTxDetails()
+        if (this.type === 'reward') this.updateMultisigTxDetails()
     }
 
     get activeWallet(): WalletType {

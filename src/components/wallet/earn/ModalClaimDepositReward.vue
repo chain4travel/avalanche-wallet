@@ -58,7 +58,6 @@
 import { ava, bintools } from '@/AVA'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
 import { RewardOwner } from '@/components/misc/ValidatorList/types'
-import { bnToBig } from '@/helpers/helper'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import AvaAsset from '@/js/AvaAsset'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
@@ -132,16 +131,8 @@ export default class ModalClaimDepositReward extends Vue {
         return this.$store.state.activeWallet
     }
 
-    get isMultiSig(): boolean {
-        return this.activeWallet.type === 'multisig'
-    }
-
     get feeAmt(): string {
         return this.formattedAmount(ava.PChain().getTxFee())
-    }
-
-    get claimableAmount(): string {
-        return this.confiremedClaimedAmount.toLocaleString()
     }
 
     get ava_asset(): AvaAsset | null {
@@ -166,6 +157,7 @@ export default class ModalClaimDepositReward extends Vue {
         await this.$store.dispatch('Platform/updateAllDepositOffers')
         await this.$store.dispatch('Platform/updateRewards')
     }
+
     async confirmClaim() {
         const wallet = this.$store.state.activeWallet
         // @ts-ignore
