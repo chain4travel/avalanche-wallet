@@ -1,6 +1,12 @@
 <template>
-    <div class="offer_row">
-        <h3 class="offer_title">{{ rewardTitle }}</h3>
+    <CamCard :title="rewardTitle">
+        <div class="progress">
+            <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
+            <span>
+                <span class="success" :style="'width:' + progress"></span>
+            </span>
+            {{ progressText }}
+        </div>
         <div class="offer_detail">
             <div class="progress">
                 <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
@@ -86,7 +92,7 @@
             :maxDepositAmount="maxDepositAmount"
             @closeDepositFundsModal="closeDepositFundsModal"
         />
-    </div>
+    </CamCard>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
@@ -95,6 +101,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { cleanAvaxBN, formatDuration } from '@/helpers/helper'
 import AvaAsset from '@/js/AvaAsset'
 
+import CamCard from '@/components/CamCard.vue'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { BN } from '@c4tplatform/caminojs/dist'
 import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
@@ -107,6 +114,7 @@ import { DepositTx, UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformv
 @Component({
     components: {
         ModalDepositFunds,
+        CamCard,
     },
 })
 export default class DepositOfferCard extends Vue {
@@ -218,19 +226,6 @@ export default class DepositOfferCard extends Vue {
 <style scoped lang="scss">
 @use '../../../styles/abstracts/mixins';
 
-.offer_row {
-    display: flex;
-    flex-direction: column;
-    border-radius: var(--border-radius-sm);
-    overflow: hidden;
-    font-size: 14px;
-    background-color: var(--bg-light);
-    padding: 1rem;
-}
-
-.offer_title {
-    margin-bottom: 1rem;
-}
 .button--container {
     display: flex;
     width: 100%;

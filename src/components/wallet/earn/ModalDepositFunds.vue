@@ -2,7 +2,14 @@
     <div>
         <modal ref="modal" :title="title">
             <div class="modal__body">
-                <div class="offer_row">
+                <CamCard>
+                    <div class="progress">
+                        <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
+                        <span>
+                            <span class="success" :style="'width:' + progress"></span>
+                        </span>
+                        {{ progressText }}
+                    </div>
                     <div class="offer_detail">
                         <div class="progress">
                             <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
@@ -56,8 +63,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <template v-if="!isWhiteListing">
+                </CamCard>
+                <template>
                     <div>
                         <form class="deposit_row">
                             <div class="deposit_inputs">
@@ -253,9 +260,7 @@ import Modal from '../../modals/Modal.vue'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 
 import { ava, bintools } from '@/AVA'
-import CamBtn from '@/components/CamBtn.vue'
 import CamInput from '@/components/CamInput.vue'
-import CamTooltip from '@/components/misc/CamTooltip.vue'
 import ModalAbortSigning from '@/components/wallet/earn/ModalAbortSigning.vue'
 import { isValidPChainAddress } from '@/helpers/address_helper'
 import { Buffer } from '@c4tplatform/caminojs/dist'
@@ -271,8 +276,7 @@ import DateForm from './DateForm.vue'
         ModalAbortSigning,
         Alert,
         CamInput,
-        CamTooltip,
-        CamBtn,
+        CamCard,
     },
 })
 export default class ModalDepositFunds extends Vue {
@@ -632,7 +636,7 @@ export default class ModalDepositFunds extends Vue {
     width: 600px;
     overflow-x: hidden;
 }
-.offer_row {
+<<<<<<< HEAD .offer_row {
     display: flex;
     flex-direction: column;
     border-radius: var(--border-radius-sm);
@@ -641,8 +645,9 @@ export default class ModalDepositFunds extends Vue {
     background-color: var(--bg-light);
     padding: 1rem;
 }
-
-.offer_title {
+=======>>>>>>>85b5836a
+    (Refactor: Implemented new Standard Camino Card, replacing old versions for improved UI consistency.)
+    .offer_title {
     margin-bottom: 1rem;
 }
 .button--container {

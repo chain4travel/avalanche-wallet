@@ -1,6 +1,5 @@
 <template>
-    <div class="offer_row">
-        <h3 class="offer_title">{{ rewardTitle }}</h3>
+    <CamCard :title="rewardTitle">
         <div class="offer_detail">
             <div class="offer_detail_left">
                 <div>
@@ -138,13 +137,7 @@
             :modalText="$t('earn.rewards.abort_modal.message')"
             @cancelTx="cancelMultisigTx"
         />
-        <!-- <ModalClaimReward
-            ref="modal_claim_reward"
-            :depositTxID="reward.deposit.depositTxID"
-            :amount="reward.amountToClaim"
-            :rewardOwner="reward.deposit.rewardOwner"
-        /> -->
-    </div>
+    </CamCard>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
@@ -156,6 +149,9 @@ import AvaAsset from '@/js/AvaAsset'
 import { PlatformRewardDeposit } from '@/store/modules/platform/types'
 
 import { bintools } from '@/AVA'
+import Alert from '@/components/Alert.vue'
+import CamBtn from '@/components/CamBtn.vue'
+import CamCard from '@/components/CamCard.vue'
 import { ZeroBN } from '@/constants'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
@@ -167,8 +163,6 @@ import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfa
 import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
 import ModalAbortSigning from './ModalAbortSigning.vue'
 import ModalClaimDepositReward from './ModalClaimDepositReward.vue'
-import CamBtn from '@/components/CamBtn.vue'
-import Alert from '@/components/Alert.vue'
 
 @Component({
     components: {
@@ -177,6 +171,7 @@ import Alert from '@/components/Alert.vue'
         ModalAbortSigning,
         CamBtn,
         Alert,
+        CamCard,
     },
 })
 export default class DepositRewardCard extends Vue {
@@ -454,20 +449,6 @@ export default class DepositRewardCard extends Vue {
 @use '../../../styles/abstracts/mixins';
 @use '../../../styles/main';
 
-.offer_row {
-    display: flex;
-    flex-direction: column;
-    border-radius: var(--border-radius-sm);
-    overflow: hidden;
-    font-size: 14px;
-    background-color: var(--bg-light);
-    padding: 1rem;
-}
-
-.offer_title {
-    margin-bottom: 1rem;
-}
-
 .mt-2 {
     margin-top: 0.5rem;
 }
@@ -502,106 +483,6 @@ label {
     font-size: 14px;
     background-color: var(--bg-light);
     padding: 1rem;
-}
-
-.offer_title {
-    margin-bottom: 1rem;
-}
-
-.offer_detail {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 1.25rem;
-    .offer_detail_left {
-        border-right: 2px solid var(--bg-wallet-light);
-    }
-}
-
-.node_id {
-    word-break: break-all;
-}
-
-.top_bar {
-    height: max-content;
-    position: relative;
-    padding: 2px 8px;
-    border-bottom: 2px solid var(--bg-wallet-light);
-}
-.reward_row {
-    border-radius: var(--border-radius-sm);
-    overflow: hidden;
-    font-size: 14px;
-    //border: 2px solid var(--bg-light);
-    background-color: var(--bg-light);
-}
-
-.data_row {
-    grid-column: 1/3;
-    display: grid;
-    grid-template-columns: 1fr 280px;
-    align-items: center;
-}
-
-.date {
-    z-index: 1;
-}
-.reward_bar {
-    background-color: var(--success);
-    position: absolute;
-    opacity: 0.5;
-    height: 100%;
-    left: 0;
-    top: 0;
-    z-index: 0;
-}
-
-.stake_info {
-    padding: 6px 12px;
-    display: grid;
-    column-gap: 14px;
-    grid-template-columns: 2fr 1fr 1fr;
-    /*justify-content: space-between;*/
-    /*text-align: right;*/
-    text-align: left;
-
-    > div {
-        align-self: baseline;
-    }
-}
-
-.bordered_button {
-    border-width: 1px;
-    border-style: solid;
-    border-radius: var(--border-radius-lg);
-    padding: 8px 24px;
-    border-color: var(--primary-btn-border-color);
-    color: var(--primary-btn-border-color);
-    background-color: transparent !important;
-    &:hover {
-        opacity: 0.6;
-    }
-    &[disabled] {
-        background: var(--bg-light);
-        border: var(--primary-border);
-        color: var(--primary-color-light);
-        border: var(--primary-border);
-        opacity: 0.3;
-        cursor: not-allowed;
-    }
-}
-
-label {
-    color: var(--primary-color-light) !important;
-}
-
-.claim_button {
-    border-radius: var(--border-radius-sm);
-    width: min-content;
-    padding: 8px 30px;
-    // margin-left: auto;
-    &[disabled] {
-        background-color: var(--primary-color) !important;
-    }
 }
 
 .button_group {
