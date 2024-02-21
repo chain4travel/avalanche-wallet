@@ -4,8 +4,6 @@
 }
 
 .v-input__slot {
-    background-color: var(--bg) !important;
-
     input {
         color: var(--primary-color) !important;
     }
@@ -69,7 +67,8 @@
     }
 }
 
-.qr_input, .alias_input {
+.qr_input,
+.alias_input {
     background-color: var(--bg-light) !important;
     color: var(--primary-color) !important;
     @include mixins.typography-caption;
@@ -100,6 +99,7 @@
 
 .pass input {
     text-align: center;
+    border: none !important;
 }
 
 .pass_name {

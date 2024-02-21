@@ -1,6 +1,35 @@
+import { ava, bintools } from '@/AVA'
+import {
+    KEYSTORE_VERSION,
+    extractKeysFromDecryptedFile,
+    makeKeyfile,
+    readKeyFile,
+} from '@/js/Keystore'
+import { INetwork, WalletType } from '@/js/wallets/types'
+import {
+    AccessWalletMultipleInput,
+    AccessWalletMultipleInputParams,
+    ExportWalletsInput,
+    ImportKeyfileInput,
+    IssueBatchTxInput,
+    RootState,
+} from '@/store/types'
+
+import { getMultisigAliases } from '@/explorer_api'
+import { getAvaxPriceUSD } from '@/helpers/price_helper'
+import { AllKeyFileDecryptedTypes } from '@/js/IKeystore'
+import { LedgerWallet } from '@/js/wallets/LedgerWallet'
+import MnemonicWallet from '@/js/wallets/MnemonicWallet'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import router from '@/router'
+import { Buffer as BufferAvalanche } from '@c4tplatform/caminojs/dist'
+import { MultisigAliasReply } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { privateToAddress } from '@ethereumjs/util'
+import createHash from 'create-hash'
 import Vue from 'vue'
 import Vuex from 'vuex'
-
+import { updateFilterAddresses } from '../providers'
 import Accounts from './modules/accounts/accounts'
 import Assets from './modules/assets/assets'
 import History from './modules/history/history'
@@ -11,41 +40,7 @@ import Notifications from './modules/notifications/notifications'
 import Platform from './modules/platform/platform'
 import Signavault from './modules/signavault/signavault'
 
-import {
-    AccessWalletMultipleInput,
-    AccessWalletMultipleInputParams,
-    ExportWalletsInput,
-    ImportKeyfileInput,
-    IssueBatchTxInput,
-    RootState,
-} from '@/store/types'
-
-import { AllKeyFileDecryptedTypes } from '@/js/IKeystore'
-import { INetwork, WalletType } from '@/js/wallets/types'
-
 Vue.use(Vuex)
-
-import { ava, bintools } from '@/AVA'
-import {
-    KEYSTORE_VERSION,
-    extractKeysFromDecryptedFile,
-    makeKeyfile,
-    readKeyFile,
-} from '@/js/Keystore'
-import { LedgerWallet } from '@/js/wallets/LedgerWallet'
-import MnemonicWallet from '@/js/wallets/MnemonicWallet'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import { SingletonWallet } from '@/js/wallets/SingletonWallet'
-
-import { Buffer as BufferAvalanche } from '@c4tplatform/caminojs/dist'
-import { MultisigAliasReply } from '@c4tplatform/caminojs/dist/apis/platformvm'
-
-import { getMultisigAliases } from '@/explorer_api'
-import { getAvaxPriceUSD } from '@/helpers/price_helper'
-import router from '@/router'
-import { privateToAddress } from '@ethereumjs/util'
-import createHash from 'create-hash'
-import { updateFilterAddresses } from '../providers'
 
 export default new Vuex.Store({
     modules: {
@@ -82,7 +77,7 @@ export default new Vuex.Store({
         volatileWallets: [], // will be forgotten when tab is closed
         warnUpdateKeyfile: false, // If true will promt the user the export a new keyfile
         multiSigAliases: [],
-        theme: 'night',
+        theme: 'light',
         walletsDeleted: false,
         prices: {
             usd: 0,
@@ -112,8 +107,8 @@ export default new Vuex.Store({
     },
     mutations: {
         updateTheme(state) {
-            if (state.theme === 'night') state.theme = 'day'
-            else state.theme = 'night'
+            if (state.theme === 'light') state.theme = 'dark'
+            else state.theme = 'light'
         },
         updateActiveAddress(state) {
             if (!state.activeWallet) {
@@ -522,10 +517,16 @@ export default new Vuex.Store({
             let keys = extractKeysFromDecryptedFile(keyFile)
 
             // If not auth, login user then add keys
+            let index = keyFile.activeIndex
+            if (
+                keyFile.keys[keyFile.activeIndex].type === 'multisig' &&
+                store.state.network.name !== fileData.keys[fileData.activeIndex].network
+            )
+                index = 0
             if (!store.state.isAuth) {
                 await store.dispatch('accessWalletMultiple', {
                     keys,
-                    activeIndex: keyFile.activeIndex,
+                    activeIndex: index,
                 })
             } else {
                 for (let i = 0; i < keys.length; i++) {

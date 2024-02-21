@@ -22,25 +22,21 @@
                 <img src="@/assets/trash_can_dark.svg" />
             </button>
         </div>
-        <button block depressed @click="addTx()" class="add_asset" v-if="showAdd">
-            <fa icon="plus"></fa>
-            Add Asset
-        </button>
         <!--        <p class="chain_warn">{{$t('transfer.chain_warn')}}</p>-->
     </div>
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 const uuidv1 = require('uuid/v1')
 
-import { BN } from '@c4tplatform/caminojs/dist'
 import CurrencyInputDropdown from '@/components/misc/CurrencyInputDropdown.vue'
-import AvaAsset from '@/js/AvaAsset'
-import { AssetsDict } from '@/store/modules/assets/types'
 import { ICurrencyInputDropdownValue, ITransaction } from '@/components/wallet/transfer/types'
 import { ChainIdType } from '@/constants'
+import AvaAsset from '@/js/AvaAsset'
+import { AssetsDict } from '@/store/modules/assets/types'
+import { BN } from '@c4tplatform/caminojs/dist'
 
 @Component({
     components: {
@@ -161,6 +157,7 @@ export default class TxList extends Vue {
     @Watch('assets_list')
     onAssetListChange() {
         this.updateUnavailable()
+        this.addTx()
     }
 
     get assets_list(): AvaAsset[] {
@@ -169,15 +166,6 @@ export default class TxList extends Vue {
 
     get assets(): AssetsDict {
         return this.$store.getters['Assets/walletAssetsDict']
-    }
-
-    get showAdd(): boolean {
-        if (this.disabled) return false
-        if (this.chainId === 'P') return false
-        if (this.tx_list.length === this.assets_list.length || this.assets_list.length === 0) {
-            return false
-        }
-        return true
     }
 }
 </script>
@@ -298,8 +286,10 @@ $right_pad: 60px;
 }
 
 @include mixins.mobile-device {
+    .table_title {
+        padding-right: 0px !important;
+    }
     .list_item {
-        column-gap: 12px;
         grid-template-columns: 1fr max-content;
     }
 

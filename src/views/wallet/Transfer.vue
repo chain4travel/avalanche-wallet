@@ -43,6 +43,7 @@
                                 'hover_border',
                                 { pending: !!pendingSendMultisigTX && formType === 'P' },
                             ]"
+                            style="padding: 0"
                             placeholder="xxx"
                             :disabled="isConfirm || (!!pendingSendMultisigTX && formType === 'P')"
                         ></qr-input>
@@ -194,6 +195,7 @@ import { ITransaction } from '@/components/wallet/transfer/types'
 import { ChainIdType } from '@/constants'
 import { bnToBig } from '@/helpers/helper'
 import { WalletHelper } from '@/helpers/wallet_helper'
+import { AvaNetwork } from '@/js/AvaNetwork'
 import { WalletType } from '@/js/wallets/types'
 import { IssueBatchTxInput, priceDict } from '@/store/types'
 import { BN, Buffer } from '@c4tplatform/caminojs/dist'
@@ -405,13 +407,21 @@ export default class Transfer extends Vue {
         })
     }
     @Watch('formType', { immediate: true })
+    @Watch('activeWallet', { immediate: true })
+    @Watch('activeNetwork')
     updateDetails() {
-        if (this.formType === 'P') this.updateMultisigTxDetails()
+        if (this.isMultiSig && this.formType === 'P') this.updateMultisigTxDetails()
         else {
             this.memo = ''
             this.addressIn = ''
+            this.pendingTxAmount = new BN(0).toLocaleString()
         }
     }
+
+    get activeNetwork(): null | AvaNetwork {
+        return this.$store?.state?.Network?.selectedNetwork
+    }
+
     async refresh() {
         if (!this.isMultiSig) return
         await this.$store.dispatch('Signavault/updateTransaction')

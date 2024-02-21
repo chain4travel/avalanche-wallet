@@ -146,8 +146,8 @@ import { WalletHelper } from '@/helpers/wallet_helper'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import { WalletCore } from '@/js/wallets/WalletCore'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
-import { BN } from '@c4tplatform/caminojs/dist'
-import { AddressState } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { BN, Buffer } from '@c4tplatform/caminojs/dist'
+import { AddressState, ClaimTx, UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import Big from 'big.js'
 import axios from 'axios'
 import 'reflect-metadata'
@@ -155,9 +155,10 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import { AvaNetwork } from '@/js/AvaNetwork'
 import Spinner from '@/components/misc/Spinner.vue'
 import moment from 'moment'
-import { ava } from '@/AVA'
+import { ava, bintools } from '@/AVA'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { WalletType } from '@/js/wallets/types'
+import { ClaimType } from '@c4tplatform/caminojs/dist/apis/platformvm'
 
 @Component({
     name: 'validator',
@@ -418,15 +419,28 @@ export default class Validator extends Vue {
     }
 
     async getPendingTransaction() {
-        if (this.isMultisignTx) {
-            let txClaim = this.$store.getters['Signavault/transactions'].find(
-                (item: any) =>
-                    item?.tx?.alias === this.pChainddress &&
-                    WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
-            )
-            this.pendingTx = txClaim
-        } else {
-            this.pendingTx = undefined
+        this.pendingTx = undefined
+
+        if (!this.isMultisignTx) return
+
+        const txClaim = this.$store.getters['Signavault/transactions'].find(
+            (item: SignavaultTx) =>
+                item?.tx?.alias === this.pChainddress &&
+                WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
+        )
+
+        if (!txClaim) return
+
+        const unsignedTx = new UnsignedTx()
+        unsignedTx.fromBuffer(Buffer.from(txClaim.tx?.unsignedTx, 'hex'))
+        const utx = unsignedTx.getTransaction() as ClaimTx
+
+        for (const claimAmount of utx.getClaimAmounts()) {
+            const claimType = bintools.fromBufferToBN(claimAmount.getType()).toString()
+            if (claimType === ClaimType.VALIDATOR_REWARD) {
+                this.pendingTx = txClaim
+                break
+            }
         }
     }
 

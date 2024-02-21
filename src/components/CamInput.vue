@@ -7,6 +7,7 @@
             @input="updateValue"
             :class="{ error: error }"
             :disabled="disabled"
+            :type="type"
         />
         <div class="validation-message" v-if="error && errorMessage">
             <svg
@@ -38,6 +39,7 @@ export default class CamInput extends Vue {
     @Prop({ default: '' }) errorMessage!: string
     @Prop({ default: '' }) value!: string
     @Prop({ default: false }) disabled!: boolean
+    @Prop({ default: 'text' }) type!: string
     updateValue(event: Event) {
         this.$emit('input', (event.target as HTMLInputElement).value)
     }

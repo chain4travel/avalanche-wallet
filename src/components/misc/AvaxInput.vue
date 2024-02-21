@@ -136,7 +136,8 @@ export default class AvaxInput extends Vue {
     &__container {
         display: flex;
         flex-direction: column;
-        width: 100%;
+        width: max-content;
+        min-width: 100%;
     }
     display: grid;
     grid-template-columns: 1fr max-content;

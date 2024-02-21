@@ -167,7 +167,7 @@ export default class MyKeys extends Vue {
     @Watch('activeWallet')
     walletChanged() {
         // @ts-ignore
-        this.globalHelper()?.setWalletSwitched(this.activeWallet.getStaticAddress('P'))
+        if (this.globalHelper().updateStore) this.globalHelper().updateStore('updateName')
     }
     @Watch('activeNetworkStatus')
     async handleNetowrkChanged() {

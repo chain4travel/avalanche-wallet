@@ -1,5 +1,5 @@
 <template>
-    <button :class="buttonClass" :disabled="disabled || loading" @click="handleClick">
+    <button :type="type" :class="buttonClass" :disabled="disabled || loading" @click="handleClick">
         <Spinner v-if="loading" />
         <div v-else>
             <slot></slot>
@@ -23,6 +23,7 @@ export default class CamBtn extends Vue {
     @Prop({ default: false }) readonly disabled!: boolean
     @Prop({ default: false }) readonly loading!: boolean
     @Prop({ default: () => {} }) readonly onClick!: Function
+    @Prop({ default: 'button' }) readonly type?: 'button' | 'submit' | 'reset'
 
     get buttonClass() {
         return `camino__${this.variant}--button`

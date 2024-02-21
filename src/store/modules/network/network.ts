@@ -1,13 +1,14 @@
-import { NetworkState } from '@/store/modules/network/types'
-import { RootState } from '@/store/types'
-import { Module } from 'vuex'
-
 import { ava, infoApi } from '@/AVA'
-import { web3 } from '@/evm'
-import { explorer_api } from '@/explorer_api'
+
 import { AvaNetwork } from '@/js/AvaNetwork'
 import { BN } from '@c4tplatform/caminojs/dist'
+import { Module } from 'vuex'
+import { NetworkState } from '@/store/modules/network/types'
+import { RootState } from '@/store/types'
+import { explorer_api } from '@/explorer_api'
 import { setSocketNetwork } from '../../../providers'
+import { web3 } from '@/evm'
+
 const network_module: Module<NetworkState, RootState> = {
     namespaced: true,
     state: {
@@ -182,6 +183,7 @@ const network_module: Module<NetworkState, RootState> = {
 
             commit('setNetwork', net, { root: true })
             state.status = 'connected'
+            localStorage.setItem('selectedNetwork', net.name)
             return true
         },
 
@@ -226,6 +228,7 @@ const network_module: Module<NetworkState, RootState> = {
 
             try {
                 let urlSubstringParam = window.location.pathname?.split('/')?.[2]
+                let storedNetworkName = localStorage.getItem('selectedNetwork')
 
                 if (urlSubstringParam !== undefined) {
                     let networkFromParam = state.networks.find(
@@ -239,11 +242,25 @@ const network_module: Module<NetworkState, RootState> = {
                             (val) => val.name.toLowerCase() === urlSubstringParam.toLowerCase()
                         )
 
-                        if (networkCustomFromParam) {
+                        if (networkCustomFromParam)
                             await dispatch('setNetwork', networkCustomFromParam)
-                        } else {
-                            await dispatch('setNetwork', state.networks[0])
-                        }
+                        else await dispatch('setNetwork', state.networks[0])
+                    }
+                } else if (storedNetworkName !== undefined) {
+                    let networkMatchFromStorage = state.networks.find(
+                        (val) => val.name.toLowerCase() === storedNetworkName?.toLowerCase()
+                    )
+
+                    if (networkMatchFromStorage) {
+                        await dispatch('setNetwork', networkMatchFromStorage)
+                    } else {
+                        let customNetworkMatchFromStorage = state.networksCustom.find(
+                            (val) => val.name.toLowerCase() === storedNetworkName?.toLowerCase()
+                        )
+
+                        if (customNetworkMatchFromStorage)
+                            await dispatch('setNetwork', customNetworkMatchFromStorage)
+                        else await dispatch('setNetwork', state.networks[0])
                     }
                 } else {
                     await dispatch('setNetwork', state.networks[0])

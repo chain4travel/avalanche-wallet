@@ -12,7 +12,7 @@ export default class ImageDayNight extends Vue {
 
     get isDay() {
         //@ts-ignore
-        return this.$root.theme === 'day'
+        return this.$root.theme === 'light'
     }
 }
 </script>
