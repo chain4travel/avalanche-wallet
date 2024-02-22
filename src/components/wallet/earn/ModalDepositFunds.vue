@@ -3,7 +3,7 @@
         <modal ref="modal" :title="title">
             <div class="modal__body">
                 <CamOfferCard type="offer" :offer="offer" />
-                <template>
+                <template v-if="!isWhiteListing">
                     <div>
                         <form class="deposit_row">
                             <div class="deposit_inputs">
@@ -140,6 +140,37 @@
                         </form>
                     </div>
                 </template>
+                <template v-else>
+                    <div class="whitelisting__container">
+                        <label style="margin-top: 16px">
+                            {{ $t('earn.rewards.offer.add_new_addresses') }}
+                        </label>
+                        <div class="addresses_container input">
+                            <div v-for="(address, index) in addresses" :key="index">
+                                <div class="address_container">
+                                    <button
+                                        @click="removeAddress(index)"
+                                        class="circle delete-button"
+                                    >
+                                        <CamTooltip
+                                            :content="$t('edit_multisig.label.remove_owner')"
+                                            placement="left"
+                                        >
+                                            <fa icon="minus"></fa>
+                                        </CamTooltip>
+                                    </button>
+                                    <CamInput class="input" v-model="address.address" />
+                                </div>
+                            </div>
+                            <button @click.prevent="addAddress" class="circle plus-button">
+                                <fa icon="plus"></fa>
+                            </button>
+                        </div>
+                        <CamBtn class="button-submit" variant="primary" :onClick="addNewAddresses">
+                            {{ $t('earn.rewards.claim_modal.confirm') }}
+                        </CamBtn>
+                    </div>
+                </template>
             </div>
         </modal>
 
@@ -153,7 +184,9 @@
 </template>
 <script lang="ts">
 import Alert from '@/components/Alert.vue'
+import CamBtn from '@/components/CamBtn.vue'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
+import CamTooltip from '@/components/misc/CamTooltip.vue'
 import { MINUTE_MS } from '@/constants'
 import { cleanAvaxBN, formatDuration } from '@/helpers/helper'
 import { WalletHelper } from '@/helpers/wallet_helper'
@@ -188,6 +221,8 @@ import DateForm from './DateForm.vue'
         Alert,
         CamInput,
         CamOfferCard,
+        CamTooltip,
+        CamBtn,
     },
 })
 export default class ModalDepositFunds extends Vue {
@@ -197,6 +232,8 @@ export default class ModalDepositFunds extends Vue {
     @Prop() warning!: boolean
     @Prop() isDepositDisabled!: boolean
     @Prop() maxDepositAmount!: BN
+    @Prop() isWhiteListing?: boolean
+    addresses: { address: string }[] = [{ address: '' }]
     // @ts-ignore
     helpers = this.globalHelper()
     amt: BN = ZeroBN
@@ -216,10 +253,37 @@ export default class ModalDepositFunds extends Vue {
     onDepositOwnerChange() {
         this.depositOwnerError = isValidPChainAddress(this.depositOwner) ? '' : 'Invalid address'
     }
+    async addNewAddresses(): Promise<void> {
+        try {
+            let result = await this.$store.dispatch('Platform/addAllowedAddresses', {
+                depositOfferID: this.offer.id,
+                allowedAddresses: this.addresses,
+                timestamp: this.offer.start.toNumber(),
+            })
+            this.addresses = [{ address: '' }]
+            this.helpers.dispatchNotification({
+                message: this.$t('earn.rewards.offer.add_new_addresses_succeeded'),
+                type: 'success',
+            })
+        } catch (e) {
+            this.helpers.dispatchNotification({
+                message: `Duplicate entry`,
+                type: 'error',
+            })
+        }
+    }
+    removeAddress(index: number): void {
+        this.addresses.splice(index, 1)
+        if (this.addresses.length === 0) this.addAddress()
+    }
+    addAddress(): void {
+        if (this.addresses.length >= 128) return
+        this.addresses.push({ address: '' })
+    }
     get activeWallet(): MultisigWallet {
         return this.$store.state.activeWallet
     }
-    get pendingDepositTX(): SignavaultTx | undefined {
+    pendingDepositTX(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
             (item: SignavaultTx) =>
                 item?.tx?.alias === this.$store.state.activeWallet?.getStaticAddress('P') &&
@@ -557,6 +621,74 @@ form {
     }
 }
 
+.whitelisting__container {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+.addresses_container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 16px 0;
+}
+.address_container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+}
+.input {
+    width: 100%;
+}
+.button-submit {
+    align-self: flex-end;
+}
+.circle {
+    border: 2px solid var(--camino-slate-slate-600);
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    border-radius: 100%;
+    padding: 10px;
+}
+
+.plus-button {
+    border: 2px solid var(--camino-success-color);
+    font-size: 10px;
+    width: 40px !important;
+    height: 40px !important;
+    svg {
+        color: var(--camino-success-color);
+    }
+}
+
+.delete-button {
+    border: 2px solid var(--camino-error-color);
+    width: 40px !important;
+    height: 40px !important;
+    svg {
+        color: var(--camino-error-color);
+    }
+}
+.delete-button.mobile {
+    display: none;
+}
+
+.delete-button.desktop {
+    display: flex;
+}
+
+@include mixins.mobile-device {
+    .delete-button.mobile {
+        display: flex;
+    }
+
+    .delete-button.desktop {
+        display: none;
+    }
+}
 @include mixins.mobile-device {
     .modal__body {
         width: 100%;

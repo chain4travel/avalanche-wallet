@@ -8,7 +8,7 @@
                 :offer="o"
                 :maxDepositAmount="maxDepositAmount"
                 @selectOffer="() => {}"
-                class="reward_card"
+                class="offer_card"
                 :isWhiteListing="true"
             ></DepositOfferCard>
         </div>
@@ -71,10 +71,21 @@ export default class CreatedOffers extends Vue {
     line-height: 36px;
     margin-bottom: 24px;
 }
+
+.offer_card {
+    flex: 1 1 calc(50% - 16px);
+    max-width: 50%;
+}
 .cards__container {
-    max-width: 600px;
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 16px;
+}
+
+@include mixins.mobile-device {
+    .offer_card {
+        flex: 1 1 100% !important;
+        max-width: 100% !important;
+    }
 }
 </style>
