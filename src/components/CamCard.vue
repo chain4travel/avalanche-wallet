@@ -30,4 +30,3 @@ export default class CamCard extends Vue {
     }
 }
 </style>
-```

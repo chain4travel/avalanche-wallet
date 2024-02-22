@@ -99,10 +99,6 @@ export default class ModalClaimDepositReward extends Vue {
         modal: Modal
     }
 
-    mounted() {
-        this.updateMultisigTxDetails()
-    }
-
     open() {
         this.$refs.modal.open()
         this.updateMultisigTxDetails()

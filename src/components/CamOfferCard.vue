@@ -1,110 +1,114 @@
 <template>
     <CamCard :title="title">
-        <div class="progress" v-if="type === 'offer'">
-            <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
-            <span>
-                <span class="success" :style="'width:' + progress"></span>
-            </span>
-            {{ progressText }}
-        </div>
-        <div class="offer_detail" v-if="type === 'offer'">
-            <div class="offer_detail_left">
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.offer.pool_start') }}:</label>
-                    <p class="reward">{{ formatDate(offer.start) }}</p>
+        <template v-if="isOffer">
+            <div class="progress" v-if="isOffer">
+                <label>{{ $t('earn.rewards.offer.pool_size') }}:</label>
+                <span>
+                    <span class="success" :style="'width:' + progress"></span>
+                </span>
+                {{ progressText }}
+            </div>
+            <div class="offer_detail" v-if="isOffer">
+                <div class="offer_detail_left">
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.offer.pool_start') }}:</label>
+                        <p class="reward">{{ formatDate(offer.start) }}</p>
+                    </div>
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.offer.pool_end') }}:</label>
+                        <p class="reward">{{ formatDate(offer.end) }}</p>
+                    </div>
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.offer.min_deposit') }}:</label>
+                        <p class="reward">{{ cleanAvaxBN(offer.minAmount) }} CAM</p>
+                    </div>
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.offer.reward') }}:</label>
+                        <p class="reward">{{ rewardPercent }} %</p>
+                    </div>
                 </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.offer.pool_end') }}:</label>
-                    <p class="reward">{{ formatDate(offer.end) }}</p>
-                </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.offer.min_deposit') }}:</label>
-                    <p class="reward">{{ cleanAvaxBN(offer.minAmount) }} CAM</p>
-                </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.offer.reward') }}:</label>
-                    <p class="reward">{{ rewardPercent }} %</p>
+                <div class="offer_detail_right">
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.offer.min_duration') }}:</label>
+                        <p class="reward">
+                            {{ formatDuration(offer.minDuration) }}
+                        </p>
+                    </div>
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.offer.max_duration') }}:</label>
+                        <p class="reward">
+                            {{ formatDuration(offer.maxDuration) }}
+                        </p>
+                    </div>
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.offer.unlock_duration') }}:</label>
+                        <p class="reward">
+                            {{ formatDuration(offer.unlockPeriodDuration) }}
+                        </p>
+                    </div>
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.offer.no_reward_duration') }}:</label>
+                        <p class="reward">
+                            {{ formatDuration(offer.noRewardsPeriodDuration) }}
+                        </p>
+                    </div>
                 </div>
             </div>
-            <div class="offer_detail_right">
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.offer.min_duration') }}:</label>
-                    <p class="reward">
-                        {{ formatDuration(offer.minDuration) }}
-                    </p>
+        </template>
+        <template v-else-if="isReward">
+            <div class="offer_detail">
+                <div class="offer_detail_left">
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.active_earning.deposit_start') }}:</label>
+                        <p class="reward">{{ startDate }}</p>
+                    </div>
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.active_earning.deposit_end') }}:</label>
+                        <p class="reward">{{ endDate }}</p>
+                    </div>
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.offer.min_deposit') }}:</label>
+                        <p class="reward">{{ cleanAvaxBN(minLock) }} {{ nativeAssetSymbol }}</p>
+                    </div>
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.offer.reward') }}:</label>
+                        <p class="reward">{{ rewardPercent }} %</p>
+                    </div>
                 </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.offer.max_duration') }}:</label>
-                    <p class="reward">
-                        {{ formatDuration(offer.maxDuration) }}
-                    </p>
-                </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.offer.unlock_duration') }}:</label>
-                    <p class="reward">
-                        {{ formatDuration(offer.unlockPeriodDuration) }}
-                    </p>
-                </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.offer.no_reward_duration') }}:</label>
-                    <p class="reward">
-                        {{ formatDuration(offer.noRewardsPeriodDuration) }}
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="offer_detail" v-else-if="type === 'reward'">
-            <div class="offer_detail_left">
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.active_earning.deposit_start') }}:</label>
-                    <p class="reward">{{ startDate }}</p>
-                </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.active_earning.deposit_end') }}:</label>
-                    <p class="reward">{{ endDate }}</p>
-                </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.offer.min_deposit') }}:</label>
-                    <p class="reward">{{ cleanAvaxBN(minLock) }} {{ nativeAssetSymbol }}</p>
-                </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.offer.reward') }}:</label>
-                    <p class="reward">{{ rewardPercent }} %</p>
-                </div>
-            </div>
-            <div class="offer_detail_right">
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.active_earning.deposited_amount') }}:</label>
-                    <p class="reward">
-                        {{ cleanAvaxBN(reward.deposit.amount) }} {{ nativeAssetSymbol }}
-                    </p>
-                </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.active_earning.pending_reward') }}:</label>
-                    <p class="reward">
-                        {{ cleanAvaxBN(reward.amountToClaim) }} {{ nativeAssetSymbol }}
-                    </p>
-                </div>
-                <div class="reward_row">
-                    <label>{{ $t('earn.rewards.active_earning.already_claimed') }}:</label>
-                    <p class="reward">
-                        {{ cleanAvaxBN(reward.deposit.claimedRewardAmount) }}
-                        {{ nativeAssetSymbol }}
-                    </p>
-                </div>
-                <div class="reward_row" v-if="pendingSendMultisigTX">
-                    <label>{{ $t('earn.rewards.active_earning.initiated_claim') }}:</label>
-                    <p class="reward">
-                        {{ cleanAvaxBN(signedclaimedAmount) }} {{ nativeAssetSymbol }}
-                    </p>
+                <div class="offer_detail_right">
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.active_earning.deposited_amount') }}:</label>
+                        <p class="reward">
+                            {{ cleanAvaxBN(reward.deposit.amount) }} {{ nativeAssetSymbol }}
+                        </p>
+                    </div>
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.active_earning.pending_reward') }}:</label>
+                        <p class="reward">
+                            {{ cleanAvaxBN(reward.amountToClaim) }} {{ nativeAssetSymbol }}
+                        </p>
+                    </div>
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.active_earning.already_claimed') }}:</label>
+                        <p class="reward">
+                            {{ cleanAvaxBN(reward.deposit.claimedRewardAmount) }}
+                            {{ nativeAssetSymbol }}
+                        </p>
+                    </div>
+                    <div class="reward_row" v-if="pendingSendMultisigTX">
+                        <label>{{ $t('earn.rewards.active_earning.initiated_claim') }}:</label>
+                        <p class="reward">
+                            {{ updateMultisigTxDetails() }} {{ nativeAssetSymbol }}
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
+        </template>
         <slot></slot>
     </CamCard>
 </template>
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import CamCard from './CamCard.vue'
 import { cleanAvaxBN, formatDuration } from '@/helpers/helper'
 import AvaAsset from '@/js/AvaAsset'
@@ -121,16 +125,17 @@ import { WalletHelper } from '@/helpers/wallet_helper'
     components: { CamCard },
 })
 export default class CamOfferCard extends Vue {
-    signedclaimedAmount: BN = new BN(0)
-
     @Prop() readonly title!: string
     @Prop() readonly type!: 'offer' | 'reward'
     @Prop() readonly offer!: DepositOffer
     @Prop() readonly reward!: PlatformRewardDeposit
 
-    @Watch('pendingSendMultisigTX')
-    onPendingSendMultisigTXChange() {
-        if (this.type === 'reward') this.updateMultisigTxDetails()
+    get isOffer() {
+        return this.type === 'offer'
+    }
+
+    get isReward() {
+        return this.type === 'reward'
     }
 
     get activeWallet(): WalletType {
@@ -252,7 +257,7 @@ export default class CamOfferCard extends Vue {
         return formatDuration(dur)
     }
 
-    private async updateMultisigTxDetails() {
+    updateMultisigTxDetails() {
         if (this.pendingSendMultisigTX) {
             let unsignedTx = new UnsignedTx()
             unsignedTx.fromBuffer(Buffer.from(this.pendingSendMultisigTX.tx?.unsignedTx, 'hex'))
@@ -260,8 +265,9 @@ export default class CamOfferCard extends Vue {
             const claimAmounts = utx.getClaimAmounts()
 
             const amount = claimAmounts[0].getAmount()
-            this.signedclaimedAmount = new BN(amount)
+            return cleanAvaxBN(new BN(amount))
         }
+        return new BN(0)
     }
 }
 </script>
