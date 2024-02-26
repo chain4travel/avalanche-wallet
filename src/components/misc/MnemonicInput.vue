@@ -12,6 +12,7 @@
                     v-model="phrase[i - 1]"
                     @input="onChange(i - 1)"
                     :data-cy="getDataCY(i)"
+                    @keyup.enter="onEnterKey"
                 />
             </div>
         </div>
@@ -31,8 +32,8 @@
     </div>
 </template>
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
 import { wordlists } from 'bip39'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
 export default class MnemonicDisplay extends Vue {
@@ -57,6 +58,9 @@ export default class MnemonicDisplay extends Vue {
         if (!(wordlists.EN.includes(word) || !word)) ret = ret + ' invalid_input'
         if (!this.password && this.isHidden) ret = ret + ' pass'
         return ret
+    }
+    onEnterKey() {
+        this.$emit('access')
     }
 
     onChange(i: number) {

@@ -13,6 +13,7 @@
                 />
                 <p class="err">{{ error }}</p>
                 <CamBtn
+                    type="submit"
                     variant="primary"
                     style="width: 100%"
                     @click="access"
@@ -28,11 +29,11 @@
     </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
-import { ImportKeyfileInput } from '@/store/types'
-import Identicon from '@/components/misc/Identicon.vue'
 import CamBtn from '@/components/CamBtn.vue'
 import CamInput from '@/components/CamInput.vue'
+import Identicon from '@/components/misc/Identicon.vue'
+import { ImportKeyfileInput } from '@/store/types'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component({
     components: { Identicon, CamBtn, CamInput },
