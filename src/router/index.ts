@@ -47,56 +47,22 @@ const routes = [
     },
     {
         path: '/wallet',
-        redirect: '/wallet/home',
-    },
-    {
-        path: '/wallet/home',
-        children: [
-            {
-                path: '/',
-                name: 'wallet',
-                component: WalletHome,
-            },
-            {
-                path: 'transfer',
-                component: Transfer,
-            },
-            {
-                path: 'cross_chain',
-                component: Export,
-            },
-            {
-                path: 'keys',
-                component: ManageKeys,
-            },
-            {
-                path: 'earn',
-                component: Earn,
-            },
-            {
-                path: 'studio',
-                component: Studio,
-            },
-            {
-                path: 'advanced',
-                component: Advanced,
-            },
-            {
-                path: 'activity',
-                component: Activity,
-            },
-            {
-                path: 'launch',
-                component: Launch,
-            },
-            {
-                path: 'validator',
-                component: Validator,
-            },
-        ],
         component: Wallet,
         beforeEnter: ifAuthenticated,
+        children: [
+            { path: '', component: WalletHome },
+            { path: 'transfer', component: Transfer },
+            { path: 'cross_chain', component: Export },
+            { path: 'keys', component: ManageKeys },
+            { path: 'earn', component: Earn },
+            { path: 'studio', component: Studio },
+            { path: 'advanced', component: Advanced },
+            { path: 'activity', component: Activity },
+            { path: 'launch', component: Launch },
+            { path: 'validator', component: Validator },
+        ],
     },
+    { path: '/wallet/home', redirect: '/wallet' },
 ]
 
 const router = new VueRouter({
