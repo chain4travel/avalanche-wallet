@@ -29,7 +29,11 @@
                     <CamBtn variant="transparent" @click="close()">
                         {{ $t('earn.rewards.claim_modal.cancel') }}
                     </CamBtn>
-                    <CamBtn variant="primary" @click="confirmClaim()">
+                    <CamBtn
+                        variant="primary"
+                        @click="confirmClaim()"
+                        :disabled="disableClaimButton"
+                    >
                         {{ $t('earn.rewards.claim_modal.confirm') }}
                     </CamBtn>
                 </div>
@@ -73,6 +77,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import Modal from '../../modals/Modal.vue'
 import CamBtn from '@/components/CamBtn.vue'
 import { cleanAvaxBN } from '@/helpers/helper'
+import { ZeroBN } from '@/constants'
 
 @Component({
     components: {
@@ -145,6 +150,10 @@ export default class ModalClaimDepositReward extends Vue {
                 item?.tx?.alias === this.activeWallet.getAllAddressesP()[0] &&
                 WalletHelper.getUnsignedTxType(item?.tx?.unsignedTx) === 'ClaimTx'
         )
+    }
+
+    get disableClaimButton(): boolean {
+        return this.amt.eq(ZeroBN)
     }
 
     async updateRewards() {
