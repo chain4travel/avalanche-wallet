@@ -130,8 +130,10 @@ export default class Keystore extends Vue {
 }
 .access_card {
     max-width: 420px;
-    background-color: var(--bg-light);
-    padding: variables.$container-padding;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-space-xl);
+    border-radius: var(--border-radius-xl);
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -158,7 +160,7 @@ h1 {
     margin: 30px auto 10px;
     @include mixins.typography-caption;
     border: none !important;
-    background-color: var(--bg) !important;
+    background-color: var(--bg-light) !important;
 }
 
 a {
