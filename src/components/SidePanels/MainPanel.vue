@@ -65,7 +65,7 @@ export default {
 
 .panel_content {
     overflow: auto;
-    background-color: var(--bg-wallet-light);
+    background-color: var(--bg-card);
     height: 100%;
     flex: 1;
 }

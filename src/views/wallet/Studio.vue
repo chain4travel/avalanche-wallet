@@ -15,9 +15,9 @@
                     <div>
                         <h4 class="title">{{ $t('studio.menu1.title') }}</h4>
                         <p>{{ $t('studio.menu1.desc') }}</p>
-                        <v-btn @click="goNewNftFamily" class="button_secondary" small depressed>
+                        <CamBtn variant="accent" @click="goNewNftFamily">
                             {{ $t('studio.menu1.submit') }}
-                        </v-btn>
+                        </CamBtn>
                     </div>
                     <div>
                         <h4 class="title">{{ $t('studio.menu2.title') }}</h4>
@@ -26,15 +26,9 @@
                             <p v-if="!canMint" class="err">
                                 {{ $t('studio.menu2.empty') }}
                             </p>
-                            <v-btn
-                                @click="goMint"
-                                class="button_secondary"
-                                small
-                                depressed
-                                :disabled="!canMint"
-                            >
+                            <CamBtn @click="goMint" class="accent" :disabled="!canMint">
                                 {{ $t('studio.menu2.submit') }}
-                            </v-btn>
+                            </CamBtn>
                         </div>
                     </div>
                 </div>
@@ -48,10 +42,12 @@ import { Component, Vue } from 'vue-property-decorator'
 import NewCollectibleFamily from '@/components/wallet/studio/NewCollectibleFamily.vue'
 import MintNft from '@/components/wallet/studio/mint/MintNft.vue'
 import { IWalletNftMintDict } from '@/store/types'
+import CamBtn from '@/components/CamBtn.vue'
 @Component({
     name: 'studio',
     components: {
         NewCollectibleFamily,
+        CamBtn,
     },
 })
 export default class Studio extends Vue {
@@ -153,16 +149,12 @@ export default class Studio extends Vue {
     column-gap: 14px;
     row-gap: 14px;
     > div {
-        border-radius: var(--border-radius-sm);
-        border: 1px solid var(--bg-light);
-        background-color: var(--bg-light);
+        background-color: var(--bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-md);
         padding: 30px;
-        display: flex;
-        flex-direction: column;
-
-        &:hover {
-            background-color: var(--bg-light);
-        }
+        // display: flex;
+        // flex-direction: column;
     }
 
     p {

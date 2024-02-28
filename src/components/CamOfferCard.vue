@@ -108,18 +108,18 @@
     </CamCard>
 </template>
 <script lang="ts">
+import { ZeroBN } from '@/constants'
+import { cleanAvaxBN, formatDuration } from '@/helpers/helper'
+import { WalletHelper } from '@/helpers/wallet_helper'
+import AvaAsset from '@/js/AvaAsset'
+import { WalletType } from '@/js/wallets/types'
+import { PlatformRewardDeposit } from '@/store/modules/platform/types'
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
+import { BN, Buffer } from '@c4tplatform/caminojs/dist'
+import { ClaimTx, UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
+import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import CamCard from './CamCard.vue'
-import { cleanAvaxBN, formatDuration } from '@/helpers/helper'
-import AvaAsset from '@/js/AvaAsset'
-import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
-import { BN, Buffer } from '@c4tplatform/caminojs/dist'
-import { PlatformRewardDeposit } from '@/store/modules/platform/types'
-import { ZeroBN } from '@/constants'
-import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
-import { ClaimTx, UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
-import { WalletType } from '@/js/wallets/types'
-import { WalletHelper } from '@/helpers/wallet_helper'
 
 @Component({
     components: { CamCard },

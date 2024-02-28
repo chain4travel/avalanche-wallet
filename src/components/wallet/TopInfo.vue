@@ -21,7 +21,7 @@ export default {
 
 .top_cards {
     @include mixins.component-wrapper;
-    background-color: var(--bg-wallet-light);
+    background-color: var(--bg-card);
     display: grid;
     grid-template-columns: 1fr 360px;
     // grid-gap: 15px;

@@ -107,6 +107,9 @@ import { cleanAvaxBN } from '@/helpers/helper'
 import { PlatformRewardDeposit } from '@/store/modules/platform/types'
 
 import { bintools } from '@/AVA'
+import Alert from '@/components/Alert.vue'
+import CamBtn from '@/components/CamBtn.vue'
+import CamOfferCard from '@/components/CamOfferCard.vue'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { WalletType } from '@/js/wallets/types'
@@ -117,9 +120,6 @@ import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfa
 import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
 import ModalAbortSigning from './ModalAbortSigning.vue'
 import ModalClaimDepositReward from './ModalClaimDepositReward.vue'
-import CamBtn from '@/components/CamBtn.vue'
-import Alert from '@/components/Alert.vue'
-import CamOfferCard from '@/components/CamOfferCard.vue'
 
 @Component({
     components: {

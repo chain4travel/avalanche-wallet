@@ -8,7 +8,7 @@
             @click="selectAccount(i)"
         >
             <Identicon :value="acct.name" diameter="40"></Identicon>
-            <p>{{ acct.name }}</p>
+            <p class="account-name">{{ acct.name }}</p>
             <v-icon class="goTo">mdi-chevron-right</v-icon>
         </div>
     </div>
@@ -76,6 +76,7 @@ export default class AccountsFound extends Vue {
     line-height: 1.5;
     @include mixins.typography-body-2;
     margin-bottom: 0.5rem;
+    text-transform: uppercase;
 }
 
 .v-icon {
@@ -95,6 +96,10 @@ export default class AccountsFound extends Vue {
 }
 h3 {
     margin-top: 1rem;
+}
+
+.account-name {
+    text-transform: capitalize;
 }
 
 .options {
