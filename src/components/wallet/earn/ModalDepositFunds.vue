@@ -283,7 +283,7 @@ export default class ModalDepositFunds extends Vue {
     get activeWallet(): MultisigWallet {
         return this.$store.state.activeWallet
     }
-    pendingDepositTX(): SignavaultTx | undefined {
+    get pendingDepositTX(): SignavaultTx | undefined {
         return this.$store.getters['Signavault/transactions'].find(
             (item: SignavaultTx) =>
                 item?.tx?.alias === this.$store.state.activeWallet?.getStaticAddress('P') &&
