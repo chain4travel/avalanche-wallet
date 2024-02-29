@@ -29,51 +29,42 @@
                             <p>
                                 {{ $t('earn.transfer.err_desc') }}
                             </p>
-                            <v-btn
-                                depressed
-                                class="button_secondary"
-                                small
-                                block
-                                @click="startAgain"
-                            >
+                            <CamBtn variant="accent" @click="startAgain" style="width: 100%">
                                 {{ $t('earn.transfer.success.again') }}
-                            </v-btn>
+                            </CamBtn>
                         </template>
                         <template v-else>
-                            <v-btn
+                            <CamBtn
                                 v-if="!isConfirm"
                                 data-cy="confirm"
-                                class="button_primary"
+                                variant="primary"
                                 @click="confirm"
+                                :type="'submit'"
                                 :disabled="!canSubmit"
-                                block
-                                depressed
                                 :loading="isLoading"
+                                style="width: 100%"
                             >
                                 {{ $t('earn.transfer.confirm') }}
-                            </v-btn>
+                            </CamBtn>
                             <template v-else>
-                                <v-btn
+                                <CamBtn
                                     data-cy="submit"
-                                    class="button_secondary"
+                                    variant="accent"
                                     @click="submit"
                                     :loading="isLoading"
-                                    depressed
-                                    block
+                                    style="width: 100%"
                                 >
                                     {{ $t('earn.transfer.submit') }}
-                                </v-btn>
-                                <v-btn
+                                </CamBtn>
+                                <CamBtn
                                     v-if="!isLoading"
                                     data-cy="cancel"
-                                    style="color: var(--primary-color); margin: 12px 0 !important"
+                                    variant="transparent"
                                     @click="cancelConfirm"
-                                    depressed
-                                    text
-                                    block
+                                    style="width: 100%; margin: 12px 0 !important"
                                 >
                                     {{ $t('earn.transfer.cancel') }}
-                                </v-btn>
+                                </CamBtn>
                             </template>
                         </template>
                     </div>
@@ -84,9 +75,9 @@
                         <fa icon="check-circle"></fa>
                         {{ $t('earn.transfer.success.message') }}
                     </p>
-                    <v-btn depressed class="button_secondary" small block @click="startAgain">
+                    <CamBtn variant="accent" @click="startAgain" style="width: 100%">
                         {{ $t('earn.transfer.success.again') }}
-                    </v-btn>
+                    </CamBtn>
                 </div>
             </div>
             <div class="right_col">
@@ -141,7 +132,7 @@ import {
     estimateImportGasFeeFromMockTx,
     getBaseFeeRecommended,
 } from '@/helpers/gas_helper'
-import { SignatureError } from '@c4tplatform/caminojs/dist/common'
+import CamBtn from '@/components/CamBtn.vue'
 
 const IMPORT_DELAY = 5000 // in ms
 const BALANCE_DELAY = 2000 // in ms
@@ -155,6 +146,7 @@ const BALANCE_DELAY = 2000 // in ms
         ChainCard,
         ChainSwapForm,
         TxStateCard,
+        CamBtn,
     },
 })
 export default class ChainTransfer extends Vue {
@@ -598,23 +590,21 @@ export default class ChainTransfer extends Vue {
 .cols {
     display: grid;
     grid-template-columns: max-content 1fr;
-    column-gap: 5vw;
+    column-gap: 2vw;
 }
 
 .right_col {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     column-gap: 14px;
-    row-gap: 2px;
+    row-gap: 14px;
     padding-top: 14px;
     height: max-content;
-    //height: 100%;
     > div {
-        //height: max-content;
-        background-color: var(--bg-light);
         border-radius: var(--border-radius-sm);
         padding: 12px 18px;
-        box-shadow: 1px 1px 6px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-md);
     }
 }
 
@@ -622,7 +612,6 @@ export default class ChainTransfer extends Vue {
     max-width: 100%;
     width: 360px;
     padding-bottom: 14px;
-    //justify-self: center;
     > div {
         margin: 14px 0;
     }
@@ -638,13 +627,9 @@ export default class ChainTransfer extends Vue {
 }
 .chains {
     position: relative;
-    //text-align: center;
     display: grid;
     grid-template-rows: max-content max-content;
     row-gap: 14px;
-    //margin: 0 !important;
-    //column-gap: 4px;
-    //grid-template-columns: 1fr 1fr;
 }
 
 .chain_cont {
@@ -675,7 +660,6 @@ h2 {
 }
 .import_err {
     max-width: 320px;
-    //margin: 10vh auto;
     color: var(--primary-color);
 
     p {
@@ -777,6 +761,9 @@ h2 {
         //grid-template-columns: 1fr 2fr;
         grid-template-columns: none;
         //column-gap: 2vw;
+    }
+    .form {
+        width: 100%;
     }
     .right_col {
         //grid-template-columns: 1fr 1fr;

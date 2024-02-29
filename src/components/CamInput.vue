@@ -62,14 +62,15 @@ export default class CamInput extends Vue {
 input {
     padding: 10px 12px;
     border-radius: 8px;
-    border: 1px solid var(--camino-slate-slate-600);
+    border: 1px solid var(--border-color);
     &:disabled {
-        border: 1px solid var(--camino-slate-slate-600) !important;
+        border: 1px solid var(--border-color) !important;
     }
 }
 
 .full-width-input {
     /* flex: 1; */
+    background-color: var(--bg);
     &:focus {
         border-color: var(--camino-brand-too-blue-to-be-true);
         box-shadow: 0px 0px 0px 3px var(--camino-brand-too-blue-to-be-true-100);
