@@ -547,7 +547,9 @@
                 "unlock_duration": "Unlock Duration",
                 "no_reward_duration": "NoReward Duration",
                 "balance": "Available for Deposit",
-                "deposit": "Deposit Now"
+                "deposit": "Deposit Now",
+                "add_new_addresses": "Add new addresses",
+                "add_new_addresses_succeeded": "New Allowed Addresses Added Successfully"
             },
             "active_earning": {
                 "title": "My Rewards",
