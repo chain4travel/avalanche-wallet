@@ -123,23 +123,23 @@
     </div>
 </template>
 <script lang="ts">
-import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
-import { BN } from '@c4tplatform/caminojs'
-import Big from 'big.js'
-import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
-import AvaAsset from '@/js/AvaAsset'
-import ModalClaimDepositReward from './ModalClaimDepositReward.vue'
-import ModalAbortSigning from './ModalAbortSigning.vue'
 import { WalletHelper } from '@/helpers/wallet_helper'
+import AvaAsset from '@/js/AvaAsset'
+import { BN } from '@c4tplatform/caminojs'
+import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
+import Big from 'big.js'
+import 'reflect-metadata'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import ModalAbortSigning from './ModalAbortSigning.vue'
+import ModalClaimDepositReward from './ModalClaimDepositReward.vue'
 
-import { WalletType } from '@/js/wallets/types'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
-import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
-import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
-import { RewardOwner } from '@/components/misc/ValidatorList/types'
 import { ava, bintools } from '@/AVA'
+import { RewardOwner } from '@/components/misc/ValidatorList/types'
+import { MultisigWallet } from '@/js/wallets/MultisigWallet'
+import { WalletType } from '@/js/wallets/types'
+import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
+import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
+import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
 
 import { cleanAvaxBN } from '@/helpers/helper'
 import { Buffer } from '@c4tplatform/caminojs/dist'
@@ -447,9 +447,15 @@ export default class UserRewardCard extends Vue {
 .offer_detail {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-gap: 1.25rem;
+    grid-gap: 1rem;
     .offer_detail_left {
-        border-right: 2px solid var(--bg-wallet-light);
+        border-right: 2px solid var(--border-color);
+    }
+    .offer_detail_right,
+    .offer_detail_left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
 }
 

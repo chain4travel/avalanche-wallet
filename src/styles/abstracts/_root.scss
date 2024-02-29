@@ -35,13 +35,6 @@
     --camino-brand-error-100: rgba(229, 67, 31, 0.25);
     --primary-font: 'Inter', sans-serif;
     --camino-brand-primary: linear-gradient(90deg, #0085ff 0%, #b440fc 100%);
-    --tailwind-slate-slate-200: #e2e7f0;
-    --tailwind-slate-slate-300: #cbd4e2;
-    --tailwind-slate-slate-600: #475569;
-    --tailwind-slate-slate-900: #0f182a;
-    --tailwind-slate-white: #fff;
-    --accent: #b5e3fd;
-    --accent-dark: #317ca5;
 
     --tailwind-slate-white: #ffffff;
     --tailwind-slate-slate-50: #f8fafc;
@@ -77,6 +70,8 @@
     --camino-warning-dark: #e5a21f;
     --camino-error-light: #e5431f;
     --camino-error-dark: #e5431f;
+    --accent: #b5e3fd;
+    --accent-dark: #317ca5;
 }
 
 html[data-theme='light'] {
