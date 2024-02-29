@@ -120,6 +120,8 @@ html[data-theme='light'] {
     --border-color: #cbd4e2;
     --bg-card: #ffffff;
     --menu-option-bg: var(--tailwind-slate-slate-200);
+
+    --text-secondary: var(--tailwind-slate-slate-600);
 }
 
 html[data-theme='dark'] {
@@ -162,9 +164,11 @@ html[data-theme='dark'] {
     --camino-error-color: rgba(229, 67, 31, 1);
     --camino-slate-slate-950: #020617;
     --camino-slate-slate-600: #475569;
+
     --border-color: #334155;
     --bg-card: var(--bg);
     --menu-option-bg: var(--tailwind-slate-slate-800);
+    --text-secondary: var(--tailwind-slate-slate-400);
 }
 body {
     overflow: auto;
