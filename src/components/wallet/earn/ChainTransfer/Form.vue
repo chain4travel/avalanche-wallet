@@ -220,7 +220,7 @@ select {
 
 .confirmation_val {
     p {
-        padding: 6px 12px;
+        padding: 12px;
         text-align: right;
         background-color: var(--bg-light);
     }

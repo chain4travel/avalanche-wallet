@@ -66,7 +66,7 @@ export default class FileInput extends Vue {
 
 .file_input {
     position: relative;
-    padding: 8px 18px;
+    padding: 12px 18px;
     cursor: pointer;
     /* color: variables.$primary-color; */
     color: rgb(118, 118, 118);

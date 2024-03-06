@@ -33,7 +33,7 @@
 #wallet_router {
     @include component-wrapper;
     padding: 22px 20px;
-    background-color: var(--bg-wallet-light);
+    background-color: var(--bg-card);
     overflow: scroll;
     flex: 1;
     &::-webkit-scrollbar {

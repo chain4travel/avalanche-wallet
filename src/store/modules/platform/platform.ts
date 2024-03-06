@@ -229,9 +229,9 @@ const platform_module: Module<PlatformState, RootState> = {
                     signatures: signatures as string[],
                     timestamp,
                 })
+                return result
             } catch (e) {
-                let error = e as Error
-                console.error('Error:', error.message)
+                throw e
             }
         },
         async updateRestrictedOffers({ state, rootState }) {
@@ -301,7 +301,21 @@ const platform_module: Module<PlatformState, RootState> = {
                 (v) => v.rewardOwner.addresses.findIndex((a) => addresses.includes(a)) >= 0
             )
         },
-
+        CreatedDepositOffer: (state, _, rootState) => (active: boolean) => {
+            const lockedFlag = new BN(1)
+            const expected = active ? ZeroBN : lockedFlag
+            return state.depositOffers
+                .filter((v) => v.flags.and(lockedFlag).eq(expected))
+                .filter((elem) => {
+                    const depositOwnerAddress = ava
+                        .PChain()
+                        .addressFromBuffer(bintools.cb58Decode(elem.ownerAddress as string))
+                    if (rootState.activeWallet?.getStaticAddress('P') === depositOwnerAddress) {
+                        return true
+                    }
+                    return false
+                })
+        },
         depositOffers: (state, _, rootState) => (active: boolean) => {
             const lockedFlag = new BN(1)
             const expected = active ? ZeroBN : lockedFlag
