@@ -159,14 +159,23 @@
                                             <fa icon="minus"></fa>
                                         </CamTooltip>
                                     </button>
-                                    <CamInput class="input" v-model="address.address" />
+                                    <CamInput
+                                        class="input"
+                                        :error="!isValidAddress(address.address)"
+                                        v-model="address.address"
+                                    />
                                 </div>
                             </div>
                             <button @click.prevent="addAddress" class="circle plus-button">
                                 <fa icon="plus"></fa>
                             </button>
                         </div>
-                        <CamBtn class="button-submit" variant="primary" :onClick="addNewAddresses">
+                        <CamBtn
+                            class="button-submit"
+                            variant="primary"
+                            :onClick="addNewAddresses"
+                            :disabled="canAddWhitelisting"
+                        >
                             {{ $t('earn.rewards.claim_modal.confirm') }}
                         </CamBtn>
                     </div>
@@ -255,9 +264,10 @@ export default class ModalDepositFunds extends Vue {
     }
     async addNewAddresses(): Promise<void> {
         try {
+            const filledAddresses = this.addresses.filter((a) => a.address !== '')
             let result = await this.$store.dispatch('Platform/addAllowedAddresses', {
                 depositOfferID: this.offer.id,
-                allowedAddresses: this.addresses,
+                allowedAddresses: filledAddresses,
                 timestamp: this.offer.start.toNumber(),
             })
             this.addresses = [{ address: '' }]
@@ -381,6 +391,10 @@ export default class ModalDepositFunds extends Vue {
     get feeAmt(): string {
         return this.formattedAmount(ava.PChain().getTxFee())
     }
+    get canAddWhitelisting(): boolean {
+        const filledAddresses = this.addresses.filter((a) => a.address !== '')
+        return !!filledAddresses.find((elem) => !this.isValidAddress(elem.address))
+    }
     formattedAmount(val: BN): string {
         return `${(Number(val.toString()) / Number(ONEAVAX.toString())).toLocaleString()}`
     }
@@ -489,6 +503,11 @@ export default class ModalDepositFunds extends Vue {
                 type: 'error',
             })
         }
+    }
+    isValidAddress(address: string): boolean {
+        if (!address) return true
+
+        return isValidPChainAddress(address)
     }
     cancelDeposit() {
         this.$emit('closeDepositFundsModal')
