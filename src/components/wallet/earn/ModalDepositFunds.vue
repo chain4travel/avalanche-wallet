@@ -152,16 +152,12 @@
                                         @click="removeAddress(index)"
                                         class="circle delete-button"
                                     >
-                                        <CamTooltip
-                                            :content="$t('edit_multisig.label.remove_owner')"
-                                            placement="left"
-                                        >
-                                            <fa icon="minus"></fa>
-                                        </CamTooltip>
+                                        <fa icon="minus"></fa>
                                     </button>
                                     <CamInput
                                         class="input"
                                         :error="!isValidAddress(address.address)"
+                                        :errorMessage="$t('earn.rewards.errors.invalid_address')"
                                         v-model="address.address"
                                     />
                                 </div>
@@ -170,11 +166,17 @@
                                 <fa icon="plus"></fa>
                             </button>
                         </div>
+                        <Alert v-if="multupleSameAddresses" variant="negative">
+                            {{ $t('earn.rewards.errors.same_address_twice') }}
+                        </Alert>
+                        <Alert v-if="isEmptyAddress" variant="negative">
+                            {{ $t('earn.rewards.errors.empty_addresses') }}
+                        </Alert>
                         <CamBtn
                             class="button-submit"
                             variant="primary"
                             :onClick="addNewAddresses"
-                            :disabled="canAddWhitelisting"
+                            :disabled="canAddWhitelisting || isEmptyAddress"
                         >
                             {{ $t('earn.rewards.claim_modal.confirm') }}
                         </CamBtn>
@@ -390,6 +392,17 @@ export default class ModalDepositFunds extends Vue {
 
     get feeAmt(): string {
         return this.formattedAmount(ava.PChain().getTxFee())
+    }
+    get multupleSameAddresses(): boolean {
+        const filledAddresses = this.addresses.filter((a) => a.address !== '')
+        const uniqueAddresses = new Set(filledAddresses.map((a) => a.address))
+
+        return uniqueAddresses.size !== filledAddresses.length
+    }
+    get isEmptyAddress(): boolean {
+        let emptAddresses = this.addresses.filter((a) => !a.address)
+        if (emptAddresses.length > 0) return true
+        return false
     }
     get canAddWhitelisting(): boolean {
         const filledAddresses = this.addresses.filter((a) => a.address !== '')
@@ -644,6 +657,7 @@ form {
     display: flex;
     flex-direction: column;
     align-items: start;
+    gap: 16px;
 }
 .addresses_container {
     display: flex;
@@ -654,7 +668,6 @@ form {
 .address_container {
     display: flex;
     flex-direction: row;
-    align-items: center;
     gap: 16px;
 }
 .input {
@@ -676,6 +689,7 @@ form {
 .plus-button {
     border: 2px solid var(--camino-success-color);
     font-size: 10px;
+    margin-top: 5px;
     width: 40px !important;
     height: 40px !important;
     svg {
@@ -686,6 +700,7 @@ form {
 .delete-button {
     border: 2px solid var(--camino-error-color);
     width: 40px !important;
+    margin-top: 5px;
     height: 40px !important;
     svg {
         color: var(--camino-error-color);
