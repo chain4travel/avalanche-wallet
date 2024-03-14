@@ -4,7 +4,9 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    border: 2px solid var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
 }
 
 $countW: 28px;
@@ -18,7 +20,6 @@ $countW: 28px;
     @include mixins.typography-caption;
     text-align: center;
     background-color: var(--primary-color);
-    //border: 1px solid var(--bg-wallet);
     color: var(--bg);
     font-weight: bold;
     z-index: 2;
@@ -30,7 +31,7 @@ $countW: 28px;
 }
 
 .generic_nft_meta {
-    //border-top: 2px solid var(--bg-light);
+    border-top: 1px solid var(--border-color);
     padding-top: 0 !important;
 
     .nft_title {
@@ -38,7 +39,6 @@ $countW: 28px;
     }
 }
 .nft_info {
-    border-top: 2px solid var(--bg-light);
     @include mixins.typography-caption;
 
     > * {
@@ -49,6 +49,7 @@ $countW: 28px;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+        color: var(--text-secondary);
 
         .nft_button {
             opacity: 0.5;

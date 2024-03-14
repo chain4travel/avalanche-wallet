@@ -123,7 +123,6 @@ export default class Account extends Vue {
 @use '../../styles/abstracts/mixins';
 .pass {
     text-align: center;
-    background-color: var(--bg-wallet-light) !important;
     border-radius: 8px;
 }
 
@@ -147,14 +146,15 @@ export default class Account extends Vue {
 .content {
     text-align: center;
     max-width: 420px;
-    background-color: var(--bg-light);
-    padding: 40px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-space-xl);
     width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    border-radius: 6px;
+    border-radius: var(--border-radius-xl);
 }
 h1 {
     font-size: variables.$m-size;
