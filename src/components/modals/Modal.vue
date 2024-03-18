@@ -91,6 +91,7 @@ export default class Modal extends Vue {
     text-align: left;
     flex-grow: 1;
     margin: 0;
+    text-transform: capitalize;
 }
 
 .modal_subtitle {

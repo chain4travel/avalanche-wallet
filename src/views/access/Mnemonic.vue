@@ -119,14 +119,15 @@ export default class Mnemonic extends Vue {
 @use '../../styles/abstracts/mixins';
 
 .mnemonic_auth {
-    background-color: var(--bg-light);
-    padding: variables.$container-padding;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-space-xl);
     max-width: 1200px;
 
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-radius: 12px;
+    border-radius: var(--border-radius-xl);
     margin-top: 15px;
     margin-bottom: 15px;
     gap: 12px;

@@ -533,7 +533,10 @@
                 "is_min_duration_less_than_unlock_period": "deposit offer minimum duration ({minDuration}) is less than vesting period duration ({unlockPeriodDuration})",
                 "is_max_diration_less_than_min_duration": "deposit offer max duration ({maxDuration}) is less than minimum duration ({minDuration})",
                 "is_min_duration_equal_to_zero": "deposit offer has zero minimum duration",
-                "is_start_date_greater_than_end_date": " deposit offer start date is greater than end date"
+                "is_start_date_greater_than_end_date": " deposit offer start date is greater than end date",
+                "same_address_twice": "The same P-Chain address should not appear more than once",
+                "empty_addresses": "One or more addresses are Empty.",
+                "invalid_address": "Invalid Address"
             },
             "offer": {
                 "title": "Active Saving Pools",
@@ -547,7 +550,9 @@
                 "unlock_duration": "Unlock Duration",
                 "no_reward_duration": "NoReward Duration",
                 "balance": "Available for Deposit",
-                "deposit": "Deposit Now"
+                "deposit": "Deposit Now",
+                "add_new_addresses": "Add new addresses",
+                "add_new_addresses_succeeded": "New Allowed Addresses Added Successfully"
             },
             "active_earning": {
                 "title": "My Rewards",
@@ -558,6 +563,7 @@
                 "locked_amount": "Locked Amount",
                 "pending_reward": "Pending Reward",
                 "already_claimed": "Already Claimed",
+                "initiated_claim": "Initiated Claim Amount",
                 "claim": "Claim Rewards",
                 "initiate_transaction": "Initiate Transaction",
                 "cancel": "Cancel",

@@ -95,14 +95,15 @@ export default class PrivateKey extends Vue {
 }
 .access_card {
     max-width: 420px;
-    background-color: var(--bg-light);
-    padding: variables.$container-padding;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-space-xl);
     width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    border-radius: 6px;
+    border-radius: var(--border-radius-xl);
 }
 .content {
     display: flex;

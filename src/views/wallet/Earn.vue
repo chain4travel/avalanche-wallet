@@ -49,7 +49,7 @@ export default class Earn extends Vue {
     pageNow: any = null
     subtitle: string = ''
     intervalID: any = null
-    tab: string = 'actine_earning'
+    tab: string = 'earn_now'
     loadingRefreshDepositRewards: boolean = false
 
     transfer() {

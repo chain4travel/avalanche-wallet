@@ -106,9 +106,8 @@ export default class MnemonicDisplay extends Vue {
     display: flex;
     overflow: hidden;
     font-weight: 700;
-
-    background-color: var(--bg);
-    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
 
     > * {
         padding: 16px 6px;
@@ -116,13 +115,14 @@ export default class MnemonicDisplay extends Vue {
 }
 
 .index {
-    width: 22px;
+    width: 30px;
     box-sizing: content-box;
     text-align: center;
     user-select: none;
     color: var(--primary-color);
     font-weight: 400;
-    border-right: 2px solid var(--bg-light);
+    background-color: var(--bg);
+    border-right: 2px solid var(--border-color);
 }
 
 .phrase_word {
@@ -132,6 +132,7 @@ export default class MnemonicDisplay extends Vue {
     flex-grow: 1;
     color: var(--primary-color);
     max-width: 125px;
+    background-color: var(--bg);
 }
 
 .invalid_input {
