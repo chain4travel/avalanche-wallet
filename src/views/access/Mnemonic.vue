@@ -8,6 +8,7 @@
             :phrase="phrase.split(' ')"
             class="phrase_disp"
             @update="mnemonicUpdate($event)"
+            @access="access"
         />
         <div class="button_container">
             <p class="err" v-if="err">{{ err }}</p>
@@ -28,12 +29,12 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import MnemonicDisplay from '@/components/misc/MnemonicDisplay.vue'
-import * as bip39 from 'bip39'
-import MnemonicInput from '@/components/misc/MnemonicInput.vue'
 import CamBtn from '@/components/CamBtn.vue'
+import MnemonicDisplay from '@/components/misc/MnemonicDisplay.vue'
+import MnemonicInput from '@/components/misc/MnemonicInput.vue'
+import * as bip39 from 'bip39'
 
 @Component({
     components: {
@@ -89,6 +90,7 @@ export default class Mnemonic extends Vue {
     }
 
     async access() {
+        if (!this.canSubmit) return
         this.phrase = this.phrase.trim()
         let phrase = this.phrase
 
