@@ -12,9 +12,9 @@
                 ></cam-input>
                 <p class="err">{{ error }}</p>
                 <CamBtn
+                    type="submit"
                     variant="primary"
                     style="width: 100%"
-                    :type="`button`"
                     @click="access"
                     :loading="isLoading"
                     :disabled="!canSubmit"
@@ -28,9 +28,9 @@
     </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
 import CamBtn from '@/components/CamBtn.vue'
 import CamInput from '@/components/CamInput.vue'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component({
     components: {
