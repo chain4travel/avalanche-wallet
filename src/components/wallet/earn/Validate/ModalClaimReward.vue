@@ -19,7 +19,11 @@
                     <CamBtn variant="transparent" @click="close()">
                         {{ $t('validator.rewards.modal_claim.cancel') }}
                     </CamBtn>
-                    <CamBtn variant="primary" @click="confirmClaim()">
+                    <CamBtn
+                        variant="primary"
+                        @click="confirmClaim()"
+                        :disabled="claimAmount.isZero() || notRewardOwner()"
+                    >
                         {{ $t('validator.rewards.modal_claim.claim') }}
                     </CamBtn>
                 </div>
@@ -43,7 +47,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import Modal from '../../../modals/Modal.vue'
 import { BN } from '@c4tplatform/caminojs'
 import { WalletHelper } from '../../../../helpers/wallet_helper'
@@ -73,6 +77,11 @@ export default class ModalClaimReward extends Vue {
     confirmedClaimedAmountText: string = ''
     claimAmount: BN = this.amount
 
+    @Watch('amount')
+    onAmountChange() {
+        this.claimAmount = this.amount
+    }
+
     open() {
         // @ts-ignore
         this.$refs.modal.open()
@@ -87,6 +96,19 @@ export default class ModalClaimReward extends Vue {
         this.confirmedClaimedAmountText = ''
         this.$emit('beforeCloseModal', this.claimed)
         this.claimed = false
+    }
+
+    get addressPVM() {
+        let wallet = this.$store.state.activeWallet
+        if (!wallet) {
+            return '-'
+        }
+
+        return wallet.getCurrentAddressPlatform()
+    }
+
+    notRewardOwner() {
+        return this.rewardOwner !== this.addressPVM
     }
 
     async confirmClaim() {

@@ -2,8 +2,8 @@
     <div>
         <h1 class="create-offer-header" v-if="isSuite">Create new DepositOffer</h1>
         <h4 v-if="!isSuite && hasOffers" class="balance">
-            {{ $t('earn.offer.balance') }}: {{ cleanAvaxBN(maxDepositAmount) }}
-            {{ nativeAssetSymbol }}
+            {{ $t('earn.offer.balance') }}:
+            <span>{{ cleanAvaxBN(maxDepositAmount) }} {{ nativeAssetSymbol }}</span>
         </h4>
         <transition name="fade" mode="out-in">
             <CreateOfferForm
@@ -124,6 +124,10 @@ export default class DepositOffers extends Vue {
     font-weight: 600;
     line-height: 32px;
     margin-bottom: 20px;
+    span {
+        color: var(--accent-dark);
+        @include mixins.typography-body-1;
+    }
 }
 
 .user_offers {
@@ -162,6 +166,14 @@ export default class DepositOffers extends Vue {
         grid-template-rows: repeat(1, 1fr);
         grid-template-columns: auto;
         grid-gap: 1rem;
+    }
+}
+
+@include mixins.night-mode {
+    .balance {
+        span {
+            color: var(--accent);
+        }
     }
 }
 </style>

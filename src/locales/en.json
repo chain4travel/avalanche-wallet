@@ -563,6 +563,7 @@
                 "locked_amount": "Locked Amount",
                 "pending_reward": "Pending Reward",
                 "already_claimed": "Already Claimed",
+                "initiated_claim": "Initiated Claim Amount",
                 "claim": "Claim Rewards",
                 "initiate_transaction": "Initiate Transaction",
                 "cancel": "Cancel",

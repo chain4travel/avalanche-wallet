@@ -48,7 +48,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
+import { Vue, Component, Prop } from 'vue-property-decorator'
 import ModalClaimReward from './ModalClaimReward.vue'
 import { ValidatorRaw } from '@/components/misc/ValidatorList/types'
 import { BN } from '@c4tplatform/caminojs'
@@ -59,9 +59,6 @@ import Spinner from '@/components/misc/Spinner.vue'
 import { ava } from '@/AVA'
 import { bnToBigAvaxX } from '@/helpers/helper'
 import CamBtn from '@/components/CamBtn.vue'
-import { WalletHelper } from '@/helpers/wallet_helper'
-import { MultisigWallet } from '@/js/wallets/MultisigWallet'
-import { WalletType } from '@/js/wallets/types'
 import { AvaNetwork } from '@/js/AvaNetwork'
 
 @Component({

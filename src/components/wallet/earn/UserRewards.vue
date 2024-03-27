@@ -38,7 +38,6 @@ export default class UserRewards extends Vue {
 }
 </script>
 <style scoped lang="scss">
-@use '../../../styles/main';
 @use '../../../styles/abstracts/mixins';
 .user_offers {
     display: grid;

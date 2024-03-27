@@ -100,7 +100,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import ModalClaimReward from '@/components/modals/ClaimRewardModal.vue'
 import { cleanAvaxBN } from '@/helpers/helper'
