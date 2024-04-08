@@ -72,15 +72,15 @@
     </div>
 </template>
 <script lang="ts">
-import 'reflect-metadata'
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import Modal from '@/components/modals/Modal.vue'
+import { KYC_VARIANT, kycStyleDay, kycStyleNight } from '@/constants'
+import MnemonicWallet from '@/js/wallets/MnemonicWallet'
+import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import { WalletNameType, WalletType } from '@/js/wallets/types'
 import { generateToken } from '@/kyc_api'
 import snsWebSdk from '@sumsub/websdk'
-import MnemonicWallet from '@/js/wallets/MnemonicWallet'
-import { WalletType, WalletNameType } from '@/js/wallets/types'
-import { SingletonWallet } from '@/js/wallets/SingletonWallet'
-import { KYC_VARIANT, kycStyleDay, kycStyleNight } from '@/constants'
+import 'reflect-metadata'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import Disclaimer from './DisclaimerModal.vue'
 interface UserData {
     email: string
@@ -198,6 +198,7 @@ export default class KybModal extends Vue {
     async close() {
         await this.$store.dispatch('Accounts/updateKycStatus')
         this.$refs.modal.close()
+        this.globalHelper().closeSelect()
         this.userDataSubmitted = false
         this.userData = {
             email: '',
