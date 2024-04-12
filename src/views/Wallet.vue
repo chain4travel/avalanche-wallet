@@ -1,14 +1,13 @@
 <template>
     <div class="wallet_view" ref="wallet_view">
-        <UpdateKeystoreModal v-if="isManageWarning"></UpdateKeystoreModal>
         <div class="top-bar">
             <div class="container">
                 <div class="links">
-                    <router-link to="/wallet/home" class="wallet_link">
+                    <router-link to="/wallet" class="wallet_link">
                         {{ $t('wallet.sidebar.portfolio') }}
                     </router-link>
                     <router-link
-                        to="/wallet/home/transfer"
+                        to="/wallet/transfer"
                         data-cy="wallet_transfer"
                         class="wallet_link"
                     >
@@ -16,41 +15,37 @@
                     </router-link>
                     <router-link
                         v-if="walletType !== 'multisig'"
-                        to="/wallet/home/cross_chain"
+                        to="/wallet/cross_chain"
                         data-cy="wallet_export"
                         class="wallet_export wallet_link"
                     >
                         {{ $t('wallet.sidebar.export') }}
                     </router-link>
                     <router-link
-                        to="/wallet/home/validator"
+                        to="/wallet/validator"
                         data-cy="wallet_validator"
                         class="wallet_validator wallet_link"
                     >
                         {{ $t('wallet.sidebar.validator') }}
                     </router-link>
-                    <router-link to="/wallet/home/earn" data-cy="wallet_earn" class="wallet_link">
+                    <router-link to="/wallet/earn" data-cy="wallet_earn" class="wallet_link">
                         {{ $t('wallet.sidebar.earn') }}
                     </router-link>
-                    <router-link
-                        to="/wallet/home/studio"
-                        data-cy="wallet_studio"
-                        class="wallet_link"
-                    >
+                    <router-link to="/wallet/studio" data-cy="wallet_studio" class="wallet_link">
                         {{ $t('wallet.sidebar.studio') }}
                     </router-link>
                     <router-link
-                        to="/wallet/home/activity"
+                        to="/wallet/activity"
                         data-cy="wallet_activity"
                         class="wallet_link"
                     >
                         {{ $t('wallet.sidebar.activity') }}
                     </router-link>
-                    <router-link to="/wallet/home/keys" data-cy="wallet_manage" class="wallet_link">
+                    <router-link to="/wallet/keys" data-cy="wallet_manage" class="wallet_link">
                         {{ $t('wallet.sidebar.manage') }}
                     </router-link>
                     <router-link
-                        to="/wallet/home/advanced"
+                        to="/wallet/advanced"
                         data-cy="wallet_advanced"
                         class="wallet_link"
                     >
@@ -85,11 +80,10 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
-import TopInfo from '@/components/wallet/TopInfo.vue'
 import MainPanel from '@/components/SidePanels/MainPanel.vue'
-import UpdateKeystoreModal from '@/components/modals/UpdateKeystore/UpdateKeystoreModal.vue'
+import TopInfo from '@/components/wallet/TopInfo.vue'
 import { WalletNameType } from '@/js/wallets/types'
+import { Component, Vue } from 'vue-property-decorator'
 
 const TIMEOUT_DURATION = 60 * 7 // in seconds
 const TIMEOUT_DUR_MS = TIMEOUT_DURATION * 1000
@@ -98,7 +92,6 @@ const TIMEOUT_DUR_MS = TIMEOUT_DURATION * 1000
     components: {
         MainPanel,
         TopInfo,
-        UpdateKeystoreModal,
     },
 })
 export default class Wallet extends Vue {
@@ -112,47 +105,47 @@ export default class Wallet extends Vue {
         {
             id: 1,
             text: this.$t('wallet.sidebar.portfolio'),
-            path: '/wallet/home',
+            path: '/wallet',
         },
         {
             id: 2,
             text: this.$t('wallet.sidebar.send'),
-            path: '/wallet/home/transfer',
+            path: '/wallet/transfer',
         },
         {
             id: 3,
             text: this.$t('wallet.sidebar.export'),
-            path: '/wallet/home/cross_chain',
+            path: '/wallet/cross_chain',
         },
         {
             id: 4,
             text: this.$t('wallet.sidebar.validator'),
-            path: '/wallet/home/validator',
+            path: '/wallet/validator',
         },
         {
             id: 5,
             text: this.$t('wallet.sidebar.earn'),
-            path: '/wallet/home/earn',
+            path: '/wallet/earn',
         },
         {
             id: 6,
             text: this.$t('wallet.sidebar.studio'),
-            path: '/wallet/home/studio',
+            path: '/wallet/studio',
         },
         {
             id: 7,
             text: this.$t('wallet.sidebar.activity'),
-            path: '/wallet/home/activity',
+            path: '/wallet/activity',
         },
         {
             id: 8,
             text: this.$t('wallet.sidebar.manage'),
-            path: '/wallet/home/keys',
+            path: '/wallet/keys',
         },
         {
             id: 9,
             text: this.$t('wallet.sidebar.advanced'),
-            path: '/wallet/home/advanced',
+            path: '/wallet/advanced',
         },
     ]
 
@@ -181,7 +174,7 @@ export default class Wallet extends Vue {
             event.preventDefault()
             this.isLogOut = false
             event.returnValue = ''
-            this.$router.push('/wallet/home/keys')
+            this.$router.push('/wallet/keys')
             this.resetTimer()
         }
     }

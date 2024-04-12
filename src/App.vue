@@ -26,12 +26,12 @@
 
 <script>
 import Notifications from '@/components/Notifications'
-import SaveAccountModal from '@/components/modals/SaveAccount/SaveAccountModal'
+import UrlBanner from '@/components/misc/UrlBanner'
 import LedgerBlock from '@/components/modals/LedgerBlock'
 import LedgerUpgrade from '@/components/modals/LedgerUpgrade'
-import UpgradeToAccountModal from '@/components/modals/SaveAccount/UpgradeToAccountModal'
 import LedgerWalletLoading from '@/components/modals/LedgerWalletLoading'
-import UrlBanner from '@/components/misc/UrlBanner'
+import SaveAccountModal from '@/components/modals/SaveAccount/SaveAccountModal'
+import UpgradeToAccountModal from '@/components/modals/SaveAccount/UpgradeToAccountModal'
 import router from '@/router'
 export default {
     components: {
@@ -44,13 +44,30 @@ export default {
         Notifications,
     },
     async created() {
-        if (router.currentRoute.path !== '/wallet/home') router.push('/wallet/home')
+        if (router.currentRoute.path !== '/wallet') router.replace('/wallet')
     },
     mounted() {
         let { updateSuiteStore } = this.globalHelper()
         updateSuiteStore(this.$store.state)
     },
-
+    watch: {
+        '$store.state.isAuth': [
+            {
+                handler: 'onAuthChanged',
+                immediate: false,
+                deep: false,
+            },
+        ],
+    },
+    methods: {
+        onAuthChanged(val, _) {
+            if (val) {
+                this.$router.replace('/wallet')
+            } else {
+                this.$router.push('/login')
+            }
+        },
+    },
     metaInfo: {
         meta: [
             {

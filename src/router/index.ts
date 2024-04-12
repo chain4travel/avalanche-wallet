@@ -1,19 +1,19 @@
+import Create from '@/views/Create.vue'
+import Legal from '@/views/Legal.vue'
+import Wallet from '@/views/Wallet.vue'
+import Activity from '@/views/wallet/Activity.vue'
+import Advanced from '@/views/wallet/Advanced.vue'
+import Export from '@/views/wallet/CrossChain.vue'
+import Earn from '@/views/wallet/Earn.vue'
+import Launch from '@/views/wallet/Launch.vue'
+import ManageKeys from '@/views/wallet/ManageKeys.vue'
+import WalletHome from '@/views/wallet/Portfolio.vue'
+import Studio from '@/views/wallet/Studio.vue'
+import Transfer from '@/views/wallet/Transfer.vue'
+import Validator from '@/views/wallet/Validator.vue'
 import Vue from 'vue'
 import VueRouter, { Route } from 'vue-router'
-import Transfer from '@/views/wallet/Transfer.vue'
-import ManageKeys from '@/views/wallet/ManageKeys.vue'
-import Create from '@/views/Create.vue'
-import Wallet from '@/views/Wallet.vue'
-import WalletHome from '@/views/wallet/Portfolio.vue'
-import Earn from '@/views/wallet/Earn.vue'
-import Advanced from '@/views/wallet/Advanced.vue'
-import Activity from '@/views/wallet/Activity.vue'
-import Validator from '@/views/wallet/Validator.vue'
-import Launch from '@/views/wallet/Launch.vue'
-import Legal from '@/views/Legal.vue'
 import store from '../store/index'
-import Studio from '@/views/wallet/Studio.vue'
-import Export from '@/views/wallet/CrossChain.vue'
 
 Vue.use(VueRouter)
 
@@ -22,7 +22,7 @@ const ifNotAuthenticated = (to: Route, from: Route, next: Function) => {
         next()
         return
     }
-    next('/wallet/home')
+    next('/login')
 }
 
 const ifAuthenticated = (to: Route, from: Route, next: Function) => {
@@ -46,7 +46,7 @@ const routes = [
         beforeEnter: ifNotAuthenticated,
     },
     {
-        path: '/wallet/home',
+        path: '/wallet',
         children: [
             {
                 path: '/',
