@@ -509,6 +509,7 @@ $col_pad: 24px;
     display: flex;
     padding: 14px;
     border: 1px dashed var(--primary-color);
+    overflow: hidden;
 
     p {
         align-self: center;

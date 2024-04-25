@@ -100,7 +100,7 @@ export default class NewCollectibleFamily extends Vue {
     }
 
     get txFee(): Big {
-        return bnToBig(ava.PChain().getCreationTxFee(), 9)
+        return bnToBig(ava.XChain().getCreationTxFee(), 9)
     }
 
     validate(): boolean {

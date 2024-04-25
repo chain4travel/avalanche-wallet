@@ -2,6 +2,8 @@ import Vue from 'vue'
 import Vuetify, {
     VApp,
     VBtn,
+    VChip,
+    VChipGroup,
     VIcon,
     VList,
     VMain,
@@ -156,6 +158,8 @@ Vue.use(Vuetify, {
     components: {
         VApp,
         VBtn,
+        VChip,
+        VChipGroup,
         VIcon,
         VList,
         VMain,
