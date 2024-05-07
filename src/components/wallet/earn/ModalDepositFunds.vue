@@ -199,7 +199,7 @@ import CamBtn from '@/components/CamBtn.vue'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
 import CamTooltip from '@/components/misc/CamTooltip.vue'
 import { MINUTE_MS } from '@/constants'
-import { cleanAvaxBN, formatDuration } from '@/helpers/helper'
+import { bnToBig, cleanAvaxBN, formatDuration } from '@/helpers/helper'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import AvaAsset from '@/js/AvaAsset'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
@@ -356,6 +356,25 @@ export default class ModalDepositFunds extends Vue {
             }
         })
         return isSigned
+    }
+    get interestRateBase(): number {
+        return 365 * 24 * 60 * 60
+    }
+    get currentAmount(): string {
+        return bnToBig(this.amt, 9).toString()
+    }
+    get maxLeftToDeposit(): BN {
+        if (this.offer.upgradeVersion === 0 || !this.offer.totalMaxAmount.isZero())
+            return this.offer.totalMaxAmount
+        let rest = this.offer.totalMaxRewardAmount.sub(this.offer.rewardedAmount)
+        let amountLeftToDeposit = new BN(
+            (rest.toNumber() / (this.rewardPercent / 100)) * (this.interestRateBase / this.duration)
+        )
+        return amountLeftToDeposit
+    }
+    get amountLeftToDepositError(): string {
+        if (this.maxLeftToDeposit.gte(this.amt)) return ''
+        return bnToBig(this.maxLeftToDeposit, 9).toString()
     }
     get maxEndDate() {
         return this.offer.end.toNumber() * 1000
