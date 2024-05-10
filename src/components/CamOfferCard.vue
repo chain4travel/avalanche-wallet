@@ -191,7 +191,7 @@ export default class CamOfferCard extends Vue {
         const amt = this.amountLimit
         return amt.amount.isZero()
             ? '0px'
-            : amt.nominator.mul(new BN(100)).div(amt.amount).toString() + '%'
+            : amt.nominator.div(amt.amount).mul(new BN(100)).toString() + '%'
     }
 
     get progressText(): string {

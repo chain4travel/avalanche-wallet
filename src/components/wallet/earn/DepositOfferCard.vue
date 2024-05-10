@@ -29,6 +29,7 @@
             :offer="offer"
             @emitOffer="emitOffer"
             :isDepositDisabled="isDepositDisabled"
+            :maxDepositAmount="maxDepositAmount"
             @closeDepositFundsModal="closeDepositFundsModal"
         />
     </CamOfferCard>
@@ -45,6 +46,7 @@ import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { BN } from '@c4tplatform/caminojs/dist'
 import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
 import ModalDepositFunds from './ModalDepositFunds.vue'
+import CamOfferCard from '@/components/CamOfferCard.vue'
 
 import { bintools } from '@/AVA'
 import { WalletHelper } from '@/helpers/wallet_helper'
