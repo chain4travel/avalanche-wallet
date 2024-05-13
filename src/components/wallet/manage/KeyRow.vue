@@ -29,7 +29,7 @@
                 <div class="header_cols">
                     <div class="detail">
                         <div class="edit-wallet-name-container">
-                            <h3 v-show="!isEditable" class="addressVal">
+                            <h3 v-show="!isEditable" class="addressVal" style="max-width: 300px">
                                 {{ walletName }}
                             </h3>
                             <input

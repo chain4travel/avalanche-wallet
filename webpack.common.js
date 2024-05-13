@@ -82,6 +82,7 @@ module.exports = {
                 './mountMultisigWalletSetting': './src/views/mountMultisigWalletSetting.ts',
                 './mountVersionComponent': './src/components/misc/mountVersion.ts',
                 './mountCreateOfferForm': './src/components/wallet/earn/mountCreateOfferForm.ts',
+                './caminoClient': './src/AVA.ts',
             },
         }),
         new HtmlWebPackPlugin({

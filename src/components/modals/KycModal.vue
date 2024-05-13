@@ -47,15 +47,15 @@
     </div>
 </template>
 <script lang="ts">
-import 'reflect-metadata'
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import Modal from '@/components/modals/Modal.vue'
+import { KYC_VARIANT, kycStyleDay, kycStyleNight } from '@/constants'
+import MnemonicWallet from '@/js/wallets/MnemonicWallet'
+import { SingletonWallet } from '@/js/wallets/SingletonWallet'
+import { WalletNameType, WalletType } from '@/js/wallets/types'
 import { generateToken } from '@/kyc_api'
 import snsWebSdk from '@sumsub/websdk'
-import MnemonicWallet from '@/js/wallets/MnemonicWallet'
-import { WalletType, WalletNameType } from '@/js/wallets/types'
-import { SingletonWallet } from '@/js/wallets/SingletonWallet'
-import { KYC_VARIANT, kycStyleDay, kycStyleNight } from '@/constants'
+import 'reflect-metadata'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 interface UserData {
     email: string
     phone: string
@@ -163,6 +163,7 @@ export default class KycModal extends Vue {
 
     beforeClose() {
         this.userDataSubmitted = false
+        this.globalHelper().closeSelect()
         this.userData = {
             email: '',
             phone: '',
