@@ -8,50 +8,38 @@
         </div>
         <p class="err" v-else-if="err">{{ err }}</p>
         <template v-if="!isLoading">
-            <v-btn block class="button_secondary" depressed @click="atomicImportX('P')" small>
-                Import X (From P)
-            </v-btn>
-            <v-btn block class="button_secondary" depressed @click="atomicImportX('C')" small>
-                Import X (From C)
-            </v-btn>
-            <v-btn block class="button_secondary" depressed @click="atomicImportP('X')" small>
-                Import P (From X)
-            </v-btn>
-            <v-btn block class="button_secondary" depressed @click="atomicImportP('C')" small>
-                Import P (From C)
-            </v-btn>
-            <v-btn
-                v-if="isEVMSupported"
-                block
-                class="button_secondary"
-                depressed
-                @click="atomicImportC('X')"
-                small
-            >
-                Import C (from X)
-            </v-btn>
-            <v-btn block class="button_secondary" depressed @click="atomicImportC('P')" small>
-                Import C (from P)
-            </v-btn>
+            <div class="button-group">
+                <CamBtn
+                    v-for="(chain, index) in chains"
+                    :key="index"
+                    variant="primary"
+                    style="width: 100%"
+                    @click="chain.handler"
+                    :loading="isLoading"
+                    :disabled="isLoading"
+                >
+                    {{ chain.label }}
+                </CamBtn>
+            </div>
         </template>
-        <Spinner class="spinner" v-else></Spinner>
+        <Spinner class="spinner" v-else />
     </div>
 </template>
+
 <script lang="ts">
 import 'reflect-metadata'
 import { Vue, Component } from 'vue-property-decorator'
-
+import Spinner from '@/components/misc/Spinner.vue'
+import CamBtn from '@/components/CamBtn.vue'
 import { CrossChainsC, CrossChainsP, CrossChainsX } from '@/constants'
 import { getBaseFeeRecommended, estimateImportGasFeeFromMockTx } from '@/helpers/gas_helper'
 import { avaxCtoX } from '@/helpers/helper'
-import Spinner from '@/components/misc/Spinner.vue'
 import { WalletType } from '@/js/wallets/types'
-
 import { BN } from '@c4tplatform/caminojs/dist'
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 
 @Component({
-    components: { Spinner },
+    components: { Spinner, CamBtn },
 })
 export default class ChainImport extends Vue {
     err = ''
@@ -60,77 +48,72 @@ export default class ChainImport extends Vue {
     txId = ''
 
     get wallet(): null | WalletType {
-        let wallet: null | WalletType = this.$store.state.activeWallet
-        return wallet
+        return this.$store.state.activeWallet
     }
 
     get isEVMSupported() {
-        if (!this.wallet) return false
-        return this.wallet.ethAddress
+        return this.wallet && !!this.wallet.ethAddress
+    }
+
+    get chains() {
+        return [
+            { label: 'Import X (From P)', handler: () => this.atomicImportX('P') },
+            { label: 'Import X (From C)', handler: () => this.atomicImportX('C') },
+            { label: 'Import P (From X)', handler: () => this.atomicImportP('X') },
+            { label: 'Import P (From C)', handler: () => this.atomicImportP('C') },
+            {
+                label: 'Import C (from X)',
+                handler: () => this.atomicImportC('X'),
+                show: this.isEVMSupported,
+            },
+            { label: 'Import C (from P)', handler: () => this.atomicImportC('P') },
+        ].filter((chain) => chain.show !== false)
     }
 
     async atomicImportX(sourceChain: CrossChainsX) {
-        this.beforeSubmit()
-        if (!this.wallet) return
-
-        // // Import from C
-        try {
-            let txId = await this.wallet.importToXChain(sourceChain)
-            this.onSuccess(txId)
-        } catch (e) {
-            if (this.isSuccess) return
-            this.onError(e as Error)
-        }
+        await this.handleImport(() => this.wallet?.importToXChain(sourceChain))
     }
 
     async atomicImportP(source: CrossChainsP) {
-        this.beforeSubmit()
-        if (!this.wallet) return
-        try {
-            let txId = await this.wallet.importToPlatformChain(source)
-            this.onSuccess(txId)
-        } catch (e) {
-            this.onError(e as Error)
-        }
+        await this.handleImport(() => this.wallet?.importToPlatformChain(source))
     }
 
     async atomicImportC(source: CrossChainsC) {
-        this.beforeSubmit()
-        if (!this.wallet) return
-        try {
+        await this.handleImport(async () => {
+            if (!this.wallet) throw new Error('No wallet found')
             const utxoSet = await this.wallet.evmGetAtomicUTXOs(source)
             const utxos = utxoSet.getAllUTXOs()
+            if (utxos.length === 0) throw new Error('Nothing to import.')
+            const numSigs = utxos.reduce(
+                (acc, utxo) => acc + utxo.getOutput().getAddresses().length,
+                0
+            )
+            const gas = estimateImportGasFeeFromMockTx(utxos.length, numSigs)
+            const totFee = (await getBaseFeeRecommended()).mul(new BN(gas))
+            return this.wallet.importToCChain(source, avaxCtoX(totFee))
+        })
+    }
 
-            const numIns = utxos.length
-            const baseFee = await getBaseFeeRecommended()
-
-            if (numIns === 0) {
-                throw new Error('Nothing to import.')
-            }
-
-            // Calculate number of signatures
-            const numSigs = utxos.reduce((acc, utxo) => {
-                return acc + utxo.getOutput().getAddresses().length
-            }, 0)
-
-            const gas = estimateImportGasFeeFromMockTx(numIns, numSigs)
-
-            const totFee = baseFee.mul(new BN(gas))
-            let txId = await this.wallet.importToCChain(source, avaxCtoX(totFee))
-            this.onSuccess(txId)
+    async handleImport(importFn: () => Promise<string | undefined>) {
+        this.beforeSubmit()
+        try {
+            const txId = await importFn()
+            if (txId) this.onSuccess(txId)
         } catch (e) {
             this.onError(e as Error)
         }
     }
 
     deactivated() {
-        this.err = ''
-        this.txId = ''
-        this.isSuccess = false
+        this.resetState()
     }
 
     beforeSubmit() {
         this.isLoading = true
+        this.resetState()
+    }
+
+    resetState() {
         this.err = ''
         this.isSuccess = false
         this.txId = ''
@@ -138,14 +121,9 @@ export default class ChainImport extends Vue {
 
     onSuccess(txId: string) {
         this.isLoading = false
-        this.err = ''
         this.isSuccess = true
         this.txId = txId
-        let { dispatchNotification } = this.globalHelper()
-        dispatchNotification({
-            message: this.$t('notifications.chain_import'),
-            type: 'success',
-        })
+        this.notifySuccess()
         setTimeout(() => {
             this.$store.dispatch('Assets/updateUTXOs')
             this.$store.dispatch('History/updateTransactionHistory')
@@ -154,20 +132,32 @@ export default class ChainImport extends Vue {
 
     onError(err: Error) {
         this.isLoading = false
-        let msg = ''
-        if (err.message.includes('No atomic')) {
-            this.err = 'Nothing found to import.'
-            return
-        } else {
-            this.err = err.message
-        }
+        this.err = err.message.includes('No atomic') ? 'Nothing found to import.' : err.message
+    }
+
+    notifySuccess() {
+        const { dispatchNotification } = this.globalHelper()
+        dispatchNotification({
+            message: this.$t('notifications.chain_import'),
+            type: 'success',
+        })
     }
 }
 </script>
+
 <style scoped lang="scss">
 @use '../../../styles/abstracts/mixins';
-.v-btn {
-    margin: 8px 0;
+
+.chain_import {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Adjust the gap value as needed */
 }
 
 .is_success {
