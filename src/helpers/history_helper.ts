@@ -244,8 +244,8 @@ function getLoss(tx: ITransactionData, wallet: WalletType): TokenSummaryResult {
 function getRawLoss(tx: ITransactionData, wallet: WalletType): TokenSummaryResult {
     if (!tx.rawTx) return getLoss(tx, wallet)
 
-    let ins = (tx.rawTx as unknown as RawAvaxTx).getIns()
-    let outs = (tx.rawTx as unknown as RawAvaxTx).getOuts()
+    let ins = ((tx.rawTx as unknown) as RawAvaxTx).getIns()
+    let outs = ((tx.rawTx as unknown) as RawAvaxTx).getOuts()
 
     let walletAddrs = wallet.getHistoryAddresses()
     let addrsStripped = new Set<string>(walletAddrs.map((addr) => addr.split('-')[1]))
@@ -350,8 +350,8 @@ function getProfit(tx: ITransactionData, wallet: WalletType): TokenSummaryResult
 function getRawProfit(tx: ITransactionData, wallet: WalletType): TokenSummaryResult {
     if (!tx.rawTx) return getProfit(tx, wallet)
 
-    let ins = (tx.rawTx as unknown as RawAvaxTx).getIns()
-    let outs = (tx.rawTx as unknown as RawAvaxTx).getOuts()
+    let ins = ((tx.rawTx as unknown) as RawAvaxTx).getIns()
+    let outs = ((tx.rawTx as unknown) as RawAvaxTx).getOuts()
 
     let walletAddrs = wallet.getHistoryAddresses()
     let addrsStripped = new Set<string>(walletAddrs.map((addr) => addr.split('-')[1]))
