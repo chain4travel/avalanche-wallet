@@ -125,7 +125,7 @@ const platform_module: Module<PlatformState, RootState> = {
                 // Since magellan is not ready we get treasury rewards
                 // by requesting the node with all single threshold owners
                 const owners = addresses.map(
-                    (a) => ({ locktime: '0', threshold: 1, addresses: [a] } as OwnerParam)
+                    (a) => ({ locktime: '0', threshold: 1, addresses: [a] }) as OwnerParam
                 )
 
                 let validatorFound = false

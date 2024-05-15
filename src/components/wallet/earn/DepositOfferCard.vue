@@ -16,8 +16,8 @@
                     isWhiteListing
                         ? $t('earn.rewards.offer.add_new_addresses')
                         : !pendingOfferID || offer.id !== pendingOfferID
-                        ? $t('earn.rewards.offer.deposit')
-                        : 'Sign depositing funds'
+                          ? $t('earn.rewards.offer.deposit')
+                          : 'Sign depositing funds'
                 }}
             </button>
         </div>

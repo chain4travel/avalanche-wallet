@@ -347,7 +347,7 @@ class LedgerWallet extends HdWalletCore implements AvaWalletCore {
     // Ideally we wont use this function at all, but ledger is not ready yet.
     async signTransactionHash<
         UnsignedTx extends AVMUnsignedTx | PlatformUnsignedTx | EVMUnsignedTx,
-        SignedTx extends AVMTx | PlatformTx | EvmTx
+        SignedTx extends AVMTx | PlatformTx | EvmTx,
     >(unsignedTx: UnsignedTx, paths: string[], chainId: ChainIdType): Promise<SignedTx> {
         let txbuff = unsignedTx.toBuffer()
         const msg: Buffer = Buffer.from(createHash('sha256').update(txbuff).digest())
@@ -398,7 +398,7 @@ class LedgerWallet extends HdWalletCore implements AvaWalletCore {
     // Used for signing transactions that are parsable
     async signTransactionParsable<
         UnsignedTx extends AVMUnsignedTx | PlatformUnsignedTx | EVMUnsignedTx,
-        SignedTx extends AVMTx | PlatformTx | EvmTx
+        SignedTx extends AVMTx | PlatformTx | EvmTx,
     >(unsignedTx: UnsignedTx, paths: string[], chainId: ChainIdType): Promise<SignedTx> {
         let tx = unsignedTx.getTransaction()
         let txType = tx.getTxType()
