@@ -6,7 +6,7 @@
             <label>Tx ID</label>
             <p class="tx_id">{{ txId }}</p>
         </div>
-        <p class="err" v-else-if="err">{{ err }}</p>
+        <Alert v-else-if="err" variant="warning" :title="err" />
         <template v-if="!isLoading">
             <div class="button-group">
                 <CamBtn
@@ -27,19 +27,19 @@
 </template>
 
 <script lang="ts">
-import 'reflect-metadata'
-import { Vue, Component } from 'vue-property-decorator'
-import Spinner from '@/components/misc/Spinner.vue'
+import Alert from '@/components/Alert.vue'
 import CamBtn from '@/components/CamBtn.vue'
+import Spinner from '@/components/misc/Spinner.vue'
 import { CrossChainsC, CrossChainsP, CrossChainsX } from '@/constants'
-import { getBaseFeeRecommended, estimateImportGasFeeFromMockTx } from '@/helpers/gas_helper'
+import { estimateImportGasFeeFromMockTx, getBaseFeeRecommended } from '@/helpers/gas_helper'
 import { avaxCtoX } from '@/helpers/helper'
 import { WalletType } from '@/js/wallets/types'
 import { BN } from '@c4tplatform/caminojs/dist'
-import { SignatureError } from '@c4tplatform/caminojs/dist/common'
+import 'reflect-metadata'
+import { Component, Vue } from 'vue-property-decorator'
 
 @Component({
-    components: { Spinner, CamBtn },
+    components: { Spinner, CamBtn, Alert },
 })
 export default class ChainImport extends Vue {
     err = ''

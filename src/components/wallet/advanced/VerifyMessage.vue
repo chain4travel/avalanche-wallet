@@ -4,15 +4,15 @@
         <p class="description">
             {{ $t('advanced.verify.desc') }}
         </p>
-        <div>
+        <div class="messages">
             <label>{{ $t('advanced.verify.label1') }}</label>
             <textarea v-model="message"></textarea>
         </div>
-        <div>
+        <div class="messages">
             <label>{{ $t('advanced.verify.label2') }}</label>
             <textarea v-model="signature"></textarea>
         </div>
-        <p class="err">{{ error }}</p>
+        <Alert v-if="error" variant="negative" :title="error" />
         <CamBtn class="primary" block small depressed @click="submit" :disabled="!canSubmit">
             {{ $t('advanced.verify.submit') }}
         </CamBtn>
@@ -25,15 +25,16 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { KeyPair } from '@c4tplatform/caminojs/dist/apis/avm'
 import { ava, bintools } from '@/AVA'
-import { Buffer } from '@c4tplatform/caminojs/dist'
-import { digestMessage } from '@/helpers/helper'
+import Alert from '@/components/Alert.vue'
 import CamBtn from '@/components/CamBtn.vue'
+import { digestMessage } from '@/helpers/helper'
+import { Buffer } from '@c4tplatform/caminojs/dist'
+import { KeyPair } from '@c4tplatform/caminojs/dist/apis/avm'
+import { Component, Vue } from 'vue-property-decorator'
 
 @Component({
-    components: { CamBtn },
+    components: { CamBtn, Alert },
 })
 export default class VerifyMessage extends Vue {
     message: string = ''
@@ -132,7 +133,9 @@ textarea {
     word-break: break-all;
 }
 
-.err {
-    color: var(--error-color);
+.messages {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 </style>

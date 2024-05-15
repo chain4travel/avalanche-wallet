@@ -19,20 +19,24 @@
         </CamBtn>
         <div v-if="signed" class="result">
             <label>{{ $t('advanced.sign.label3') }}</label>
-            <p class="signed">{{ signed }}</p>
+            <div class="signed">
+                <p>{{ signed }}</p>
+                <CopyText :tooltip="$t('top.hover3')" :value="signed" class="copy_but"></CopyText>
+            </div>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { WalletType } from '@/js/wallets/types'
+import CamBtn from '@/components/CamBtn.vue'
+import CopyText from '@/components/misc/CopyText.vue'
 import SearchAddress from '@/components/wallet/advanced/SignMessage/SearchAddress.vue'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
-import CamBtn from '@/components/CamBtn.vue'
+import { WalletType } from '@/js/wallets/types'
+import { Component, Vue } from 'vue-property-decorator'
 
 @Component({
-    components: { SearchAddress, CamBtn },
+    components: { SearchAddress, CamBtn, CopyText },
 })
 export default class SignMessage extends Vue {
     sourceAddress: string | null = null
@@ -111,6 +115,14 @@ textarea,
     padding: 4px 12px;
 }
 
+.signed {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 12px 12px;
+}
+
 select {
     outline: none;
     width: 100%;
@@ -158,10 +170,13 @@ textarea {
     color: var(--error-color);
 }
 
+.copy_but {
+    color: var(--primary-color);
+}
 .result {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    margin-top: 6px;
+    width: 100%;
 }
 </style>
