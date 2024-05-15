@@ -13,14 +13,7 @@
             <textarea v-model="signature"></textarea>
         </div>
         <p class="err">{{ error }}</p>
-        <CamBtn 
-            class="primary" 
-            block 
-            small 
-            depressed 
-            @click="submit" 
-            :disabled="!canSubmit"
-        >
+        <CamBtn class="primary" block small depressed @click="submit" :disabled="!canSubmit">
             {{ $t('advanced.verify.submit') }}
         </CamBtn>
         <div v-if="addressX" class="result">
@@ -32,60 +25,60 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import { KeyPair } from '@c4tplatform/caminojs/dist/apis/avm';
-import { ava, bintools } from '@/AVA';
-import { Buffer } from '@c4tplatform/caminojs/dist';
-import { digestMessage } from '@/helpers/helper';
-import CamBtn from '@/components/CamBtn.vue';
+import { Component, Vue } from 'vue-property-decorator'
+import { KeyPair } from '@c4tplatform/caminojs/dist/apis/avm'
+import { ava, bintools } from '@/AVA'
+import { Buffer } from '@c4tplatform/caminojs/dist'
+import { digestMessage } from '@/helpers/helper'
+import CamBtn from '@/components/CamBtn.vue'
 
 @Component({
     components: { CamBtn },
 })
 export default class VerifyMessage extends Vue {
-    message: string = '';
-    addressX: string = '';
-    addressP: string = '';
-    signature: string = '';
-    error: string = '';
+    message: string = ''
+    addressX: string = ''
+    addressP: string = ''
+    signature: string = ''
+    error: string = ''
 
     submit() {
-        this.addressX = '';
-        this.addressP = '';
-        this.error = '';
+        this.addressX = ''
+        this.addressP = ''
+        this.error = ''
         try {
-            this.verify();
+            this.verify()
         } catch (e: any) {
-            this.error = e.message;
+            this.error = e.message
         }
     }
 
     verify() {
-        const digest = digestMessage(this.message);
-        const digestBuff = Buffer.from(digest.toString('hex'), 'hex');
-        const hrp = ava.getHRP();
-        const keypair = new KeyPair(hrp, 'X');
-        const signedBuff = bintools.cb58Decode(this.signature);
-        const pubKey = keypair.recover(digestBuff, signedBuff);
-        const addressBuff = KeyPair.addressFromPublicKey(pubKey);
-        this.addressX = bintools.addressToString(hrp, 'X', addressBuff);
-        this.addressP = bintools.addressToString(hrp, 'P', addressBuff);
+        const digest = digestMessage(this.message)
+        const digestBuff = Buffer.from(digest.toString('hex'), 'hex')
+        const hrp = ava.getHRP()
+        const keypair = new KeyPair(hrp, 'X')
+        const signedBuff = bintools.cb58Decode(this.signature)
+        const pubKey = keypair.recover(digestBuff, signedBuff)
+        const addressBuff = KeyPair.addressFromPublicKey(pubKey)
+        this.addressX = bintools.addressToString(hrp, 'X', addressBuff)
+        this.addressP = bintools.addressToString(hrp, 'P', addressBuff)
     }
 
     clear() {
-        this.message = '';
-        this.signature = '';
-        this.addressX = '';
-        this.addressP = '';
-        this.error = '';
+        this.message = ''
+        this.signature = ''
+        this.addressX = ''
+        this.addressP = ''
+        this.error = ''
     }
 
     deactivated() {
-        this.clear();
+        this.clear()
     }
 
     get canSubmit() {
-        return this.message && this.signature;
+        return this.message && this.signature
     }
 }
 </script>
