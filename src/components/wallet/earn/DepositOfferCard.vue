@@ -16,8 +16,8 @@
                     isWhiteListing
                         ? $t('earn.rewards.offer.add_new_addresses')
                         : !pendingOfferID || offer.id !== pendingOfferID
-                        ? $t('earn.rewards.offer.deposit')
-                        : 'Sign depositing funds'
+                          ? $t('earn.rewards.offer.deposit')
+                          : 'Sign depositing funds'
                 }}
             </button>
         </div>
@@ -46,7 +46,6 @@ import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { BN } from '@c4tplatform/caminojs/dist'
 import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
 import ModalDepositFunds from './ModalDepositFunds.vue'
-import CamOfferCard from '@/components/CamOfferCard.vue'
 
 import { bintools } from '@/AVA'
 import { WalletHelper } from '@/helpers/wallet_helper'

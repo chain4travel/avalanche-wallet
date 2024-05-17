@@ -1,33 +1,27 @@
 <template>
-    <div>
+    <div class="container">
         <ConsolidateFundsModal
             ref="modal"
             @ctaClick="consolidateFunds"
             :balances="balances"
             :loading="isProcessing"
             :totalFee="totalFeeAmount"
-        ></ConsolidateFundsModal>
+        />
         <h2>{{ $t('advanced.consolidate_funds.title') }}</h2>
-        <p style="margin-bottom: 14px !important">
+        <p class="description">
             {{ $t('advanced.consolidate_funds.desc') }}
         </p>
-
-        <v-btn
-            class="button_secondary"
-            :loading="isScanning"
-            @click="scanForFunds"
-            block
-            small
-            depressed
-        >
+        <CamBtn class="primary" :loading="isScanning" @click="scanForFunds" block small depressed>
             {{ $t('advanced.consolidate_funds.cta') }}
-        </v-btn>
+        </CamBtn>
     </div>
 </template>
+
 <script lang="ts">
+import CamBtn from '@/components/CamBtn.vue'
+import { Component, Vue } from 'vue-property-decorator'
 import ConsolidateFundsModal from '@/components/modals/ConsolidateFundsModal.vue'
 import { WalletHelper } from '@/helpers/wallet_helper'
-import { Component, Vue } from 'vue-property-decorator'
 import { UTXO as PlatformUTXO } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { AmountOutput, UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm'
 import { ava, bintools } from '@/AVA'
@@ -36,14 +30,13 @@ import Big from 'big.js'
 import MnemonicWallet from '@/js/wallets/MnemonicWallet'
 import AvaAsset from '@/js/AvaAsset'
 import { ITransaction } from '@/components/wallet/transfer/types'
-import { BN, Big, bnToBig } from '@/helpers/helper'
+import { BN } from '@c4tplatform/caminojs/dist'
 import { ChainIdType } from '@/constants'
+
 const uuidv1 = require('uuid/v1')
 
 @Component({
-    components: {
-        ConsolidateFundsModal,
-    },
+    components: { ConsolidateFundsModal, CamBtn },
 })
 export default class ConsolidateFunds extends Vue {
     isScanning = false
@@ -78,13 +71,11 @@ export default class ConsolidateFunds extends Vue {
     }
 
     private utxoToAddressBalances(utxo: AVMUTXO | PlatformUTXO, chainID: 'X' | 'P') {
-        const out = utxo.getOutput()
+        const out = utxo.getOutput() as AmountOutput
         const addrs = out.getAddresses()
         const hrp = ava.getHRP()
         const id = chainID
-        const addrsClean = addrs.map((addr) => {
-            return bintools.addressToString(hrp, id, addr)
-        })
+        const addrsClean = addrs.map((addr) => bintools.addressToString(hrp, id, addr))
 
         const assetID = utxo.getAssetID()
         const idClean = bintools.cb58Encode(assetID)
@@ -95,7 +86,7 @@ export default class ConsolidateFunds extends Vue {
         this.asset = asset
 
         const denom = asset.denomination
-        const bn = (out as AmountOutput).getAmount()
+        const bn = out.getAmount()
         const amount = bnToBig(bn, denom)
 
         return {
@@ -124,6 +115,7 @@ export default class ConsolidateFunds extends Vue {
                 this.balances.push(this.utxoToAddressBalances(utxo, 'P'))
             }
         }
+
         this.tempMnemonicWallet = result?.wallet
         this.$refs.modal.open()
     }
@@ -141,7 +133,7 @@ export default class ConsolidateFunds extends Vue {
                         ? this.wallet.getCurrentAddressPlatform()
                         : this.wallet.getCurrentAddressAvm()
 
-                const chainBalances = this.balances?.filter((bal) => bal.chainID === chainId)
+                const chainBalances = this.balances.filter((bal) => bal.chainID === chainId)
                 let total = new Big(0)
                 for (const bal of chainBalances) {
                     total = total.plus(bal.amount)
@@ -219,6 +211,15 @@ export default class ConsolidateFunds extends Vue {
     }
 }
 </script>
+
 <style lang="scss" scoped>
-//
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.description {
+    margin-bottom: 14px !important;
+}
 </style>
