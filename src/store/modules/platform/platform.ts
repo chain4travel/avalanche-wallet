@@ -125,7 +125,7 @@ const platform_module: Module<PlatformState, RootState> = {
                 // Since magellan is not ready we get treasury rewards
                 // by requesting the node with all single threshold owners
                 const owners = addresses.map(
-                    (a) => ({ locktime: '0', threshold: 1, addresses: [a] } as OwnerParam)
+                    (a) => ({ locktime: '0', threshold: 1, addresses: [a] }) as OwnerParam
                 )
 
                 let validatorFound = false
@@ -296,11 +296,13 @@ const platform_module: Module<PlatformState, RootState> = {
                 state.validatorsPending.findIndex((v) => v.nodeID === nodeID) >= 0
             )
         },
-        getValidatorByRewardOwner: (state) => (addresses: string[]): ValidatorRaw | undefined => {
-            return state.validators.find(
-                (v) => v.rewardOwner.addresses.findIndex((a) => addresses.includes(a)) >= 0
-            )
-        },
+        getValidatorByRewardOwner:
+            (state) =>
+            (addresses: string[]): ValidatorRaw | undefined => {
+                return state.validators.find(
+                    (v) => v.rewardOwner.addresses.findIndex((a) => addresses.includes(a)) >= 0
+                )
+            },
         CreatedDepositOffer: (state, _, rootState) => (active: boolean) => {
             const lockedFlag = new BN(1)
             const expected = active ? ZeroBN : lockedFlag
