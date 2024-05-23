@@ -13,24 +13,12 @@
                 <div class="filter_cont">
                     <label>Export CSV File (BETA)</label>
                     <div class="csv_buttons">
-                        <v-btn
-                            x-small
-                            @click="openCsvModal"
-                            class="button_secondary"
-                            depressed
-                            :disabled="!showList"
-                        >
+                        <CamBtn class="primary" :disabled="!showList" @click="openCsvModal">
                             Export Rewards
-                        </v-btn>
-                        <v-btn
-                            x-small
-                            @click="openAvaxCsvModal"
-                            class="button_secondary"
-                            depressed
-                            :disabled="!showList"
-                        >
+                        </CamBtn>
+                        <CamBtn class="primary" :disabled="!showList" @click="openAvaxCsvModal">
                             Export Native asset Transfers
-                        </v-btn>
+                        </CamBtn>
                     </div>
                 </div>
                 <div class="filter_cont">
@@ -38,16 +26,16 @@
                     <RadioButtons :labels="modes" :keys="modeKey" v-model="mode"></RadioButtons>
                 </div>
             </div>
-            <div>
+            <div class="pagination-section">
                 <div class="pagination">
                     <p class="date_display">{{ monthNowName }} {{ yearNow }}</p>
-                    <div>
-                        <button @click="prevPage" :disabled="!isPrevPage">
+                    <div class="pagination-btn">
+                        <CamBtn variant="transparent" @click="prevPage" :disabled="!isPrevPage">
                             <fa icon="angle-left"></fa>
-                        </button>
-                        <button @click="nextPage" :disabled="!isNextPage">
+                        </CamBtn>
+                        <CamBtn variant="transparent" @click="nextPage" :disabled="!isNextPage">
                             <fa icon="angle-right"></fa>
-                        </button>
+                        </CamBtn>
                     </div>
                 </div>
                 <div class="pagination_info">
@@ -72,6 +60,7 @@
                         //@ts-ignore
                         indexData: getIndexData(this),
                     }"
+                    class="list"
                 ></virtual-list>
                 <div v-if="txs.length === 0" class="empty">
                     <p>{{ $t('activity.empty') }}</p>
@@ -103,6 +92,7 @@ import VirtualList from 'vue-virtual-scroll-list'
 import { AvaNetwork } from '@/js/AvaNetwork'
 import ExportCsvModal from '@/components/modals/ExportCsvModal.vue'
 import ExportAvaxCsvModal from '@/components/modals/ExportAvaxCsvModal.vue'
+import CamBtn from '@/components/CamBtn.vue'
 
 const PAGE_LIMIT = 100
 
@@ -118,6 +108,7 @@ const MONTH_MIN = 8
         TxRow,
         RadioButtons,
         VirtualList,
+        CamBtn,
     },
 })
 export default class Activity extends Vue {
@@ -415,10 +406,22 @@ export default class Activity extends Vue {
     align-items: flex-end;
     justify-content: space-between;
     margin-bottom: 12px;
+
+    .pagination-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .pagination-btn {
+            display: flex;
+            gap: 0.1rem;
+        }
+    }
 }
 
 .tx_table {
-    border-top: 2px solid var(--bg-wallet);
+    margin-top: 0.5rem;
+    border-top: 2px solid var(--border-color);
 }
 
 .tx_list {
@@ -454,13 +457,13 @@ export default class Activity extends Vue {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 18px 12px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-space-lg);
+    border-radius: var(--border-radius-xl);
+    margin-top: 1rem;
 }
 
-.loading {
-    background-color: var(--bg-light);
-    padding: 30px;
-}
 .spinner {
     font-size: 32px;
     margin-bottom: 22px;
@@ -500,7 +503,17 @@ export default class Activity extends Vue {
     @include mixins.typography-subtitle-1;
 }
 
+.filter_col {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
 .filter_cont {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
     label {
         @include mixins.typography-caption;
         color: var(--primary-color);
@@ -526,10 +539,10 @@ export default class Activity extends Vue {
 }
 
 .csv_buttons {
-    .v-btn {
-        margin-right: 1em;
-    }
+    display: flex;
+    gap: 1rem;
 }
+
 @include mixins.medium-device {
     .pagination {
         p {
@@ -540,14 +553,19 @@ export default class Activity extends Vue {
 
 @include mixins.mobile-device {
     .settings {
-        display: grid;
-        grid-template-columns: none;
-        grid-template-rows: auto auto;
+        display: flex;
+        flex-direction: column-reverse;
+        align-items: flex-start;
+        gap: 1.5rem;
     }
 
     .filter_col {
         grid-row: 2;
         justify-content: center;
+    }
+
+    .csv_buttons {
+        flex-direction: column;
     }
 
     .pagination {
