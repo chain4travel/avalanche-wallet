@@ -42,7 +42,7 @@
                                         :placeholder="`Deposit Owner`"
                                         v-model="depositOwner"
                                         class="reward-input"
-                                        :error="depositOwnerError && isEmptyAddress"
+                                        :error="depositOwnerError"
                                         :errorMessage="depositOwnerError"
                                         style="flex: 1"
                                     />
@@ -59,14 +59,14 @@
                                     </label>
                                     <AvaxInput
                                         v-if="pendingTxamount"
-                                        :max="maxLeftToDeposit"
+                                        :max="maxDepositAmount"
                                         v-model="amt"
                                         :initial="pendingTxamount * 1000000000"
                                         :readonly="pendingDepositTX"
                                     ></AvaxInput>
                                     <AvaxInput
                                         v-else
-                                        :max="maxLeftToDeposit"
+                                        :max="maxDepositAmount"
                                         v-model="amt"
                                     ></AvaxInput>
                                 </div>
@@ -112,20 +112,6 @@
                                     </div>
                                 </template>
                                 <template v-else>
-                                    <Alert
-                                        v-if="
-                                            amountLeftToDepositError &&
-                                            amountLeftToDepositError !== '0'
-                                        "
-                                        variant="negative"
-                                    >
-                                        {{
-                                            $t('earn.rewards.offer.deposit_amount_error', {
-                                                currentAmount,
-                                                amountLeftToDepositError,
-                                            })
-                                        }}
-                                    </Alert>
                                     <div class="button--container">
                                         <button
                                             class="camino__negative--button"
@@ -140,11 +126,7 @@
                                                 { 'camino--button--disabled': isDepositDisabled },
                                             ]"
                                             @click.prevent="submitDeposit"
-                                            :disabled="
-                                                isDepositDisabled ||
-                                                !!amountLeftToDepositError ||
-                                                amt.isZero()
-                                            "
+                                            :disabled="isDepositDisabled"
                                         >
                                             {{ $t('earn.rewards.offer.deposit') }}
                                         </button>
@@ -184,7 +166,7 @@
                                 <fa icon="plus"></fa>
                             </button>
                         </div>
-                        <Alert v-if="multipleSameAddresses" variant="negative">
+                        <Alert v-if="multupleSameAddresses" variant="negative">
                             {{ $t('earn.rewards.errors.same_address_twice') }}
                         </Alert>
                         <Alert v-if="isEmptyAddress" variant="negative">
@@ -194,9 +176,7 @@
                             class="button-submit"
                             variant="primary"
                             :onClick="addNewAddresses"
-                            :disabled="
-                                canAddWhitelisting || isEmptyAddress || multipleSameAddresses
-                            "
+                            :disabled="canAddWhitelisting || isEmptyAddress"
                         >
                             {{ $t('earn.rewards.claim_modal.confirm') }}
                         </CamBtn>
@@ -218,7 +198,8 @@ import Alert from '@/components/Alert.vue'
 import CamBtn from '@/components/CamBtn.vue'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
 import CamTooltip from '@/components/misc/CamTooltip.vue'
-import { bnToBig, cleanAvaxBN, formatDuration } from '@/helpers/helper'
+import { MINUTE_MS } from '@/constants'
+import { cleanAvaxBN, formatDuration } from '@/helpers/helper'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import AvaAsset from '@/js/AvaAsset'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
@@ -261,6 +242,7 @@ export default class ModalDepositFunds extends Vue {
     @Prop() error!: boolean
     @Prop() warning!: boolean
     @Prop() isDepositDisabled!: boolean
+    @Prop() maxDepositAmount!: BN
     @Prop() isWhiteListing?: boolean
     addresses: { address: string }[] = [{ address: '' }]
     // @ts-ignore
@@ -375,28 +357,8 @@ export default class ModalDepositFunds extends Vue {
         })
         return isSigned
     }
-    get interestRateBase(): number {
-        return 365 * 24 * 60 * 60
-    }
-    get currentAmount(): string {
-        return bnToBig(this.amt, 9).toString()
-    }
-    get maxLeftToDeposit(): BN {
-        if (this.offer.upgradeVersion === 0 || !this.offer.totalMaxAmount.isZero())
-            return this.offer.totalMaxAmount
-        let rest = this.offer.totalMaxRewardAmount.sub(this.offer.rewardedAmount)
-        let amountLeftToDeposit = new BN(
-            (rest.toNumber() / (this.rewardPercent / 100)) *
-                (this.interestRateBase / this.offer.maxDuration)
-        )
-        return amountLeftToDeposit
-    }
-    get amountLeftToDepositError(): string {
-        if (this.maxLeftToDeposit.gte(this.amt)) return ''
-        return bnToBig(this.maxLeftToDeposit, 9).toString()
-    }
     get maxEndDate() {
-        return new Date().getTime() + this.maxDuration
+        return this.offer.end.toNumber() * 1000
     }
 
     get minDuration() {
@@ -404,7 +366,7 @@ export default class ModalDepositFunds extends Vue {
     }
 
     get maxDuration() {
-        return this.offer.maxDuration * 1000
+        return this.offer.maxDuration * 1000 - 15 * MINUTE_MS
     }
     get rewardPercent() {
         const interestRateBase = 365 * 24 * 60 * 60
@@ -431,7 +393,7 @@ export default class ModalDepositFunds extends Vue {
     get feeAmt(): string {
         return this.formattedAmount(ava.PChain().getTxFee())
     }
-    get multipleSameAddresses(): boolean {
+    get multupleSameAddresses(): boolean {
         const filledAddresses = this.addresses.filter((a) => a.address !== '')
         const uniqueAddresses = new Set(filledAddresses.map((a) => a.address))
 

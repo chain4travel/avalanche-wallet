@@ -551,7 +551,6 @@
                 "no_reward_duration": "NoReward Duration",
                 "balance": "Available for Deposit",
                 "deposit": "Deposit Now",
-                "deposit_amount_error":  "deposit amount ({currentAmount}) is greater than deposit offer available amount ({amountLeftToDepositError}).",
                 "add_new_addresses": "Add new addresses",
                 "add_new_addresses_succeeded": "New Allowed Addresses Added Successfully"
             },

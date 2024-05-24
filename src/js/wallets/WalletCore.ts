@@ -180,7 +180,7 @@ abstract class WalletCore {
                 fromAddresses,
                 [changeAddress]
             )
-        const eTx = (exportTx.getTransaction() as unknown) as PlatformExportTx
+        const eTx = exportTx.getTransaction() as unknown as PlatformExportTx
         let tx = await this.signX(exportTx)
 
         return ava.XChain().issueTx(tx)
