@@ -1,20 +1,27 @@
 <template>
     <div class="radio_buts">
-        <button
+        <CamBtn
             v-for="(key, i) in keys"
             :key="key"
             @click="select(key)"
             :active="selection === key"
-            class="hover_border"
+            variant="transparent"
         >
             {{ labels[i] }}
-        </button>
+        </CamBtn>
     </div>
 </template>
+
 <script lang="ts">
 import { Vue, Component, Prop, Model } from 'vue-property-decorator'
+import CamBtn from '../CamBtn.vue'
 
-@Component
+@Component({
+    name: 'radio',
+    components: {
+        CamBtn,
+    },
+})
 export default class RadioButtons extends Vue {
     @Prop() labels!: string[]
     @Prop() keys!: string[]
@@ -26,40 +33,21 @@ export default class RadioButtons extends Vue {
     }
 }
 </script>
+
 <style scoped lang="scss">
 @use '../../styles/abstracts/mixins';
+
 .radio_buts {
     display: flex;
     flex-wrap: wrap;
+    gap: 0.5rem;
 }
+
 button {
-    word-break: normal;
-    white-space: nowrap;
-    @include mixins.typography-caption;
-    padding: 4px 14px;
-    border: 1px solid transparent;
-    color: var(--primary-color-light);
-    background-color: var(--bg-wallet);
-    border-radius: var(--border-radius-sm);
-    margin-right: 6px;
-    margin-bottom: 6px;
-    transition-duration: 0.2s;
-
-    //&:hover {
-    //    border-color: var(--bg-light);
-    //}
-
     &[active] {
-        color: var(--primary-color);
-        //border-color: #285599;
-        background-color: var(--bg-light);
-    }
-}
-
-@include mixins.medium-device {
-    button {
-        @include mixins.typography-caption;
-        padding: 4px 8px;
+        color: var(--white) !important;
+        background-color: #0085ff;
+        border: none;
     }
 }
 </style>

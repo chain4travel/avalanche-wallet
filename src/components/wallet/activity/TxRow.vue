@@ -32,6 +32,7 @@
         </div>
     </div>
 </template>
+
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { Chain, ITransactionDataProcessed } from '@/store/modules/history/types'
@@ -139,21 +140,20 @@ export default class TxRow extends Vue {
     @include mixins.typography-caption;
     //display: grid;
     //grid-template-columns: 1fr 1fr;
-    //margin-bottom: 22px;
-
+    margin-bottom: 0.5rem;
     &[day_change] {
         margin-top: 14px;
         padding-top: 14px;
-        border-top: 1px solid var(--bg-light);
     }
 }
 .tx_cols {
     display: grid;
     grid-template-columns: max-content 2fr 1fr;
-    column-gap: 14px;
-    background-color: var(--bg-light);
-    padding: 8px 14px;
-    border-radius: var(--border-radius-sm);
+    column-gap: 1rem;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-space-lg);
+    border-radius: var(--border-radius-xl);
 }
 
 .date {
