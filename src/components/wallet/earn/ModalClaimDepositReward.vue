@@ -73,7 +73,7 @@ import { OutputOwners } from '@c4tplatform/caminojs/dist/common'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import Big from 'big.js'
 import 'reflect-metadata'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import Modal from '../../modals/Modal.vue'
 import CamBtn from '@/components/CamBtn.vue'
 import { cleanAvaxBN } from '@/helpers/helper'
@@ -96,6 +96,11 @@ export default class ModalClaimDepositReward extends Vue {
     claimed: number = 0 // 0:false, 1:true, 2:pending
     confiremedClaimedAmount: BN = new BN(0)
     amt: BN = this.amount
+
+    @Watch('amount')
+    onAmountChange() {
+        this.amt = this.amount
+    }
 
     // @ts-ignore
     helpers = this.globalHelper()
@@ -210,6 +215,7 @@ export default class ModalClaimDepositReward extends Vue {
                         message: this.$t('notifications.something_went_wrong'),
                         type: 'error',
                     })
+                    this.confiremedClaimedAmount = new BN(0)
                     this.claimed = 0
                 })
         } else {
