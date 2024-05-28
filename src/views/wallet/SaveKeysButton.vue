@@ -72,9 +72,6 @@ export default class SaveKeysButton extends Vue {
         justify-content: flex-start;
         align-items: flex-start;
         /*flex-wrap: wrap;*/
-        button {
-            padding: 8px 0;
-        }
     }
 }
 </style>
