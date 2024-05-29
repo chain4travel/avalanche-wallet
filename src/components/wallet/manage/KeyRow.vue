@@ -46,7 +46,7 @@
                                 </button>
                             </Tooltip>
                         </div>
-                        <span class="addressVal">
+                        <span class="addressVal-value">
                             {{ walletTitle }}
                         </span>
                     </div>
@@ -470,6 +470,7 @@ export default class KeyRow extends Vue {
     display: flex;
     align-items: flex-start;
     flex-direction: column;
+    gap: 0.5rem;
 }
 
 .label {
@@ -513,13 +514,22 @@ export default class KeyRow extends Vue {
 }
 
 @include mixins.mobile-device {
+    .addressVal-value {
+        white-space: normal;
+        word-break: break-all;
+        text-align: left;
+    }
     .header_cols {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
     }
 
     .detail {
         text-align: right;
         overflow: auto;
+        gap: 0.5rem;
     }
 
     .bal_cols {
