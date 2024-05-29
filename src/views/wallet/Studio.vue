@@ -26,7 +26,12 @@
                             <p v-if="!canMint" class="err">
                                 {{ $t('studio.menu2.empty') }}
                             </p>
-                            <CamBtn @click="goMint" class="accent" :disabled="!canMint">
+                            <CamBtn
+                                @click="goMint"
+                                variant="accent"
+                                class="accent"
+                                :disabled="!canMint"
+                            >
                                 {{ $t('studio.menu2.submit') }}
                             </CamBtn>
                         </div>

@@ -43,9 +43,9 @@
                     </p>
                 </div>
                 <p v-if="error" class="err">{{ error }}</p>
-                <v-btn :loading="isLoading" type="submit" class="button_secondary" small>
+                <CamBtn :loading="isLoading" variant="accent" type="submit">
                     {{ $t('studio.family.submit') }}
-                </v-btn>
+                </CamBtn>
             </form>
             <div class="success_cont" v-if="isSuccess">
                 <p style="color: var(--success); margin: 12px 0 !important">
@@ -71,6 +71,9 @@
                 <v-btn class="button_secondary" small @click="cancel" depressed>
                     {{ $t('studio.family.back') }}
                 </v-btn>
+                <CamBtn @click="cancel" variant="accent">
+                    {{ $t('studio.family.back') }}
+                </CamBtn>
             </div>
         </div>
     </div>
@@ -80,8 +83,13 @@ import { Vue, Component, Watch } from 'vue-property-decorator'
 import { ava } from '@/AVA'
 import { bnToBig } from '@/helpers/helper'
 import Big from 'big.js'
+import CamBtn from '@/components/CamBtn.vue'
 
-@Component
+@Component({
+    components: {
+        CamBtn,
+    },
+})
 export default class NewCollectibleFamily extends Vue {
     name: string = ''
     symbol: string = ''
