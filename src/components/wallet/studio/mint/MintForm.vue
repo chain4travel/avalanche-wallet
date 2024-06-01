@@ -1,5 +1,33 @@
 <template>
     <div class="mint_form">
+        <div class="right_col">
+            <div class="preview">
+                <label>{{ $t('studio.mint.preview.label1') }}</label>
+                <div class="payload_view_cont" v-if="payloadPreview">
+                    <NftCard :payload="payloadPreview" :group-i-d="groupId"></NftCard>
+                </div>
+                <div class="nft_preview preview_holder" v-else>
+                    <p>{{ $t('studio.mint.preview.info1') }}</p>
+                </div>
+            </div>
+            <template v-if="isSuccess">
+                <div class="success_cont">
+                    <p style="color: var(--success)">
+                        <fa icon="check-circle"></fa>
+                        {{ $t('studio.mint.preview.success.text1') }}
+                        <br />
+                        {{ $t('studio.mint.preview.success.text2') }}
+                    </p>
+                    <div>
+                        <label>{{ $t('studio.mint.preview.success.label1') }}</label>
+                        <p style="word-break: break-all">{{ txId }}</p>
+                    </div>
+                    <v-btn @click="clearUtxo" class="button_secondary" small depressed>
+                        {{ $t('studio.mint.preview.success.back') }}
+                    </v-btn>
+                </div>
+            </template>
+        </div>
         <div class="cols">
             <div class="utxo_col">
                 <div class="utxo">
@@ -112,49 +140,19 @@
                             <span>{{ txFee.toLocaleString() }} {{ nativeAssetSymbol }}</span>
                         </p>
                     </div>
-                    <v-btn
-                        :disabled="!canSubmit"
-                        @click="submit"
-                        block
-                        :loading="isLoading"
-                        class="button_primary"
-                        style="margin: 14px 0"
-                        v-if="!isSuccess"
-                    >
-                        {{ $t('studio.mint.form_col.submit') }}
-                    </v-btn>
-                </template>
-            </div>
-
-            <div class="right_col">
-                <div class="preview">
-                    <label>{{ $t('studio.mint.preview.label1') }}</label>
-                    <div class="payload_view_cont" v-if="payloadPreview">
-                        <NftCard :payload="payloadPreview" :group-i-d="groupId"></NftCard>
-                    </div>
-                    <div class="nft_preview preview_holder" v-else>
-                        <p>{{ $t('studio.mint.preview.info1') }}</p>
-                    </div>
-                </div>
-                <template v-if="isSuccess">
-                    <div class="success_cont">
-                        <p style="color: var(--success)">
-                            <fa icon="check-circle"></fa>
-                            {{ $t('studio.mint.preview.success.text1') }}
-                            <br />
-                            {{ $t('studio.mint.preview.success.text2') }}
-                        </p>
-                        <div>
-                            <label>{{ $t('studio.mint.preview.success.label1') }}</label>
-                            <p style="word-break: break-all">{{ txId }}</p>
-                        </div>
-                        <v-btn @click="clearUtxo" class="button_secondary" small depressed>
-                            {{ $t('studio.mint.preview.success.back') }}
-                        </v-btn>
-                    </div>
                 </template>
             </div>
         </div>
+        <CamBtn
+            :disabled="!canSubmit"
+            @click="submit"
+            block
+            :loading="isLoading"
+            variant="primary"
+            v-if="!isSuccess"
+        >
+            {{ $t('studio.mint.form_col.submit') }}
+        </CamBtn>
     </div>
 </template>
 <script lang="ts">
@@ -181,6 +179,7 @@ import { NftFamilyDict } from '@/store/modules/assets/types'
 import { NFTMintOutput, NFTTransferOutput, UTXO } from '@c4tplatform/caminojs/dist/apis/avm'
 import { JSONPayload, PayloadBase, URLPayload, UTF8Payload } from '@c4tplatform/caminojs/dist/utils'
 import Big from 'big.js'
+import CamBtn from '@/components/CamBtn.vue'
 
 type NftType = 'utf8' | 'url' | 'json'
 
@@ -193,6 +192,7 @@ type NftType = 'utf8' | 'url' | 'json'
         NftPayloadView,
         Utf8Form,
         JsonForm,
+        CamBtn,
     },
 })
 export default class MintNft extends Vue {
@@ -432,7 +432,17 @@ export default class MintNft extends Vue {
 @use '../../../../styles/abstracts/mixins';
 
 .mint_form {
-    padding: 10px 0;
+    margin-top: 1rem;
+    padding: 24px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+
+    > button {
+        width: 31.5%;
+        align-self: end;
+        margin-right: 30px;
+    }
 }
 
 .nft-type__contaiener {
@@ -479,6 +489,9 @@ export default class MintNft extends Vue {
 .utxo {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
     position: relative;
     height: max-content;
 
@@ -497,14 +510,17 @@ export default class MintNft extends Vue {
 }
 
 $col_pad: 24px;
+
 .cols {
+    width: 100%;
     display: grid;
-    grid-template-columns: max-content 1fr 340px 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     column-gap: $col_pad;
     > div {
-        padding-left: $col_pad;
-        padding-right: $col_pad;
         border-right: 1px solid var(--bg-light);
+        &:last-child {
+            border: none !important;
+        }
     }
 }
 
@@ -585,12 +601,19 @@ $col_pad: 24px;
 }
 
 @include mixins.medium-device {
+    .mint_form {
+        padding: 24px;
+    }
     .cols {
         grid-template-columns: 1fr 1fr;
         row-gap: 24px;
         > div {
-            border: none;
-            padding: 0;
+            &:nth-child(2) {
+                border-right: none;
+            }
+            &:last-child {
+                grid-column-end: span 2;
+            }
         }
     }
 
@@ -598,6 +621,32 @@ $col_pad: 24px;
         display: grid;
         column-gap: 22px;
         grid-template-columns: max-content 1fr;
+    }
+}
+
+@include mixins.mobile-device {
+    .mint_form {
+        > button {
+            width: 100%;
+            margin: 0;
+        }
+    }
+    .cols {
+        grid-template-columns: 1fr;
+        row-gap: 24px;
+        > div {
+            padding: 24px;
+            border-right: none;
+            border-bottom: 1px solid var(--bg-light);
+
+            &:first-child {
+                border-top: 1px solid var(--bg-light);
+            }
+
+            &:last-child {
+                border: none !important;
+            }
+        }
     }
 }
 </style>
