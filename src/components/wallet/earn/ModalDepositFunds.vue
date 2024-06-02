@@ -66,7 +66,7 @@
                                     ></AvaxInput>
                                     <AvaxInput
                                         v-else
-                                        :max="maxDepositAmount"
+                                        :max="maxLeftToDeposit"
                                         v-model="amt"
                                     ></AvaxInput>
                                 </div>
@@ -198,7 +198,6 @@ import Alert from '@/components/Alert.vue'
 import CamBtn from '@/components/CamBtn.vue'
 import AvaxInput from '@/components/misc/AvaxInput.vue'
 import CamTooltip from '@/components/misc/CamTooltip.vue'
-import { MINUTE_MS } from '@/constants'
 import { bnToBig, cleanAvaxBN, formatDuration } from '@/helpers/helper'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import AvaAsset from '@/js/AvaAsset'
@@ -377,7 +376,7 @@ export default class ModalDepositFunds extends Vue {
         return bnToBig(this.maxLeftToDeposit, 9).toString()
     }
     get maxEndDate() {
-        return this.offer.end.toNumber() * 1000
+        return this.offer.maxDuration * 1000 + new Date().getTime()
     }
 
     get minDuration() {
@@ -385,7 +384,7 @@ export default class ModalDepositFunds extends Vue {
     }
 
     get maxDuration() {
-        return this.offer.maxDuration * 1000 - 15 * MINUTE_MS
+        return this.offer.maxDuration * 1000
     }
     get rewardPercent() {
         const interestRateBase = 365 * 24 * 60 * 60
