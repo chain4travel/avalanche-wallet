@@ -132,7 +132,7 @@
                     </div>
                     <div>
                         <label>{{ $t('studio.mint.form_col.label1') }}</label>
-                        <input type="number" min="1" v-model="quantity" style="width: 100%" />
+                        <CamInput type="number" min="1" v-model="quantity" style="width: 100%" />
                     </div>
                     <div class="fee">
                         <p>
@@ -180,6 +180,7 @@ import { NFTMintOutput, NFTTransferOutput, UTXO } from '@c4tplatform/caminojs/di
 import { JSONPayload, PayloadBase, URLPayload, UTF8Payload } from '@c4tplatform/caminojs/dist/utils'
 import Big from 'big.js'
 import CamBtn from '@/components/CamBtn.vue'
+import CamInput from '@/components/CamInput.vue'
 
 type NftType = 'utf8' | 'url' | 'json'
 
@@ -193,6 +194,7 @@ type NftType = 'utf8' | 'url' | 'json'
         Utf8Form,
         JsonForm,
         CamBtn,
+        CamInput,
     },
 })
 export default class MintNft extends Vue {
@@ -439,7 +441,7 @@ export default class MintNft extends Vue {
     gap: 3rem;
 
     > button {
-        width: 31.5%;
+        min-width: 150px;
         align-self: end;
         margin-right: 30px;
     }
@@ -516,6 +518,10 @@ $col_pad: 24px;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     column-gap: $col_pad;
+
+    .type_col {
+        padding-right: 10px;
+    }
     > div {
         border-right: 1px solid var(--bg-light);
         &:last-child {
