@@ -10,23 +10,6 @@
                     <p>{{ $t('studio.mint.preview.info1') }}</p>
                 </div>
             </div>
-            <template v-if="isSuccess">
-                <div class="success_cont">
-                    <p style="color: var(--success)">
-                        <fa icon="check-circle"></fa>
-                        {{ $t('studio.mint.preview.success.text1') }}
-                        <br />
-                        {{ $t('studio.mint.preview.success.text2') }}
-                    </p>
-                    <div>
-                        <label>{{ $t('studio.mint.preview.success.label1') }}</label>
-                        <p style="word-break: break-all">{{ txId }}</p>
-                    </div>
-                    <v-btn @click="clearUtxo" class="button_secondary" small depressed>
-                        {{ $t('studio.mint.preview.success.back') }}
-                    </v-btn>
-                </div>
-            </template>
         </div>
         <div class="cols">
             <div class="utxo_col">
@@ -153,6 +136,21 @@
         >
             {{ $t('studio.mint.form_col.submit') }}
         </CamBtn>
+
+        <template v-if="isSuccess">
+            <div class="success_cont">
+                <Alert variant="positive">
+                    {{ $t('studio.mint.preview.success.text2') }}
+                </Alert>
+                <div class="txID">
+                    <label>{{ $t('studio.mint.preview.success.label1') }} :</label>
+                    <p style="word-break: break-all">{{ txId }}</p>
+                </div>
+                <CamBtn @click="clearUtxo" variant="accent" small depressed>
+                    {{ $t('studio.mint.preview.success.back') }}
+                </CamBtn>
+            </div>
+        </template>
     </div>
 </template>
 <script lang="ts">
@@ -181,6 +179,7 @@ import { JSONPayload, PayloadBase, URLPayload, UTF8Payload } from '@c4tplatform/
 import Big from 'big.js'
 import CamBtn from '@/components/CamBtn.vue'
 import CamInput from '@/components/CamInput.vue'
+import Alert from '@/components/Alert.vue'
 
 type NftType = 'utf8' | 'url' | 'json'
 
@@ -195,6 +194,7 @@ type NftType = 'utf8' | 'url' | 'json'
         JsonForm,
         CamBtn,
         CamInput,
+        Alert,
     },
 })
 export default class MintNft extends Vue {
@@ -578,10 +578,28 @@ $col_pad: 24px;
     max-width: 100%;
     margin: 24px 0;
     text-align: center;
-    > div {
-        //background-color: var(--bg-light);
-        padding: 3px 12px;
-        margin: 12px 0;
+    width: fit-content;
+    margin-right: 40px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    align-self: flex-end;
+    gap: 0.5rem;
+
+    .txID {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        p {
+            color: var(--primary-color-light);
+            @include mixins.typography-caption;
+        }
+    }
+
+    > button {
+        margin-top: 1rem;
     }
 }
 
@@ -635,6 +653,13 @@ $col_pad: 24px;
         > button {
             width: 100%;
             margin: 0;
+        }
+    }
+    .success_cont {
+        .txID {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
         }
     }
     .cols {

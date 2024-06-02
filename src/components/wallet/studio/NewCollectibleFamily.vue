@@ -68,9 +68,6 @@
                     <label>{{ $t('studio.family.success.label4') }}</label>
                     <p>{{ groupNum }}</p>
                 </div>
-                <v-btn class="button_secondary" small @click="cancel" depressed>
-                    {{ $t('studio.family.back') }}
-                </v-btn>
                 <CamBtn @click="cancel" variant="accent">
                     {{ $t('studio.family.back') }}
                 </CamBtn>
