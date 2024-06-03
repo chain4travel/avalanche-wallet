@@ -1,77 +1,69 @@
 <template>
     <div class="new_family">
-        <div>
-            <p>{{ $t('studio.family.desc') }}</p>
-            <form @submit.prevent="submit" v-if="!isSuccess">
-                <div style="display: flex">
-                    <div style="flex-grow: 1">
-                        <label>{{ $t('studio.family.label1') }}</label>
-                        <input
-                            type="text"
-                            placeholder="Name"
-                            v-model="name"
-                            style="width: 100%"
-                            maxlength="128"
-                        />
-                    </div>
-                    <div class="symbol">
-                        <label>{{ $t('studio.family.label2') }}</label>
-                        <input
-                            type="text"
-                            placeholder="xxxx"
-                            v-model="symbol"
-                            max="4"
-                            maxlength="4"
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <label>{{ $t('studio.family.label3') }}</label>
+        <p>{{ $t('studio.family.desc') }}</p>
+        <form @submit.prevent="submit" v-if="!isSuccess">
+            <div style="display: flex">
+                <div style="flex-grow: 1">
+                    <label>{{ $t('studio.family.label1') }}</label>
                     <input
-                        type="number"
-                        placeholder="Name of the Collection"
-                        min="1"
-                        max="1024"
-                        v-model="groupNum"
+                        type="text"
+                        placeholder="Name"
+                        v-model="name"
+                        style="width: 100%"
+                        maxlength="128"
                     />
                 </div>
-                <div>
-                    <p>
-                        {{ $t('studio.family.fee') }}: {{ txFee.toLocaleString() }}
-                        {{ nativeAssetSymbol }}
-                    </p>
+                <div class="symbol">
+                    <label>{{ $t('studio.family.label2') }}</label>
+                    <input type="text" placeholder="xxxx" v-model="symbol" max="4" maxlength="4" />
                 </div>
-                <p v-if="error" class="err">{{ error }}</p>
-                <CamBtn :loading="isLoading" variant="accent" type="submit">
-                    {{ $t('studio.family.submit') }}
-                </CamBtn>
-            </form>
-            <div class="success_cont" v-if="isSuccess">
-                <p style="color: var(--success); margin: 12px 0 !important">
-                    <fa icon="check-circle"></fa>
-                    {{ $t('studio.family.success.desc') }}
-                </p>
-                <div>
-                    <label>{{ $t('studio.family.success.label1') }}</label>
-                    <p style="word-break: break-all">{{ txId }}</p>
-                </div>
-                <div>
-                    <label>{{ $t('studio.family.success.label2') }}</label>
-                    <p>{{ name }}</p>
-                </div>
-                <div>
-                    <label>{{ $t('studio.family.success.label3') }}</label>
-                    <p>{{ symbol }}</p>
-                </div>
-                <div>
-                    <label>{{ $t('studio.family.success.label4') }}</label>
-                    <p>{{ groupNum }}</p>
-                </div>
-                <CamBtn @click="cancel" variant="accent">
-                    {{ $t('studio.family.back') }}
-                </CamBtn>
             </div>
+
+            <div>
+                <label>{{ $t('studio.family.label3') }}</label>
+                <input
+                    type="number"
+                    placeholder="Name of the Collection"
+                    min="1"
+                    max="1024"
+                    v-model="groupNum"
+                />
+            </div>
+            <div>
+                <p>
+                    {{ $t('studio.family.fee') }}: {{ txFee.toLocaleString() }}
+                    {{ nativeAssetSymbol }}
+                </p>
+            </div>
+            <p v-if="error" class="err">{{ error }}</p>
+            <CamBtn :loading="isLoading" variant="accent" type="submit">
+                {{ $t('studio.family.submit') }}
+            </CamBtn>
+        </form>
+        <div class="success_cont" v-if="isSuccess">
+            <Alert variant="positive">
+                {{ $t('studio.family.success.desc') }}
+            </Alert>
+            <div class="family-info">
+                <label>{{ $t('studio.family.success.label1') }}</label>
+                <p style="word-break: break-all">{{ txId }}</p>
+            </div>
+            <div class="family-info">
+                <label>{{ $t('studio.family.success.label2') }}</label>
+                <p>{{ name }}</p>
+            </div>
+            <div class="family-info">
+                <label>{{ $t('studio.family.success.label3') }}</label>
+                <p>{{ symbol }}</p>
+            </div>
+            <div class="family-info">
+                <label>{{ $t('studio.family.success.label4') }}</label>
+                <p>{{ groupNum }}</p>
+            </div>
+
+            <CamBtn @click="cancel" variant="accent">
+                {{ $t('studio.family.back') }}
+            </CamBtn>
         </div>
     </div>
 </template>
@@ -81,10 +73,12 @@ import { ava } from '@/AVA'
 import { bnToBig } from '@/helpers/helper'
 import Big from 'big.js'
 import CamBtn from '@/components/CamBtn.vue'
+import Alert from '@/components/Alert.vue'
 
 @Component({
     components: {
         CamBtn,
+        Alert,
     },
 })
 export default class NewCollectibleFamily extends Vue {
@@ -183,8 +177,9 @@ export default class NewCollectibleFamily extends Vue {
 .new_family {
     max-width: 100%;
     width: 340px;
-    //display: grid;
-    //grid-template-columns: 1fr 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 form > div {
     margin: 12px 0;
@@ -229,10 +224,21 @@ input {
 }
 
 .success_cont {
-    > div {
-        padding: 3px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .family-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
         margin-bottom: 5px;
+        @include mixins.typography-caption;
         background-color: var(--bg-light);
+        resize: none;
+        width: 100%;
+        border-radius: var(--border-radius-sm);
+        padding: 4px 12px;
     }
 
     .v-btn {
