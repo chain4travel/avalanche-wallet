@@ -1,13 +1,14 @@
 <template>
     <div class="cam-input">
-        <input
+        <component
+            :is="textArea ? 'textarea' : 'input'"
             class="full-width-input"
             :placeholder="placeholder"
             :value="value"
             @input="updateValue"
             :class="{ error: error }"
             :disabled="disabled"
-            :type="type"
+            :type="textArea ? null : type"
         />
         <div class="validation-message" v-if="error && errorMessage">
             <svg
@@ -22,9 +23,7 @@
                     fill="#E5431F"
                 />
             </svg>
-            <p class="err">
-                {{ errorMessage }}
-            </p>
+            <p class="err">{{ errorMessage }}</p>
         </div>
     </div>
 </template>
@@ -34,17 +33,21 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
 export default class CamInput extends Vue {
+    @Prop({ default: {} }) Inlinestyle!: any
+    @Prop({ default: false }) textArea!: boolean
     @Prop({ default: '' }) placeholder!: string
     @Prop({ default: false }) error!: boolean
     @Prop({ default: '' }) errorMessage!: string
     @Prop({ default: '' }) value!: string
     @Prop({ default: false }) disabled!: boolean
     @Prop({ default: 'text' }) type!: string
+
     updateValue(event: Event) {
         this.$emit('input', (event.target as HTMLInputElement).value)
     }
 }
 </script>
+
 <style scoped lang="scss">
 .v-application .error {
     background-color: transparent !important;
@@ -53,13 +56,15 @@ export default class CamInput extends Vue {
         border: 1px solid var(--camino-slate-slate-600) !important;
     }
 }
+
 .cam-input {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-input {
+input,
+textarea {
     padding: 10px 12px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
@@ -68,8 +73,13 @@ input {
     }
 }
 
+textarea {
+    width: 100%;
+    height: 80px;
+    max-width: 100%;
+}
+
 .full-width-input {
-    /* flex: 1; */
     background-color: var(--bg);
     &:focus {
         border-color: var(--camino-brand-too-blue-to-be-true);
@@ -94,7 +104,7 @@ input {
         font-size: 14px;
         font-style: normal;
         font-weight: 400;
-        line-height: 20px; /* 142.857% */
+        line-height: 20px;
     }
 }
 </style>
