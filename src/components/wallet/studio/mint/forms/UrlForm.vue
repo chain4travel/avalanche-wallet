@@ -1,14 +1,19 @@
 <template>
     <div>
         <label>URL</label>
-        <input placeholder="https://" v-model="urlIn" @input="onInput" />
+        <CamInput placeholder="https://" v-model="urlIn" @input="onInput" />
     </div>
 </template>
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { UrlFormType } from '@/components/wallet/studio/mint/types'
+import CamInput from '@/components/CamInput.vue'
 
-@Component
+@Component({
+    components: {
+        CamInput,
+    },
+})
 export default class UrlForm extends Vue {
     urlIn = ''
 

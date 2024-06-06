@@ -5,6 +5,7 @@
                 <p class="index">{{ i }}.</p>
                 <input
                     :id="'i' + i"
+                    autocomplete="off"
                     autocapitalize="off"
                     spellcheck="false"
                     :type="isHidden && password ? 'password' : 'text'"

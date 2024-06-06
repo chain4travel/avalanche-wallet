@@ -2,7 +2,14 @@
     <div>
         <label>{{ $t('studio.mint.forms.json.label1') }}</label>
         <div class="input_cont">
-            <textarea maxlength="1024" type="text" v-model="data" @input="onInput" />
+            <CamInput
+                maxlength="1024"
+                type="text"
+                v-model="data"
+                @input="onInput"
+                :textArea="true"
+                class="json-form"
+            />
             <p class="counter">{{ data.length }} / 1024</p>
         </div>
     </div>
@@ -10,10 +17,15 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { JsonFormType } from '@/components/wallet/studio/mint/types'
+import CamInput from '@/components/CamInput.vue'
 
 // const JSONEditor = require('jsoneditor')
 
-@Component
+@Component({
+    components: {
+        CamInput,
+    },
+})
 export default class JsonForm extends Vue {
     data = '{\n\n}'
 
@@ -53,6 +65,14 @@ export default class JsonForm extends Vue {
     }
 }
 </script>
+
+<style lang="scss">
+.json-form {
+    > textarea {
+        height: 180px;
+    }
+}
+</style>
 <style scoped lang="scss">
 @use '../../../../../styles/abstracts/mixins';
 textarea,

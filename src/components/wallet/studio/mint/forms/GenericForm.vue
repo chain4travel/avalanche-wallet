@@ -2,15 +2,21 @@
     <div>
         <div class="input_cont">
             <label>{{ $t('studio.mint.forms.generic.label1') }}</label>
-            <input class="text" max="128" v-model="title" @input="onInput" />
+            <CamInput class="text" max="128" v-model="title" @input="onInput" />
         </div>
         <div class="input_cont">
             <label>{{ $t('studio.mint.forms.generic.label2') }}</label>
-            <input class="text" placeholder="https://" v-model="imgUrl" @input="onInput" />
+            <CamInput class="text" placeholder="https://" v-model="imgUrl" @input="onInput" />
         </div>
         <div class="input_cont">
             <label>{{ $t('studio.mint.forms.generic.label3') }}</label>
-            <textarea class="text" maxlength="256" v-model="description" @input="onInput" />
+            <CamInput
+                class="text"
+                maxlength="256"
+                v-model="description"
+                @input="onInput"
+                :textArea="true"
+            />
         </div>
         <!--        <div class="input_cont">-->
         <!--            <label>Corner Radius</label>-->
@@ -22,8 +28,13 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { GenericFormType, IGenericNft } from '@/components/wallet/studio/mint/types'
+import CamInput from '@/components/CamInput.vue'
 
-@Component
+@Component({
+    components: {
+        CamInput,
+    },
+})
 export default class GenericForm extends Vue {
     title = ''
     description = ''
@@ -90,11 +101,6 @@ export default class GenericForm extends Vue {
 </script>
 <style scoped lang="scss">
 @use '../../../../../styles/abstracts/mixins';
-textarea {
-    width: 100%;
-    height: 80px;
-    max-width: 100%;
-}
 
 .input_cont {
     margin-top: 2px;
