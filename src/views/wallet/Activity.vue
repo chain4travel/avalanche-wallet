@@ -13,10 +13,10 @@
                 <div class="filter_cont">
                     <label>Export CSV File (BETA)</label>
                     <div class="csv_buttons">
-                        <CamBtn class="primary" :disabled="!showList" @click="openCsvModal">
+                        <CamBtn variant="primary" :disabled="!showList" @click="openCsvModal">
                             Export Rewards
                         </CamBtn>
-                        <CamBtn class="primary" :disabled="!showList" @click="openAvaxCsvModal">
+                        <CamBtn variant="primary" :disabled="!showList" @click="openAvaxCsvModal">
                             Export Native asset Transfers
                         </CamBtn>
                     </div>

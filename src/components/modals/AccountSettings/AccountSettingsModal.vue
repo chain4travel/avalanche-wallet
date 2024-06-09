@@ -15,17 +15,17 @@
             </div>
 
             <div class="options" v-if="!subComponent">
-                <button
+                <CamBtn
                     v-if="hasVolatile"
                     @click="saveKeys"
-                    class="ava_button"
-                    style="color: var(--warning)"
+                    variant="transparent"
+                    style="color: var(--warning) !important"
                 >
                     <fa icon="exclamation-triangle"></fa>
                     Save Keys
-                </button>
-                <button @click="changePassword" class="ava_button">Change Password</button>
-                <button @click="deleteAccount" class="ava_button">Delete Account</button>
+                </CamBtn>
+                <CamBtn @click="changePassword" variant="transparent">Change Password</CamBtn>
+                <CamBtn @click="deleteAccount" variant="negative">Delete Account</CamBtn>
             </div>
             <template v-else>
                 <component
@@ -33,7 +33,9 @@
                     :is="subComponent"
                     v-bind="[{ accountName: account.name }]"
                 ></component>
-                <button @click="clear">{{ $t('access.cancel') }}</button>
+                <CamBtn @click="clear" variant="transparent" class="cancel">
+                    {{ $t('access.cancel') }}
+                </CamBtn>
             </template>
         </div>
     </modal>
@@ -47,11 +49,13 @@ import { iUserAccountEncrypted } from '@/store/types'
 import ChangePassword from '@/components/modals/AccountSettings/ChangePassword.vue'
 import DeleteAccount from '@/components/modals/AccountSettings/DeleteAccount.vue'
 import SaveKeys from '@/components/modals/AccountSettings/SaveKeys.vue'
+import CamBtn from '@/components/CamBtn.vue'
 @Component({
     components: {
         ChangePassword,
         Identicon,
         Modal,
+        CamBtn,
     },
 })
 export default class AccountSettingsModal extends Vue {
@@ -115,13 +119,23 @@ export default class AccountSettingsModal extends Vue {
 }
 
 .options {
+    width: 100%;
     display: flex;
     flex-direction: column;
+    gap: 0.5rem;
 
-    button {
-        padding: 20px 30px;
+    > button {
         width: 100%;
-        border-top: 1px solid var(--bg-light);
+        padding: 1.5rem;
     }
+
+    .camino__transparent--button {
+        border: none;
+    }
+}
+
+.cancel {
+    margin-top: 0.2rem;
+    width: 100%;
 }
 </style>
