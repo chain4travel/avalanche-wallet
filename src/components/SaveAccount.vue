@@ -6,11 +6,10 @@
             <p>{{ $t('keys.save_account.info') }}</p>
         </div>
 
-        <form @submit.prevent="submit">
+        <form>
             <div class="container__input">
                 <label>{{ $t('keys.save_account.placeholder_1') }}</label>
-                <input
-                    class="camino--input"
+                <CamInput
                     v-model="accountName"
                     :name="$t('keys.save_account.placeholder_1').toString()"
                     placeholder="Account Name"
@@ -19,8 +18,7 @@
             </div>
             <div class="container__input">
                 <label>{{ $t('keys.save_account.placeholder_2') }}</label>
-                <input
-                    class="camino--input"
+                <CamInput
                     type="password"
                     :placeholder="$t('keys.save_account.placeholder_2').toString()"
                     v-model="password"
@@ -28,8 +26,7 @@
             </div>
             <div class="container__input">
                 <label>{{ $t('keys.save_account.placeholder_3') }}</label>
-                <input
-                    class="camino--input"
+                <CamInput
                     type="password"
                     :placeholder="$t('keys.save_account.placeholder_3').toString()"
                     v-model="password_confirm"
@@ -63,14 +60,9 @@
                 :title="error"
                 :key="index"
             ></Alert>
-            <button
-                :class="['camino__primary--button', { 'camino--button--disabled': !canSubmit }]"
-                :disabled="!canSubmit"
-                type="submit"
-                :loading="isLoading"
-            >
+            <CamBtn :disabled="!canSubmit" :onClick="submit" :loading="isLoading">
                 {{ $t('keys.save_account.submit') }}
-            </button>
+            </CamBtn>
         </form>
     </div>
 </template>
@@ -81,11 +73,15 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import Identicon from '@/components/misc/Identicon.vue'
 import { SaveAccountInput, iUserAccountEncrypted } from '@/store/types'
 import Alert from './Alert.vue'
+import CamInput from './CamInput.vue'
+import CamBtn from './CamBtn.vue'
 
 @Component({
     components: {
         Identicon,
         Alert,
+        CamInput,
+        CamBtn,
     },
 })
 export default class SaveAccount extends Vue {
