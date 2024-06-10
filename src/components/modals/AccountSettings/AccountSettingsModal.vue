@@ -4,7 +4,6 @@
             <div class="header">
                 <Identicon :value="accountName"></Identicon>
                 <p style="text-align: center">{{ accountName }}</p>
-
                 <p class="err small" style="text-align: center">
                     Clearing your browser cache will remove this account. Make sure you have your
                     <b>mnemonic phrase</b>
@@ -32,8 +31,9 @@
                     v-if="subComponent"
                     :is="subComponent"
                     v-bind="[{ accountName: account.name }]"
+                    @clear="clear"
                 ></component>
-                <CamBtn @click="clear" variant="transparent" class="cancel">
+                <CamBtn :onClick="clear" variant="transparent" class="cancel" v-if="isSaveKeys">
                     {{ $t('access.cancel') }}
                 </CamBtn>
             </template>
@@ -62,6 +62,7 @@ export default class AccountSettingsModal extends Vue {
     $refs!: {
         modal: Modal
     }
+    isSaveKeys: boolean = false
 
     subComponent: any = null
 
@@ -81,18 +82,22 @@ export default class AccountSettingsModal extends Vue {
 
     clear() {
         this.subComponent = null
+        this.isSaveKeys = false
     }
 
     changePassword() {
         this.subComponent = ChangePassword
+        this.isSaveKeys = false
     }
 
     deleteAccount() {
         this.subComponent = DeleteAccount
+        this.isSaveKeys = false
     }
 
     saveKeys() {
         this.subComponent = SaveKeys
+        this.isSaveKeys = true
     }
 
     get hasVolatile() {
