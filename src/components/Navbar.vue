@@ -54,7 +54,7 @@
                         <DayNightToggle class="action_but"></DayNightToggle>
                     </div>
                     <template v-if="isAuth">
-                        <router-link to="/wallet/home">
+                        <router-link to="/wallet">
                             {{ $t('wallet.sidebar.portfolio') }}
                         </router-link>
                         <router-link to="/wallet/transfer">
