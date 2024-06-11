@@ -1,29 +1,27 @@
 <template>
-    <form @submit.prevent="submit">
-        <input class="camino--input" type="password" v-model="pass" placeholder="Password" />
-        <p class="err">{{ error }}</p>
+    <form>
+        <CamInput type="password" v-model="pass" placeholder="Password" />
+        <Alert variant="negative" class="err" v-if="error">{{ error }}</Alert>
         <div class="buttons_container">
-            <button
-                :class="['camino__transparent--button', { 'camino--button--disabled': !canSubmit }]"
-                :disabled="!canSubmit"
-                depressed
-                block
-                small
-                type="submit"
-            >
-                Delete
-            </button>
-            <button class="camino__negative--button" small block depressed @click="cancel">
-                Cancel
-            </button>
+            <CamBtn variant="primary" :disabled="!canSubmit" :onClick="submit">Delete</CamBtn>
+            <CamBtn :onClick="cancel" variant="negative">Cancel</CamBtn>
         </div>
     </form>
 </template>
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import AccountSettingsModal from '@/components/modals/AccountSettings/AccountSettingsModal.vue'
+import CamBtn from '@/components/CamBtn.vue'
+import Alert from '@/components/Alert.vue'
+import CamInput from '@/components/CamInput.vue'
 
-@Component
+@Component({
+    components: {
+        CamBtn,
+        Alert,
+        CamInput,
+    },
+})
 export default class DeleteAccount extends Vue {
     @Prop() setAccount: any
     pass = ''
@@ -61,10 +59,21 @@ export default class DeleteAccount extends Vue {
     display: flex;
     gap: 8px;
     margin-top: 16px;
+
+    > button {
+        width: 100%;
+    }
 }
 
-input {
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
     width: 100%;
-    max-width: 300px;
+
+    > input,
+    .buttons_container {
+        width: 100%;
+    }
 }
 </style>
