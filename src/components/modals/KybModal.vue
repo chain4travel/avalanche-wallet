@@ -24,32 +24,30 @@
                     <div class="text">
                         {{ $t('kyc_process.info_explanation_kyb_p2') }}
                     </div>
-                    <form @submit.prevent="submitUserData">
+                    <div class="form__conatainer">
                         <div>
                             <label>{{ $t('kyc_process.your_email_address') }}</label>
-                            <input
-                                type="text"
+                            <cam-input
                                 :placeholder="$t('kyc_process.email_address')"
                                 v-model="userData.email"
-                            />
+                            ></cam-input>
                         </div>
                         <div>
                             <label>{{ $t('kyc_process.your_phone_number') }}</label>
-                            <input
-                                type="tel"
+                            <cam-input
                                 :placeholder="$t('kyc_process.phone_number')"
                                 v-model="userData.phone"
-                            />
+                            ></cam-input>
                         </div>
-                        <v-btn
-                            type="submit"
+                        <cam-btn
+                            variant="primary"
                             :disabled="submitUserDataDisabled"
                             :loading="isLoading"
-                            class="button_submit_form submit"
+                            @click="submitUserData"
                         >
                             {{ $t('kyc_process.submit') }}
-                        </v-btn>
-                    </form>
+                        </cam-btn>
+                    </div>
                 </div>
                 <p>
                     {{ $t('kyc_process.provider') }}
@@ -81,6 +79,8 @@ import { generateToken } from '@/kyc_api'
 import snsWebSdk from '@sumsub/websdk'
 import 'reflect-metadata'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import CamBtn from '../CamBtn.vue'
+import CamInput from '../CamInput.vue'
 import Disclaimer from './DisclaimerModal.vue'
 interface UserData {
     email: string
@@ -91,6 +91,8 @@ interface UserData {
     components: {
         Modal,
         Disclaimer,
+        CamBtn,
+        CamInput,
     },
 })
 export default class KybModal extends Vue {
@@ -288,8 +290,8 @@ h1 {
         text-align: center;
         color: var(--primary-contrast-text);
         border-radius: var(--border-radius-sm);
-        box-shadow: var(--box-shadow);
-        background-color: var(--bg-light);
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius-lg);
     }
 }
 .KYCform {
@@ -303,14 +305,15 @@ h1 {
         color: var(--primary-contrast-text);
         border-radius: var(--border-radius-sm);
         box-shadow: var(--box-shadow);
-        background-color: var(--bg-light);
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius-lg);
     }
     a {
         color: var(--secondary-color);
         cursor: pointer;
         text-decoration: underline;
     }
-    form {
+    .form__conatainer {
         flex: 0 0 50%;
         display: grid;
         gap: 10px;
