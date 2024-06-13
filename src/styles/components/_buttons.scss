@@ -1,4 +1,4 @@
-@use "../abstracts/mixins";
+@use '../abstracts/mixins';
 .v-btn {
     padding: 15px !important;
 }
@@ -170,4 +170,10 @@
 .camino__accent--button:disabled {
     cursor: not-allowed;
     opacity: 0.5;
+}
+
+[data-theme='light'] {
+    .camino__transparent--button {
+        color: var(--camino-slate-slate-800) !important;
+    }
 }

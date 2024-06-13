@@ -1,27 +1,25 @@
 version: '3.5'
 
 services:
-
   wallet:
     build:
       context: .
-      args: 
+      args:
         BUILD_ENV: ${BUILD_ENV}
     image: ${WALLET_IMAGE}
-    entrypoint: ["yarn", "start"]
+    entrypoint: ['yarn', 'start']
     ports:
       - 5003:5003
     container_name: camino-suite-wallet-container
   explorer:
     image: ${EXPLORER_IMAGE}
-    entrypoint: ["yarn", "start"]
+    entrypoint: ['yarn', 'start']
     ports:
       - 5002:5002
     container_name: camino-suite-explorer-container
   suite:
     image: ${SUITE_IMAGE}
-    entrypoint: ["yarn", "start"]
+    entrypoint: ['yarn', 'start']
     ports:
       - 5001:5001
     container_name: camino-suite-host-container
-

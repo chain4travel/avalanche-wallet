@@ -2,18 +2,15 @@
     <modal ref="modal" title="Export Transfers" class="modal_main">
         <div class="csv_modal_body">
             <p>Only X chain {{ nativeAssetSymbol }} transactions will be exported.</p>
-            <p class="err" v-if="error">{{ error }}</p>
-            <v-btn
-                class="button_secondary"
-                small
+            <Alert variant="negative" class="err" v-if="error">{{ error }}</Alert>
+            <CamBtn
+                variant="primary"
                 @click="submit"
                 :disabled="!canSubmit"
-                depressed
-                block
-                style="margin-top: 12px"
+                style="margin-top: 12px; width: 100%"
             >
                 Download CSV File
-            </v-btn>
+            </CamBtn>
         </div>
     </modal>
 </template>
@@ -37,10 +34,14 @@ import {
 } from '@/store/modules/history/history_utils'
 import { ava } from '@/AVA'
 import { BN } from '@c4tplatform/caminojs/dist'
+import CamBtn from '../CamBtn.vue'
+import Alert from '../Alert.vue'
 
 @Component({
     components: {
         Modal,
+        CamBtn,
+        Alert,
     },
 })
 export default class ExportAvaxCsvModal extends Vue {
@@ -174,5 +175,11 @@ export default class ExportAvaxCsvModal extends Vue {
     width: 420px;
     max-width: 100%;
     padding: 10px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.err {
+    width: 100%;
 }
 </style>

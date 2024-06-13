@@ -2,7 +2,7 @@
     <div v-if="!isLedger && wallet" class="userItem">
         <div v-if="account" class="account_but">
             <Identicon :value="account.baseAddresses.join('')" diameter="18"></Identicon>
-            <p>{{ account.name }}</p>
+            <p class="account-name">{{ account.name }}</p>
         </div>
     </div>
 </template>
@@ -55,13 +55,13 @@ export default class AccountCard extends Vue {
     align-items: center;
     text-transform: capitalize;
     width: 100%;
-    p {
-        text-align: left;
-        margin-left: 12px !important;
-        width: 80%;
-        overflow: hidden;
+    .account-name {
         text-overflow: ellipsis;
+        overflow: hidden;
         white-space: nowrap;
+        width: fit-content;
+        max-width: 100px;
+        margin-left: 12px !important;
     }
 
     &:hover {

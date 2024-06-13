@@ -2,7 +2,14 @@
     <div>
         <label>{{ $t('studio.mint.forms.utf8.label1') }}</label>
         <div class="input_cont">
-            <textarea maxlength="1024" type="text" v-model="val" @input="onInput" />
+            <CamInput
+                :textArea="true"
+                maxlength="1024"
+                type="text"
+                v-model="val"
+                @input="onInput"
+                class="utf8-form"
+            />
             <p class="counter">{{ val.length }} / 1024</p>
         </div>
     </div>
@@ -10,8 +17,13 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { UtfFormType } from '@/components/wallet/studio/mint/types'
+import CamInput from '@/components/CamInput.vue'
 
-@Component
+@Component({
+    components: {
+        CamInput,
+    },
+})
 export default class Utf8Form extends Vue {
     val = ''
 
@@ -38,13 +50,17 @@ export default class Utf8Form extends Vue {
     }
 }
 </script>
+
+<style lang="scss">
+.utf8-form {
+    > textarea {
+        height: 180px;
+    }
+}
+</style>
+
 <style scoped lang="scss">
 @use '../../../../../styles/abstracts/mixins';
-textarea {
-    width: 100%;
-    height: 180px;
-    max-width: 100%;
-}
 
 .input_cont {
     width: 100%;

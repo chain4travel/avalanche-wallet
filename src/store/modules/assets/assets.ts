@@ -544,8 +544,8 @@ const assets_module: Module<AssetsState, RootState> = {
                     const dest = locktime.lte(now)
                         ? newBalance.unlocked
                         : outId === PlatformVMConstants.STAKEABLELOCKOUTID
-                        ? newBalance.lockedStakeable
-                        : newBalance.locked
+                          ? newBalance.lockedStakeable
+                          : newBalance.locked
                     addDictAmount(amt, assetID, dest)
                 }
             }

@@ -121,6 +121,12 @@ export default class ManageKeys extends Vue {
 <style scoped lang="scss">
 @use '../../styles/abstracts/mixins';
 
+.card_body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
 .button_container {
     display: flex;
     flex-direction: row;
@@ -151,10 +157,6 @@ h1 {
         justify-content: flex-start;
         align-items: flex-start;
         flex-wrap: wrap;
-
-        button {
-            padding: 8px 0;
-        }
     }
 }
 </style>

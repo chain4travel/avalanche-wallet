@@ -52,6 +52,6 @@ export default defineConfig({
         grepTags: '',
         grepFilterSpecs: true,
         grepOmitFiltered: true,
-        grepUntagged: true
+        grepUntagged: true,
     },
 })

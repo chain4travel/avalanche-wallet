@@ -1,10 +1,8 @@
 <template>
     <div>
-        <div>
-            <h1>{{ $t('advanced.title') }}</h1>
-        </div>
+        <h1>{{ $t('advanced.title') }}</h1>
         <TokenListModal ref="token_list"></TokenListModal>
-        <div :class="canConsolidate ? 'grids_4' : 'grids_3'">
+        <div class="grids">
             <ChainImport class="grid_box"></ChainImport>
             <SignMessage class="grid_box"></SignMessage>
             <VerifyMessage class="grid_box"></VerifyMessage>
@@ -12,6 +10,7 @@
         </div>
     </div>
 </template>
+
 <script lang="ts">
 import 'reflect-metadata'
 import { Vue, Component } from 'vue-property-decorator'
@@ -54,52 +53,35 @@ export default class Advanced extends Vue {
     }
 }
 </script>
+
 <style scoped lang="scss">
 @use '../../styles/abstracts/mixins';
 
 h1 {
     font-weight: normal;
-}
-.grids_3 {
-    display: grid;
-    column-gap: 14px;
-    row-gap: 14px;
-    grid-template-columns: repeat(3, 1fr);
+    margin-bottom: var(--spacing-space-xl);
 }
 
-.grids_4 {
+.grids {
     display: grid;
     column-gap: 14px;
     row-gap: 14px;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+
+    @include mixins.mobile-device {
+        grid-template-columns: 1fr;
+    }
+
+    @include mixins.medium-device {
+        grid-template-columns: 1fr;
+    }
 }
 
 .grid_box {
-    background-color: var(--bg-light);
-    padding: 30px;
-    border-radius: var(--border-radius-sm);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-space-xl);
+    border-radius: var(--border-radius-xl);
     overflow: auto;
-}
-
-@include mixins.mobile-device {
-    .grids {
-        grid-template-columns: none;
-    }
-}
-
-@include mixins.medium-device {
-    .grids {
-        grid-template-columns: none;
-    }
-}
-
-.buts {
-    margin-bottom: 12px;
-    button {
-        color: var(--primary-color);
-        &:hover {
-            color: var(--secondary-color);
-        }
-    }
 }
 </style>
