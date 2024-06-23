@@ -12,32 +12,30 @@
                     <br />
                     {{ $t('kyc_process.info_explanation_p2') }}
                 </div>
-                <form @submit.prevent="submitUserData">
+                <div class="form__container">
                     <div>
                         <label>{{ $t('kyc_process.your_email_address') }}</label>
-                        <input
-                            type="text"
+                        <cam-input
                             :placeholder="$t('kyc_process.email_address')"
                             v-model="userData.email"
-                        />
+                        ></cam-input>
                     </div>
                     <div>
                         <label>{{ $t('kyc_process.your_phone_number') }}</label>
-                        <input
-                            type="tel"
+                        <cam-input
                             :placeholder="$t('kyc_process.phone_number')"
                             v-model="userData.phone"
-                        />
+                        ></cam-input>
                     </div>
-                    <v-btn
-                        type="submit"
+                    <cam-btn
+                        variant="primary"
                         :disabled="submitUserDataDisabled"
                         :loading="isLoading"
-                        class="button_submit_form"
+                        @click="submitUserData"
                     >
                         {{ $t('kyc_process.submit') }}
-                    </v-btn>
-                </form>
+                    </cam-btn>
+                </div>
             </div>
             <div id="sumsub-websdk-container"></div>
             <div v-if="verficationCompleted" class="kyc_action">
@@ -56,6 +54,8 @@ import { generateToken } from '@/kyc_api'
 import snsWebSdk from '@sumsub/websdk'
 import 'reflect-metadata'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import CamBtn from '../CamBtn.vue'
+import CamInput from '../CamInput.vue'
 interface UserData {
     email: string
     phone: string
@@ -64,6 +64,8 @@ interface UserData {
 @Component({
     components: {
         Modal,
+        CamBtn,
+        CamInput,
     },
 })
 export default class KycModal extends Vue {
@@ -163,7 +165,7 @@ export default class KycModal extends Vue {
 
     beforeClose() {
         this.userDataSubmitted = false
-        this.globalHelper().closeSelect()
+        if (this.globalHelper().closeSelect()) this.globalHelper().closeSelect()
         this.userData = {
             email: '',
             phone: '',
@@ -231,15 +233,14 @@ h1 {
     overflow: auto;
     .request-text {
         padding: 1rem;
-        /* border: var(--primary-border); */
         text-align: center;
         color: var(--primary-contrast-text);
         border-radius: var(--border-radius-sm);
         margin-bottom: 25px;
-        box-shadow: var(--box-shadow);
-        background-color: var(--bg-light);
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius-lg);
     }
-    form {
+    .form__container {
         display: grid;
         gap: 10px;
         label {
