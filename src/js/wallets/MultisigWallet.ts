@@ -104,16 +104,17 @@ class MultisigWallet extends WalletCore implements AvaWalletCore {
         return JSON.stringify(this.keyData)
     }
 
-    setKey(key?: string, updatedValues?: { addresses: string[]; threshold: number }): void {
-        if (updatedValues) {
-            this.keyData.owner.addresses = updatedValues.addresses
-            this.keyData.owner.threshold = updatedValues.threshold
-        } else if (key) {
+    async setKey(key?: string): Promise<void> {
+        let hrp = ava.getHRP()
+        if (key) {
             this.keyData = JSON.parse(key)
-            // The JSON buffer is not our "AvalancheBuffer"
             this.keyData.alias = Buffer.from(this.keyData.alias)
             this.ethAddress = this.keyData.alias.toString('hex')
         }
+        let alias = bintools.addressToString(hrp, 'P', this.keyData.alias)
+        let values = await ava.PChain().getMultisigAlias(alias)
+        this.keyData.owner.addresses = values.addresses
+        this.keyData.owner.threshold = values.threshold
     }
 
     ownerAddresses(): Buffer[] {

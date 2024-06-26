@@ -325,7 +325,7 @@ export default new Vuex.Store({
                 const wallet = new MultisigWallet()
                 if (file.name) wallet.name = file.name
                 wallet.accountHash = createHash('sha256').update(file.key).digest()
-                wallet.setKey(file.key)
+                await wallet.setKey(file.key)
                 state.wallets = [...state.wallets, wallet]
                 state.volatileWallets = [...state.volatileWallets, wallet]
                 return [wallet]
