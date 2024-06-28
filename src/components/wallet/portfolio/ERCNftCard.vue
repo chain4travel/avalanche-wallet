@@ -105,7 +105,7 @@ export default class ERCNftCard extends Vue {
     transfer(ev: any) {
         ev.stopPropagation()
         this.$router.push({
-            path: '/wallet/home/transfer',
+            path: '/wallet/transfer',
             query: {
                 chain: 'C',
                 token: this.token.data.address,

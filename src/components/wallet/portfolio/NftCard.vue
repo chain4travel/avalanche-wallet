@@ -72,7 +72,7 @@ export default class NftCard extends Vue {
 
         let utxoId = this.utxo.getUTXOID()
         this.$router.push({
-            path: '/wallet/home/transfer',
+            path: '/wallet/transfer',
             query: {
                 nft: utxoId,
                 chain: 'X',
