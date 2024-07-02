@@ -28,7 +28,7 @@
                 </div>
             </div>
         </div>
-        <transition-group name="fade">
+        <transition-group name="fade" class="other-keys">
             <key-row
                 v-for="wallet in inactiveWallets"
                 :wallet="wallet"
@@ -184,6 +184,12 @@ export default class MyKeys extends Vue {
 
 <style scoped lang="scss">
 @use '../../../styles/abstracts/mixins';
+
+.other-keys {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
 
 .container {
     background-color: var(--bg-card);
