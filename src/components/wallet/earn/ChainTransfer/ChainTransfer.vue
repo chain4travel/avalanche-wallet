@@ -563,7 +563,7 @@ export default class ChainTransfer extends Vue {
         let { dispatchNotification } = this.globalHelper()
         this.$store.dispatch('Assets/updateUTXOs')
         this.$store.dispatch('History/updateTransactionHistory')
-        
+
         dispatchNotification({
             message: this.$t('notifications.chain_transfer_success'),
             type: 'success',
