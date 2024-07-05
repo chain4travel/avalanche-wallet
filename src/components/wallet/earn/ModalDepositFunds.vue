@@ -369,7 +369,8 @@ export default class ModalDepositFunds extends Vue {
         }
         let rest = this.offer.totalMaxRewardAmount.sub(this.offer.rewardedAmount)
         let amountLeftToDeposit = new BN(
-            (rest.toNumber() / (this.rewardPercent / 100)) * (this.interestRateBase / this.duration)
+            (rest.toNumber() / (this.rewardPercent / 100)) *
+                (this.interestRateBase / (this.duration - this.offer.noRewardsPeriodDuration))
         )
         return amountLeftToDeposit
     }
