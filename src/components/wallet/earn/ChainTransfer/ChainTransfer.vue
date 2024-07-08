@@ -561,14 +561,13 @@ export default class ChainTransfer extends Vue {
         // Clear Form
         this.isSuccess = true
         let { dispatchNotification } = this.globalHelper()
+        this.$store.dispatch('Assets/updateUTXOs')
+        this.$store.dispatch('History/updateTransactionHistory')
+
         dispatchNotification({
             message: this.$t('notifications.chain_transfer_success'),
             type: 'success',
         })
-        setTimeout(() => {
-            this.$store.dispatch('Assets/updateUTXOs')
-            this.$store.dispatch('History/updateTransactionHistory')
-        }, BALANCE_DELAY)
     }
 
     get canSubmit() {
