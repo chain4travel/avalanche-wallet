@@ -34,6 +34,7 @@
         </div>
         <template v-else>
             <component
+                class="delete-section"
                 v-if="subComponent"
                 :is="subComponent"
                 v-bind="[{ accountName: account.name }]"
@@ -96,7 +97,11 @@ export default class ManageAccount extends Vue {
 }
 </script>
 <style scoped lang="scss">
+.delete-section {
+    max-width: 50%;
+}
 .manage_account--container {
+    max-width: 50%;
     margin-top: 4rem;
     height: 100%;
     color: var(--primary-color);

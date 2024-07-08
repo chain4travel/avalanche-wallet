@@ -14,7 +14,7 @@ Vue.use(BootstrapVue)
 Vue.component('datetime', Datetime)
 
 export const mountKyesComponent = (el: string, props: any) => {
-    const { dispatchNotification, dispatchSetNewName } = props
+    const { dispatchNotification, dispatchSetNewName, setAccount } = props
     const MyPlugin = {
         install(Vue) {
             Vue.prototype.globalHelper = () => {
@@ -22,6 +22,7 @@ export const mountKyesComponent = (el: string, props: any) => {
                     dispatchNotification: (params) => dispatchNotification(params),
                     dispatchSetNewName: () => dispatchSetNewName(),
                     updateStore: (params) => props.updateStore(params),
+                    setAccount: (params) => setAccount(params),
                 }
             }
         },
