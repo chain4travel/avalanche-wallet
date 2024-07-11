@@ -1,23 +1,14 @@
 <template>
-    <div class="verify-wallet--container" v-if="shouldShowVerification">
+    <div v-if="shouldShowVerification" class="verify-wallet--container">
         <div class="header">
-            <h1>Verify Wallet</h1>
-            <p>
-                Verifying your wallet comes with many benefits on the Camino Network. Choose the
-                most suitable benefits for you below. All information provided is stored and
-                verified only by our third-party verification provider Sumsub, for more information
-                please visit our user guides about
-                <a href="https://docs.camino.network/guides/kyc" target="_blank">KYC</a>
-                and
-                <a href="https://docs.camino.network/guides/kyb" target="_blank">KYB</a>
-                .
-            </p>
+            <h1>{{ $t('verify_wallet.title') }}</h1>
+            <p v-html="description"></p>
         </div>
 
         <div class="content">
             <div v-for="(item, index) in verificationItems" :key="index" class="content-item">
                 <div class="content-item-action">
-                    <h2>{{ item.title }}</h2>
+                    <h2>{{ $t(`verify_wallet.verificationItems.${item.type}.title`) }}</h2>
                     <v-icon v-if="isVerified(item.type) && !isMultisig">mdi-check-decagram</v-icon>
                     <template v-else>
                         <component
@@ -33,10 +24,13 @@
                         </CamBtn>
                     </template>
                 </div>
-                <h3>{{ item.description }}</h3>
+                <h3>{{ $t(`verify_wallet.verificationItems.${item.type}.description`) }}</h3>
 
                 <ul class="content-item-list">
-                    <li v-for="(benefit, idx) in item.benefits" :key="idx">{{ benefit }}</li>
+                    <li v-for="(benefit, idx) in item.benefits" :key="idx">
+                        <v-icon>mdi-check-circle</v-icon>
+                        {{ benefit }}
+                    </li>
                 </ul>
             </div>
         </div>
@@ -53,43 +47,26 @@ import { WalletType } from '@/js/wallets/types'
 
 interface VerificationItem {
     type: 'kyc' | 'kyb'
-    title: string
-    description: string
     benefits: string[]
     modalComponent: typeof Vue
+}
+
+interface ModalComponent extends Vue {
+    open(): void
 }
 
 @Component({
     components: { CamBtn, KycModal, KybModal },
 })
 export default class VerifyWalletSetting extends Vue {
-    private verificationItems: VerificationItem[] = [
-        {
-            type: 'kyc',
-            title: 'Individual Verification (KYC)',
-            description: 'Includes a liveliness check and personal identity verification.',
-            benefits: [
-                'Deploy smart contracts on the Camino Network',
-                'Interact with applications that require KYC verified wallets',
-                'Get the verified status on the official wallet and block explorer (coming soon)',
-            ],
-            modalComponent: KycModal,
-        },
-        {
-            type: 'kyb',
-            title: 'Business Verification (KYB)',
-            description:
-                'Includes an in-depth verification of the company existence, ownership structure, and official representatives.',
-            benefits: [
-                'Deploy smart contracts on the Camino Network',
-                'Interact with applications that require KYB verified wallets',
-                'Get the verified status on the official wallet and block explorer (coming soon)',
-            ],
-            modalComponent: KybModal,
-        },
-    ]
+    description = this.$t('verify_wallet.description', {
+        kycLink: '<a href="https://docs.camino.network/guides/kyc" target="_blank">KYC</a>',
+        kybLink: '<a href="https://docs.camino.network/guides/kyb" target="_blank">KYB</a>',
+    })
 
-    $refs!: Record<string, Vue | Vue[]>
+    private verificationItems: VerificationItem[] = this.generateVerificationItems()
+
+    $refs!: Record<string, ModalComponent | ModalComponent[]>
 
     get isKycVerified(): boolean {
         return this.$store.getters['Accounts/kycStatus']
@@ -118,25 +95,40 @@ export default class VerifyWalletSetting extends Vue {
 
     openModal(type: 'kyc' | 'kyb', index: number): void {
         this.$nextTick(() => {
-            const modalRef = this.getModalRef(type, index) as KycModal | KybModal | undefined
+            const modalRef = this.getModalRef(type, index)
             if (modalRef) {
-                modalRef.open() // Now TypeScript knows 'open' exists on modalRef
+                modalRef.open()
             }
         })
     }
 
-    getModalRef(type: 'kyc' | 'kyb', index: number): Vue | undefined {
+    getModalRef(type: 'kyc' | 'kyb', index: number): ModalComponent | undefined {
         const refKey = this.getModalRefKey(type, index)
-        const refsArray = this.$refs[refKey] as Vue[] | undefined
+        const refsArray = this.$refs[refKey] as ModalComponent[] | undefined
         return refsArray ? refsArray[0] : undefined
     }
 
     getModalRefKey(type: 'kyc' | 'kyb', index: number): string {
-        return type === 'kyc' ? `kycModal_${index}` : `kybModal_${index}`
+        return `${type}Modal_${index}`
     }
 
     isVerified(type: 'kyc' | 'kyb'): boolean {
         return type === 'kyc' ? this.isKycVerified : this.isKybVerified
+    }
+
+    private generateVerificationItems(): VerificationItem[] {
+        const types: ('kyc' | 'kyb')[] = ['kyc', 'kyb']
+        return types.map((type) => ({
+            type,
+            benefits: [
+                this.$t('verify_wallet.verificationItems.benefits.opt1').toString(),
+                this.$t('verify_wallet.verificationItems.benefits.opt2', {
+                    type: type.toUpperCase(),
+                }).toString(),
+                this.$t('verify_wallet.verificationItems.benefits.opt3').toString(),
+            ],
+            modalComponent: type === 'kyc' ? KycModal : KybModal,
+        }))
     }
 }
 </script>
@@ -170,7 +162,7 @@ export default class VerifyWalletSetting extends Vue {
         flex-direction: column;
         gap: 1.5rem;
         padding: 16px 24px;
-        padding-left: 0px;
+        padding-left: 0;
         margin-top: 1rem;
 
         h1 {
@@ -181,6 +173,7 @@ export default class VerifyWalletSetting extends Vue {
             font-weight: 600;
             line-height: 36px;
         }
+
         p {
             max-width: 50%;
             font-family: Inter;
@@ -197,12 +190,19 @@ export default class VerifyWalletSetting extends Vue {
         flex-direction: column;
         gap: 3rem;
         padding: 16px 24px;
-        padding-left: 0px;
+        padding-left: 0;
 
         &-item {
             display: flex;
             flex-direction: column;
             gap: 1rem;
+
+            .v-icon {
+                color: var(--primary-color);
+                width: 20px;
+                height: 20px;
+                @include mixins.typography-subtitle-1;
+            }
 
             &-action {
                 display: flex;
@@ -211,10 +211,22 @@ export default class VerifyWalletSetting extends Vue {
             }
 
             &-list {
-                padding-left: 3rem;
+                list-style-type: none; /* Remove default bullets/dots */
+                padding-left: 2rem;
                 display: flex;
                 flex-direction: column;
                 gap: 0.5rem;
+
+                font-family: Inter;
+                font-size: 14px;
+                font-weight: 400;
+                line-height: 20px;
+
+                li {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                }
             }
         }
     }
