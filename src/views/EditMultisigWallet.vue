@@ -164,6 +164,8 @@ import Alert from '@/components/Alert.vue'
 import CamBtn from '@/components/CamBtn.vue'
 import CamInput from '@/components/CamInput.vue'
 import CamTooltip from '@/components/misc/CamTooltip.vue'
+import { getMultisigAliases } from '@/explorer_api'
+import { isValidPChainAddress } from '@/helpers/address_helper'
 import AvaAsset from '@/js/AvaAsset'
 import { AvaNetwork } from '@/js/AvaNetwork'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
@@ -176,11 +178,9 @@ import { MultisigAliasTx } from '@c4tplatform/caminojs/dist/apis/platformvm/mult
 import { SignatureError } from '@c4tplatform/caminojs/dist/common'
 import { ONEAVAX } from '@c4tplatform/caminojs/dist/utils'
 import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
+import { TranslateResult } from 'vue-i18n'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { WalletHelper } from '../helpers/wallet_helper'
-import { TranslateResult } from 'vue-i18n'
-import { isValidPChainAddress } from '@/helpers/address_helper'
-import { getMultisigAliases } from '@/explorer_api'
 
 const MAX_ADDRESS_COUNT = 128
 const UPDATE_ALIAS_TIMEOUT = 3000
@@ -509,10 +509,7 @@ export default class EditMultisigWallet extends Vue {
                 this.loading = true
                 let values = await ava.PChain().getMultisigAlias(alias)
                 let wallet = this.activeWallet as MultisigWallet
-                wallet.setKey(undefined, {
-                    addresses: values.addresses,
-                    threshold: values.threshold,
-                })
+                await wallet.setKey()
                 const result = await WalletHelper.sendMultisigAliasTxUpdate(
                     this.activeWallet as MultisigWallet,
                     nonEmptyInitialAddresses,

@@ -2,29 +2,29 @@
     <div>
         <Modal ref="modal" :title="$t('keys.save_account.title')">
             <div class="remember_modal">
-                <form @submit.prevent="submit">
+                <form>
                     <div class="flex-row" style="justify-content: center">
                         <Identicon :value="name"></Identicon>
                     </div>
                     <p>{{ $t('keys.save_account.desc') }}</p>
 
-                    <input
+                    <CamInput
                         v-model="accountName"
                         :name="$t('keys.save_account.placeholder_1').toString()"
                         placeholder="Account Name"
                         :disabled="existsInLocalStorage"
                     />
-                    <input
+                    <CamInput
                         type="password"
                         :placeholder="$t('keys.save_account.placeholder_2').toString()"
                         v-model="password"
                     />
-                    <input
+                    <CamInput
                         type="password"
                         :placeholder="$t('keys.save_account.placeholder_3').toString()"
                         v-model="password_confirm"
                     />
-                    <p class="err">{{ err }}</p>
+                    <Alert variant="negative" v-if="err" class="err">{{ err }}</Alert>
                     <p class="err small" style="text-align: center">
                         Clearing your browser cache will remove this account. Make sure you have
                         your
@@ -33,14 +33,14 @@
                         <b>private key</b>
                         saved.
                     </p>
-                    <v-btn
-                        class="button_primary"
+                    <CamBtn
+                        variant="primary"
                         :disabled="!canSubmit"
-                        type="submit"
+                        :onClick="submit"
                         :loading="isLoading"
                     >
                         {{ $t('keys.save_account.submit') }}
-                    </v-btn>
+                    </CamBtn>
                 </form>
             </div>
         </Modal>
@@ -54,11 +54,17 @@ import Modal from '../Modal.vue'
 import { SaveAccountInput } from '@/store/types'
 import { iUserAccountEncrypted } from '@/store/types'
 import Identicon from '@/components/misc/Identicon.vue'
+import CamInput from '@/components/CamInput.vue'
+import Alert from '@/components/Alert.vue'
+import CamBtn from '@/components/CamBtn.vue'
 
 @Component({
     components: {
         Identicon,
         Modal,
+        CamInput,
+        Alert,
+        CamBtn,
     },
 })
 export default class SaveAccountModal extends Vue {
@@ -151,16 +157,15 @@ export default class SaveAccountModal extends Vue {
 form {
     display: flex;
     flex-direction: column;
+    gap: 0.2rem;
+
+    > button {
+        width: 100%;
+    }
 
     > * {
         margin: 6px 0px;
     }
-}
-
-input {
-    background-color: var(--bg-light);
-    color: var(--primary-color);
-    padding: 6px 14px;
 }
 
 .cancel_but {
@@ -179,6 +184,7 @@ input {
 }
 
 .err {
-    color: var(--error);
+    width: 100%;
+    max-width: 100%;
 }
 </style>

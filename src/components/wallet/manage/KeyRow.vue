@@ -344,6 +344,7 @@ export default class KeyRow extends Vue {
     /*grid-template-columns: 1fr max-content;*/
     /*grid-gap: 15px;*/
     overflow: auto;
+    margin-bottom: 0.5rem;
 
     > * {
         align-self: center;

@@ -1,29 +1,12 @@
 <template>
-    <form @submit.prevent="submit" class="change_pass_form">
-        <input placeholder="Old Password" type="password" class="camino--input" v-model="passOld" />
-        <input placeholder="New Password" type="password" class="camino--input" v-model="pass" />
-        <input
-            placeholder="Confirm Password"
-            type="password"
-            class="camino--input"
-            v-model="passConfirm"
-        />
-        <p class="err">{{ error }}</p>
+    <form class="change_pass_form">
+        <CamInput placeholder="Old Password" type="password" v-model="passOld" />
+        <CamInput placeholder="New Password" type="password" v-model="pass" />
+        <CamInput placeholder="Confirm Password" type="password" v-model="passConfirm" />
+        <Alert variant="negative" class="err" v-if="error">{{ error }}</Alert>
         <div class="buttons_container">
-            <button
-                :class="['camino__primary--button', { 'camino--button--disabled': !canSubmit }]"
-                class="camino__primary--button"
-                small
-                block
-                depressed
-                :disabled="!canSubmit"
-                type="submit"
-            >
-                Submit
-            </button>
-            <button class="camino__negative--button" small block depressed @click="cancel">
-                Cancel
-            </button>
+            <CamBtn variant="primary" :disabled="!canSubmit" :onClick="submit">Submit</CamBtn>
+            <CamBtn variant="negative" :onClick="cancel">Cancel</CamBtn>
         </div>
     </form>
 </template>
@@ -31,8 +14,17 @@
 import { Vue, Component } from 'vue-property-decorator'
 import AccountSettingsModal from '@/components/modals/AccountSettings/AccountSettingsModal.vue'
 import { ChangePasswordInput } from '@/store/modules/accounts/types'
+import CamBtn from '@/components/CamBtn.vue'
+import CamInput from '@/components/CamInput.vue'
+import Alert from '@/components/Alert.vue'
 
-@Component
+@Component({
+    components: {
+        CamBtn,
+        CamInput,
+        Alert,
+    },
+})
 export default class ChangePassword extends Vue {
     pass = ''
     passOld = ''
@@ -98,12 +90,20 @@ export default class ChangePassword extends Vue {
 .buttons_container {
     display: flex;
     gap: 8px;
+    > button {
+        width: 100%;
+    }
 }
 
 form {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    max-width: 300px;
+    width: 100%;
+
+    > input,
+    .buttons_container {
+        width: 100%;
+    }
 }
 </style>

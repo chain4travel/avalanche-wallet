@@ -15,29 +15,20 @@
             <p class="aliases--header">
                 {{ $t('keys.multisig_aliases', { '0': multiSigAliases.length }) }}
             </p>
-            <p class="">{{ error }}</p>
+            <Alert variant="negative" v-if="error">{{ error }}</Alert>
             <div class="aliases__content">
                 <p>{{ $t('keys.import_wallets') }}</p>
                 <div class="aliases__content--buttons">
-                    <button
-                        @click="dismiss"
-                        class="addAliasButton button_primary ava_button_secondary"
-                    >
+                    <CamBtn @click="dismiss" variant="transparent">
                         {{ $t('keys.button5') }}
-                    </button>
-                    <button
-                        @click="addAlias"
-                        :loading="isLoading"
-                        class="button_secondary ava_button addAliasButton"
-                        depressed
-                        block
-                    >
+                    </CamBtn>
+                    <CamBtn @click="addAlias" :loading="isLoading" variant="primary">
                         {{ $t('keys.button4') }}
-                    </button>
+                    </CamBtn>
                 </div>
             </div>
         </div>
-        <transition-group name="fade">
+        <transition-group name="fade" class="other-keys">
             <key-row
                 v-for="wallet in inactiveWallets"
                 :wallet="wallet"
@@ -59,11 +50,15 @@ import RememberKey from '@/components/misc/RememberKey.vue'
 import KeyRow from '@/components/wallet/manage/KeyRow.vue'
 import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { WalletType } from '@/js/wallets/types'
+import CamBtn from '@/components/CamBtn.vue'
+import Alert from '@/components/Alert.vue'
 
 @Component({
     components: {
         KeyRow,
         RememberKey,
+        CamBtn,
+        Alert,
     },
 })
 export default class MyKeys extends Vue {
@@ -190,10 +185,17 @@ export default class MyKeys extends Vue {
 <style scoped lang="scss">
 @use '../../../styles/abstracts/mixins';
 
+.other-keys {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
 .container {
-    background-color: var(--bg-light);
-    padding: 15px;
-    border-radius: 8px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-space-lg);
+    border-radius: var(--border-radius-xl);
     margin-bottom: 10px;
     display: flex;
     flex-direction: column;
