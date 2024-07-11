@@ -24,6 +24,19 @@ import { PlatformRewards } from '@/store/modules/platform/types'
     },
 })
 export default class UserRewards extends Vue {
+    mounted() {
+        this.updateExpiredDepositRewards()
+    }
+
+    updateExpiredDepositRewards() {
+        this.$store.state.Platform.rewards.depositRewards.forEach((reward: any) => {
+            return this.$store.getters['Platform/updateExpiredDepositRewards'](
+                reward.deposit.depositOfferID,
+                reward.deposit.start.toNumber()
+            )
+        })
+    }
+
     get platformRewards(): PlatformRewards {
         return this.$store.state.Platform.rewards
     }
