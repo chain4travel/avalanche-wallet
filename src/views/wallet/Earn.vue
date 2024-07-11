@@ -95,6 +95,15 @@ export default class Earn extends Vue {
         return bnToBig(bn, 9)
     }
 
+    updateExpiredDepositRewards() {
+        this.$store.state.Platform.rewards.depositRewards.forEach((reward: any) => {
+            return this.$store.getters['Platform/updateExpiredDepositRewards'](
+                reward.deposit.depositOfferID,
+                reward.deposit.start.toNumber()
+            )
+        })
+    }
+
     async refresh() {
         try {
             this.loadingRefreshDepositRewards = true
@@ -103,6 +112,7 @@ export default class Earn extends Vue {
                     await Promise.all([
                         this.$store.dispatch('Platform/updateRewards'),
                         this.$store.dispatch('Signavault/updateTransaction'),
+                        this.updateExpiredDepositRewards(),
                     ])
                 })
             })
