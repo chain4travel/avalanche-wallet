@@ -1130,5 +1130,24 @@
             "cancelled": "Transaction has been cancelled",
             "failed": "Cancelling the transaction failed"
         }
+    },
+    "verify_wallet": {
+        "title": "Verify Wallet",
+        "description": "Verifying your wallet comes with many benefits on the Camino Network. Choose the most suitable benefits for you below. All information provided is stored and verified only by our third-party verification provider Sumsub. For more information, please visit our user guides about {kycLink} and {kybLink}.",
+        "verificationItems": {
+            "kyc": {
+                "title": "Individual Verification (KYC)",
+                "description": "Includes a liveliness check and personal identity verification."
+            },
+            "kyb": {
+                "title": "Business Verification (KYB)",
+                "description": "Includes a business identity verification."
+            },
+            "benefits": {
+                "opt1": "Deploy smart contracts on the Camino Network",
+                "opt2": "Interact with applications that require {type} verified wallets",
+                "opt3": "Get the verified status on the official wallet and block explorer (coming soon)"
+            }
+        }
     }
 }
