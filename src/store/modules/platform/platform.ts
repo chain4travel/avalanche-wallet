@@ -345,6 +345,20 @@ const platform_module: Module<PlatformState, RootState> = {
                 return restrictedDepositOffer
             }
         },
+        updateExpiredDepositRewards:
+            (state) => async (depositOfferID: string, timestamp: number) => {
+                if (!state.depositOffers.find((v) => v.id === depositOfferID)) {
+                    const l = await ava.PChain().getAllDepositOffers(timestamp)
+                    const offer = l.find((v) => v.id === depositOfferID)
+
+                    if (offer) {
+                        state.depositOffers.push(offer)
+                        return offer
+                    }
+                }
+
+                return
+            },
         depositOffer: (state) => (depositOfferID: string) => {
             return state.depositOffers.find((v) => v.id === depositOfferID)
         },

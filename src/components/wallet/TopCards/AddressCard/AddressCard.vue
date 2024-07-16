@@ -68,7 +68,7 @@ import MnemonicWallet, {
     LEDGER_ETH_ACCOUNT_PATH,
 } from '@/js/wallets/MnemonicWallet'
 import { WalletNameType, WalletType } from '@/js/wallets/types'
-
+import { toChecksumAddress } from 'web3-utils'
 @Component({
     components: {
         CopyText,
@@ -186,8 +186,7 @@ export default class AddressCard extends Vue {
         if (!wallet) {
             return '-'
         }
-
-        return '0x' + wallet.getEvmAddress()
+        return toChecksumAddress('0x' + wallet.getEvmAddress())
     }
 
     get activeAddress(): string {
@@ -198,8 +197,9 @@ export default class AddressCard extends Vue {
                 return this.addressPVM
             case 'C':
                 return this.addressEVM
+            default:
+                return this.address
         }
-        return this.address
     }
 
     get activeIdx(): number {

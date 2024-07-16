@@ -200,7 +200,7 @@ export default class KybModal extends Vue {
     async close() {
         await this.$store.dispatch('Accounts/updateKycStatus')
         this.$refs.modal.close()
-        this.globalHelper().closeSelect()
+        if (this.globalHelper().closeSelect) this.globalHelper().closeSelect()
         this.userDataSubmitted = false
         this.userData = {
             email: '',

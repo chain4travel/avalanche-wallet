@@ -165,7 +165,7 @@ export default class KycModal extends Vue {
 
     beforeClose() {
         this.userDataSubmitted = false
-        if (this.globalHelper().closeSelect()) this.globalHelper().closeSelect()
+        if (this.globalHelper().closeSelect) this.globalHelper().closeSelect()
         this.userData = {
             email: '',
             phone: '',
