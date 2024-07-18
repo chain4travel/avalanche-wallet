@@ -231,4 +231,14 @@ export default class VerifyWalletSetting extends Vue {
         }
     }
 }
+
+@media only screen and (max-width: 600px) {
+    .verify-wallet--container {
+        .header {
+            p {
+                max-width: 100%;
+            }
+        }
+    }
+}
 </style>
