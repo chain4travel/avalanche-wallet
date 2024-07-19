@@ -157,4 +157,11 @@ export default class ManageAccount extends Vue {
     line-height: 20px;
     color: var(--camino-warning-color);
 }
+
+@media only screen and (max-width: 600px) {
+    .delete-section,
+    .manage_account--container {
+        max-width: 100%;
+    }
+}
 </style>
