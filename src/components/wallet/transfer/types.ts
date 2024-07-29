@@ -17,3 +17,8 @@ export interface ICurrencyInputDropdownValue {
     asset: AvaAsset | null
     amount: BN
 }
+
+export interface BulkOrder {
+    address: string
+    amount: BN
+}

@@ -1,5 +1,6 @@
 import { ava, bintools } from '@/AVA'
 import {
+    buildBulkTransfer,
     buildCreateNftFamilyTx,
     buildEvmTransferERCNftTx,
     buildEvmTransferErc20Tx,
@@ -10,7 +11,7 @@ import { WalletType } from '@/js/wallets/types'
 import { AmountOutput } from '@c4tplatform/caminojs/dist/apis/avm'
 import { UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
 
-import { ITransaction } from '@/components/wallet/transfer/types'
+import { BulkOrder, ITransaction } from '@/components/wallet/transfer/types'
 import { BN, Buffer } from '@c4tplatform/caminojs/dist'
 import { UTXO as AVMUTXO } from '@c4tplatform/caminojs/dist/apis/avm/utxos'
 import {
@@ -36,6 +37,7 @@ import { GetValidatorsResponse } from '@/store/modules/platform/types'
 import { MultisigAliasParams } from '@c4tplatform/caminojs/dist/apis/platformvm'
 import { OutputOwners, SignatureError } from '@c4tplatform/caminojs/dist/common'
 import { ModelDepositOfferSig } from '@c4tplatform/signavaultjs'
+import AvaAsset from '@/js/AvaAsset'
 class WalletHelper {
     static async getStake(wallet: WalletType): Promise<BN> {
         let addrs = wallet.getAllAddressesP()
@@ -111,6 +113,27 @@ class WalletHelper {
         const txId: string = await ava.XChain().issueTx(tx)
 
         return txId
+    }
+
+    static async issueBulkTx(
+        wallet: WalletType,
+        asset: AvaAsset,
+        orders: BulkOrder[],
+        memo: Buffer | undefined
+    ): Promise<string> {
+        const fromAddresses = wallet.getAllAddressesX()
+        const changeAddress = wallet.getChangeAddressAvm()
+
+        let unsignedTx = buildBulkTransfer(
+            fromAddresses,
+            [changeAddress],
+            wallet.getUTXOSet(),
+            orders,
+            asset,
+            memo
+        )
+        const tx = await wallet.signX(unsignedTx)
+        return await ava.XChain().issueTx(tx)
     }
 
     static async validate(
