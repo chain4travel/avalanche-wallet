@@ -557,8 +557,7 @@ export default class EditMultisigWallet extends Vue {
     getErrorMessage(error: any): string {
         if (error?.message.includes('insufficient balance'))
             return 'notifications.insufficient_funds_edit'
-
-        return 'notifications.something_went_wrong'
+        return error.message
     }
 
     handleMsigEditError(error: any) {
