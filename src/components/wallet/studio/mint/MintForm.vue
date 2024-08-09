@@ -115,7 +115,21 @@
                     </div>
                     <div>
                         <label>{{ $t('studio.mint.form_col.label1') }}</label>
-                        <CamInput type="number" min="1" v-model="quantity" style="width: 100%" />
+                        <CamInput
+                            type="number"
+                            :min="minQuantity"
+                            v-model="quantity"
+                            style="width: 100%"
+                        />
+                    </div>
+                    <div>
+                        <label>{{ $t('studio.mint.form_col.label2') }}</label>
+                        <input
+                            type="text"
+                            :value="addresses.join(',')"
+                            @input="onAddressInput"
+                            style="width: 100%"
+                        />
                     </div>
                     <div class="fee">
                         <p>
@@ -201,10 +215,10 @@ export default class MintNft extends Vue {
     @Prop() mintUtxo!: UTXO
 
     quantity = 1
+    addresses = []
     nftType: NftType = 'url'
     nftFormType = 'generic'
     payloadPreview: null | PayloadBase = null
-    canSubmit = false
     isSuccess = false
     isLoading = false
     txId = ''
@@ -282,10 +296,21 @@ export default class MintNft extends Vue {
         return bnToBig(ava.XChain().getTxFee(), 9)
     }
 
+    get canSubmit(): boolean {
+        return this.payloadPreview !== null && this.quantity >= this.minQuantity
+    }
+
+    get minQuantity(): number {
+        return this.addresses.length || 1
+    }
+
+    onAddressInput(ev: any) {
+        this.addresses = ev.target.value.trim().split(',')
+    }
+
     onInput(form: NftMintFormType | null) {
         if (form === null) {
             this.payloadPreview = null
-            this.canSubmit = false
             return
         }
 
@@ -313,7 +338,6 @@ export default class MintNft extends Vue {
             }
 
             this.payloadPreview = payload
-            this.canSubmit = true
         } catch (e) {
             console.error(e)
         }
@@ -355,9 +379,13 @@ export default class MintNft extends Vue {
         if (!wallet) return
 
         this.isLoading = true
-
         try {
-            let txId = await wallet.mintNft(this.mintUtxo, this.payloadPreview, this.quantity)
+            let txId = await wallet.mintNft(
+                this.mintUtxo,
+                this.payloadPreview,
+                this.quantity,
+                this.addresses
+            )
             this.onSuccess(txId)
         } catch (e) {
             console.error(e)
