@@ -112,10 +112,6 @@ export default class DepositOffers extends Vue {
         this.$data.depositOffer = undefined
         this.$data.createOffer = false
     }
-
-    beforeCreate() {
-        console.log('salam , deposit offers', this.platformOffers)
-    }
 }
 </script>
 <style scoped lang="scss">
