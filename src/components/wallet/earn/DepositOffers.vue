@@ -96,10 +96,6 @@ export default class DepositOffers extends Vue {
         return this.$store.getters['Platform/isOfferCreator']
     }
 
-    get isDepositExpired(): boolean {
-        return true
-    }
-
     cleanAvaxBN(val: BN): string {
         return cleanAvaxBN(val)
     }
