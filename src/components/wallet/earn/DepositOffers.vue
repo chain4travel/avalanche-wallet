@@ -71,7 +71,11 @@ export default class DepositOffers extends Vue {
     }
 
     get platformOffers(): DepositOffer[] {
-        return this.$store.getters['Platform/depositOffers'](true)
+        const now = Date.now()
+        return this.$store.getters['Platform/depositOffers'](true).filter((offer: DepositOffer) => {
+            const endTime = offer.end.toNumber() * 1000
+            return now < endTime
+        })
     }
 
     get hasOffers(): boolean {
@@ -91,6 +95,11 @@ export default class DepositOffers extends Vue {
     get canAddOffers(): boolean {
         return this.$store.getters['Platform/isOfferCreator']
     }
+
+    get isDepositExpired(): boolean {
+        return true
+    }
+
     cleanAvaxBN(val: BN): string {
         return cleanAvaxBN(val)
     }
@@ -106,6 +115,10 @@ export default class DepositOffers extends Vue {
     closeOffer(): void {
         this.$data.depositOffer = undefined
         this.$data.createOffer = false
+    }
+
+    beforeCreate() {
+        console.log('salam , deposit offers', this.platformOffers)
     }
 }
 </script>
