@@ -2,20 +2,21 @@
     <div class="term-of-us">
         <p>
             By using this application you agree to the
-            <span class="link" @click="click('/legal')">Terms of Use.</span>
+            <a class="link" @click="redirect()" href="#" target="_blank" rel="noopener noreferrer">
+                Terms of Use.
+            </a>
         </p>
     </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component } from 'vue-property-decorator'
 @Component({
     name: 'tos',
 })
 export default class ToS extends Vue {
-    helpers = this.globalHelper()
-
-    click(to: string) {
-        this.helpers.navigate(to)
+    url: string = 'https://camino.network/terms/'
+    redirect() {
+        window.open(this.url, '_blank')
     }
 }
 </script>
