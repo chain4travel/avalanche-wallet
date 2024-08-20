@@ -83,7 +83,6 @@ module.exports = {
                 './mountCreateOfferForm': './src/components/wallet/earn/mountCreateOfferForm.ts',
                 './caminoClient': './src/AVA.ts',
                 './mountVerifyWalletSetting': './src/views/mountVerifyWalletSetting.ts',
-                './mountLegal': './src/views/mountLegal.ts',
             },
         }),
         new HtmlWebPackPlugin({
