@@ -74,7 +74,6 @@ module.exports = {
                 './moutHomePage': './src/mountHomePage.ts',
                 './mountCreate': './src/views/createMount.ts',
                 './mountAccessComponents': './src/views/access/mountAccessComponents.ts',
-                './mountLegal': './src/views/mountLegal.ts',
                 './mountAccountMenu': './src/components/wallet/sidebar/mountAccountMenu.ts',
                 './mountAccounts': './src/components/Access/mountAccounts.ts',
                 './mountKyesComponent': './src/components/wallet/manage/mountKyesComponent.ts',
@@ -83,7 +82,7 @@ module.exports = {
                 './mountVersionComponent': './src/components/misc/mountVersion.ts',
                 './mountCreateOfferForm': './src/components/wallet/earn/mountCreateOfferForm.ts',
                 './caminoClient': './src/AVA.ts',
-                './mountVerifyWalletSetting': './src/views/mountVerifyWalletSetting.ts'
+                './mountVerifyWalletSetting': './src/views/mountVerifyWalletSetting.ts',
             },
         }),
         new HtmlWebPackPlugin({
