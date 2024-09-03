@@ -347,9 +347,11 @@ const platform_module: Module<PlatformState, RootState> = {
         },
         updateExpiredDepositRewards:
             (state) => async (depositOfferID: string, timestamp: number) => {
-                if (!state.depositOffers.find((v) => v.id === depositOfferID)) {
-                    const l = await ava.PChain().getAllDepositOffers(timestamp)
-                    const offer = l.find((v) => v.id === depositOfferID)
+                const offerExists = state.depositOffers.some((v) => v.id === depositOfferID)
+
+                if (!offerExists) {
+                    const allOffers = await ava.PChain().getAllDepositOffers(timestamp)
+                    const offer = allOffers.find((v) => v.id === depositOfferID)
 
                     if (offer) {
                         state.depositOffers.push(offer)
@@ -357,7 +359,7 @@ const platform_module: Module<PlatformState, RootState> = {
                     }
                 }
 
-                return
+                return null
             },
         depositOffer: (state) => (depositOfferID: string) => {
             return state.depositOffers.find((v) => v.id === depositOfferID)

@@ -1,5 +1,4 @@
 import Create from '@/views/Create.vue'
-import Legal from '@/views/Legal.vue'
 import Wallet from '@/views/Wallet.vue'
 import Activity from '@/views/wallet/Activity.vue'
 import Advanced from '@/views/wallet/Advanced.vue'
@@ -34,11 +33,6 @@ const ifAuthenticated = (to: Route, from: Route, next: Function) => {
 }
 
 const routes = [
-    {
-        path: '/wallet/legal',
-        name: 'legal',
-        component: Legal,
-    },
     {
         path: '/wallet/create',
         name: 'create',
