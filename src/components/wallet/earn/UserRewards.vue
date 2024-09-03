@@ -1,26 +1,33 @@
 <template>
-    <div v-if="hasRewards">
+    <div v-if="hasPendingRewards || hasRewards">
+        <TreasuryRewardCard
+            v-if="firstTreasuryReward"
+            class="reward_card"
+            :reward="firstTreasuryReward"
+        />
         <div class="user_offers">
             <DepositRewardCard
-                v-for="(v, i) in platformRewards.depositRewards"
-                :key="'u' + i"
-                :reward="v"
+                v-for="(reward, index) in platformRewards.depositRewards"
+                :key="'reward_' + index"
+                :reward="reward"
                 class="reward_card"
-            ></DepositRewardCard>
+            />
         </div>
     </div>
     <div v-else class="empty">No Active Earning</div>
 </template>
+
 <script lang="ts">
-import 'reflect-metadata'
 import { Component, Vue } from 'vue-property-decorator'
 
 import DepositRewardCard from '@/components/wallet/earn/DepositRewardCard.vue'
 import { PlatformRewards } from '@/store/modules/platform/types'
+import TreasuryRewardCard from './TreasuryRewardCard.vue'
 
 @Component({
     components: {
         DepositRewardCard,
+        TreasuryRewardCard,
     },
 })
 export default class UserRewards extends Vue {
@@ -29,8 +36,9 @@ export default class UserRewards extends Vue {
     }
 
     updateExpiredDepositRewards() {
-        this.$store.state.Platform.rewards.depositRewards.forEach((reward: any) => {
-            return this.$store.getters['Platform/updateExpiredDepositRewards'](
+        const { depositRewards } = this.$store.state.Platform.rewards
+        depositRewards.forEach((reward: any) => {
+            this.$store.getters['Platform/updateExpiredDepositRewards'](
                 reward.deposit.depositOfferID,
                 reward.deposit.start.toNumber()
             )
@@ -45,52 +53,48 @@ export default class UserRewards extends Vue {
         return this.platformRewards.depositRewards.length > 0
     }
 
+    get hasPendingRewards(): boolean {
+        return this.platformRewards.treasuryRewards.length > 0
+    }
+
+    get firstTreasuryReward() {
+        return this.platformRewards.treasuryRewards[0] ?? null
+    }
+
     get nativeAssetSymbol(): string {
         return this.$store.getters['Assets/AssetAVA']?.symbol ?? ''
     }
 }
 </script>
+
 <style scoped lang="scss">
 @use '../../../styles/abstracts/mixins';
+
 .user_offers {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: auto;
     grid-gap: 1rem;
 }
-.user_rewards {
+
+.reward_card {
+    margin-bottom: 1rem;
+}
+
+.empty {
     padding-bottom: 5vh;
-}
-
-.reward_row {
-    margin-bottom: 12px;
-}
-
-.claimables {
-    margin-bottom: 10px;
-}
-
-label {
-    margin-top: 6px;
+    text-align: center;
     color: var(--primary-color-light);
-    @include mixins.typography-caption;
-    margin-bottom: 3px;
 }
 
 @include mixins.medium-device {
     .user_offers {
-        display: grid;
-        grid-template-rows: repeat(1, 1fr);
-        grid-template-columns: auto;
-        grid-gap: 1rem;
+        grid-template-columns: 1fr;
     }
 }
+
 @include mixins.mobile-device {
     .user_offers {
-        display: grid;
-        grid-template-rows: repeat(1, 1fr);
-        grid-template-columns: auto;
-        grid-gap: 1rem;
+        grid-template-columns: 1fr;
     }
 }
 </style>
