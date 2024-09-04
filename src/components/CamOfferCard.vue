@@ -104,6 +104,23 @@
                 </div>
             </div>
         </template>
+        <template v-else-if="isTreasuryRewards">
+            <div class="offer_detail">
+                <div class="offer_detail_left">
+                    <p>
+                        {{ $t('earn.rewards.pending_rewards.description') }}
+                    </p>
+                </div>
+                <div class="offer_detail_right">
+                    <div class="reward_row">
+                        <label>{{ $t('earn.rewards.pending_rewards.pending_reward') }}:</label>
+                        <p class="reward">
+                            {{ cleanAvaxBN(treasuryRewards.amountToClaim) }} {{ nativeAssetSymbol }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </template>
         <slot></slot>
     </CamCard>
 </template>
@@ -113,7 +130,7 @@ import { cleanAvaxBN, formatDuration } from '@/helpers/helper'
 import { WalletHelper } from '@/helpers/wallet_helper'
 import AvaAsset from '@/js/AvaAsset'
 import { WalletType } from '@/js/wallets/types'
-import { PlatformRewardDeposit } from '@/store/modules/platform/types'
+import { PlatformRewardDeposit, PlatformRewardTreasury } from '@/store/modules/platform/types'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { BN, Buffer } from '@c4tplatform/caminojs/dist'
 import { ClaimTx, UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
@@ -126,9 +143,10 @@ import CamCard from './CamCard.vue'
 })
 export default class CamOfferCard extends Vue {
     @Prop() readonly title!: string
-    @Prop() readonly type!: 'offer' | 'reward'
+    @Prop() readonly type!: 'offer' | 'reward' | 'treasuryRewards'
     @Prop() readonly offer!: DepositOffer
     @Prop() readonly reward!: PlatformRewardDeposit
+    @Prop() readonly treasuryRewards!: PlatformRewardTreasury
 
     get isOffer() {
         return this.type === 'offer'
@@ -136,6 +154,10 @@ export default class CamOfferCard extends Vue {
 
     get isReward() {
         return this.type === 'reward'
+    }
+
+    get isTreasuryRewards() {
+        return this.type === 'treasuryRewards'
     }
 
     get activeWallet(): WalletType {
@@ -326,6 +348,7 @@ label {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-gap: 1rem;
+    height: 100%;
     .offer_detail_left {
         border-right: 2px solid var(--border-color);
     }

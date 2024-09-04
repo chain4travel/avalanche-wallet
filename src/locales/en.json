@@ -189,7 +189,10 @@
                 "label1": "Transaction Hash"
             },
             "reset": "New Transaction"
-        }
+        },
+        "transfer": "Transfer",
+        "receivers": "Receivers and Amounts",
+        "airdrop": "Airdrop"
     },
     "cross_chain": {
         "title": "Cross Chain",
@@ -578,6 +581,11 @@
                 "deposit_end": "Deposit End",
                 "deposit_amount": "Deposit Amount",
                 "deposited_amount": "Deposited Amount"
+            },
+            "pending_rewards": {
+                "title": "Expired deposit rewards",
+                "description": "At least one deposit has already expired without claiming the full amount of rewards. You can still claim the rewards here.",
+                "pending_reward": "Pending Reward"
             },
             "claim_modal": {
                 "are_you_sure": "Are you sure you want to claim {amount} {symbol} rewards?",

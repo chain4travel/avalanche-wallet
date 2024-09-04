@@ -10,7 +10,7 @@
                     {{ $t('earn.rewards.active_earning.title') }}
                 </button>
             </div>
-            <div class="refresh" v-if="tab === 'actine_earning'">
+            <div class="refresh">
                 <Spinner v-if="loadingRefreshDepositRewards" class="spinner"></Spinner>
                 <button v-else @click="refresh">
                     <v-icon>mdi-refresh</v-icon>
