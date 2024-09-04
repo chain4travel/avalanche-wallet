@@ -274,7 +274,7 @@ export default class MnemonicWallet extends HdWalletCore implements IAvaHdWallet
         return await WalletHelper.createNftFamily(this, name, symbol, groupNum)
     }
 
-    async mintNft(mintUtxo: AVMUTXO, payload: PayloadBase, quantity: number) {
-        return await WalletHelper.mintNft(this, mintUtxo, payload, quantity)
+    async mintNft(mintUtxo: AVMUTXO, payload: PayloadBase, quantity: number, owners: string[]) {
+        return await WalletHelper.mintNft(this, mintUtxo, payload, quantity, owners)
     }
 }

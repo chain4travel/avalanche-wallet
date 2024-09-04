@@ -239,18 +239,14 @@ export async function buildCreateNftFamilyTx(
 export async function buildMintNftTx(
     mintUtxo: AVMUTXO,
     payload: PayloadBase,
-    quantity: number,
-    ownerAddress: string,
+    ownerAddresses: string[],
     changeAddress: string,
     fromAddresses: string[],
     utxoSet: UTXOSet
 ): Promise<AVMUnsignedTx> {
-    let addrBuf = bintools.parseAddress(ownerAddress, 'X')
     let owners = []
-
-    let sourceAddresses = fromAddresses
-
-    for (var i = 0; i < quantity; i++) {
+    for (const addr of ownerAddresses) {
+        const addrBuf = bintools.parseAddress(addr, 'X')
         let owner = new OutputOwners([addrBuf])
         owners.push(owner)
     }
@@ -262,7 +258,7 @@ export async function buildMintNftTx(
         .buildCreateNFTMintTx(
             utxoSet,
             owners,
-            sourceAddresses,
+            fromAddresses,
             [changeAddress],
             mintUtxo.getUTXOID(),
             groupID,
