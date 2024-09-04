@@ -189,7 +189,10 @@
                 "label1": "Transaction Hash"
             },
             "reset": "New Transaction"
-        }
+        },
+        "transfer": "Transfer",
+        "receivers": "Receivers and Amounts",
+        "airdrop": "Airdrop"
     },
     "cross_chain": {
         "title": "Cross Chain",
