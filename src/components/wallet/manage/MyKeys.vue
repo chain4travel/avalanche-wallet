@@ -73,8 +73,12 @@ export default class MyKeys extends Vue {
         return this.$store.getters['Accounts/account']
     }
 
+    get getPendingTransaction() {
+        return this.$store.getters['Signavault/importedTransactions']
+    }
+
     get inactiveWallets(): WalletType[] {
-        return this.wallets.filter((wallet) => wallet !== this.activeWallet)
+        return this.checkInactivePendingWallet()
     }
 
     get wallets(): WalletType[] {
@@ -181,6 +185,25 @@ export default class MyKeys extends Vue {
                 this.isLoading = false
             }
         }, 200)
+    }
+
+    checkInactivePendingWallet() {
+        const pendingTxs = this.getPendingTransaction
+        const wallets = this.wallets.filter((wallet) => wallet !== this.activeWallet)
+
+        wallets.forEach((wallet) => {
+            if (wallet.type === 'multisig') {
+                const matchingTx = pendingTxs.find(
+                    (tx) => tx.tx.alias === wallet.getStaticAddress('P')
+                )
+
+                if (matchingTx) {
+                    Object.assign(wallet, { pendingTx: matchingTx })
+                }
+            }
+        })
+
+        return wallets
     }
 }
 </script>

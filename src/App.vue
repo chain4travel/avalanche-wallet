@@ -49,6 +49,7 @@ export default {
     mounted() {
         let { updateSuiteStore } = this.globalHelper()
         updateSuiteStore(this.$store.state)
+        this.$store.dispatch('Signavault/getImportedMultiSigTransaction')
     },
     watch: {
         '$store.state.isAuth': [

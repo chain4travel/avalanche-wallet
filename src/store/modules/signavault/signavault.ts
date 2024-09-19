@@ -8,6 +8,7 @@ const signavault_module: Module<SignavaultState, RootState> = {
     namespaced: true,
     state: {
         transactions: [],
+        importedTransactions: [],
     },
     getters: {
         transactions(state) {
@@ -16,6 +17,10 @@ const signavault_module: Module<SignavaultState, RootState> = {
         transaction: (state) => (txID: string) => {
             return state.transactions.find((t) => t.tx.id === txID)
         },
+
+        importedTransactions(state) {
+            return state.importedTransactions
+        },
     },
     mutations: {
         clear(state) {
@@ -23,6 +28,13 @@ const signavault_module: Module<SignavaultState, RootState> = {
         },
         setTx(state, newTx: MultisigTx[]) {
             state.transactions = newTx
+        },
+
+        setImportedTx(state, newTx: MultisigTx[]) {
+            state.importedTransactions = newTx
+        },
+        clearImported(state) {
+            state.importedTransactions = []
         },
     },
     actions: {
@@ -56,6 +68,57 @@ const signavault_module: Module<SignavaultState, RootState> = {
                 )
             } catch (e: any) {
                 return commit('clear')
+            }
+        },
+
+        async getImportedMultiSigTransaction({ commit, rootState, rootGetters }) {
+            try {
+                const network = rootGetters['Network/selectedNetwork']
+                if (!network) {
+                    commit('clearImported')
+                    return
+                }
+
+                const multisigWallets = rootState.wallets.filter(
+                    (wallet) => wallet.type === 'multisig'
+                )
+
+                const allTxPromises = multisigWallets.map(async (wallet) => {
+                    if (!(wallet instanceof MultisigWallet)) {
+                        commit('clearImported')
+                        return
+                    }
+
+                    const staticAddress = wallet.getStaticAddress('P')
+                    const signingKeyPair = wallet.wallets[0]?.getStaticKeyPair()
+
+                    if (!signingKeyPair) {
+                        console.log('wallet returned undefined staticKeyPair')
+                        commit('clearImported')
+                        return
+                    }
+
+                    return await SignaVaultTx(staticAddress, signingKeyPair) // Get transactions for each wallet
+                })
+
+                const allTxResults = (await Promise.all(allTxPromises)).flat()
+
+                const multisigTxs = allTxResults
+                    .map((mms, index) => {
+                        const wallet = multisigWallets[index]
+                        if (!mms || !(wallet instanceof MultisigWallet)) return []
+
+                        return {
+                            tx: mms,
+                            state: wallet.getSignatureStatus(mms),
+                        }
+                    })
+                    .filter((tx: any) => tx.length !== 0) // Filter out empty results
+
+                commit('setImportedTx', multisigTxs.flat())
+            } catch (e: any) {
+                console.error('Error fetching transactions:', e)
+                commit('clearImported')
             }
         },
     },
