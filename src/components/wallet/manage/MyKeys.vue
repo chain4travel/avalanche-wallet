@@ -188,23 +188,27 @@ export default class MyKeys extends Vue {
     }
 
     checkInactivePendingWallet() {
-        const pendingTxs = this.getPendingTransaction
-        const wallets = this.wallets.filter((wallet) => wallet !== this.activeWallet)
+    const pendingTxs = this.getPendingTransaction;
+    const wallets = this.wallets.filter(wallet => wallet !== this.activeWallet);
 
-        wallets.forEach((wallet) => {
-            if (wallet.type === 'multisig') {
-                const matchingTx = pendingTxs.find(
-                    (tx) => tx.tx.alias === wallet.getStaticAddress('P')
-                )
-
-                if (matchingTx) {
-                    Object.assign(wallet, { pendingTx: matchingTx })
-                }
+    const assignPendingTx = (wallet: WalletType) => {
+        if (wallet.type === 'multisig') {
+            const matchingTx = pendingTxs.find(tx => tx.tx.alias === wallet.getStaticAddress('P'));
+            if (matchingTx) {
+                Object.assign(wallet, { pendingTx: matchingTx });
             }
-        })
+        }
+    };
 
-        return wallets
-    }
+    // Check active wallet
+    assignPendingTx(this.activeWallet);
+
+    // Check inactive wallets
+    wallets.forEach(assignPendingTx);
+
+    return wallets;
+}
+
 }
 </script>
 

@@ -93,6 +93,11 @@
                             >
                                 {{ $t('keys.view_priv_key') }}
                             </button>
+                            <CamBadge
+                                v-if="walletType === 'multisig' && hasPending()"
+                                label="pending tx"
+                                variant="warning"
+                            />
                             <button
                                 v-if="walletType === 'multisig'"
                                 @click="showMultisigOwnerModal"
@@ -141,7 +146,7 @@
 </template>
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import Spinner from '@/components/misc/Spinner.vue'
 import Tooltip from '@/components/misc/Tooltip.vue'
@@ -157,6 +162,7 @@ import { MultisigWallet } from '@/js/wallets/MultisigWallet'
 import { SingletonWallet } from '@/js/wallets/SingletonWallet'
 import { WalletNameType, WalletType } from '@/js/wallets/types'
 import { privateToPublic } from '@ethereumjs/util'
+import CamBadge from '@/components/CamBadge.vue'
 
 @Component({
     components: {
@@ -167,6 +173,7 @@ import { privateToPublic } from '@ethereumjs/util'
         Tooltip,
         ExportKeys,
         PrivateKey,
+        CamBadge,
     },
 })
 export default class KeyRow extends Vue {
@@ -185,6 +192,14 @@ export default class KeyRow extends Vue {
         modal_priv_key: PrivateKey
         editNameInput: HTMLInputElement
     }
+
+    @Watch('walletName')
+    
+
+    checkAdr() {
+        console.log("--------->", this.$store.getters['Signavault/transactions']);
+    }
+
 
     get allMultisigWalletsOwners() {
         return this.$store.state.wallets
@@ -211,6 +226,11 @@ export default class KeyRow extends Vue {
     }
     get isHDWallet() {
         return ['mnemonic', 'ledger'].includes(this.walletType)
+    }
+
+    hasPending(): boolean {
+        if (this.wallet.pendingTx) return true
+        return false
     }
 
     get mnemonicPhrase(): MnemonicPhrase | null {
@@ -278,6 +298,7 @@ export default class KeyRow extends Vue {
     get wallets(): WalletType[] {
         return this.$store.state.wallets
     }
+
     canRemove(): boolean {
         if (this.wallet instanceof MultisigWallet) return true
         else {
