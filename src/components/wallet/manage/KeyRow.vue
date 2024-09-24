@@ -193,14 +193,6 @@ export default class KeyRow extends Vue {
         editNameInput: HTMLInputElement
     }
 
-    @Watch('walletName')
-    
-
-    checkAdr() {
-        console.log("--------->", this.$store.getters['Signavault/transactions']);
-    }
-
-
     get allMultisigWalletsOwners() {
         return this.$store.state.wallets
             .filter((wallet: WalletType) => wallet.type === 'multisig')

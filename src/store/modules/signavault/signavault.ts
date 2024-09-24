@@ -38,7 +38,7 @@ const signavault_module: Module<SignavaultState, RootState> = {
         },
     },
     actions: {
-        async updateTransaction({ commit, rootState, rootGetters }) {
+        async updateTransaction({ commit, dispatch, rootState, rootGetters }) {
             const wallet = rootState.activeWallet
             if (!wallet || !(wallet instanceof MultisigWallet)) return commit('clear')
 
@@ -66,18 +66,15 @@ const signavault_module: Module<SignavaultState, RootState> = {
                         })
                     )
                 )
+                await dispatch('updateImportedMultiSigTransaction')
             } catch (e: any) {
                 return commit('clear')
             }
         },
-
-        async getImportedMultiSigTransaction({ commit, rootState, rootGetters }) {
+        async updateImportedMultiSigTransaction({ commit, rootState, rootGetters }) {
             try {
                 const network = rootGetters['Network/selectedNetwork']
-                if (!network) {
-                    commit('clearImported')
-                    return
-                }
+                if (!network) return commit('clearImported')
 
                 const multisigWallets = rootState.wallets.filter(
                     (wallet) => wallet.type === 'multisig'

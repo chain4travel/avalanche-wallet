@@ -158,17 +158,17 @@ export default class MyKeys extends Vue {
     addAlias() {
         this.isLoading = true
         this.error = ''
-
         setTimeout(async () => {
             try {
                 const multisigAliases = this.multiSigAliases.map((alias) => 'P-' + alias)
                 const multisigWallets = await this.$store.dispatch('addWalletsMultisig', {
                     keys: multisigAliases,
                 })
-
+                await this.$store.dispatch('Signavault/updateImportedMultiSigTransaction')
                 if (!multisigWallets || multisigWallets.length === 0) {
                     this.error = 'No address intersection with signing wallets found!'
                 } else {
+                    this.globalHelper().updateStore('updatePendingTxState', true)
                     this.globalHelper().dispatchNotification({
                         message: `Added ${multisigWallets.length} multisig ${multisigWallets.length > 1 ? 'wallets' : 'wallet'} from ${multisigAliases.length} multisig ${multisigAliases.length > 1 ? 'aliases' : 'alias'}`,
                         type: 'success',
@@ -188,27 +188,29 @@ export default class MyKeys extends Vue {
     }
 
     checkInactivePendingWallet() {
-    const pendingTxs = this.getPendingTransaction;
-    const wallets = this.wallets.filter(wallet => wallet !== this.activeWallet);
+        const pendingTxs = this.getPendingTransaction
+        const wallets = this.wallets.filter((wallet) => wallet !== this.activeWallet)
 
-    const assignPendingTx = (wallet: WalletType) => {
-        if (wallet.type === 'multisig') {
-            const matchingTx = pendingTxs.find(tx => tx.tx.alias === wallet.getStaticAddress('P'));
-            if (matchingTx) {
-                Object.assign(wallet, { pendingTx: matchingTx });
+        const assignPendingTx = (wallet: WalletType) => {
+            if (wallet.type === 'multisig') {
+                delete wallet.pendingTx
+                const matchingTx = pendingTxs.find(
+                    (tx) => tx.tx.alias === wallet.getStaticAddress('P')
+                )
+                if (matchingTx) {
+                    Object.assign(wallet, { pendingTx: matchingTx })
+                }
             }
         }
-    };
 
-    // Check active wallet
-    assignPendingTx(this.activeWallet);
+        // Check active wallet
+        assignPendingTx(this.activeWallet)
 
-    // Check inactive wallets
-    wallets.forEach(assignPendingTx);
-
-    return wallets;
-}
-
+        // Check inactive wallets
+        wallets.forEach(assignPendingTx)
+        
+        return wallets
+    }
 }
 </script>
 

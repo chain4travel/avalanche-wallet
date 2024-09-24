@@ -71,21 +71,22 @@ export default class CamBadge extends Vue {
 .small,
 .medium {
     font-family: Inter;
-    font-weight: 600;
-    line-height: 16px;
     letter-spacing: 1.6px;
     text-align: center;
     text-transform: uppercase;
+    font-weight: 600;
+    line-height: 18px;
+    font-variant-numeric: lining-nums tabular-nums slashed-zero;
+    font-feature-settings: "ss01" on;
+    font-size: 10px;
 }
 
 .small {
     font-size: 10px;
-    line-height: 16px;
 }
 
 .medium {
     font-size: 12px;
-    line-height: 18px;
 }
 
 [data-theme='light'] {
