@@ -96,7 +96,6 @@
             :title="$t('earn.rewards.abort_modal.title')"
             :modalText="$t('earn.rewards.abort_modal.message')"
             @cancelTx="cancelMultisigTx"
-            
         />
     </CamOfferCard>
 </template>
