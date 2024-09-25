@@ -3,7 +3,9 @@
         <TreasuryRewardCard
             v-if="firstTreasuryReward"
             class="reward_card"
+            :key="'reward_TreasuryReward'"
             :reward="firstTreasuryReward"
+            :pendingDepositClaimStatus="pendingDepositClaimStatus"
         />
         <div class="user_offers">
             <DepositRewardCard
@@ -11,6 +13,7 @@
                 :key="'reward_' + index"
                 :reward="reward"
                 class="reward_card"
+                @updatePendingDepositClaim="updatePendingDepositClaim"
             />
         </div>
     </div>
@@ -31,8 +34,14 @@ import TreasuryRewardCard from './TreasuryRewardCard.vue'
     },
 })
 export default class UserRewards extends Vue {
+    pendingDepositClaimStatus = false
+
     mounted() {
         this.updateExpiredDepositRewards()
+    }
+
+    updatePendingDepositClaim(status: boolean) {
+        this.pendingDepositClaimStatus = status
     }
 
     updateExpiredDepositRewards() {

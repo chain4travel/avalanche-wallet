@@ -116,6 +116,7 @@ export interface PlatformRewardDeposit {
     deposit: APIDeposit
 }
 
+
 export interface PlatformRewards {
     treasuryRewards: PlatformRewardTreasury[]
     depositRewards: PlatformRewardDeposit[]
