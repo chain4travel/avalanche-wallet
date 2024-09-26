@@ -77,7 +77,7 @@ export default class CamBadge extends Vue {
     font-weight: 600;
     line-height: 18px;
     font-variant-numeric: lining-nums tabular-nums slashed-zero;
-    font-feature-settings: "ss01" on;
+    font-feature-settings: 'ss01' on;
     font-size: 10px;
 }
 
@@ -108,7 +108,5 @@ export default class CamBadge extends Vue {
         background: var(--camino-error-light);
         color: #ffff;
     }
-
-   
 }
 </style>

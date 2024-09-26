@@ -208,7 +208,6 @@ export default class MyKeys extends Vue {
 
         // Check inactive wallets
         wallets.forEach(assignPendingTx)
-        
         return wallets
     }
 }
