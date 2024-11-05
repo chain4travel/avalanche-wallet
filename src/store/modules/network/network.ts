@@ -183,7 +183,7 @@ const network_module: Module<NetworkState, RootState> = {
 
             commit('setNetwork', net, { root: true })
             state.status = 'connected'
-            localStorage.setItem('selectedNetwork', net.name)
+            localStorage.setItem('selectedNetwork', net.name.toLowerCase())
             return true
         },
 
@@ -227,41 +227,38 @@ const network_module: Module<NetworkState, RootState> = {
             commit('addNetwork', columbus)
 
             try {
-                let urlSubstringParam = window.location.pathname?.split('/')?.[2]
-                let storedNetworkName = localStorage.getItem('selectedNetwork')
+                const urlSubstringParam = window.location.pathname?.split('/')?.[2]
+                const storedNetworkName = localStorage.getItem('selectedNetwork')
 
-                if (urlSubstringParam !== undefined) {
-                    let networkFromParam = state.networks.find(
-                        (val) => val.name.toLowerCase() === urlSubstringParam.toLowerCase()
-                    )
+                const findNetwork = (
+                    networks: AvaNetwork[],
+                    name: string | null
+                ): AvaNetwork | undefined =>
+                    networks.find((val) => val.name.toLowerCase() === name?.toLowerCase())
 
-                    if (networkFromParam) {
-                        await dispatch('setNetwork', networkFromParam)
+                const setNetworkFromParam = async (param: string) => {
+                    const network =
+                        findNetwork(state.networks, param) ||
+                        findNetwork(state.networksCustom, param)
+                    if (network) {
+                        await dispatch('setNetwork', network)
                     } else {
-                        let networkCustomFromParam = state.networksCustom.find(
-                            (val) => val.name.toLowerCase() === urlSubstringParam.toLowerCase()
-                        )
-
-                        if (networkCustomFromParam)
-                            await dispatch('setNetwork', networkCustomFromParam)
-                        else await dispatch('setNetwork', state.networks[0])
+                        await setNetworkFromStorage()
                     }
-                } else if (storedNetworkName !== undefined) {
-                    let networkMatchFromStorage = state.networks.find(
-                        (val) => val.name.toLowerCase() === storedNetworkName?.toLowerCase()
-                    )
+                }
 
-                    if (networkMatchFromStorage) {
-                        await dispatch('setNetwork', networkMatchFromStorage)
-                    } else {
-                        let customNetworkMatchFromStorage = state.networksCustom.find(
-                            (val) => val.name.toLowerCase() === storedNetworkName?.toLowerCase()
-                        )
+                const setNetworkFromStorage = async () => {
+                    const network =
+                        findNetwork(state.networks, storedNetworkName) ||
+                        findNetwork(state.networksCustom, storedNetworkName) ||
+                        state.networks[0]
+                    await dispatch('setNetwork', network)
+                }
 
-                        if (customNetworkMatchFromStorage)
-                            await dispatch('setNetwork', customNetworkMatchFromStorage)
-                        else await dispatch('setNetwork', state.networks[0])
-                    }
+                if (urlSubstringParam) {
+                    await setNetworkFromParam(urlSubstringParam)
+                } else if (storedNetworkName) {
+                    await setNetworkFromStorage()
                 } else {
                     await dispatch('setNetwork', state.networks[0])
                 }

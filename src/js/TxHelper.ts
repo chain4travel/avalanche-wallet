@@ -1,5 +1,5 @@
 import { ava, bintools } from '@/AVA'
-import { ITransaction } from '@/components/wallet/transfer/types'
+import { BulkOrder, ITransaction } from '@/components/wallet/transfer/types'
 import { BN, Buffer } from '@c4tplatform/caminojs/dist'
 import {
     AssetAmountDestination,
@@ -13,6 +13,7 @@ import {
     UTXOSet,
     UTXOSet as AVMUTXOSet,
     AVMConstants,
+    SECPTransferOutput,
 } from '@c4tplatform/caminojs/dist/apis/avm'
 
 import { PayloadBase } from '@c4tplatform/caminojs/dist/utils'
@@ -26,6 +27,8 @@ import ERCNftToken from '@/js/ERCNftToken'
 import { Transaction } from '@ethereumjs/tx'
 import { Chain, Common, Hardfork } from '@ethereumjs/common'
 import Erc20Token from '@/js/Erc20Token'
+import AvaAsset from './AvaAsset'
+import { ZeroBN } from '@/constants'
 
 export async function buildUnsignedTransaction(
     orders: (ITransaction | AVMUTXO)[],
@@ -153,6 +156,59 @@ export async function buildUnsignedTransaction(
     return unsignedTx
 }
 
+export function buildBulkTransfer(
+    from: string[],
+    change: string[],
+    utxoset: AVMUTXOSet,
+    orders: BulkOrder[],
+    asset: AvaAsset,
+    memo?: Buffer
+): AVMUnsignedTx {
+    const fromAddrs: Buffer[] = from.map((val) => bintools.parseAddress(val, 'X'))
+    const changeAddrs: Buffer[] = change.map((val) => bintools.parseAddress(val, 'X'))
+
+    const aad: AssetAmountDestination = new AssetAmountDestination([], 0, fromAddrs, changeAddrs, 1)
+    const assetId = bintools.cb58Decode(asset.id)
+    const avaAsset = ava.getNetwork().X.avaxAssetID
+
+    // Collect outputs
+    let amount = ZeroBN
+    orders.forEach((o) => (amount = amount.add(o.amount)))
+    const fee = ava.XChain().getTxFee()
+
+    if (asset.id === avaAsset) {
+        aad.addAssetAmount(assetId, amount, fee)
+    } else {
+        aad.addAssetAmount(assetId, amount, ZeroBN)
+        aad.addAssetAmount(bintools.cb58Decode(avaAsset), ZeroBN, fee)
+    }
+
+    const success: Error = utxoset.getMinimumSpendable(aad)
+
+    let ins: TransferableInput[] = []
+    let outs: TransferableOutput[] = []
+    if (typeof success === 'undefined') {
+        ins = aad.getInputs()
+        outs = aad.getChangeOutputs()
+    } else {
+        throw success
+    }
+
+    // Build the other outputs
+    orders.forEach((v) => {
+        const addr = bintools.parseAddress(v.address, 'X')
+        outs.push(
+            new TransferableOutput(assetId, new SECPTransferOutput(v.amount, [addr], ZeroBN, 1))
+        )
+    })
+
+    let networkId: number = ava.getNetworkID()
+    let chainId: Buffer = bintools.cb58Decode(ava.XChain().getBlockchainID())
+
+    const baseTx = new BaseTx(networkId, chainId, outs, ins, memo)
+
+    return new AVMUnsignedTx(baseTx)
+}
 export async function buildCreateNftFamilyTx(
     name: string,
     symbol: string,
@@ -183,18 +239,14 @@ export async function buildCreateNftFamilyTx(
 export async function buildMintNftTx(
     mintUtxo: AVMUTXO,
     payload: PayloadBase,
-    quantity: number,
-    ownerAddress: string,
+    ownerAddresses: string[],
     changeAddress: string,
     fromAddresses: string[],
     utxoSet: UTXOSet
 ): Promise<AVMUnsignedTx> {
-    let addrBuf = bintools.parseAddress(ownerAddress, 'X')
     let owners = []
-
-    let sourceAddresses = fromAddresses
-
-    for (var i = 0; i < quantity; i++) {
+    for (const addr of ownerAddresses) {
+        const addrBuf = bintools.parseAddress(addr, 'X')
         let owner = new OutputOwners([addrBuf])
         owners.push(owner)
     }
@@ -206,7 +258,7 @@ export async function buildMintNftTx(
         .buildCreateNFTMintTx(
             utxoSet,
             owners,
-            sourceAddresses,
+            fromAddresses,
             [changeAddress],
             mintUtxo.getUTXOID(),
             groupID,
