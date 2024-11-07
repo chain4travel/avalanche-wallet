@@ -153,7 +153,6 @@ class WalletHelper {
 
         const unsignedTx = await ava.PChain().buildCaminoAddValidatorTx(
             utxoSet,
-            [stakeReturnAddr],
             [pAddressStrings, signerAddresses], // from
             [changeAddress], // change
             nodeID,
@@ -304,7 +303,6 @@ class WalletHelper {
 
         const unsignedTx = await ava.PChain().buildCaminoAddValidatorTx(
             utxoSet,
-            pAddressStrings,
             [pAddressStrings, signerAddresses],
             pAddressStrings,
             nodeID,
