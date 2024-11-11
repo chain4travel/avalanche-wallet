@@ -1014,9 +1014,9 @@
         "transfer_success_msg": "You have succesfully sent your transaction.",
         "transfer_error_msg": "Failed to send transaction.",
         "transfer_cancelled_msg": "Transaction has been cancelled.",
-        "execute_multisig_transaction_error": "Transaction execution failed {error}",
-        "multisig_transaction_saved": "Your signature saved successfully! {txId}",
-        "multisig_transaction_not_saved": "Your signature saved successfully! {error}",
+        "execute_multisig_transaction_error": "Transaction execution failed",
+        "multisig_transaction_saved": "Your signature saved successfully!",
+        "multisig_transaction_not_saved": "Your signature saved successfully!",
         "transaction_cancel_failed": "Cancelling the transaction failed",
         "claim_reward_failed": "Failed to claim reward",
         "something_went_wrong": "Something went wrong",
@@ -1040,7 +1040,7 @@
         "confirm": "Confirm",
         "create_multisig": "Create Multisignature Wallet",
         "cancel": "Cancel",
-        "disclamer": "Saving the multisignature wallet definition will incur a fee of {fee} {symbol} from P-Chain balance",
+        "disclamer": "Saving the  wallet definition will incur a fee of {fee} {symbol} from P-Chain balance",
         "alert": {
             "wize_name": "Please be aware that this description will be publicly visible on the Camino Network. Choose your words carefully."
         },
