@@ -6,6 +6,7 @@
             :wallet="activeWallet"
             class="key_row"
             :is_default="true"
+            :isSuite="isSuite"
         ></key-row>
         <hr v-if="inactiveWallets.length > 0" />
         <p class="label" v-if="hasOtherKeys">
@@ -30,6 +31,7 @@
         </div>
         <transition-group name="fade" class="other-keys">
             <key-row
+                :isSuite="isSuite"
                 v-for="wallet in inactiveWallets"
                 :wallet="wallet"
                 :key="wallet.id"
@@ -43,7 +45,7 @@
 
 <script lang="ts">
 import 'reflect-metadata'
-import { Component, Vue, Watch } from 'vue-property-decorator'
+import { Component, Vue, Watch, Prop } from 'vue-property-decorator'
 
 import { bintools } from '@/AVA'
 import RememberKey from '@/components/misc/RememberKey.vue'
@@ -62,6 +64,7 @@ import Alert from '@/components/Alert.vue'
     },
 })
 export default class MyKeys extends Vue {
+    @Prop() isSuite?: boolean
     error: string = ''
     isLoading: boolean = false
     imported: boolean = false

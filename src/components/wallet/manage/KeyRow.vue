@@ -29,7 +29,11 @@
                 <div class="header_cols">
                     <div class="detail">
                         <div class="edit-wallet-name-container">
-                            <h3 v-show="!isEditable" class="addressVal" style="max-width: 300px">
+                            <h3
+                                v-show="!isEditable"
+                                class="addressVal"
+                                :style="isSuite ? { maxWidth: '395px' } : { maxWidth: 'none' }"
+                            >
                                 {{ walletName }}
                             </h3>
                             <input
@@ -166,6 +170,7 @@ import { privateToPublic } from '@ethereumjs/util'
     },
 })
 export default class KeyRow extends Vue {
+    @Prop() isSuite?: boolean
     @Prop() wallet!: WalletType
     @Prop({ default: false }) is_default?: boolean
 
@@ -514,11 +519,44 @@ export default class KeyRow extends Vue {
     margin-right: 6px;
 }
 
+@include mixins.medium-device {
+    .addressVal {
+        max-width: 395px !important;
+    }
+}
+
+@include mixins.large-device {
+    .addressVal {
+        max-width: 395px !important;
+    }
+}
+
+@include mixins.large-device {
+    .addressVal {
+        max-width: 500px !important;
+    }
+}
+
+@include mixins.xl-device {
+    .addressVal {
+        max-width: 500px !important;
+    }
+}
+
+@include mixins.largest-device {
+    .addressVal {
+        max-width: 800px !important;
+    }
+}
+
 @include mixins.mobile-device {
     .addressVal-value {
         white-space: normal;
         word-break: break-all;
         text-align: left;
+    }
+    .addressVal {
+        max-width: 395px !important;
     }
     .header_cols {
         display: flex;
