@@ -777,7 +777,8 @@ export default class CreateOfferForm extends Vue {
 
     /* methods */
     async submitCreateOffer() {
-        if (!this.isRestricted) this.offer.ownerAddress = undefined
+        if (!this.isRestricted || this.wallet.type === 'multisig')
+            this.offer.ownerAddress = undefined
         else this.offer.ownerAddress = this.wallet?.getStaticAddress('P')
         this.txState = TxState.started
         const wallet: WalletType = this.$store.state.activeWallet
@@ -793,7 +794,12 @@ export default class CreateOfferForm extends Vue {
         try {
             const result = await WalletHelper.buildAddDepositOfferTx(wallet, offer)
             this.txState = TxState.waiting
-            this.waitTxConfirm(result, addresses, this.offer.start.toNumber(), this.isRestricted)
+            this.waitTxConfirm(
+                result,
+                addresses,
+                this.offer.start.toNumber(),
+                this.wallet.type === 'multisig' ? false : this.isRestricted
+            )
         } catch (error) {
             if (error instanceof SignatureError) {
                 await this.$store.dispatch('Signavault/updateTransaction')
