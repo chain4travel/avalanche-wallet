@@ -278,8 +278,6 @@ class WalletHelper {
 
         const signerAddresses = wallet.getSignerAddresses('P')
 
-        // For change address use first available on the platform chain
-        const changeAddress = wallet.getChangeAddressPlatform()
         const consortiumMemberAuthCredentials: [number, Buffer | string][] = [
             [0, pAddressStrings[0]],
         ]
@@ -290,7 +288,7 @@ class WalletHelper {
         const unsignedTx = await ava.PChain().buildRegisterNodeTx(
             utxoSet,
             [pAddressStrings, signerAddresses], // from + possible signers
-            [changeAddress], // change
+            [], // change
             oldNodeID,
             newNodeID,
             address,
@@ -368,9 +366,6 @@ class WalletHelper {
         const pAddressStrings = wallet.getAllAddressesP()
         const signerAddresses = wallet.getSignerAddresses('P')
 
-        // For change address use first available on the platform chain
-        const changeAddress = wallet.getChangeAddressPlatform()
-
         const threshold =
             wallet.type === 'multisig' ? (wallet as MultisigWallet)?.keyData?.owner?.threshold : 1
 
@@ -379,7 +374,7 @@ class WalletHelper {
             amount,
             [toAddress],
             [pAddressStrings, signerAddresses], // from + possible signers
-            [changeAddress], // change
+            [], // change
             memo,
             undefined, // asOf
             undefined, // lockTime
