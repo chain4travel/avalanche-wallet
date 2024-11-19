@@ -179,7 +179,6 @@ class WalletHelper {
 
         const unsignedTx = await ava.PChain().buildCaminoAddValidatorTx(
             utxoSet,
-            [stakeReturnAddr],
             [pAddressStrings, signerAddresses], // from
             [changeAddress], // change
             nodeID,
@@ -279,8 +278,6 @@ class WalletHelper {
 
         const signerAddresses = wallet.getSignerAddresses('P')
 
-        // For change address use first available on the platform chain
-        const changeAddress = wallet.getChangeAddressPlatform()
         const consortiumMemberAuthCredentials: [number, Buffer | string][] = [
             [0, pAddressStrings[0]],
         ]
@@ -291,7 +288,7 @@ class WalletHelper {
         const unsignedTx = await ava.PChain().buildRegisterNodeTx(
             utxoSet,
             [pAddressStrings, signerAddresses], // from + possible signers
-            [changeAddress], // change
+            [], // change
             oldNodeID,
             newNodeID,
             address,
@@ -330,7 +327,6 @@ class WalletHelper {
 
         const unsignedTx = await ava.PChain().buildCaminoAddValidatorTx(
             utxoSet,
-            pAddressStrings,
             [pAddressStrings, signerAddresses],
             pAddressStrings,
             nodeID,
@@ -370,9 +366,6 @@ class WalletHelper {
         const pAddressStrings = wallet.getAllAddressesP()
         const signerAddresses = wallet.getSignerAddresses('P')
 
-        // For change address use first available on the platform chain
-        const changeAddress = wallet.getChangeAddressPlatform()
-
         const threshold =
             wallet.type === 'multisig' ? (wallet as MultisigWallet)?.keyData?.owner?.threshold : 1
 
@@ -381,7 +374,7 @@ class WalletHelper {
             amount,
             [toAddress],
             [pAddressStrings, signerAddresses], // from + possible signers
-            [changeAddress], // change
+            [], // change
             memo,
             undefined, // asOf
             undefined, // lockTime
@@ -512,8 +505,6 @@ class WalletHelper {
 
         //signerAddresses = arrSigner.concat(signerAddresses)
 
-        const changeAddress = activeWallet.getChangeAddressPlatform()
-
         const threshold =
             activeWallet.type === 'multisig'
                 ? (activeWallet as MultisigWallet)?.keyData?.owner?.threshold
@@ -525,7 +516,7 @@ class WalletHelper {
             //@ts-ignore
             utxoSet,
             [[rewardOwnerAddress], signerAddresses],
-            [changeAddress],
+            [],
             undefined, // memo
             new BN(0), //as Of
             Number(threshold),
@@ -570,9 +561,6 @@ class WalletHelper {
         const pAddressStrings = wallet.getAllAddressesP()
         const signerAddresses = wallet.getSignerAddresses('P')
 
-        // For change address use first available on the platform chain
-        const changeAddress = wallet.getChangeAddressPlatform()
-
         const claimAmountParam = {
             claimType: claimValidator
                 ? ClaimType.VALIDATOR_REWARD
@@ -592,7 +580,7 @@ class WalletHelper {
             .buildClaimTx(
                 wallet.platformUtxoset,
                 [pAddressStrings, signerAddresses],
-                [changeAddress],
+                [],
                 Buffer.alloc(0),
                 ZeroBN,
                 1,
@@ -628,7 +616,6 @@ class WalletHelper {
             'P'
         )
 
-        const changeAddress = wallet.getChangeAddressPlatform()
         const depositCreator = pAddressStrings[0]
         const depositCreatorAuth: [number, string | Buffer][] = [[0, depositCreator]]
         const unsignedTx = await ava
@@ -637,7 +624,7 @@ class WalletHelper {
                 restrictedOffer ? 1 : 0,
                 wallet.platformUtxoset,
                 [pAddressStrings, signerAddresses],
-                [changeAddress],
+                [],
                 depositID,
                 depositDuration,
                 new OutputOwners([depositOwnerAddress], ZeroBN, 1),
@@ -663,7 +650,6 @@ class WalletHelper {
     static async buildAddDepositOfferTx(wallet: WalletType, offer: DepositOffer) {
         const pAddressStrings = wallet.getAllAddressesP()
         const signerAddresses = wallet.getSignerAddresses('P')
-        const changeAddress = wallet.getChangeAddressPlatform()
 
         const creatorAddress = pAddressStrings[0]
         const creatorAuth: [number, Buffer | string][] = [[0, pAddressStrings[0]]]
@@ -673,7 +659,7 @@ class WalletHelper {
             .buildAddDepositOfferTx(
                 wallet.platformUtxoset,
                 [pAddressStrings, signerAddresses],
-                [changeAddress],
+                [],
                 offer,
                 creatorAddress,
                 creatorAuth,
