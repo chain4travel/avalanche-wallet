@@ -805,7 +805,7 @@ class WalletHelper {
             .buildMultisigAliasTx(
                 wallet.platformUtxoset,
                 pAddressStrings,
-                pAddressStrings,
+                [],
                 multisigAliasParams,
                 undefined,
                 ZeroBN
@@ -844,7 +844,7 @@ class WalletHelper {
             .buildMultisigAliasTx(
                 wallet.platformUtxoset,
                 [[multisigAliasAddress], initialAddresses],
-                [multisigAliasAddress],
+                [],
                 multisigAliasParams,
                 undefined,
                 ZeroBN,
