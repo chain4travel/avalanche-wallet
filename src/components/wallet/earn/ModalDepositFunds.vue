@@ -260,14 +260,6 @@ export default class ModalDepositFunds extends Vue {
         modal_abort_signing: ModalAbortSigning
     }
 
-    mounted() {
-        console.log('offer', this.offer)
-        const adr = ava
-                        .PChain()
-                        .addressFromBuffer(bintools.cb58Decode(this.offer.ownerAddress as string))
-        console.log('deposit owner', adr )
-    }
-
     @Watch('depositOwner')
     onDepositOwnerChange() {
         this.depositOwnerError = isValidPChainAddress(this.depositOwner) ? '' : 'Invalid address'
