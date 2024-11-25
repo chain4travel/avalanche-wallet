@@ -45,6 +45,7 @@
                                         :error="depositOwnerError"
                                         :errorMessage="depositOwnerError"
                                         style="flex: 1"
+                                        :disabled="pendingDepositTX"
                                     />
                                 </div>
                                 <!-- <label style="margin-top: 16px">Deposit Owner</label>
@@ -257,6 +258,14 @@ export default class ModalDepositFunds extends Vue {
     $refs!: {
         modal: Modal
         modal_abort_signing: ModalAbortSigning
+    }
+
+    mounted() {
+        console.log('offer', this.offer)
+        const adr = ava
+                        .PChain()
+                        .addressFromBuffer(bintools.cb58Decode(this.offer.ownerAddress as string))
+        console.log('deposit owner', adr )
     }
 
     @Watch('depositOwner')
