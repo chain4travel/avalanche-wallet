@@ -18,8 +18,7 @@
         "release": "release-it",
         "test_watch": "jest --verbose --watch ./tests",
         "test_debug": "node --inspect-brk node_modules/.bin/jest ./tests --runInBand",
-        "test": "jest --verbose ./tests",
-        "preinstall": "git submodule update --recursive --init"
+        "test": "jest --verbose ./tests"
     },
     "devDependencies": {
         "@babel/core": "^7.15.8",
