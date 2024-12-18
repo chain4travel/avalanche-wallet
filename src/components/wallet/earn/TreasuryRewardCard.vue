@@ -80,7 +80,7 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import ModalClaimReward from '@/components/modals/ClaimRewardModal.vue'
 import { cleanAvaxBN } from '@/helpers/helper'
-import { PlatformRewardDeposit } from '@/store/modules/platform/types'
+import { PlatformRewardTreasury } from '@/store/modules/platform/types'
 
 import { bintools } from '@/AVA'
 import Alert from '@/components/Alert.vue'
@@ -92,7 +92,6 @@ import { WalletType } from '@/js/wallets/types'
 import { MultisigTx as SignavaultTx } from '@/store/modules/signavault/types'
 import { BN, Buffer } from '@c4tplatform/caminojs/dist'
 import { ClaimTx, UnsignedTx } from '@c4tplatform/caminojs/dist/apis/platformvm'
-import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfaces'
 import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
 import ModalAbortSigning from './ModalAbortSigning.vue'
 import ModalClaimDepositReward from './ModalClaimDepositReward.vue'
@@ -116,7 +115,8 @@ export default class TreasuryRewardCard extends Vue {
     helpers = this.globalHelper()
     signedclaimedAmount: BN = new BN(0)
     // signedDepositID: string = ''
-    @Prop() reward!: PlatformRewardDeposit
+    @Prop() reward!: PlatformRewardTreasury
+    @Prop() pendingDepositClaimStatus!: boolean
 
     $refs!: {
         // modal_claim_reward: ModalClaimReward
@@ -239,10 +239,17 @@ export default class TreasuryRewardCard extends Vue {
         return this.pendingSendMultisigTX?.tx?.owners ?? []
     }
 
+    getPendingMultisigTx(): SignavaultTx | undefined {
+        const tx = this.pendingSendMultisigTX
+        if (!tx) return undefined
+
+        return tx
+    }
+
     signatureStatus(): number {
-        if (!this.pendingSendMultisigTX?.tx) return -1
-        else if (!this.canExecuteMultisigTx()) return 1
-        else if (this.canExecuteMultisigTx()) return 2
+        if (!this.getPendingMultisigTx()?.tx && !this.pendingDepositClaimStatus) return -1
+        else if (!this.canExecuteMultisigTx() && !this.pendingDepositClaimStatus) return 1
+        else if (this.canExecuteMultisigTx() && !this.pendingDepositClaimStatus) return 2
 
         return -1
     }
