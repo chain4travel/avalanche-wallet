@@ -27,8 +27,7 @@ export async function getGasPrice(): Promise<BN> {
  */
 export async function getAdjustedGasPrice(): Promise<BN> {
     let gasPrice = await getGasPrice()
-    let adjustedGas = adjustValue(gasPrice, 25)
-    return BN.min(adjustedGas, MAX_GAS)
+    return BN.min(gasPrice, MAX_GAS)
 }
 
 /**
