@@ -45,6 +45,7 @@
                                         :error="depositOwnerError"
                                         :errorMessage="depositOwnerError"
                                         style="flex: 1"
+                                        :disabled="pendingDepositTX"
                                     />
                                 </div>
                                 <!-- <label style="margin-top: 16px">Deposit Owner</label>
