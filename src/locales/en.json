@@ -180,7 +180,7 @@
             "title": "Source Chain"
         },
         "c_chain": {
-            "gasPrice": "Gas Price (GWEI)",
+            "gasPrice": "Gas Price (nCAM)",
             "gasLimit": "Gas Limit",
             "confirm": "Confirm",
             "cancel": "Cancel",

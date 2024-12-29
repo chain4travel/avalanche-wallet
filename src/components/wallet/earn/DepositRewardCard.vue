@@ -89,6 +89,7 @@
             :amount="reward.amountToClaim"
             :rewardOwner="reward.deposit.rewardOwner"
             :canExecuteMultisigTx="canExecuteMultisigTx"
+            @updatePendingDepositClaim="updatePendingDepositClaim"
         />
         <ModalAbortSigning
             ref="modal_abort_signing"
@@ -213,6 +214,7 @@ export default class DepositRewardCard extends Vue {
                     message: this.$t('transfer.multisig.transaction_aborted'),
                     type: 'success',
                 })
+                this.updatePendingDepositClaim(false)
             }
         } catch (err) {
             console.log(err)
@@ -273,11 +275,17 @@ export default class DepositRewardCard extends Vue {
     }
 
     signatureStatus(depositTxID: string): number {
+        const depositId = this.signedDepositID()
+        if (depositId === depositTxID) this.updatePendingDepositClaim(true)
         if (!this.getPendingMultisigTx(depositTxID)?.tx) return -1
         else if (!this.canExecuteMultisigTx(depositTxID)) return 1
         else if (this.canExecuteMultisigTx(depositTxID)) return 2
 
         return -1
+    }
+
+    updatePendingDepositClaim(status: boolean) {
+        this.$emit('updatePendingDepositClaim', status)
     }
 
     canExecuteMultisigTx(depositTxID: string): boolean {

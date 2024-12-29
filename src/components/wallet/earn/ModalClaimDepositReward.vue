@@ -231,6 +231,7 @@ export default class ModalClaimDepositReward extends Vue {
             this.issueMultisigTx()
             this.updateBalance()
         }
+        this.$emit('updatePendingDepositClaim', false)
     }
 
     async issueMultisigTx() {
