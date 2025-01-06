@@ -295,6 +295,7 @@
             },
             "form_col": {
                 "label1": "Quantity",
+                "label2": "Owners (optional)",
                 "fee": "Fee",
                 "submit": "Mint"
             },
@@ -315,7 +316,9 @@
                     "label3": "Description",
                     "err1": "Not a valid image URL.",
                     "err2": "You must set the image.",
-                    "err3": "Image URL too long."
+                    "err3": "Image URL too long.",
+                    "errInvalidUrl": "The provided URL is not valid or unsupported.",
+                    "errInvalidJson": "The JSON metadata is invalid or missing the image field."
                 },
                 "json": {
                     "label1": "JSON Payload (MAX 1024 characters)"
