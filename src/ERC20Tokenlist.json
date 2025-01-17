@@ -14,7 +14,7 @@
             "decimals": 18,
             "name": "Monerium EURe",
             "symbol": "EURe",
-            "logoURI": "/assets/eure_logo.png"
+            "logoURI": "/img/eure_logo.png"
         }
     ],
     "timestamp": "2022-03-20T00:00:00+00:00"
