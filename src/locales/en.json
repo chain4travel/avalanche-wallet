@@ -583,7 +583,10 @@
                 "deposit_start": "Deposit Start",
                 "deposit_end": "Deposit End",
                 "deposit_amount": "Deposit Amount",
-                "deposited_amount": "Deposited Amount"
+                "deposited_amount": "Deposited Amount",
+                "undepositable_amount": "Undepositable Amount",
+                "already_undeposited": "Already Undeposited",
+                "undeposit": "Undeposit"
             },
             "pending_rewards": {
                 "title": "Expired deposit rewards",

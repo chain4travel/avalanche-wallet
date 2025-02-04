@@ -82,10 +82,24 @@
                             {{ cleanAvaxBN(reward.deposit.amount) }} {{ nativeAssetSymbol }}
                         </p>
                     </div>
+                    <div>
+                        <label>{{ $t('earn.rewards.active_earning.undepositable_amount') }}:</label>
+                        <p class="reward">
+                            {{ cleanAvaxBN(reward?.deposit?.unlockableAmount) }}
+                            {{ nativeAssetSymbol }}
+                        </p>
+                    </div>
                     <div class="reward_row">
                         <label>{{ $t('earn.rewards.active_earning.pending_reward') }}:</label>
                         <p class="reward">
                             {{ cleanAvaxBN(reward.amountToClaim) }} {{ nativeAssetSymbol }}
+                        </p>
+                    </div>
+                    <div>
+                        <label>{{ $t('earn.rewards.active_earning.already_undeposited') }}:</label>
+                        <p class="reward">
+                            {{ cleanAvaxBN(reward?.deposit?.unlockedAmount) }}
+                            {{ nativeAssetSymbol }}
                         </p>
                     </div>
                     <div class="reward_row">
