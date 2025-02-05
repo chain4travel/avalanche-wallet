@@ -1,6 +1,9 @@
 <template>
     <CamOfferCard :title="rewardTitle" type="reward" :reward="reward">
         <div v-if="!isMultiSig" class="button_group">
+            <CamBtn variant="primary" @click="openUndepositModal" :disabled="isUndepositDisabled">
+                {{ $t('earn.rewards.active_earning.undeposit') }}
+            </CamBtn>
             <CamBtn variant="primary" @click="openModal" :disabled="isClaimDisabled">
                 {{ $t('earn.rewards.active_earning.claim') }}
             </CamBtn>
@@ -69,6 +72,13 @@
             <div v-else class="button_group">
                 <CamBtn
                     variant="primary"
+                    @click="openUndepositModal"
+                    :disabled="isUndepositDisabled"
+                >
+                    {{ $t('earn.rewards.active_earning.undeposit') }}
+                </CamBtn>
+                <CamBtn
+                    variant="primary"
                     @click="disclamer = true"
                     :disabled="isClaimDisabled || disallowedClaim(reward.deposit.depositTxID)"
                 >
@@ -83,6 +93,7 @@
                 {{ $t('earn.rewards.active_earning.are_you_sure') }}
             </Alert>
         </template>
+        <ModalUndeposit ref="modal_undeposit" />
         <ModalClaimDepositReward
             ref="modal_claim_reward"
             :depositTxID="reward.deposit.depositTxID"
@@ -121,6 +132,7 @@ import { DepositOffer } from '@c4tplatform/caminojs/dist/apis/platformvm/interfa
 import { ModelMultisigTxOwner } from '@c4tplatform/signavaultjs'
 import ModalAbortSigning from './ModalAbortSigning.vue'
 import ModalClaimDepositReward from './ModalClaimDepositReward.vue'
+import ModalUndeposit from './ModalUndeposit.vue'
 
 @Component({
     components: {
@@ -130,6 +142,7 @@ import ModalClaimDepositReward from './ModalClaimDepositReward.vue'
         CamBtn,
         Alert,
         CamOfferCard,
+        ModalUndeposit,
     },
 })
 export default class DepositRewardCard extends Vue {
@@ -147,6 +160,7 @@ export default class DepositRewardCard extends Vue {
         // modal_claim_reward: ModalClaimReward
         modal_claim_reward: ModalClaimDepositReward
         modal_abort_signing: ModalAbortSigning
+        modal_undeposit: ModalUndeposit
     }
 
     openAbortModal() {
@@ -344,6 +358,10 @@ export default class DepositRewardCard extends Vue {
         return this.reward.amountToClaim.isZero()
     }
 
+    get isUndepositDisabled() {
+        return this.reward.deposit.unlockableAmount.isZero()
+    }
+
     cleanAvaxBN(val: BN): string {
         return cleanAvaxBN(val)
     }
@@ -351,6 +369,11 @@ export default class DepositRewardCard extends Vue {
     openModal() {
         this.disclamer = false
         this.$refs.modal_claim_reward.open()
+    }
+
+    openUndepositModal() {
+        this.disclamer = false
+        this.$refs.modal_undeposit.open()
     }
 }
 </script>

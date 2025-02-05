@@ -647,6 +647,38 @@ class WalletHelper {
         return await ava.PChain().issueTx(tx)
     }
 
+    static async buildUnlockDepositTx(wallet: WalletType, amount: BN) {
+        const pAddressStrings = wallet.getAllAddressesP()
+        const signerAddresses = wallet.getSignerAddresses('P')
+        const changeAddress = wallet.getChangeAddressPlatform()
+
+        const threshold =
+            wallet.type === 'multisig' ? (wallet as MultisigWallet)?.keyData?.owner?.threshold : 1
+
+        const unsignedTx = await ava
+            .PChain()
+            .buildUnlockDepositTx(
+                wallet.platformUtxoset,
+                [pAddressStrings, signerAddresses],
+                [changeAddress],
+                Buffer.alloc(0),
+                ZeroBN,
+                amount,
+                threshold
+            )
+
+        try {
+            const tx = await wallet.signP(unsignedTx)
+            return await ava.PChain().issueTx(tx)
+        } catch (err) {
+            if (err instanceof SignatureError) {
+                return undefined
+            } else {
+                throw err
+            }
+        }
+    }
+
     static async buildAddDepositOfferTx(wallet: WalletType, offer: DepositOffer) {
         const pAddressStrings = wallet.getAllAddressesP()
         const signerAddresses = wallet.getSignerAddresses('P')
